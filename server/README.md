@@ -1,0 +1,139 @@
+# Cermin Wicara — server
+
+FastAPI server untuk analisis rekaman latihan. Kontrak API: [docs/SPEC.md §5](../docs/SPEC.md).
+Fase A0: endpoint lengkap dengan **mode mock**, plus upload dataset. Analisis sungguhan menyusul (A1–A5).
+
+## Prasyarat
+
+- **Python 3.11** (bukan 3.12+: MediaPipe/torch di fase berikutnya butuh 3.11)
+- **FFmpeg + ffprobe** di PATH (`ffmpeg -version`)
+  - Windows: `winget install -e --id Gyan.FFmpeg`, lalu buka ulang terminal/VS Code
+  - macOS: `brew install ffmpeg`
+  - Linux: `sudo apt install ffmpeg`
+
+## Setup venv
+
+Windows (PowerShell):
+```powershell
+cd server
+py -V:3.11 -m venv .venv          # atau: py -3.11 -m venv .venv
+.venv\Scripts\activate
+python -m pip install -r requirements.txt
+copy .env.example .env
+```
+
+macOS / Linux:
+```bash
+cd server
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+```
+
+Variabel penting di `.env` (lihat `.env.example`):
+
+| Variabel | Arti |
+|---|---|
+| `MOCK_MODE` | `true`: `/analyze` dan `/calibrate` mengembalikan contoh valid tanpa analisis |
+| `DATASET_MODE` | `true`: mengaktifkan `POST /v1/dataset/upload` (hanya saat sesi rekam dataset) |
+| `DATA_DIR` | folder data; relatif terhadap `server/` (default `../data`) |
+| `SCORER_MODE` | `rules` \| `w2v` \| `hybrid` |
+| `MAX_UPLOAD_MB` | batas ukuran upload (default 15) |
+
+## Menjalankan
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+`--host 0.0.0.0` wajib supaya HP di Wi-Fi yang sama bisa mengakses laptop.
+Dokumentasi interaktif: `http://<IP-laptop>:8000/docs`.
+
+### Mencari IP LAN laptop
+
+| OS | Perintah | Cari |
+|---|---|---|
+| Windows | `ipconfig` | "IPv4 Address" di adapter **Wi-Fi**, mis. `192.168.1.10` |
+| macOS | `ipconfig getifaddr en0` | langsung tampil IP-nya |
+| Linux | `hostname -I` (atau `ip -4 addr show`) | alamat pertama `192.168.x.x` / `10.x.x.x` |
+
+Lalu buka `http://<IP>:8000/v1/health` dari browser HP. Isi `EXPO_PUBLIC_API_URL=http://<IP>:8000` di `app/.env`.
+
+**Tidak bisa diakses dari HP?**
+- HP dan laptop harus di Wi-Fi yang sama (bukan Wi-Fi tamu yang mengisolasi perangkat).
+- Windows: profil jaringan Wi-Fi harus **Private** (Settings → Network & internet → Wi-Fi → properti jaringan).
+  Saat pertama kali menjalankan uvicorn, izinkan Python di dialog Windows Defender Firewall untuk jaringan Private.
+- macOS: System Settings → Network → Firewall, izinkan Python.
+
+## Contoh curl
+
+Analisis (mock). Pilih variasi dengan `?mock=hijau|kuning|merah|retry` (default `hijau`):
+```bash
+curl -X POST "http://localhost:8000/v1/analyze?mock=merah" \
+  -F "file=@klip.mp4;type=video/mp4" \
+  -F user_id=user-1 -F item_id=l3_mama -F session_id=sesi-1
+```
+
+Kalibrasi (mock); `step` ∈ `rest | vowel_a | vowel_i | vowel_u`:
+```bash
+curl -X POST "http://localhost:8000/v1/calibrate" \
+  -F "file=@klip.mp4;type=video/mp4" -F user_id=user-1 -F step=vowel_a
+```
+
+Upload dataset (butuh `DATASET_MODE=true`):
+```bash
+curl -X POST http://localhost:8000/v1/dataset/upload \
+  -F "file=@klip.mp4;type=video/mp4" \
+  -F purpose=dataset -F speaker_id=S01 -F item_id=l3_mama -F rep=1 \
+  -F intended_error=none -F condition=quiet -F session_id=sesi-1 \
+  -F sex=P -F age_group=18-25 -F device="Samsung A52"
+# -> {"status":"ok","clip_id":"S01__l3_mama__r1__none__quiet"}
+# berkas: DATA_DIR/raw/S01/l3_mama__r1__none__quiet.mp4 + baris di DATA_DIR/raw/metadata.csv
+```
+
+Video model (timpa bila sudah ada) dan mengambilnya kembali:
+```bash
+curl -X POST http://localhost:8000/v1/dataset/upload \
+  -F "file=@model_mama.mp4;type=video/mp4" \
+  -F purpose=model_video -F speaker_id=S01 -F item_id=l3_mama -F rep=1 \
+  -F intended_error=none -F condition=quiet -F session_id=sesi-model
+curl -o mama.mp4 http://localhost:8000/v1/model-video/l3_mama   # 404 bila belum ada
+```
+
+Contoh video uji 2 detik dibuat dengan ffmpeg:
+```bash
+ffmpeg -f lavfi -i testsrc=duration=2:size=320x240:rate=15 -f lavfi -i sine=frequency=220:duration=2 \
+  -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest klip.mp4
+```
+
+## Catatan kontrak untuk developer app
+
+- **Error** selalu berbentuk `{"detail": {"code": "...", "message": "..."}}`. Tampilkan teks Indonesia
+  berdasarkan `code`, bukan `message`. Kode: `invalid_request` (422), `invalid_item_id` (422),
+  `empty_file` (422), `unsupported_media_type` (415), `file_too_large` (413), `analysis_unavailable` (503),
+  `not_found` / `model_video_not_found` (404), `internal_error` (500); khusus dataset juga
+  `invalid_speaker_id`, `invalid_intended_error`, `intended_error_item_mismatch` (422).
+- `GET /v1/items` mengembalikan **array** item aktif. Item bonus (`l1_e`, `l1_o`, `l3_mau`, `l3_bau`, `l3_boba`)
+  ada di `items.json` dengan `active: false`.
+- Saat `status: "retry"`: `overall`, `score`, `units`, dan **`indicators`** bernilai `null`; semua kunci `visuals` `null`.
+- `user_id` dan `session_id`: huruf, angka, `_`, `-`, maks. 64 karakter (UUID Supabase lolos).
+- Upload: hanya video mp4/mov (dicek dari tipe dan isi berkas), maksimal 15 MB.
+- Dataset: `speaker_id` ∈ `S01`–`S06`, `T00`. `item_id` = item di `items.json` atau kelas `other`:
+  `other_na`, `other_ta`, `other_ka`, `other_diam`, `other_batuk`, `other_bising`.
+  `intended_error` ∈ `none`, `mama_as_papa` (l3_mama), `u_flat_lips` (l1_u), `a_narrow` (l1_a),
+  `mama_no_closure` (l3_mama). Field opsional: `sex`, `age_group`, `device`.
+  Upload ulang klip yang sama (speaker/item/rep/error/kondisi sama) menimpa berkas dan baris metadata-nya.
+
+## Privasi
+
+- Log hanya berisi metode, templat rute, status, dan durasi (ms). Tidak ada nama berkas, isi upload,
+  IP klien, atau query string. Access log bawaan uvicorn dimatikan.
+- `/analyze` dan `/calibrate` tidak menyimpan rekaman.
+
+## Tes
+
+```bash
+pytest -q          # butuh ffmpeg di PATH: fixture video dibuat saat tes
+ruff check . && ruff format --check .
+```

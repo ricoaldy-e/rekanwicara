@@ -1,0 +1,34 @@
+[
+  {"item_id": "l0_hold_a", "level": 0, "text": "Tahan \"aaa\"", "units": ["a"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l0_soft_loud", "level": 0, "text": "Pelan lalu keras", "units": ["a", "a"], "priority": "required", "emoji": null, "active": true},
+
+  {"item_id": "l1_a", "level": 1, "text": "a", "units": ["a"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l1_i", "level": 1, "text": "i", "units": ["i"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l1_u", "level": 1, "text": "u", "units": ["u"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l1_m", "level": 1, "text": "mmm", "units": ["m_hum"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l1_e", "level": 1, "text": "e", "units": ["e"], "priority": "bonus", "emoji": null, "active": false},
+  {"item_id": "l1_o", "level": 1, "text": "o", "units": ["o"], "priority": "bonus", "emoji": null, "active": false},
+
+  {"item_id": "l2_ma", "level": 2, "text": "ma", "units": ["ma"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l2_mi", "level": 2, "text": "mi", "units": ["mi"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l2_mu", "level": 2, "text": "mu", "units": ["mu"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l2_pa", "level": 2, "text": "pa", "units": ["pa"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l2_pi", "level": 2, "text": "pi", "units": ["pi"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l2_pu", "level": 2, "text": "pu", "units": ["pu"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l2_ba", "level": 2, "text": "ba", "units": ["ba"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l2_bi", "level": 2, "text": "bi", "units": ["bi"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l2_bu", "level": 2, "text": "bu", "units": ["bu"], "priority": "required", "emoji": null, "active": true},
+
+  {"item_id": "l3_mama", "level": 3, "text": "mama", "units": ["ma", "ma"], "priority": "required", "emoji": "👩", "active": true},
+  {"item_id": "l3_papa", "level": 3, "text": "papa", "units": ["pa", "pa"], "priority": "required", "emoji": "👨", "active": true},
+  {"item_id": "l3_bibi", "level": 3, "text": "bibi", "units": ["bi", "bi"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l3_pipi", "level": 3, "text": "pipi", "units": ["pi", "pi"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l3_apa", "level": 3, "text": "apa", "units": ["a", "pa"], "priority": "required", "emoji": "❓", "active": true},
+  {"item_id": "l3_abu", "level": 3, "text": "abu", "units": ["a", "bu"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l3_ibu", "level": 3, "text": "ibu", "units": ["i", "bu"], "priority": "required", "emoji": "👩‍👧", "active": true},
+  {"item_id": "l3_ubi", "level": 3, "text": "ubi", "units": ["u", "bi"], "priority": "required", "emoji": "🍠", "active": true},
+  {"item_id": "l3_bumi", "level": 3, "text": "bumi", "units": ["bu", "mi"], "priority": "required", "emoji": "🌍", "active": true},
+  {"item_id": "l3_mau", "level": 3, "text": "mau", "units": ["ma", "u"], "priority": "bonus", "emoji": "🙋", "active": false},
+  {"item_id": "l3_bau", "level": 3, "text": "bau", "units": ["ba", "u"], "priority": "bonus", "emoji": "👃", "active": false},
+  {"item_id": "l3_boba", "level": 3, "text": "boba", "units": ["bo", "ba"], "priority": "bonus", "emoji": "🧋", "active": false}
+]

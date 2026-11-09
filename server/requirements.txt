@@ -1,0 +1,14 @@
+# Phase A0. Python 3.11. MediaPipe, Parselmouth and torch are added in later phases.
+fastapi==0.162.2
+uvicorn[standard]==0.54.0
+python-multipart==0.0.33
+pydantic-settings==2.16.2
+numpy==2.4.6
+scipy==1.17.1
+soundfile==0.14.0
+pyyaml==6.0.3
+
+# Dev / test
+pytest==9.2.0
+httpx==0.28.1
+ruff==0.17.4

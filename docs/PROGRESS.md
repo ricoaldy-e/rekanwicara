@@ -5,7 +5,7 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | Fase | Track | Isi | Target hari | Status | Catatan |
 |---|---|---|---|---|---|
 | P0 | Bersama | Inisialisasi repo | Selasa 10 Nov pagi | selesai | Python 3.11.9, ffmpeg 9.0.2, Node 22.13.0, git 2.49.0. Lisensi model face_landmarker.task belum terverifikasi |
-| A0 | Server | Kerangka FastAPI, mock, upload dataset | Selasa 10 Nov | belum | |
+| A0 | Server | Kerangka FastAPI, mock, upload dataset | Selasa 10 Nov | selesai | 181 tes hijau; diuji lewat IP LAN dari laptop. Akses dari HP: menunggu cek tim |
 | B0 | App | Kerangka Expo, navigasi, komponen dasar | Selasa 10 Nov | belum | |
 | A1 | Server | Media + cek kualitas + MediaPipe dasar | Selasa 10 Nov | belum | |
 | B1 | App | Perekaman, upload, Mode Dataset | Selasa 10 Nov | belum | |
@@ -35,6 +35,17 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 
 ## Keputusan penting
 - (catat di sini: misalnya "Rabu malam: SCORER_MODE demo = hybrid karena kesepakatan 87% vs 78%")
+- Senin 9 Nov (A0): `POST /v1/dataset/upload` menerima field opsional `sex`, `age_group`, `device`
+  untuk kolom metadata.csv §10.5 (field §5 lainnya tidak berubah).
+- Senin 9 Nov (A0): item_id kelas `other` untuk dataset blok D/E: `other_na`, `other_ta`, `other_ka`,
+  `other_diam`, `other_batuk`, `other_bising` (`server/app/content/dataset_extra_items.json`).
+- Senin 9 Nov (A0): item bonus (`l1_e`, `l1_o`, `l3_mau`, `l3_bau`, `l3_boba`) `active: false` sampai aturan e/o siap.
+- Senin 9 Nov (A0): saat `status:"retry"`, `indicators` juga `null` (selain overall/score/units).
+- Senin 9 Nov (A0): format error `{"detail":{"code","message"}}`; daftar kode di `server/README.md`.
 
 ## Masalah terbuka
--
+- SPEC §5: contoh respons `/analyze` berisi `score: 0.75` untuk unit hijau + merah, padahal rumus §6.8
+  memberi 0.5. Server mengikuti rumus §6.8. Perbaiki contoh di SPEC?
+- Lisensi model `face_landmarker.task` belum terverifikasi (lihat `docs/THIRD_PARTY.md`).
+- Drive C: laptop server tinggal ±9 GB. Sebelum A5 (torch, Wav2Vec2), arahkan cache pip/Hugging Face ke D:.
+- Starlette memberi peringatan bahwa `httpx` untuk TestClient sudah usang (disarankan `httpx2`); tes tetap lolos.

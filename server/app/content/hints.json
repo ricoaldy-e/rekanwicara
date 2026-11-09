@@ -1,0 +1,18 @@
+{
+  "ok_good": "Bagus! Coba sekali lagi tanpa melihat layar.",
+  "l0_duration_short": "Tahan suaranya sedikit lebih lama.",
+  "l0_loudness_flat": "Bedakan lagi: pertama pelan, lalu keras.",
+  "a_open": "Buka mulut lebih lebar.",
+  "i_spread": "Tarik sudut bibir ke samping, seperti tersenyum.",
+  "u_round": "Bulatkan dan majukan bibir, seperti meniup.",
+  "closure_missing": "Rapatkan kedua bibir dulu, baru buka.",
+  "m_voicing": "Saat bibir rapat, biarkan suara keluar lewat hidung. Rasakan getaran di hidung.",
+  "p_silent": "Saat bibir rapat, tahan sebentar tanpa suara, lalu lepaskan.",
+  "b_voicing": "Saat bibir rapat, suara tetap berbunyi, lalu lepaskan bibir.",
+  "retry_no_face": "Wajah belum terlihat. Posisikan wajah di dalam bingkai.",
+  "retry_off_frame": "Dekatkan wajah dan letakkan di tengah.",
+  "retry_quiet": "Suara belum terdeteksi. Coba bersuara lebih jelas.",
+  "retry_noisy": "Ruangan terlalu bising. Coba di tempat yang lebih tenang.",
+  "retry_clipping": "Suara terlalu keras di mikrofon. Jauhkan HP sedikit.",
+  "retry_short": "Ucapannya terlalu singkat. Coba lagi."
+}
