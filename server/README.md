@@ -13,10 +13,14 @@ Fase A0: endpoint lengkap dengan **mode mock**, plus upload dataset. Analisis su
 
 ## Setup venv
 
+Versi Python dipin ke 3.11 lewat `server/.python-version`. Di Windows, venv **dibuat dengan
+`py -3.11 -m venv .venv`** (bukan `python -m venv`, yang bisa memakai Python lain).
+Saat start, server menampilkan peringatan jelas bila Python bukan 3.10 atau 3.11.
+
 Windows (PowerShell):
 ```powershell
 cd server
-py -V:3.11 -m venv .venv          # atau: py -3.11 -m venv .venv
+py -3.11 -m venv .venv
 .venv\Scripts\activate
 python -m pip install -r requirements.txt
 copy .env.example .env

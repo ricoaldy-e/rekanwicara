@@ -113,7 +113,7 @@ Field: `file` (mp4), `user_id`, `item_id`, `session_id`.
   "item_id": "l3_mama",
   "level": 3,
   "overall": "merah",
-  "score": 0.75,
+  "score": 0.5,
   "indicators": {"bibir": "hijau", "suara": "merah"},
   "units": [
     {"index":0,"target":"ma","start_ms":120,"end_ms":520,
