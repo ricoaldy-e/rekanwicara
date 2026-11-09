@@ -29,17 +29,34 @@ class Settings(BaseSettings):
     scorer_mode: ScorerMode = "rules"
     engine_version: str = "0.1.0"
     max_upload_mb: int = Field(default=15, gt=0)
+    # MediaPipe Face Landmarker bundle (scripts/download_models.py). Relative to server/.
+    face_model_path: Path = Path("models/face_landmarker.task")
+    # Where per-request temp media dirs are created (deleted after each request).
+    # Empty = system temp.
+    tmp_dir: Path | None = None
 
     supabase_url: str = ""
     supabase_service_role_key: SecretStr = SecretStr("")
 
-    @field_validator("data_dir")
+    @field_validator("data_dir", "face_model_path")
     @classmethod
-    def _resolve_data_dir(cls, value: Path) -> Path:
+    def _resolve_server_relative(cls, value: Path) -> Path:
         # Relative paths are relative to server/, not to the current working directory.
         if not value.is_absolute():
             value = SERVER_DIR / value
         return value.resolve()
+
+    @field_validator("tmp_dir", mode="before")
+    @classmethod
+    def _empty_tmp_dir(cls, value: object) -> object:
+        return None if value in ("", None) else value
+
+    @field_validator("tmp_dir")
+    @classmethod
+    def _resolve_tmp_dir(cls, value: Path | None) -> Path | None:
+        if value is None:
+            return None
+        return (value if value.is_absolute() else SERVER_DIR / value).resolve()
 
     @property
     def max_upload_bytes(self) -> int:

@@ -1,4 +1,4 @@
-# Python 3.11. MediaPipe and Parselmouth are added in later phases. No torch/transformers in the MVP.
+# Python 3.11. No torch/transformers in the MVP.
 fastapi==0.162.2
 uvicorn[standard]==0.54.0
 python-multipart==0.0.33
@@ -7,6 +7,12 @@ numpy==2.4.6
 scipy==1.17.1
 soundfile==0.14.0
 pyyaml==6.0.3
+
+# Phase A1: face landmarks (Tasks API) and Praat acoustics.
+# mediapipe pulls in opencv-contrib-python (provides cv2), so opencv-python-headless is NOT added:
+# both install the same cv2 module. Our code does not import cv2 (frames are PNGs from ffmpeg).
+mediapipe==1.2.2
+praat-parselmouth==0.4.7
 
 # Dev / test
 pytest==9.2.0

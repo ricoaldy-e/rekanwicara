@@ -1,0 +1,109 @@
+# Cermin Wicara: every scoring and quality threshold lives here (CLAUDE.md: never hard-coded).
+# Values are INITIAL values from docs/SPEC.md; they are re-tuned from data in phase A6.
+# Comments say where each value comes from. "asumsi A1" = not in SPEC, chosen in phase A1 (disetel di A6).
+#
+# Intensity unit: Praat dB (samples treated as pascal, re 2e-5 Pa).
+# A full-scale sine is ~91 dB; amplitude 0.03 (about -30 dBFS) is ~61 dB; digital silence is clamped to 0 dB.
+
+media:
+  max_duration_s: 4.0          # §6.1: cut longer clips
+  fps: 15                      # §6.1: frame rate normalised to 15 fps
+  frame_height_px: 480         # §6.1: frames 480 px high (width keeps aspect ratio)
+  audio_sample_rate_hz: 16000  # §6.1: WAV mono 16 kHz
+
+quality:
+  # Face (§6.2). Ratios are computed over frames WITH a face only.
+  face_min_frame_ratio: 0.90       # §6.2 no_face: face detected in < 90% of frames
+  face_min_width_ratio: 0.25       # §6.2 face_off_frame: face width < 25% of frame width (asumsi A1, disetel di A6)
+  mouth_out_max_frame_ratio: 0.10  # face_off_frame: > 10% of face frames have a mouth point outside the frame (asumsi A1, disetel di A6)
+  # Audio (§6.2)
+  quiet_margin_db: 10.0            # §6.2 too_quiet: peak intensity < noise_floor + 10 dB
+  noisy_min_snr_db: 15.0           # §6.2 too_noisy: (median speech intensity - noise_floor) < 15 dB
+  clip_amplitude: 0.99             # §6.2 clipping: |sample| >= 0.99 ...
+  clip_max_ratio: 0.01             # §6.2 ... in more than 1% of samples
+  min_speech_s: 0.2                # §6.2 too_short: speech duration < 0.2 s
+  noise_floor_percentile: 10       # §6.2: without calibration, noise_floor = 10th percentile of clip intensity
+  # Noise-floor safeguard (keputusan A1): a clip that is almost all voice (e.g. "tahan aaa") has no
+  # silence to measure the floor from. When the speech region covers more than this share of the clip,
+  # the floor is "uncertain": too_quiet uses the absolute limit below and too_noisy is not evaluated.
+  floor_uncertain_coverage: 0.85   # keputusan A1
+  abs_speech_db: 50.0              # absolute "this is voice" level, ~-41 dBFS (asumsi A1, disetel di A6)
+  # The absolute-level region only counts as voice when this share of its pitch frames is voiced
+  # (§6.5 pitch settings). Without it, loud steady noise (fan, music) would also look "full of voice"
+  # and too_noisy would never be evaluated exactly when it matters. (asumsi A1, disetel di A6)
+  floor_uncertain_min_voiced_ratio: 0.5
+  abs_min_peak_db: 55.0            # too_quiet when floor is uncertain: peak < 55 dB, ~-36 dBFS (asumsi A1, disetel di A6)
+
+segment:
+  speech_margin_db: 10.0     # §6.6.1: speech region = intensity > noise_floor + 10 dB
+  gap_tolerance_ms: 100      # §6.6.1: longest region, gaps up to 100 ms are bridged
+  closure_min_ms: 80         # §6.6.2: lips closed for >= 80 ms ...
+  closure_min_frames: 2      # §6.6.2: ... (>= 2 frames at 15 fps)
+
+lips:
+  # §6.4 MediaPipe Face Landmarker indices (verify by drawing on a sample frame before use in A2).
+  landmarks:
+    upper_inner: 13          # §6.4: inner upper lip
+    lower_inner: 14          # §6.4: inner lower lip
+    corner_left: 61          # §6.4: mouth corner
+    corner_right: 291        # §6.4: mouth corner
+    eye_outer_left: 33       # §6.4: fallback normalisation (outer eye corners)
+    eye_outer_right: 263     # §6.4
+  closed_gap_ratio: 0.05     # §6.4: closed = lip_gap_ratio < 0.05
+  median_filter_frames: 3    # §6.4: smooth with a 3-frame median filter
+  contour_points: 20         # §6.4: ~20 outer-lip points for lip_contour
+
+audio:
+  time_step_s: 0.01          # §6.5: 10 ms step
+  pitch_floor_hz: 75.0       # §6.5
+  pitch_ceiling_hz: 600.0    # §6.5
+  max_number_of_formants: 5  # §6.5
+  maximum_formant_hz: 5500.0 # §6.5
+  vowel_center_fraction: 0.5 # §6.5: F1/F2 median over the middle 50% of the voiced vowel segment
+
+rules:
+  yellow_margin: 0.15        # §6.7: kuning when the value is within 15% of the threshold
+  l0_hold_a:
+    min_voiced_s: 3.0        # §6.7
+    yellow_min_voiced_s: 2.55  # §6.7
+  l0_soft_loud:
+    min_diff_db: 6.0         # §6.7
+    yellow_min_diff_db: 5.0  # §6.7
+  vowels:                    # §6.7 table (bibir; suara relative to the user's anchors)
+    a:
+      jaw_open_min: 0.40
+      f1_margin_hz: 100.0    # F1 >= max(F1_i, F1_u) + 100 Hz
+    i:
+      lip_width_ratio_min: 1.05
+      rounding_max: 0.20
+      f2_margin_hz: 300.0    # F2 >= F2_u + 300 Hz
+    u:
+      rounding_min: 0.35
+      lip_width_ratio_max: 0.95
+      f2_margin_hz: 300.0    # F2 <= F2_i - 300 Hz
+    e:                       # bonus
+      jaw_open_min: 0.15
+      jaw_open_max: 0.40
+      lip_width_ratio_min: 1.0
+    o:                       # bonus
+      rounding_min: 0.25
+      jaw_open_min: 0.15
+      jaw_open_max: 0.40
+  m_hum:
+    closed_min_ratio: 0.80   # §6.7: lips closed >= 80% of the speech duration
+    voiced_ratio_min: 0.70   # §6.7
+    min_duration_s: 0.5      # §6.7
+  consonants:
+    closure_min_ms: 80       # §6.7: closure >= 80 ms then open
+    p:
+      voiced_ratio_max: 0.3        # §6.7
+      yellow_voiced_ratio_max: 0.4 # §6.7
+    b:
+      voiced_ratio_min: 0.5        # §6.7
+      yellow_voiced_ratio_min: 0.4 # §6.7
+    m:
+      voiced_ratio_min: 0.5        # §6.7
+      bonus_closure_ms: 100        # §6.7 bonus
+      bonus_closure_db_margin: 15.0  # §6.7 bonus: closure_db >= noise_floor + 15
+
+# Population defaults used without calibration (§6.3) are added in phase A3.

@@ -170,3 +170,58 @@ class ErrorDetail(_Strict):
 
 class ErrorResponse(_Strict):
     detail: ErrorDetail
+
+
+# ---------- GET/POST /v1/debug/features (only when DEBUG=true; NOT part of SPEC §5) ----------
+
+
+class DebugStatusResponse(_Strict):
+    ffmpeg: bool
+    ffprobe: bool
+    face_model: bool
+    thresholds_loaded: bool
+    mediapipe_version: str | None
+    parselmouth_version: str | None
+
+
+class DebugAudioSummary(_Strict):
+    peak_db: float
+    noise_floor_db: float
+    noise_floor_uncertain: bool
+    speech_start_ms: int | None
+    speech_ms: int
+    speech_coverage: float
+    speech_median_db: float | None
+    loud_region_voiced_ratio: float | None
+    clip_ratio: float
+    too_noisy_evaluated: bool
+
+
+class DebugFaceSummary(_Strict):
+    face_width_ratio: float | None
+    mouth_out_ratio: float | None
+
+
+class DebugTimings(_Strict):
+    media_ms: int
+    landmarker_init_ms: int
+    face_detect_ms: int
+    audio_ms: int
+    total_ms: int
+
+
+class DebugFeaturesResponse(_Strict):
+    status: Literal["ok"] = "ok"
+    quality_flags: list[QualityFlag]
+    # Extra notes, e.g. "noise_floor_uncertain". Never a cause for retry by itself.
+    info: list[str]
+    n_frames: int
+    face_frames: int
+    face_frame_pct: float
+    av_offset_ms: int
+    audio_duration_ms: int
+    has_audio: bool
+    audio: DebugAudioSummary
+    face: DebugFaceSummary
+    timings_ms: DebugTimings
+    engine_version: str

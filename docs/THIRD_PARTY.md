@@ -5,9 +5,9 @@ komponen di bawah tetap memakai lisensinya masing-masing.
 
 | Komponen | Dipakai di | Lisensi (SPDX) | Sumber resmi |
 |---|---|---|---|
-| MediaPipe (Face Landmarker, Python Tasks API) | server | Apache-2.0 | https://github.com/google-ai-edge/mediapipe/blob/master/LICENSE |
-| Model `face_landmarker.task` | server/models (tidak di-commit) | **Belum terverifikasi** | https://developers.google.com/edge/mediapipe/solutions/vision/face_landmarker (halaman tidak menyebut lisensi model; model card PDF belum terbaca) |
-| Parselmouth (`praat-parselmouth`) | server | GPL-3.0 | https://github.com/YannickJadoul/Parselmouth/blob/master/LICENSE |
+| MediaPipe 1.2.2 (Face Landmarker, Python Tasks API) | server | Apache-2.0 | https://github.com/google-ai-edge/mediapipe/blob/master/LICENSE |
+| Model `face_landmarker.task` (float16/latest, SHA-256 `64184e22…bc9ff`) | server/models (tidak di-commit) | **Belum terverifikasi** | https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task (halaman Face Landmarker tidak menyebut lisensi model; model card PDF belum terbaca) |
+| Parselmouth (`praat-parselmouth` 0.4.7, Praat 6.1.38) | server | GPL-3.0 | https://github.com/YannickJadoul/Parselmouth/blob/master/LICENSE |
 | Praat (dibundel di Parselmouth) | server | GPL-3.0-or-later | https://www.fon.hum.uva.nl/praat/manual/License.html |
 | FFmpeg / ffprobe (binary sistem) | server | LGPL-2.1-or-later; build dengan bagian GPL menjadi GPL | https://ffmpeg.org/legal.html |
 | FFmpeg build Windows gyan.dev (`full_build`) | mesin pengembang | GPL-3.0 | https://www.gyan.dev/ffmpeg/builds/ |
@@ -16,6 +16,7 @@ komponen di bawah tetap memakai lisensinya masing-masing.
 | PyTorch | ditunda (roadmap, tidak dipasang di MVP) | BSD-3-Clause | https://github.com/pytorch/pytorch/blob/main/LICENSE |
 | torchaudio | ditunda (roadmap, tidak dipasang di MVP) | BSD-2-Clause | https://github.com/pytorch/audio/blob/main/LICENSE |
 | scikit-learn | ml (metrik evaluasi) | BSD-3-Clause | https://github.com/scikit-learn/scikit-learn/blob/main/COPYING |
+| OpenCV (`opencv-contrib-python`, dependensi mediapipe; tidak di-import kode kita) | server | Apache-2.0 | https://github.com/opencv/opencv/blob/4.x/LICENSE |
 | FastAPI | server | MIT | https://github.com/fastapi/fastapi/blob/master/LICENSE |
 | Expo | app | MIT | https://github.com/expo/expo/blob/main/LICENSE |
 | supabase-js | app | MIT | https://github.com/supabase/supabase-js/blob/master/LICENSE |
