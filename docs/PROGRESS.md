@@ -6,7 +6,7 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 |---|---|---|---|---|---|
 | P0 | Bersama | Inisialisasi repo | Selasa 10 Nov pagi | selesai | Python 3.11.9, ffmpeg 9.0.2, Node 22.13.0, git 2.49.0 |
 | A0 | Server | Kerangka FastAPI, mock, upload dataset | Selasa 10 Nov | selesai | A0-fix: disesuaikan dengan spec tim 3 orang (lihat Keputusan). 188 tes hijau. Akses dari HP: menunggu cek tim |
-| B0 | App | Kerangka Expo, navigasi, komponen dasar | Selasa 10 Nov | belum | |
+| B0 | App | Kerangka Expo, navigasi, komponen dasar | Selasa 10 Nov | selesai | Expo SDK 54 (RN 0.81.5, React 19.1.0, expo-router 6). 30 tes jest hijau, tsc + lint + expo-doctor bersih. Uji di HP: menunggu cek tim |
 | A1 | Server | Media + cek kualitas + MediaPipe dasar | Selasa 10 Nov | belum | |
 | B1 | App | Perekaman, upload, Mode Dataset | Selasa 10 Nov | belum | |
 | A2 | Server | Fitur bibir + fitur suara + alat plot | Rabu 11 Nov pagi | belum | |
@@ -24,7 +24,7 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 
 | No | Isi | Sebelum prompt | Status |
 |---|---|---|---|
-| 1 | Pasang Expo Go di HP | B0 | belum |
+| 1 | Pasang Expo Go di HP | B0 | selesai (Expo Go: SDK 54) |
 | 2 | Rekam: 3 orang × 27 klip + 16 video model | A2 | belum |
 | 3 | Buat proyek Supabase (isi SQL dan .env saat B3) | B3 | belum |
 | 4 | Cek label: tiap orang ±54 klip milik dua orang lain | A6 | belum |
@@ -32,6 +32,13 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | 6 | Submission | Sabtu 14 Nov | belum |
 
 ## Keputusan penting
+- Selasa 10 Nov (B0): app memakai **Expo SDK 54** karena Expo Go di HP tim hanya mendukung SDK 54
+  (npm terbaru SDK 58; dokumen Expo menyarankan SDK 57 untuk Expo Go selama transisi). Bila Expo Go di HP
+  diperbarui ke SDK lain, app harus dinaikkan (`npx expo install expo@^<SDK> --fix`).
+- Selasa 10 Nov (B0): layar Pengaturan tersembunyi dibuka dengan tekan lama (2 detik) judul "Misi hari ini" di Home.
+  URL server pengganti disimpan di AsyncStorage; tombol "Kembalikan ke bawaan" memakai nilai `app/.env`.
+- Selasa 10 Nov (B0): `app/src/content/hints.json` salinan server; tes jest memastikan isinya identik.
+  Tes jest juga menolak kata "normal/abnormal/gangguan/diagnosis" di `app/app` dan `app/src`.
 - (catat di sini: misalnya "Rabu malam: SCORER_MODE demo = hybrid karena kesepakatan 87% vs 78%")
 - Selasa 10 Nov (A0-fix): `/v1/dataset/upload` hanya menerima `speaker_id` `P1`/`P2`/`P3`;
   `intended_error` + `bad_face` (item apa saja) dan `bad_noise` (hanya `l1_a`).
@@ -44,6 +51,8 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 - Senin 9 Nov (A0): format error `{"detail":{"code","message"}}`; daftar kode di `server/README.md`.
 
 ## Masalah terbuka
+- B0: akses HP → laptop (port 8000) belum dicoba dari HP. Bila gagal, cek Windows Firewall (izinkan inbound TCP 8000
+  untuk jaringan Private) dan pastikan Wi-Fi laptop berprofil Private.
 - SPEC §5: contoh `/analyze` berisi `score: 0.75` untuk unit hijau + merah, padahal rumus §6.8 memberi 0.5.
   Server mengikuti rumus §6.8. Perbaiki contoh di SPEC?
 - Lisensi model `face_landmarker.task` belum terverifikasi (lihat `docs/THIRD_PARTY.md`).
