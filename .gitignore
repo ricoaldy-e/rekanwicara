@@ -1,0 +1,50 @@
+# ---------- Data and model artifacts (never committed) ----------
+data/
+server/models/*.task
+*.joblib
+*.pt
+
+# ---------- Secrets ----------
+.env
+.env.*
+!.env.example
+
+# ---------- Video: no recordings in git ----------
+*.mp4
+!app/assets/model-videos/
+!app/assets/model-videos/*.mp4
+
+# ---------- Python ----------
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ---------- Node / Expo ----------
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# ---------- OS / editor ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+*.swp
