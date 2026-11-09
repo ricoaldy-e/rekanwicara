@@ -9,7 +9,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 SERVER_DIR = Path(__file__).resolve().parents[2]
 
-ScorerMode = Literal["rules", "w2v", "hybrid"]
+# SPEC §4: MVP is always "rules" (Wav2Vec2 postponed). Other values are rejected at startup.
+ScorerMode = Literal["rules"]
 
 
 class Settings(BaseSettings):

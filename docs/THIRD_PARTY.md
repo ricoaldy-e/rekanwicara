@@ -11,11 +11,11 @@ komponen di bawah tetap memakai lisensinya masing-masing.
 | Praat (dibundel di Parselmouth) | server | GPL-3.0-or-later | https://www.fon.hum.uva.nl/praat/manual/License.html |
 | FFmpeg / ffprobe (binary sistem) | server | LGPL-2.1-or-later; build dengan bagian GPL menjadi GPL | https://ffmpeg.org/legal.html |
 | FFmpeg build Windows gyan.dev (`full_build`) | mesin pengembang | GPL-3.0 | https://www.gyan.dev/ffmpeg/builds/ |
-| Wav2Vec2 (`facebook/wav2vec2-base`, bobot model) | server (fase A5) | Apache-2.0 | https://huggingface.co/facebook/wav2vec2-base |
-| Hugging Face Transformers | server (fase A5) | Apache-2.0 | https://github.com/huggingface/transformers/blob/main/LICENSE |
-| PyTorch | server (fase A5) | BSD-3-Clause | https://github.com/pytorch/pytorch/blob/main/LICENSE |
-| torchaudio | server (fase A5) | BSD-2-Clause | https://github.com/pytorch/audio/blob/main/LICENSE |
-| scikit-learn | server, ml | BSD-3-Clause | https://github.com/scikit-learn/scikit-learn/blob/main/COPYING |
+| Wav2Vec2 (`facebook/wav2vec2-base`, bobot model) | ditunda (roadmap, tidak dipasang di MVP) | Apache-2.0 | https://huggingface.co/facebook/wav2vec2-base |
+| Hugging Face Transformers | ditunda (roadmap, tidak dipasang di MVP) | Apache-2.0 | https://github.com/huggingface/transformers/blob/main/LICENSE |
+| PyTorch | ditunda (roadmap, tidak dipasang di MVP) | BSD-3-Clause | https://github.com/pytorch/pytorch/blob/main/LICENSE |
+| torchaudio | ditunda (roadmap, tidak dipasang di MVP) | BSD-2-Clause | https://github.com/pytorch/audio/blob/main/LICENSE |
+| scikit-learn | ml (metrik evaluasi) | BSD-3-Clause | https://github.com/scikit-learn/scikit-learn/blob/main/COPYING |
 | FastAPI | server | MIT | https://github.com/fastapi/fastapi/blob/master/LICENSE |
 | Expo | app | MIT | https://github.com/expo/expo/blob/main/LICENSE |
 | supabase-js | app | MIT | https://github.com/supabase/supabase-js/blob/master/LICENSE |

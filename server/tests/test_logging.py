@@ -41,14 +41,14 @@ def test_dataset_upload_log_has_no_paths(
     client.post(
         "/v1/dataset/upload",
         data={
-            "purpose": "dataset", "speaker_id": "S02", "item_id": "l2_pa", "rep": "3",
+            "purpose": "dataset", "speaker_id": "P2", "item_id": "l2_pa", "rep": "3",
             "intended_error": "none", "condition": "noisy", "session_id": "s9",
         },
         files=video_file(sample_video),
     )  # fmt: skip
     text = "\n".join(_messages(caplog))
     assert "POST /v1/dataset/upload 200" in text
-    for secret in (SECRET_FILENAME, "S02", "l2_pa", ".mp4", "raw"):
+    for secret in (SECRET_FILENAME, "P2", "l2_pa", ".mp4", "raw"):
         assert secret not in text
 
 

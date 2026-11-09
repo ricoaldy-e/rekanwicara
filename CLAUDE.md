@@ -3,7 +3,7 @@
 ## Ringkas
 Aplikasi latihan pelafalan untuk penyandang Tuli/tunarungu yang **memilih** berlatih bicara.
 Pengguna merekam 2–3 detik video wajah beserta suaranya. Server menilai bentuk bibir
-(MediaPipe) dan suara (Parselmouth sebagai baseline; Wav2Vec2 sebagai peningkatan), lalu
+(MediaPipe) dan suara (Parselmouth) dengan aturan berambang, lalu
 aplikasi menampilkan dua indikator (Bibir, Suara) dan satu petunjuk.
 
 - Lomba: LOGICODIX 2026, subtema Inclusive Health.
@@ -26,8 +26,10 @@ aplikasi menampilkan dua indikator (Bibir, Suara) dan satu petunjuk.
   react-native-svg, @supabase/supabase-js, expo-haptics. Harus bisa jalan di **Expo Go**:
   jangan menambah modul native custom.
 - `server/`: Python 3.11, FastAPI, MediaPipe Face Landmarker (Python Tasks API), praat-parselmouth,
-  FFmpeg/ffprobe (binary sistem), torch + torchaudio + transformers (Wav2Vec2), scikit-learn.
-- `ml/`: skrip dataset, pelabelan, training, evaluasi. Wajib memakai ulang modul `server/app/pipeline`.
+  FFmpeg/ffprobe (binary sistem), numpy/scipy, scikit-learn (hanya untuk metrik evaluasi).
+  Wav2Vec2 DITUNDA ke roadmap: jangan memasang torch/transformers di MVP.
+- Data tim: 3 perekam, maksimal 100 video. Tidak ada training model; data hanya untuk menyetel ambang dan menguji.
+- `ml/`: skrip dataset, pelabelan, penyetelan ambang, evaluasi. Wajib memakai ulang modul `server/app/pipeline`.
 - Supabase: profil, riwayat latihan, progres. Server menyimpan kalibrasi di disk lokal (angka saja).
 - Demo: HP Android (Expo Go) + laptop server di Wi-Fi yang sama.
 
@@ -42,10 +44,10 @@ cermin-wicara/
 │   │   ├── main.py
 │   │   ├── api/         routers (v1)
 │   │   ├── core/        settings, logging
-│   │   ├── pipeline/    media, quality, lips, audio, calibration, segment, rules, hints, scorer_w2v
+│   │   ├── pipeline/    media, quality, lips, audio, calibration, segment, rules, hints
 │   │   ├── content/     items.json, hints.json
 │   │   └── config/      thresholds.yaml
-│   ├── models/          face_landmarker.task, w2v artefak (tidak di-commit)
+│   ├── models/          face_landmarker.task (tidak di-commit)
 │   └── tests/
 ├── ml/              dataset/, train/, eval/, tools/
 └── data/            raw/, processed/, labels/, splits/, calibration/  (tidak di-commit)

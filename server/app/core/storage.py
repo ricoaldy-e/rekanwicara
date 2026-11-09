@@ -13,8 +13,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import BinaryIO
 
-# SPEC §10.1: S01–S06 for speakers, T00 for the team's quick test clips.
-SPEAKER_IDS = frozenset({"S01", "S02", "S03", "S04", "S05", "S06", "T00"})
+# SPEC §10.1: the three team members who record.
+SPEAKER_IDS = frozenset({"P1", "P2", "P3"})
 
 # SPEC §10.3: intended error -> the only item it applies to (None = any item).
 INTENDED_ERRORS: dict[str, str | None] = {
@@ -23,14 +23,14 @@ INTENDED_ERRORS: dict[str, str | None] = {
     "u_flat_lips": "l1_u",
     "a_narrow": "l1_a",
     "mama_no_closure": "l3_mama",
+    "bad_face": None,  # block G: face out of frame, any item
+    "bad_noise": "l1_a",  # block G: say "a" with loud music/fan
 }
 
 # SPEC §10.5.
 METADATA_COLUMNS = (
     "clip_id",
     "speaker_id",
-    "sex",
-    "age_group",
     "item_id",
     "rep",
     "intended_error",
@@ -55,8 +55,6 @@ class ClipMeta:
     intended_error: str
     condition: str
     session_id: str
-    sex: str = ""
-    age_group: str = ""
     device: str = ""
 
     @property

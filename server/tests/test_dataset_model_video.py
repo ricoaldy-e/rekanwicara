@@ -17,7 +17,7 @@ def ds_client(make_client) -> TestClient:
 def _fields(**overrides: str) -> dict[str, str]:
     fields = {
         "purpose": "dataset",
-        "speaker_id": "S01",
+        "speaker_id": "P1",
         "item_id": "l3_mama",
         "rep": "1",
         "intended_error": "none",
@@ -39,6 +39,21 @@ def _metadata(data_dir: Path) -> list[dict[str, str]]:
         return list(reader)
 
 
+def test_metadata_columns_match_spec() -> None:
+    # SPEC §10.5
+    assert METADATA_COLUMNS == (
+        "clip_id",
+        "speaker_id",
+        "item_id",
+        "rep",
+        "intended_error",
+        "condition",
+        "session_id",
+        "recorded_at",
+        "device",
+    )
+
+
 def test_dataset_upload_disabled_by_default(client: TestClient, sample_video: bytes) -> None:
     res = _upload(client, sample_video)
     assert res.status_code == 404
@@ -47,12 +62,12 @@ def test_dataset_upload_disabled_by_default(client: TestClient, sample_video: by
 def test_dataset_upload_saves_clip_and_metadata(
     ds_client: TestClient, sample_video: bytes, data_dir: Path
 ) -> None:
-    res = _upload(ds_client, sample_video, sex="P", age_group="18-25", device="Samsung A52")
+    res = _upload(ds_client, sample_video, device="Samsung A52")
     assert res.status_code == 200, res.text
     clip_id = DatasetUploadResponse.model_validate(res.json()).clip_id
-    assert clip_id == "S01__l3_mama__r1__none__quiet"
+    assert clip_id == "P1__l3_mama__r1__none__quiet"
 
-    path = data_dir / "raw" / "S01" / "l3_mama__r1__none__quiet.mp4"
+    path = data_dir / "raw" / "P1" / "l3_mama__r1__none__quiet.mp4"
     # SPEC §5: raw/{speaker_id}/{item_id}__r{rep}__{intended_error}__{condition}.mp4
     assert path.read_bytes() == sample_video
 
@@ -60,23 +75,31 @@ def test_dataset_upload_saves_clip_and_metadata(
     assert len(rows) == 1
     row = rows[0]
     assert row["clip_id"] == clip_id
-    assert (row["speaker_id"], row["item_id"], row["rep"]) == ("S01", "l3_mama", "1")
+    assert (row["speaker_id"], row["item_id"], row["rep"]) == ("P1", "l3_mama", "1")
     assert (row["intended_error"], row["condition"], row["session_id"]) == (
         "none",
         "quiet",
         "sess-1",
     )
-    assert (row["sex"], row["age_group"], row["device"]) == ("P", "18-25", "Samsung A52")
+    assert row["device"] == "Samsung A52"
     assert row["recorded_at"]
-    assert not list((data_dir / "raw" / "S01").glob("*.part"))
+    assert not list((data_dir / "raw" / "P1").glob("*.part"))
 
 
-def test_dataset_optional_metadata_may_be_omitted(
+def test_dataset_device_may_be_omitted(
     ds_client: TestClient, sample_video: bytes, data_dir: Path
 ) -> None:
     assert _upload(ds_client, sample_video).status_code == 200
+    assert _metadata(data_dir)[0]["device"] == ""
+
+
+def test_dataset_ignores_removed_fields(
+    ds_client: TestClient, sample_video: bytes, data_dir: Path
+) -> None:
+    # sex/age_group were dropped from SPEC §10.5; an old app build sending them must not break.
+    assert _upload(ds_client, sample_video, sex="P", age_group="18-25").status_code == 200
     row = _metadata(data_dir)[0]
-    assert (row["sex"], row["age_group"], row["device"]) == ("", "", "")
+    assert "sex" not in row and "age_group" not in row
 
 
 def test_dataset_reupload_replaces_row(
@@ -90,35 +113,33 @@ def test_dataset_reupload_replaces_row(
     assert rows[1]["session_id"] == "again"
 
 
-@pytest.mark.parametrize(
-    "item_id", ["other_na", "other_ta", "other_ka", "other_diam", "other_batuk", "other_bising"]
-)
-def test_dataset_accepts_other_class_items(
-    ds_client: TestClient, sample_video: bytes, item_id: str
+@pytest.mark.parametrize("speaker_id", ["P1", "P2", "P3"])
+def test_dataset_accepts_team_speakers(
+    ds_client: TestClient, sample_video: bytes, data_dir: Path, speaker_id: str
 ) -> None:
-    res = _upload(ds_client, sample_video, item_id=item_id)
+    res = _upload(ds_client, sample_video, speaker_id=speaker_id)
     assert res.status_code == 200
-    assert res.json()["clip_id"] == f"S01__{item_id}__r1__none__quiet"
+    assert (data_dir / "raw" / speaker_id / "l3_mama__r1__none__quiet.mp4").is_file()
 
 
 def test_dataset_accepts_inactive_bonus_item(ds_client: TestClient, sample_video: bytes) -> None:
     assert _upload(ds_client, sample_video, item_id="l1_e").status_code == 200
 
 
-def test_dataset_accepts_t00(ds_client: TestClient, sample_video: bytes) -> None:
-    assert _upload(ds_client, sample_video, speaker_id="T00").status_code == 200
-
-
 @pytest.mark.parametrize(
     ("overrides", "code"),
     [
-        ({"speaker_id": "S07"}, "invalid_speaker_id"),
-        ({"speaker_id": "../S01"}, "invalid_speaker_id"),
-        ({"speaker_id": "s01"}, "invalid_speaker_id"),
+        ({"speaker_id": "P4"}, "invalid_speaker_id"),
+        ({"speaker_id": "p1"}, "invalid_speaker_id"),
+        ({"speaker_id": "S01"}, "invalid_speaker_id"),
+        ({"speaker_id": "T00"}, "invalid_speaker_id"),
+        ({"speaker_id": "../P1"}, "invalid_speaker_id"),
         ({"item_id": "l3_nana"}, "invalid_item_id"),
+        ({"item_id": "other_na"}, "invalid_item_id"),
         ({"item_id": "../../etc"}, "invalid_item_id"),
         ({"intended_error": "lupa"}, "invalid_intended_error"),
         ({"intended_error": "u_flat_lips", "item_id": "l1_a"}, "intended_error_item_mismatch"),
+        ({"intended_error": "bad_noise", "item_id": "l3_mama"}, "intended_error_item_mismatch"),
         ({"condition": "loud"}, "invalid_request"),
         ({"purpose": "other"}, "invalid_request"),
         ({"rep": "0"}, "invalid_request"),
@@ -143,14 +164,24 @@ def test_dataset_rejects_invalid_fields(
         ("u_flat_lips", "l1_u"),
         ("a_narrow", "l1_a"),
         ("mama_no_closure", "l3_mama"),
+        ("bad_face", "l1_a"),
+        ("bad_face", "l3_bumi"),
+        ("bad_noise", "l1_a"),
     ],
 )
 def test_dataset_intended_errors(
-    ds_client: TestClient, sample_video: bytes, intended_error: str, item_id: str
+    ds_client: TestClient,
+    sample_video: bytes,
+    data_dir: Path,
+    intended_error: str,
+    item_id: str,
 ) -> None:
-    res = _upload(ds_client, sample_video, intended_error=intended_error, item_id=item_id)
-    assert res.status_code == 200
-    assert intended_error in res.json()["clip_id"]
+    res = _upload(
+        ds_client, sample_video, intended_error=intended_error, item_id=item_id, condition="noisy"
+    )
+    assert res.status_code == 200, res.text
+    assert res.json()["clip_id"] == f"P1__{item_id}__r1__{intended_error}__noisy"
+    assert _metadata(data_dir)[0]["intended_error"] == intended_error
 
 
 def test_dataset_rejects_non_video(ds_client: TestClient, data_dir: Path) -> None:
@@ -192,7 +223,7 @@ def test_model_video_upload_overwrites(
     assert (data_dir / "model_videos" / "l1_a.mp4").read_bytes() == other
 
 
-def test_model_video_rejects_other_class_item(ds_client: TestClient, sample_video: bytes) -> None:
+def test_model_video_rejects_unknown_item(ds_client: TestClient, sample_video: bytes) -> None:
     res = _upload(ds_client, sample_video, purpose="model_video", item_id="other_na")
     assert res.status_code == 422
     assert res.json()["detail"]["code"] == "invalid_item_id"
@@ -213,3 +244,4 @@ def test_model_video_served_without_dataset_mode(
 def test_model_video_unknown_item_is_404(client: TestClient, item_id: str) -> None:
     res = client.get(f"/v1/model-video/{item_id}")
     assert res.status_code == 404
+    assert res.json()["detail"]["code"] in {"model_video_not_found", "not_found"}

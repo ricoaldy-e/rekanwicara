@@ -17,7 +17,7 @@ from app.content.loader import (
 def content_copy(tmp_path: Path) -> Path:
     target = tmp_path / "content"
     target.mkdir()
-    for name in ("items.json", "hints.json", "dataset_extra_items.json"):
+    for name in ("items.json", "hints.json"):
         shutil.copy(CONTENT_DIR / name, target / name)
     return target
 
@@ -33,9 +33,6 @@ def test_real_content_loads() -> None:
     content = load_content()
     assert len(content.items) == 29
     assert set(content.hints) == REQUIRED_HINT_IDS
-    assert content.dataset_extra_item_ids == {
-        "other_na", "other_ta", "other_ka", "other_diam", "other_batuk", "other_bising",
-    }  # fmt: skip
 
 
 def test_bonus_items_are_inactive() -> None:

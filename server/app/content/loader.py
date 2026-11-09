@@ -1,10 +1,9 @@
-"""Load and validate learning content (SPEC §3, §10.2, §13).
+"""Load and validate learning content (SPEC §3, §13).
 
 Validation is strict on purpose: the server refuses to start with content that breaks the rules.
 """
 
 import json
-import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -43,8 +42,6 @@ REQUIRED_HINT_IDS = frozenset(
 
 # Product boundary (CLAUDE.md): these words must never reach the UI or API output.
 FORBIDDEN_WORDS = ("normal", "abnormal", "gangguan", "diagnosis")
-
-_EXTRA_ITEM_ID = re.compile(r"^other_[a-z]+$")
 
 
 class ContentError(ValueError):
@@ -139,30 +136,10 @@ def load_hints(path: Path) -> dict[str, str]:
     return dict(raw)
 
 
-def load_dataset_extra_items(path: Path, item_ids: set[str]) -> list[str]:
-    """Ids for dataset-only recordings of class ``other`` (SPEC §10.2 blocks D/E).
-
-    These are deliberately NOT Stage A and never appear in GET /v1/items.
-    """
-    raw = _read_json(path)
-    if not isinstance(raw, list):
-        raise ContentError(f"{path.name}: expected a JSON list")
-    ids: list[str] = []
-    for position, entry in enumerate(raw):
-        item_id = entry.get("item_id") if isinstance(entry, dict) else None
-        if not isinstance(item_id, str) or not _EXTRA_ITEM_ID.match(item_id):
-            raise ContentError(f"{path.name}: entry #{position} needs an item_id like 'other_na'")
-        if item_id in item_ids or item_id in ids:
-            raise ContentError(f"{path.name}: duplicate item_id '{item_id}'")
-        ids.append(item_id)
-    return ids
-
-
 @dataclass(frozen=True)
 class Content:
     items: list[Item]
     hints: dict[str, str]
-    dataset_extra_item_ids: frozenset[str]
     items_by_id: dict[str, Item] = field(init=False)
 
     def __post_init__(self) -> None:
@@ -176,7 +153,4 @@ class Content:
 def load_content(content_dir: Path = CONTENT_DIR) -> Content:
     items = load_items(content_dir / "items.json")
     hints = load_hints(content_dir / "hints.json")
-    extra = load_dataset_extra_items(
-        content_dir / "dataset_extra_items.json", {item.item_id for item in items}
-    )
-    return Content(items=items, hints=hints, dataset_extra_item_ids=frozenset(extra))
+    return Content(items=items, hints=hints)

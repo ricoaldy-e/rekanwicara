@@ -18,9 +18,9 @@ from app.core.storage import INTENDED_ERRORS, SPEAKER_IDS, ClipMeta, UploadTooLa
 
 router = APIRouter(prefix=API_PREFIX, tags=["dataset"])
 
-# Optional descriptive metadata (sex, age_group, device). Must start with a letter/digit so a
-# value can never be read as a spreadsheet formula when metadata.csv is opened.
-_META_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9 _.\-]{0,39}$"
+# Optional ``device`` for the metadata.csv column (SPEC §10.5). Must start with a letter/digit so
+# the value can never be read as a spreadsheet formula when metadata.csv is opened.
+_DEVICE_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9 _.\-]{0,39}$"
 
 
 @router.post(
@@ -40,19 +40,15 @@ def dataset_upload(
     intended_error: Annotated[str, Form()],
     condition: Annotated[RecordingCondition, Form()],
     session_id: Annotated[str, Form(pattern=ID_PATTERN)],
-    sex: Annotated[str | None, Form(pattern=_META_PATTERN)] = None,
-    age_group: Annotated[str | None, Form(pattern=_META_PATTERN)] = None,
-    device: Annotated[str | None, Form(pattern=_META_PATTERN)] = None,
+    device: Annotated[str | None, Form(pattern=_DEVICE_PATTERN)] = None,
 ) -> DatasetUploadResponse:
     if speaker_id not in SPEAKER_IDS:
-        raise ApiError(422, "invalid_speaker_id", "speaker_id must be one of S01-S06 or T00.")
+        raise ApiError(
+            422, "invalid_speaker_id", f"speaker_id must be one of {sorted(SPEAKER_IDS)}."
+        )
 
-    if purpose == "model_video":
-        allowed_items = content.items_by_id.keys()
-    else:
-        allowed_items = content.items_by_id.keys() | content.dataset_extra_item_ids
-    if item_id not in allowed_items:
-        raise ApiError(422, "invalid_item_id", f"Unknown item_id for purpose '{purpose}'.")
+    if item_id not in content.items_by_id:
+        raise ApiError(422, "invalid_item_id", "Unknown item_id.")
 
     if intended_error not in INTENDED_ERRORS:
         raise ApiError(
@@ -79,8 +75,6 @@ def dataset_upload(
                 intended_error=intended_error,
                 condition=condition,
                 session_id=session_id,
-                sex=sex or "",
-                age_group=age_group or "",
                 device=device or "",
             )
             clip_id = store.save_clip(file.file, meta, settings.max_upload_bytes)

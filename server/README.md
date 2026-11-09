@@ -38,7 +38,7 @@ Variabel penting di `.env` (lihat `.env.example`):
 | `MOCK_MODE` | `true`: `/analyze` dan `/calibrate` mengembalikan contoh valid tanpa analisis |
 | `DATASET_MODE` | `true`: mengaktifkan `POST /v1/dataset/upload` (hanya saat sesi rekam dataset) |
 | `DATA_DIR` | folder data; relatif terhadap `server/` (default `../data`) |
-| `SCORER_MODE` | `rules` \| `w2v` \| `hybrid` |
+| `SCORER_MODE` | MVP selalu `rules` (Wav2Vec2 ditunda; nilai lain ditolak saat start) |
 | `MAX_UPLOAD_MB` | batas ukuran upload (default 15) |
 
 ## Menjalankan
@@ -85,18 +85,18 @@ Upload dataset (butuh `DATASET_MODE=true`):
 ```bash
 curl -X POST http://localhost:8000/v1/dataset/upload \
   -F "file=@klip.mp4;type=video/mp4" \
-  -F purpose=dataset -F speaker_id=S01 -F item_id=l3_mama -F rep=1 \
+  -F purpose=dataset -F speaker_id=P1 -F item_id=l3_mama -F rep=1 \
   -F intended_error=none -F condition=quiet -F session_id=sesi-1 \
-  -F sex=P -F age_group=18-25 -F device="Samsung A52"
-# -> {"status":"ok","clip_id":"S01__l3_mama__r1__none__quiet"}
-# berkas: DATA_DIR/raw/S01/l3_mama__r1__none__quiet.mp4 + baris di DATA_DIR/raw/metadata.csv
+  -F device="Samsung A52"
+# -> {"status":"ok","clip_id":"P1__l3_mama__r1__none__quiet"}
+# berkas: DATA_DIR/raw/P1/l3_mama__r1__none__quiet.mp4 + baris di DATA_DIR/raw/metadata.csv
 ```
 
 Video model (timpa bila sudah ada) dan mengambilnya kembali:
 ```bash
 curl -X POST http://localhost:8000/v1/dataset/upload \
   -F "file=@model_mama.mp4;type=video/mp4" \
-  -F purpose=model_video -F speaker_id=S01 -F item_id=l3_mama -F rep=1 \
+  -F purpose=model_video -F speaker_id=P1 -F item_id=l3_mama -F rep=1 \
   -F intended_error=none -F condition=quiet -F session_id=sesi-model
 curl -o mama.mp4 http://localhost:8000/v1/model-video/l3_mama   # 404 bila belum ada
 ```
@@ -119,10 +119,11 @@ ffmpeg -f lavfi -i testsrc=duration=2:size=320x240:rate=15 -f lavfi -i sine=freq
 - Saat `status: "retry"`: `overall`, `score`, `units`, dan **`indicators`** bernilai `null`; semua kunci `visuals` `null`.
 - `user_id` dan `session_id`: huruf, angka, `_`, `-`, maks. 64 karakter (UUID Supabase lolos).
 - Upload: hanya video mp4/mov (dicek dari tipe dan isi berkas), maksimal 15 MB.
-- Dataset: `speaker_id` ∈ `S01`–`S06`, `T00`. `item_id` = item di `items.json` atau kelas `other`:
-  `other_na`, `other_ta`, `other_ka`, `other_diam`, `other_batuk`, `other_bising`.
+- Dataset: `speaker_id` ∈ `P1`, `P2`, `P3`. `item_id` = item di `items.json` (termasuk item bonus).
   `intended_error` ∈ `none`, `mama_as_papa` (l3_mama), `u_flat_lips` (l1_u), `a_narrow` (l1_a),
-  `mama_no_closure` (l3_mama). Field opsional: `sex`, `age_group`, `device`.
+  `mama_no_closure` (l3_mama), `bad_face` (item apa saja), `bad_noise` (l1_a).
+  Field opsional: `device` (kolom `device` di metadata.csv).
+  Kolom metadata.csv (SPEC §10.5): `clip_id, speaker_id, item_id, rep, intended_error, condition, session_id, recorded_at, device`.
   Upload ulang klip yang sama (speaker/item/rep/error/kondisi sama) menimpa berkas dan baris metadata-nya.
 
 ## Privasi

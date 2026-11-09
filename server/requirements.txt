@@ -1,4 +1,4 @@
-# Phase A0. Python 3.11. MediaPipe, Parselmouth and torch are added in later phases.
+# Python 3.11. MediaPipe and Parselmouth are added in later phases. No torch/transformers in the MVP.
 fastapi==0.162.2
 uvicorn[standard]==0.54.0
 python-multipart==0.0.33

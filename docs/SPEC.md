@@ -75,7 +75,7 @@ expo-camera rekam mp4 (video+audio) ─▶ /v1/analyze
                                         1 media: ffprobe offset, ffmpeg → wav 16k mono + frame 15 fps 480p
                                         2 quality (K1)
                                         3a lips: MediaPipe Face Landmarker (VIDEO mode)
-                                        3b audio: Parselmouth (+ Wav2Vec2 bila SCORER_MODE≠rules)
+                                        3b audio: Parselmouth
                                         4 segment: unit/suku kata
                                         5 rules + hints → JSON
                                         6 hapus semua berkas sementara
@@ -84,7 +84,7 @@ app simpan ringkasan → Supabase
 ```
 
 Environment server (`server/.env`): `HOST`, `PORT`, `MOCK_MODE` (true/false), `DATASET_MODE`,
-`DEBUG`, `DATA_DIR` (default `../data`), `SCORER_MODE` (`rules` | `w2v` | `hybrid`), `ENGINE_VERSION`.
+`DEBUG`, `DATA_DIR` (default `../data`), `SCORER_MODE` (MVP: selalu `rules`), `ENGINE_VERSION`.
 
 ## §5 Kontrak API v1 (sumber kebenaran)
 
@@ -175,7 +175,7 @@ noise_floor: dari kalibrasi bila ada; bila tidak, persentil ke-10 intensitas kli
 
 ### §6.3 Kalibrasi (K2) — `DATA_DIR/calibration/{user_id}.json`, angka saja
 - `rest`: median fitur bibir 3 detik diam (termasuk `mouth_width_rest`), noise_floor.
-- `vowel_a|i|u`: median F1, F2, dan fitur bibir di 50% tengah ucapan; juga embedding Wav2Vec2 bila tersedia.
+- `vowel_a|i|u`: median F1, F2, dan fitur bibir di 50% tengah ucapan.
 - Jangkar diperbarui: median dari 10 percobaan terakhir berstatus hijau untuk vokal itu.
 - Tanpa kalibrasi: pakai nilai default populasi di `thresholds.yaml` dan tambahkan `"uncalibrated"` ke `quality_flags` (bukan penyebab retry).
 
@@ -259,7 +259,10 @@ Prioritas memilih SATU petunjuk: (1) flag kualitas → `retry_*`; (2) unit merah
 (3) dalam satu unit, masalah bibir sebelum suara; (4) semua hijau → `ok_good`.
 Kalimat petunjuk ada di `server/app/content/hints.json` (salinan juga di app). Lihat §13.
 
-## §7 Scorer Wav2Vec2 (peningkatan, fase A5)
+## §7 Scorer Wav2Vec2 — DITUNDA ke roadmap
+
+**Tidak dikerjakan di MVP**: data hanya ±80 klip dari 3 orang, terlalu sedikit untuk melatih pengklasifikasi. `SCORER_MODE` di MVP selalu `rules`. Rancangan di bawah disimpan untuk tahap lanjutan bersama mitra (data dari banyak penutur).
+
 - Model awal: `facebook/wav2vec2-base`, dibekukan. Uji embedding lapisan 4–9 (mean-pool di wilayah ucapan unit); pilih lewat validasi.
 - Pengklasifikasi: StandardScaler + LogisticRegression multinomial (bandingkan dengan MLP kecil bila sempat).
 - Kelas: `a i u m_hum ma mi mu pa pi pu ba bi bu` + `other` (na, ta, da, ka, sa, la, diam, batuk, bising). Bonus: `e o bo`.
@@ -316,47 +319,50 @@ Tabel (RLS aktif, autentikasi anonim; `user_id = auth.uid()`):
 - `listen_checks(id, user_id, item_id, result text, created_at)`
 Tidak ada video/audio di Supabase. App punya antrean lokal (AsyncStorage) bila offline, sinkron saat online.
 
-## §10 Dataset (versi ringan)
+## §10 Dataset (versi tim 3 orang, maksimal 100 video)
 
-### §10.1 Penutur
-6 penutur dewasa (minimal 4): 4 untuk latih/setel, 2 untuk uji. Kode anonim `S01`–`S06`.
-Kode `T00` dipakai untuk klip uji cepat tim (tidak masuk latih/uji). Video model direkam satu kali oleh satu penutur.
+Data **tidak dipakai untuk melatih model**. Penilaian memakai MediaPipe (model pralatih) + Parselmouth + aturan.
+Data hanya dipakai untuk (1) menyetel ambang di `thresholds.yaml` dan (2) menguji kesepakatan dengan penilaian manusia.
 
-### §10.2 Skrip sesi per penutur (dibuat otomatis oleh Mode Dataset, ±12 menit)
+### §10.1 Perekam
+3 anggota tim, kode `P1`, `P2`, `P3`. Persetujuan cukup berupa kesepakatan tim yang dicatat di MODEL_CARD.md.
+
+### §10.2 Skrip sesi per orang (27 klip, ±6 menit)
 | blok | isi | ulangan | klip |
 |---|---|---|---|
-| A | a, i, u, mmm | 5 | 20 |
-| B | ma mi mu pa pi pu ba bi bu | 5 | 45 |
-| C | 9 kata wajib Level 3 | 2 | 18 |
-| D | na, ta, ka (kelas `other`) | 2 | 6 |
-| E | diam, batuk, bising (kelas `other`) | 1 | 3 |
-| F | kesalahan disengaja (§10.3) | 2 | 8 |
-| | **total** | | **100** |
-Urutan di dalam blok diacak. Jeda 30 detik setiap 25 klip.
+| A | l0_hold_a, l0_soft_loud | 1 | 2 |
+| B | a, i, u | 2 | 6 |
+| C | mmm | 1 | 1 |
+| D | ma, pa, ba, mi, pi, bu | 1 | 6 |
+| E | mama, papa, bibi, apa, ibu, bumi | 1 | 6 |
+| F | kesalahan disengaja (§10.3) | 1 | 4 |
+| G | klip buruk: wajah keluar bingkai, ruangan bising | 1 | 2 |
+| | **total** | | **27** |
+3 orang × 27 = 81 klip. Urutan di dalam blok diacak.
 
-### §10.3 Kesalahan disengaja dan label unit otomatis
-| intended_error | instruksi ke penutur | label unit otomatis |
+### §10.3 Kesalahan disengaja dan label otomatis
+| intended_error | instruksi | label otomatis |
 |---|---|---|
-| `mama_as_papa` | Ucapkan "mama" tapi tahan suara saat bibir rapat, sehingga terdengar "papa" | kedua unit: bibir ok, suara salah |
+| `mama_as_papa` | Ucapkan "mama" tapi tahan suara saat bibir rapat | kedua unit: bibir ok, suara salah |
 | `u_flat_lips` | Ucapkan "u" dengan bibir datar | unit 1: bibir salah |
 | `a_narrow` | Ucapkan "a" dengan mulut hampir tertutup | unit 1: bibir salah |
 | `mama_no_closure` | Ucapkan "mama" tanpa merapatkan bibir | kedua unit: bibir salah |
-Klip tanpa kesalahan disengaja diberi label otomatis "semua unit ok" dengan `heard_label` = materi yang diminta.
-Saat merekam, pendamping menekan **ulang** bila penutur salah ucap, sehingga label otomatis dapat dipercaya.
+| `bad_face` (blok G) | Geser wajah keluar bingkai | harus `retry` (no_face / face_off_frame) |
+| `bad_noise` (blok G) | Ucapkan "a" dengan musik atau kipas keras | harus `retry` (too_noisy) atau tetap dinilai bila suara jelas |
+Klip lain: label otomatis "semua unit ok". Saat merekam, tekan **ulang** bila salah ucap.
 
-### §10.4 Mode Video Model
-Submode di Mode Dataset: daftar semua materi wajib (±25), rekam satu kali per materi, putar ulang, simpan
-dengan `purpose=model_video`. Penutur: artikulasi jelas, wajah polos, cahaya dari depan.
+### §10.4 Video model (16 video, 1 orang, ±5 menit)
+l1_a, l1_i, l1_u, l1_m, l2_ma, l2_pa, l2_ba, dan 9 kata wajib Level 3. Materi lain (Level 0, suku kata lain,
+kata bonus) memakai teks + ilustrasi bibir SVG. Total video: 81 + 16 = 97.
 
 ### §10.5 Metadata dan label
-`data/raw/metadata.csv`: `clip_id, speaker_id, sex, age_group, item_id, rep, intended_error, condition, session_id, recorded_at, device`.
-Label manusia hanya untuk penutur uji (2 penutur × 100 klip), disimpan di `data/labels/labels_{annotator}.csv`:
-`clip_id, annotator, matches_request (ya/tidak), heard_label (bila tidak), lips_wrong (bool), quality_ok (bool), notes`.
-Dua annotator memberi label terpisah. Penutur latih memakai label otomatis.
+`data/raw/metadata.csv`: `clip_id, speaker_id, item_id, rep, intended_error, condition, session_id, recorded_at, device`.
+Cek label: setiap klip dinilai oleh **2 anggota yang bukan perekamnya** (masing-masing ±54 klip, ±5 menit) di `/labeler`.
+Berkas: `data/labels/labels_{annotator}.csv` dengan kolom `clip_id, annotator, matches_request, heard_label, lips_wrong, quality_ok, notes`.
 
-### §10.6 Pembagian dan augmentasi
-Pembagian per penutur (4 latih, 2 uji). Penutur tidak boleh muncul di dua bagian.
-Augmentasi (hanya latih): bising, kecepatan 0,9–1,1, nada naik, volume (menambah ±4× data latih).
+### §10.6 Pembagian: leave-one-speaker-out (LOSO)
+Setel ambang memakai 2 orang, uji pada 1 orang sisanya; ulangi 3 kali sehingga setiap orang pernah menjadi penguji.
+Laporkan rata-rata dan hasil per putaran. Ambang final disetel dari ketiga orang. Tidak ada augmentasi (tidak ada training).
 
 ## §11 Evaluasi (fase A6)
 | metrik | target |
@@ -369,7 +375,7 @@ Augmentasi (hanya latih): bising, kecepatan 0,9–1,1, nada naik, volume (menamb
 | klip buruk tertangkap K1 | semua yang disengaja |
 | klip layak salah ditolak | < 10% |
 | waktu respons p90 | ≤ 5 s |
-Bandingkan scorer `rules` vs `w2v`/`hybrid` di data uji yang sama. Laporan: `docs/EVAL_REPORT.md`.
+Evaluasi memakai LOSO (§10.6). Data kecil: satu klip ≈ 3–4% pada setiap putaran, jadi laporkan jumlah klip di samping setiap persentase dan sebut hasilnya sebagai bukti awal. Laporan: `docs/EVAL_REPORT.md`.
 
 ## §12 Privasi
 Rekaman produk dihapus setelah analisis. Tidak ada media di log. Dataset hanya di `data/` lokal dengan

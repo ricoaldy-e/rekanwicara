@@ -1,6 +1,9 @@
+import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 from app.api.schemas import HealthResponse, Item
+from app.core.settings import Settings
 
 
 def test_health_matches_contract(client: TestClient) -> None:
@@ -17,15 +20,20 @@ def test_health_matches_contract(client: TestClient) -> None:
 
 
 def test_health_reflects_settings(make_client) -> None:
-    res = make_client(mock_mode=False, scorer_mode="hybrid", engine_version="9.9.9").get(
-        "/v1/health"
-    )
+    res = make_client(mock_mode=False, engine_version="9.9.9").get("/v1/health")
     assert res.json() == {
         "status": "ok",
         "engine_version": "9.9.9",
-        "scorer_mode": "hybrid",
+        "scorer_mode": "rules",
         "mock_mode": False,
     }
+
+
+@pytest.mark.parametrize("mode", ["w2v", "hybrid"])
+def test_scorer_mode_other_than_rules_is_rejected(mode: str) -> None:
+    # SPEC §4: SCORER_MODE is always "rules" in the MVP (Wav2Vec2 postponed).
+    with pytest.raises(ValidationError, match="scorer_mode"):
+        Settings(_env_file=None, scorer_mode=mode)  # type: ignore[call-arg]
 
 
 def test_items_returns_only_active_items(client: TestClient) -> None:

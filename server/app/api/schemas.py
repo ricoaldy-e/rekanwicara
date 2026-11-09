@@ -11,7 +11,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 Status = Literal["hijau", "kuning", "merah"]
 ResponseStatus = Literal["ok", "retry"]
-ScorerName = Literal["rules", "w2v", "hybrid"]
+# SPEC §4/§7: the MVP always scores with rules; w2v/hybrid are postponed to the roadmap.
+ScorerName = Literal["rules"]
 Priority = Literal["required", "bonus"]
 CalibrationStep = Literal["rest", "vowel_a", "vowel_i", "vowel_u"]
 MockVariant = Literal["hijau", "kuning", "merah", "retry"]
