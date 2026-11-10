@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   ovalInner: { flex: 1, borderRadius: 1000, borderWidth: 5, borderColor: '#FFFFFF' },
   ovalRecording: { borderColor: REC_RED },
   countOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(0,0,0,0.45)',

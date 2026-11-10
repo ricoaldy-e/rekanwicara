@@ -12,8 +12,8 @@ const CASES: [Status, string, string][] = [
 ];
 
 describe('StatusBadge', () => {
-  it.each(CASES)('%s shows text "%s", icon %s and its color', (status, label, icon) => {
-    render(<StatusBadge status={status} testID="badge" />);
+  it.each(CASES)('%s shows text "%s", icon %s and its color', async (status, label, icon) => {
+    await render(<StatusBadge status={status} testID="badge" />);
 
     expect(screen.getByText(label)).toBeTruthy();
     // The icon is decorative for screen readers (the label carries the meaning), hence hidden.
@@ -24,8 +24,8 @@ describe('StatusBadge', () => {
     expect(StyleSheet.flatten(badge.props.style).backgroundColor).toBe(statusStyles[status].background);
   });
 
-  it('prefixes the indicator name when a label is given', () => {
-    render(<StatusBadge status="merah" label="Suara" testID="badge" />);
+  it('prefixes the indicator name when a label is given', async () => {
+    await render(<StatusBadge status="merah" label="Suara" testID="badge" />);
     expect(screen.getByText('Suara: Belum sesuai')).toBeTruthy();
     expect(screen.getByTestId('badge').props.accessibilityLabel).toBe('Suara: Belum sesuai');
   });
