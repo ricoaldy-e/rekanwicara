@@ -1,52 +1,153 @@
-import { useLocalSearchParams } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator } from 'react-native';
 
-import { Body, Card, InfoNote, Screen, StatusBadge, StepHeader } from '../../src/components';
+import type { AnalyzeResponse } from '../../src/api/types';
+import { BigButton, Body, InfoNote, Screen, StepHeader } from '../../src/components';
+import { UploadStatus } from '../../src/components/UploadStatus';
+import { ModelVideo } from '../../src/practice/ModelVideo';
+import { deleteLocalFile, videoUpload } from '../../src/recording/localFile';
+import { DEFAULT_DURATION_MS } from '../../src/recording/recorder';
+import { RecordPanel } from '../../src/recording/RecordPanel';
+import { useUpload } from '../../src/recording/useUpload';
+import { ResultView } from '../../src/results/ResultView';
 import { useContent } from '../../src/state/content';
-import { colors, fontSize, spacing } from '../../src/theme';
+import { useSettings } from '../../src/state/settings';
+import { SESSION_ID, useUser } from '../../src/state/user';
+import { colors } from '../../src/theme';
 
-/** SPEC §2 cycle. Placeholder (B0); model video, recording and results come in B1/B2. */
-const CYCLE = ['Lihat', 'Tiru', 'Bandingkan', 'Ulangi'] as const;
+/** SPEC §2 cycle: Lihat → Tiru → Bandingkan → Ulangi ("Ulangi" is the button that loops back to Tiru). */
+type Stage = 'look' | 'record' | 'send' | 'result';
+const STAGE_STEP: Record<Stage, { step: number; title: string }> = {
+  look: { step: 1, title: 'Lihat' },
+  record: { step: 2, title: 'Tiru' },
+  send: { step: 2, title: 'Tiru' },
+  result: { step: 3, title: 'Bandingkan' },
+};
+const LEVEL0_DURATION_MS = 4000; // SPEC §8.2
 
 export default function Practice() {
+  const router = useRouter();
   const { itemId } = useLocalSearchParams<{ itemId: string }>();
-  const { items } = useContent();
+  const { items, loading } = useContent();
+  const { api } = useSettings();
+  const { profile, addAttempt } = useUser();
   const item = items?.find((it) => it.item_id === itemId);
+
+  const [stage, setStage] = useState<Stage>('look');
+  const [uri, setUri] = useState<string | null>(null);
+  const [result, setResult] = useState<AnalyzeResponse | null>(null);
+  const { state: upload, run, reset } = useUpload();
+
+  // A recording that was never analysed is deleted when leaving the screen (CLAUDE.md: no leftovers).
+  const uriRef = useRef<string | null>(null);
+  useEffect(() => {
+    uriRef.current = uri;
+  }, [uri]);
+  useEffect(() => () => deleteLocalFile(uriRef.current), []);
+
+  const discard = useCallback(() => {
+    deleteLocalFile(uri);
+    setUri(null);
+    reset();
+  }, [uri, reset]);
+
+  const send = useCallback(
+    async (file: string) => {
+      if (!item) return;
+      setStage('send');
+      const res = await run((opts) =>
+        api.analyze(
+          { file: videoUpload(file, 'clip.mp4'), user_id: profile.userId, item_id: item.item_id, session_id: SESSION_ID },
+          opts,
+        ),
+      );
+      if (!res) return; // network error: UploadStatus offers "Coba kirim lagi", the file stays
+      deleteLocalFile(file);
+      setUri(null);
+      reset();
+      if (res.status === 'ok' && res.overall) addAttempt(item.item_id, res.overall); // retry is not an attempt
+      setResult(res);
+      setStage('result');
+    },
+    [api, item, profile.userId, run, reset, addAttempt],
+  );
 
   if (!item) {
     return (
       <Screen>
-        <InfoNote tone="warning" text="Materi tidak ditemukan. Kembali ke beranda dan pilih materi lain." />
+        {loading ? (
+          <ActivityIndicator size="large" color={colors.primary} accessibilityLabel="Memuat materi" />
+        ) : (
+          <InfoNote tone="warning" text="Materi tidak ditemukan. Kembali ke beranda dan pilih materi lain." />
+        )}
       </Screen>
     );
   }
 
+  const { step, title } = STAGE_STEP[stage];
   return (
     <Screen>
-      <StepHeader step={1} total={CYCLE.length} title={CYCLE[0]} />
-      <Card>
-        <View style={styles.target}>
-          {item.emoji ? <Text style={styles.emoji}>{item.emoji}</Text> : null}
-          <Text style={styles.text} accessibilityLabel={`Ucapkan ${item.text}`}>
-            {item.text}
-          </Text>
-        </View>
-      </Card>
-      <Body muted>Langkah latihan: {CYCLE.join(' → ')}</Body>
-      <InfoNote text="Video contoh dan perekaman belum aktif di versi kerangka ini." />
-      <Body muted>Contoh tampilan hasil:</Body>
-      <View style={styles.badges}>
-        <StatusBadge status="hijau" label="Bibir" />
-        <StatusBadge status="kuning" label="Suara" />
-      </View>
-      <Body muted>Hasil ini perkiraan sistem untuk latihan, bukan penilaian klinis.</Body>
+      <StepHeader step={step} total={4} title={title} />
+
+      {stage === 'look' ? (
+        <>
+          <ModelVideo item={item} />
+          {!profile.calibrated ? (
+            <InfoNote text="Hasil lebih tepat setelah kalibrasi. Kalibrasi bisa dilakukan dari beranda." />
+          ) : null}
+          <BigButton label="Mulai rekam" icon="videocam" onPress={() => setStage('record')} />
+        </>
+      ) : null}
+
+      {stage === 'record' ? (
+        <>
+          <Body>Ucapkan: {item.text}</Body>
+          <RecordPanel
+            durationMs={item.level === 0 ? LEVEL0_DURATION_MS : DEFAULT_DURATION_MS}
+            onRecorded={(file) => {
+              setUri(file);
+              send(file);
+            }}
+            hint="Wajah di dalam oval. Mulai bicara setelah tulisan MEREKAM muncul."
+          />
+          <BigButton label="Lihat contoh lagi" variant="secondary" onPress={() => setStage('look')} />
+        </>
+      ) : null}
+
+      {stage === 'send' ? (
+        <>
+          <UploadStatus state={upload} onRetry={() => uri && send(uri)} />
+          {upload.status === 'error' ? (
+            <BigButton
+              label="Rekam ulang"
+              variant="secondary"
+              onPress={() => {
+                discard();
+                setStage('record');
+              }}
+            />
+          ) : (
+            <Body muted>Menilai rekamanmu…</Body>
+          )}
+        </>
+      ) : null}
+
+      {stage === 'result' && result ? (
+        <>
+          <ResultView result={result} />
+          <BigButton
+            label="Ulangi"
+            icon="refresh"
+            onPress={() => {
+              setResult(null);
+              setStage('record');
+            }}
+          />
+          <BigButton label="Lihat contoh lagi" variant="secondary" onPress={() => setStage('look')} />
+          <BigButton label="Selesai" variant="secondary" onPress={() => router.back()} />
+        </>
+      ) : null}
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  target: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.lg },
-  emoji: { fontSize: fontSize.display },
-  text: { fontSize: fontSize.display, fontWeight: '800', color: colors.text },
-  badges: { gap: spacing.sm },
-});

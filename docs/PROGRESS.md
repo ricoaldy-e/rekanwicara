@@ -11,7 +11,7 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | B1 | App | Perekaman, upload, Mode Dataset | Selasa 10 Nov | selesai | Diuji di HP (Expo Go SDK 58) oleh 3 perekam di 3 iPhone (iOS 26.5, 26.6.2, 27.0): sesi 27 klip per orang tanpa crash, 81 klip + 16 video model tersimpan di `data/`, metadata 81 baris. Cek kualitas A1 atas 81 klip: 5 klip cacat (lihat Keputusan, 11 Nov) |
 | A2 | Server | Fitur bibir + fitur suara + alat plot | Rabu 11 Nov pagi | selesai | `pipeline/lips.py`, `pipeline/audio.py`, `ml/tools/draw_landmarks.py`, `ml/tools/plot_features.py`; deret waktu di `/v1/debug/features`. 255 tes hijau. Indeks 13/14/61/291/33/263 + kontur bibir diverifikasi dengan gambar (P1, P2). l3_mama/l3_papa P1–P3: 2 penutupan di keenam klip; /m/ tengah 100% bersuara (3/3); /p/ tengah P3 0%, P2 38%, P1 57% bersuara (lihat Keputusan) |
 | A3 | Server | Kalibrasi, segmentasi, aturan L0–3, petunjuk | Rabu 11 Nov | selesai | `pipeline/calibration.py`, `segment.py`, `rules.py`, `hints.py`; `/analyze` dan `/calibrate` sungguhan saat `MOCK_MODE=false`. 313 tes hijau. Data tim tanpa kalibrasi (L1–L3, klip benar): L1 18/21 hijau (+1 retry klip cacat), L2 12/18, L3 4/18; a_narrow 3/3 dan mama_no_closure 3/3 merah. processing_ms median 803 (749–943, request pertama 1669) pada 68 rekaman |
-| B2 | App | Onboarding, kalibrasi, alur latihan, hasil | Rabu 11 Nov | belum | |
+| B2 | App | Onboarding, kalibrasi, alur latihan, hasil | Rabu 11 Nov | selesai | Onboarding (penjelasan, 2 persetujuan, PIN 4 angka di keystore), kalibrasi 4 langkah, Home (misi hari ini + status terakhir), Practice Lihat→Tiru→Bandingkan→Ulangi, ResultView (2 lencana, petunjuk, Peta Vokal, Cermin Bibir, grafik kekerasan L0, label perkiraan sistem). 99 tes jest, tsc, expo-doctor 20/20, bundle Android bersih. Uji di HP: menunggu |
 | A4 | ML | Proses dataset, alat cek label, putaran LOSO | Rabu 11 Nov | belum | |
 | B3 | App | Supabase, logika kemajuan, Mode Pendamping | Kamis 12 Nov | belum | |
 | A5 | ML | Scorer Wav2Vec2 | — | dilewati | data terlalu sedikit; roadmap |
@@ -54,6 +54,17 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
   `await render(...)` di tes, `types: ["jest","node"]` di tsconfig (TS 6), `newArchEnabled`/`edgeToEdgeEnabled`
   dihapus dari app.json. Aturan lint baru `react-hooks/refs` dan `set-state-in-effect` sementara `warn`.
   66 tes jest, tsc, expo-doctor 20/20, bundle Android bersih. Uji di HP: menunggu.
+- Rabu 11 Nov (B2): dua dependency baru, disetujui: `react-native-svg` (semua gambar dan grafik, tanpa berkas
+  gambar) dan `expo-secure-store` (PIN pendamping di keystore, bukan AsyncStorage). Keduanya bawaan Expo Go.
+- Rabu 11 Nov (B2): `user_id` dibuat lokal (`u_` + 24 heks, disimpan di AsyncStorage `cw.profile`); B3 menggantinya
+  dengan `auth.uid()`. `session_id` = satu id per peluncuran app. Rekaman di HP dihapus setelah dianalisis, saat
+  "Rekam ulang", dan saat meninggalkan layar. Percobaan `retry` tidak dicatat.
+- Rabu 11 Nov (B2): Cermin Bibir menampilkan bentuk target bawaan app (a/i/u), bukan garis dari video model: server
+  tidak mengirim kontur target (mengubah kontrak §5). Kontur server dinormalkan ke kotak mulut, jadi yang
+  dibandingkan bentuknya, bukan ukurannya. Tidak ditampilkan untuk "mmm" (bibir rapat, normalisasi tidak berarti).
+- Rabu 11 Nov (B2): status materi di Home hanya "Belum dicoba" atau hasil terakhir. Penguncian level, lulus, ulasan
+  berjarak, turunkan level, dan pengurangan umpan balik Level 3 (§8.4) masuk B3. Kalibrasi opsional (bisa dilewati;
+  tanpa itu `quality_flags` berisi `uncalibrated`); semua langkah kalibrasi merekam 3 detik.
 - Rabu 11 Nov (A3): prompt A3 meminta "mama dengan penutupan kedua senyap → skor 0,75"; rumus §6.8
   memberi **0,5** (hijau + merah) ÷ 2, sama seperti contoh §5 yang sudah dibetulkan. Tes memakai 0,5.
 - Rabu 11 Nov (A3): kuning = dalam 15% relatif terhadap nilai ambang (mis. jaw_open ≥ 0,34 untuk ambang

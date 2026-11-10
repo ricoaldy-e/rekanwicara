@@ -39,7 +39,8 @@
           "microphonePermission": "Cermin Wicara memakai mikrofon untuk merekam suara saat berlatih.",
           "recordAudioAndroid": true
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

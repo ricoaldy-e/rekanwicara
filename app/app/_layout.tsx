@@ -4,6 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ContentProvider } from '../src/state/content';
 import { SettingsProvider } from '../src/state/settings';
+import { UserProvider } from '../src/state/user';
 import { colors, fontSize } from '../src/theme';
 
 export default function RootLayout() {
@@ -11,6 +12,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <SettingsProvider>
         <ContentProvider>
+          <UserProvider>
           <StatusBar style="dark" />
           <Stack
             screenOptions={{
@@ -32,6 +34,7 @@ export default function RootLayout() {
             <Stack.Screen name="dataset/model-videos" options={{ title: 'Rekam Video Model' }} />
             <Stack.Screen name="settings" options={{ title: 'Pengaturan' }} />
           </Stack>
+          </UserProvider>
         </ContentProvider>
       </SettingsProvider>
     </SafeAreaProvider>
