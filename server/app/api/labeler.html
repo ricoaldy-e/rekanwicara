@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cek label</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { color-scheme: light; --fg:#111; --muted:#3a3a3a; --bg:#fff; --card:#f4f6f8; --primary:#0b3d91; --ok:#1b5e20; --bad:#b71c1c; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:20px/1.5 system-ui, sans-serif; color:var(--fg); background:var(--bg); }
+  main { max-width: 760px; margin: 0 auto; padding: 16px; display:grid; gap:16px; }
+  h1 { font-size: 30px; margin: 0; }
+  .muted { color: var(--muted); }
+  .row { display:flex; gap:12px; flex-wrap:wrap; }
+  button { font:inherit; font-weight:700; min-height:64px; padding:12px 24px; border-radius:16px; border:3px solid var(--primary);
+           background:#fff; color:var(--primary); cursor:pointer; flex:1 1 200px; }
+  button.primary { background:var(--primary); color:#fff; }
+  button.ok { background:var(--ok); border-color:var(--ok); color:#fff; }
+  button.bad { background:var(--bad); border-color:var(--bad); color:#fff; }
+  button:disabled { opacity:.5; cursor:default; }
+  button:focus-visible, select:focus-visible, input:focus-visible { outline:4px solid #ffb300; outline-offset:2px; }
+  .card { background:var(--card); border:2px solid var(--fg); border-radius:18px; padding:16px; display:grid; gap:12px; }
+  video { width:100%; max-height:38vh; background:#000; border-radius:12px; }
+  .word { font-size:44px; font-weight:800; }
+  label { display:flex; align-items:center; gap:10px; }
+  input[type=checkbox] { width:28px; height:28px; }
+  select, input[type=text] { font:inherit; padding:10px; border:3px solid var(--fg); border-radius:12px; width:100%; }
+  .bar { height:14px; background:#ddd; border-radius:8px; overflow:hidden; }
+  .bar > div { height:100%; background:var(--primary); }
+  .error { color:var(--bad); font-weight:700; }
+  kbd { border:2px solid var(--fg); border-radius:6px; padding:0 8px; background:#fff; font-weight:700; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Cek label</h1>
+
+  <section id="pick" class="card">
+    <p>Siapa kamu? Kamu hanya akan menilai rekaman <b>orang lain</b>.</p>
+    <div class="row">
+      <button data-who="P1">P1</button><button data-who="P2">P2</button><button data-who="P3">P3</button>
+    </div>
+    <p class="muted">Kerjakan sendiri-sendiri, jangan berdiskusi dengan penilai lain. Buka halaman ini di laptop, dengan suara dinyalakan.</p>
+  </section>
+
+  <section id="work" hidden>
+    <div class="card">
+      <div id="counter" class="muted" aria-live="polite"></div>
+      <div class="bar"><div id="progress" style="width:0"></div></div>
+      <video id="video" playsinline controls aria-label="Rekaman yang dinilai"></video>
+      <div><span class="muted">Materi yang diminta:</span> <span id="emoji"></span> <span id="word" class="word"></span></div>
+      <p><b>Apakah bunyi dan bibirnya sesuai dengan materi itu?</b></p>
+      <div class="row">
+        <button id="yes" class="ok">1 · Sesuai</button>
+        <button id="no" class="bad">2 · Tidak sesuai</button>
+      </div>
+      <label for="heard">Yang terdengar (boleh dikosongkan)</label>
+      <select id="heard"></select>
+      <label><input id="lips" type="checkbox"> <span><kbd>3</kbd> Bibir salah</span></label>
+      <label><input id="bad" type="checkbox"> <span><kbd>4</kbd> Kualitas buruk (wajah, suara, atau bising)</span></label>
+      <input id="notes" type="text" maxlength="200" placeholder="Catatan (boleh dikosongkan)" aria-label="Catatan">
+      <div id="error" class="error" role="alert"></div>
+      <div class="row">
+        <button id="replay">Putar ulang (spasi)</button>
+        <button id="back">Kembali (←)</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="done" class="card" hidden>
+    <h2>Selesai!</h2>
+    <p id="doneText"></p>
+    <div class="row"><button id="doneBack">Kembali ke klip terakhir</button></div>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let annotator = null, clips = [], options = [], index = 0, busy = false;
+
+async function api(path, init) {
+  const res = await fetch(path, init);
+  if (!res.ok) {
+    let msg = 'Gagal (' + res.status + ')';
+    try { msg = (await res.json()).detail.message || msg; } catch (_) {}
+    throw new Error(msg);
+  }
+  return res.json();
+}
+
+document.querySelectorAll('#pick button').forEach((b) => b.addEventListener('click', () => start(b.dataset.who)));
+
+async function start(who) {
+  try {
+    const data = await api('/labeler/api/clips?annotator=' + encodeURIComponent(who));
+    annotator = who; clips = data.clips; options = data.options;
+    const heard = $('heard');
+    heard.replaceChildren(new Option('(tidak diisi)', ''));
+    options.forEach((o) => heard.add(new Option(o.label, o.value)));
+    $('pick').hidden = true;
+    const next = clips.findIndex((c) => c.label === null); // resume at the first clip not yet labelled
+    show(next === -1 ? clips.length : next);
+  } catch (e) { alert(e.message); }
+}
+
+function doneCount() { return clips.filter((c) => c.label !== null).length; }
+
+function show(i) {
+  index = i;
+  $('error').textContent = '';
+  const finished = i >= clips.length;
+  $('work').hidden = finished || clips.length === 0;
+  $('done').hidden = !finished;
+  $('progress').style.width = (clips.length ? (100 * doneCount()) / clips.length : 0) + '%';
+  if (finished) {
+    $('doneText').textContent = 'Kamu sudah menilai ' + doneCount() + ' dari ' + clips.length + ' klip. Terima kasih.';
+    $('video').pause();
+    return;
+  }
+  const c = clips[i], l = c.label;
+  $('counter').textContent = 'Klip ' + (i + 1) + ' dari ' + clips.length + ' · sudah dinilai ' + doneCount();
+  $('emoji').textContent = c.emoji || '';
+  $('word').textContent = c.item_text;
+  $('heard').value = l ? l.heard_label : '';
+  $('lips').checked = l ? l.lips_wrong : false;
+  $('bad').checked = l ? !l.quality_ok : false;
+  $('notes').value = l ? l.notes : '';
+  $('back').disabled = i === 0;
+  const v = $('video');
+  v.src = '/labeler/video/' + c.token;
+  v.play().catch(() => {});
+}
+
+async function submit(matches) {
+  if (busy || index >= clips.length) return;
+  busy = true; $('yes').disabled = $('no').disabled = true;
+  const c = clips[index];
+  const body = {
+    annotator, token: c.token, matches_request: matches,
+    heard_label: $('heard').value || (matches ? c.item_id : ''),
+    lips_wrong: $('lips').checked, quality_ok: !$('bad').checked, notes: $('notes').value.trim(),
+  };
+  try {
+    await api('/labeler/api/labels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    c.label = { matches_request: matches, heard_label: body.heard_label, lips_wrong: body.lips_wrong, quality_ok: body.quality_ok, notes: body.notes };
+    show(index + 1);
+  } catch (e) {
+    $('error').textContent = 'Belum tersimpan: ' + e.message + ' Coba tekan lagi.';
+  } finally { busy = false; $('yes').disabled = $('no').disabled = false; }
+}
+
+function replay() { const v = $('video'); v.currentTime = 0; v.play().catch(() => {}); }
+function back() { if (index > 0) show(index - 1); }
+
+$('yes').addEventListener('click', () => submit(true));
+$('no').addEventListener('click', () => submit(false));
+$('replay').addEventListener('click', replay);
+$('back').addEventListener('click', back);
+$('doneBack').addEventListener('click', () => show(clips.length - 1));
+
+document.addEventListener('keydown', (e) => {
+  if (annotator === null || e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' && e.target.type === 'text' || tag === 'select' || tag === 'textarea') return;
+  if (e.target.tagName === 'BUTTON' && e.key === ' ') e.preventDefault(); // space replays, it does not click the focused button
+  if ($('work').hidden) { if (e.key === 'ArrowLeft') back(); return; }
+  if (e.key === '1') submit(true);
+  else if (e.key === '2') submit(false);
+  else if (e.key === ' ') { e.preventDefault(); replay(); }
+  else if (e.key === '3') $('lips').checked = !$('lips').checked;
+  else if (e.key === '4') $('bad').checked = !$('bad').checked;
+  else if (e.key === 'ArrowLeft') back();
+});
+</script>
+</body>
+</html>

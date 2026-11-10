@@ -12,7 +12,7 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | A2 | Server | Fitur bibir + fitur suara + alat plot | Rabu 11 Nov pagi | selesai | `pipeline/lips.py`, `pipeline/audio.py`, `ml/tools/draw_landmarks.py`, `ml/tools/plot_features.py`; deret waktu di `/v1/debug/features`. 255 tes hijau. Indeks 13/14/61/291/33/263 + kontur bibir diverifikasi dengan gambar (P1, P2). l3_mama/l3_papa P1–P3: 2 penutupan di keenam klip; /m/ tengah 100% bersuara (3/3); /p/ tengah P3 0%, P2 38%, P1 57% bersuara (lihat Keputusan) |
 | A3 | Server | Kalibrasi, segmentasi, aturan L0–3, petunjuk | Rabu 11 Nov | selesai | `pipeline/calibration.py`, `segment.py`, `rules.py`, `hints.py`; `/analyze` dan `/calibrate` sungguhan saat `MOCK_MODE=false`. 313 tes hijau. Data tim tanpa kalibrasi (L1–L3, klip benar): L1 18/21 hijau (+1 retry klip cacat), L2 12/18, L3 4/18; a_narrow 3/3 dan mama_no_closure 3/3 merah. processing_ms median 803 (749–943, request pertama 1669) pada 68 rekaman |
 | B2 | App | Onboarding, kalibrasi, alur latihan, hasil | Rabu 11 Nov | selesai | Onboarding (penjelasan, 2 persetujuan, PIN 4 angka di keystore), kalibrasi 4 langkah, Home (misi hari ini + status terakhir), Practice Lihat→Tiru→Bandingkan→Ulangi, ResultView (2 lencana, petunjuk, Peta Vokal, Cermin Bibir, grafik kekerasan L0, label perkiraan sistem). 99 tes jest, tsc, expo-doctor 20/20, bundle Android bersih. Uji di HP: menunggu |
-| A4 | ML | Proses dataset, alat cek label, putaran LOSO | Rabu 11 Nov | belum | |
+| A4 | ML | Proses dataset, alat cek label, putaran LOSO | Rabu 11 Nov | selesai | `ml/dataset/{process,folds,report}.py` (logika di `server/app/dataset/`), halaman `/labeler`. 81 klip diproses tanpa gagal (71 s; ulang = lewati semua), `auto_labels.csv` 81 baris, 3 fold LOSO (uji 27, setel 54). `/labeler` diuji di browser sungguhan (video, pintasan 1/2/3/4/spasi/←, simpan, lanjut setelah muat ulang). 368 tes server hijau. **Cek label manusia belum dilakukan** (Tugas 4) |
 | B3 | App | Supabase, logika kemajuan, Mode Pendamping | Kamis 12 Nov | belum | |
 | A5 | ML | Scorer Wav2Vec2 | — | dilewati | data terlalu sedikit; roadmap |
 | I1 | Bersama | Integrasi ujung ke ujung di HP | Kamis 12 Nov malam | belum | |
@@ -54,6 +54,24 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
   `await render(...)` di tes, `types: ["jest","node"]` di tsconfig (TS 6), `newArchEnabled`/`edgeToEdgeEnabled`
   dihapus dari app.json. Aturan lint baru `react-hooks/refs` dan `set-state-in-effect` sementara `warn`.
   66 tes jest, tsc, expo-doctor 20/20, bundle Android bersih. Uji di HP: menunggu.
+- Rabu 11 Nov (A4): logika dataset ada di `server/app/dataset/` (server tidak boleh bergantung pada `ml/`, dan tes
+  tetap lewat pytest); `ml/dataset/*.py` hanya skrip perintah. Klip diproses TANPA kalibrasi (default §6.3).
+  `.npz` menyimpan deret bibir dan suara supaya A6 bisa menilai ulang tanpa MediaPipe. Berkas `.json` memuat
+  hash `thresholds.yaml`; klip yang diproses dengan ambang lain dilaporkan "usang" dan diproses ulang otomatis.
+- Rabu 11 Nov (A4): label otomatis hanya memakai yang tertulis di SPEC §10.3; sel yang SPEC tidak sebut dikosongkan
+  (mis. suara `u_flat_lips`), tidak ditebak. `bad_noise` = `retry_or_scored`.
+- Rabu 11 Nov (A4), `/labeler`: hanya terbuka dari laptop server (localhost atau alamat LAN laptop itu sendiri;
+  perangkat lain 403) karena menayangkan video wajah. Annotator tidak melihat pembicara, jenis kesalahan sengaja,
+  nama berkas, atau hasil mesin; klip dialamatkan dengan token acak dan diacak per annotator; log akses hanya
+  menulis `/labeler/video/{token}`. Rekaman iPhone berformat **HEVC**, jadi tiap klip dikonversi sekali ke H.264 ke
+  `data/processed/labeler_cache/` (lokal, tidak di-commit) saat pertama diputar. `heard_label` = materi aktif atau
+  `unclear`; bila "Sesuai" dan kolom itu kosong, diisi materi yang diminta.
+- Rabu 11 Nov (A4): laporan menandai klip yang perlu ditinjau: klip "benar" yang dinilai tidak sesuai atau
+  berkualitas buruk, kesalahan sengaja yang dinilai sesuai oleh kedua annotator, dan annotator yang berbeda
+  pendapat. Putuskan sebelum A6 (terutama `mama_as_papa` P2 dan `u_flat_lips` P3 dari catatan A3).
+- Rabu 11 Nov (uji B2 di HP, `MOCK_MODE=false`): hasil cukup baik, tetapi bunyi yang mirip masih dinilai sama, mis.
+  /u/ dan /o/. Penyebab yang diketahui: hanya a, i, u yang dinilai (e dan o bonus, `active: false`), dan
+  penilaian vokal memakai ambang F1/F2 yang belum disetel. Catatan untuk A6 / roadmap, belum dikerjakan.
 - Rabu 11 Nov (B2): dua dependency baru, disetujui: `react-native-svg` (semua gambar dan grafik, tanpa berkas
   gambar) dan `expo-secure-store` (PIN pendamping di keystore, bukan AsyncStorage). Keduanya bawaan Expo Go.
 - Rabu 11 Nov (B2): `user_id` dibuat lokal (`u_` + 24 heks, disimpan di AsyncStorage `cw.profile`); B3 menggantinya

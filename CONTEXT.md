@@ -85,6 +85,7 @@ cermin-wicara/
 | `POST /analyze` | analisis rekaman: **sungguhan** saat `MOCK_MODE=false` (A3), contoh saat `true` (`?mock=hijau\|kuning\|merah\|retry`) | selalu |
 | `POST /calibrate` | kalibrasi: sungguhan saat `MOCK_MODE=false` (simpan angka ke `data/calibration/`), contoh saat `true` | selalu |
 | `POST /dataset/upload` | simpan klip ke `data/raw/{speaker}/{item}__r{rep}__{error}__{cond}.mp4` + baris `data/raw/metadata.csv`; `purpose=model_video` → `data/model_videos/{item}.mp4` (timpa) | `DATASET_MODE=true` (selain itu 404) |
+| `GET /labeler` | halaman cek label (§10.5), hanya dari laptop server: `http://localhost:8000/labeler`; label ke `data/labels/labels_{P}.csv` | `DATASET_MODE=true` |
 | `GET /model-video/{item_id}` | kirim video model (mendukung `Range`; 404 bila belum ada) | selalu |
 | `GET/POST /debug/features` | ringkasan kualitas rekaman sungguhan (flag, % frame berwajah, av_offset, timing) | `DEBUG=true` (selain itu 404) |
 

@@ -6,6 +6,7 @@ from app.content.loader import Content
 from app.core.settings import Settings
 from app.core.storage import DatasetStore
 from app.core.thresholds import Thresholds
+from app.dataset.labels import LabelStore
 from app.pipeline.calibration import CalibrationStore
 
 
@@ -29,7 +30,12 @@ def _calibration_store(request: Request) -> CalibrationStore:
     return request.app.state.calibration_store
 
 
+def _label_store(request: Request) -> LabelStore:
+    return request.app.state.label_store
+
+
 SettingsDep = Annotated[Settings, Depends(_settings)]
+LabelStoreDep = Annotated[LabelStore, Depends(_label_store)]
 ContentDep = Annotated[Content, Depends(_content)]
 DatasetStoreDep = Annotated[DatasetStore, Depends(_dataset_store)]
 ThresholdsDep = Annotated[Thresholds, Depends(_thresholds)]
