@@ -49,6 +49,9 @@ class SegmentConfig(_Strict):
     gap_tolerance_ms: int = Field(ge=0)
     closure_min_ms: int = Field(ge=0)
     closure_min_frames: int = Field(ge=1)
+    closure_max_ms: int = Field(gt=0)
+    release_tolerance_ms: int = Field(ge=0)
+    valley_min_gap_ms: int = Field(gt=0)
 
 
 class LipLandmarks(_Strict):
@@ -166,6 +169,27 @@ class RulesConfig(_Strict):
     consonants: ConsonantsConfig
 
 
+class CalibrationConfig(_Strict):
+    anchor_history: int = Field(ge=1)
+
+
+class FormantAnchor(_Strict):
+    f1: float = Field(gt=0)
+    f2: float = Field(gt=0)
+
+
+class DefaultAnchors(_Strict):
+    a: FormantAnchor
+    i: FormantAnchor
+    u: FormantAnchor
+
+
+class DefaultsConfig(_Strict):
+    rest_jaw_open: float
+    rest_rounding: float
+    vowel_anchors: DefaultAnchors
+
+
 class Thresholds(_Strict):
     media: MediaConfig
     quality: QualityConfig
@@ -173,6 +197,8 @@ class Thresholds(_Strict):
     lips: LipsConfig
     audio: AudioConfig
     rules: RulesConfig
+    calibration: CalibrationConfig
+    defaults: DefaultsConfig
 
 
 def load_thresholds(path: Path = THRESHOLDS_PATH) -> Thresholds:

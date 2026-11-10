@@ -1,8 +1,15 @@
+import json
+from types import SimpleNamespace
+
+import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
-from app.api.schemas import AnalyzeResponse, CalibrateResponse
+from app.api.schemas import AnalyzeResponse, CalibrateResponse, Indicators
+from app.api.v1 import analysis as analysis_module
 from app.content.loader import FORBIDDEN_WORDS, load_content
+from app.pipeline.face import FaceFrame
+from tests import synth
 from tests.conftest import video_file
 
 CONTENT = load_content()
@@ -195,10 +202,65 @@ def test_upload_at_limit_is_accepted(client: TestClient) -> None:
     assert res.status_code == 200
 
 
-def test_analyze_without_mock_mode_is_unavailable(make_client, sample_video: bytes) -> None:
-    res = _analyze(make_client(mock_mode=False), sample_video)
-    assert res.status_code == 503
-    assert res.json()["detail"]["code"] == "analysis_unavailable"
+# ---------- real pipeline (MOCK_MODE=false, phase A3) ----------
+
+
+def _fake_extraction(monkeypatch: pytest.MonkeyPatch, second_closure_voiced: bool = True) -> None:
+    """Replace the media/MediaPipe step with synthetic "mama" features (see tests/synth.py)."""
+    lips, voice, _ = synth.mama(second_closure_voiced)
+    pts = np.zeros((478, 3), dtype=np.float32)
+    pts[:, 0] = np.linspace(0.3, 0.7, 478)
+    pts[:, 1] = np.linspace(0.5, 0.7, 478)
+    frames = [FaceFrame(int(t), pts, {}) for t in lips.t_ms]
+    audio = SimpleNamespace(
+        speech_start_ms=300, speech_ms=950, noise_floor_db=30.0, noise_floor_uncertain=False
+    )
+    feats = SimpleNamespace(
+        quality_flags=[], audio=audio, lips=lips, voice=voice, frames=frames, image_size=(360, 480)
+    )
+    monkeypatch.setattr(analysis_module, "extract_or_error", lambda *a, **k: feats)
+
+
+def test_analyze_real_response_follows_the_contract(
+    make_client, sample_video: bytes, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _fake_extraction(monkeypatch, second_closure_voiced=False)
+    res = _analyze(make_client(mock_mode=False), sample_video, "l3_mama")
+    assert res.status_code == 200, res.text
+    body = AnalyzeResponse.model_validate(res.json())
+    assert body.status == "ok" and body.quality_flags == ["uncalibrated"]
+    assert body.overall == "merah" and body.score == 0.5 and body.hint_id == "m_voicing"
+    assert body.indicators == Indicators(bibir="hijau", suara="merah")
+    assert body.units is not None and [u.target for u in body.units] == ["ma", "ma"]
+    assert body.units[1].reason_code == "closure_voicing_expected"
+    v = body.visuals
+    assert v.vowel_point is not None and v.vowel_anchors is not None and v.loudness is not None
+    assert v.lip_contour is not None and len(v.lip_contour.points) == 20
+    assert body.scorer == "rules" and body.engine_version == "0.1.0"
+    _assert_no_forbidden_words(res.text)
+
+
+def test_analyze_real_rejects_inactive_items(make_client, sample_video: bytes) -> None:
+    inactive = next(i.item_id for i in CONTENT.items if not i.active)
+    res = _analyze(make_client(mock_mode=False), sample_video, inactive)
+    assert res.status_code == 422
+    assert res.json()["detail"]["code"] == "item_inactive"
+
+
+@pytest.mark.requires_model
+def test_analyze_real_without_face_is_retry(
+    make_client, sample_video: bytes, face_model, data_dir, tmp_path
+) -> None:
+    work = tmp_path / "work"
+    client = make_client(mock_mode=False, face_model_path=face_model, tmp_dir=work)
+    res = _analyze(client, sample_video, "l1_a")
+    assert res.status_code == 200, res.text
+    body = AnalyzeResponse.model_validate(res.json())
+    assert body.status == "retry" and body.hint_id == "retry_no_face"
+    assert body.quality_flags[0] == "no_face" and "uncalibrated" in body.quality_flags
+    assert body.units is None and body.score is None and body.overall is None
+    assert list(work.iterdir()) == []  # the recording is gone
+    assert not data_dir.exists() or not any(data_dir.rglob("*"))
 
 
 def test_analyze_writes_nothing_to_data_dir(
@@ -241,5 +303,32 @@ def test_calibrate_invalid_step(client: TestClient, sample_video: bytes) -> None
     assert _calibrate(client, sample_video, "vowel_x").status_code == 422
 
 
-def test_calibrate_without_mock_mode_is_unavailable(make_client, sample_video: bytes) -> None:
-    assert _calibrate(make_client(mock_mode=False), sample_video, "rest").status_code == 503
+def test_calibrate_real_saves_numbers_and_completes(
+    make_client, sample_video: bytes, monkeypatch: pytest.MonkeyPatch, data_dir
+) -> None:
+    _fake_extraction(monkeypatch)
+    client = make_client(mock_mode=False)
+    for step in ("rest", "vowel_a", "vowel_i", "vowel_u"):
+        body = CalibrateResponse.model_validate(_calibrate(client, sample_video, step).json())
+        assert body.status == "ok" and body.saved is True
+        assert body.calibration_complete is (step == "vowel_u")
+    saved = json.loads((data_dir / "calibration" / "user-123.json").read_text(encoding="utf-8"))
+    assert set(saved) == {"rest", "vowels", "history"} and set(saved["vowels"]) == {"a", "i", "u"}
+
+    # Calibrated now: no "uncalibrated" flag, and the anchors are the user's (here every step got
+    # the same fake recording, so a, i and u share one anchor).
+    body = _analyze(client, sample_video, "l3_mama").json()
+    assert body["status"] == "ok" and body["quality_flags"] == []
+    anchors = body["visuals"]["vowel_anchors"]
+    assert anchors["a"] == anchors["i"] == anchors["u"] == {"f1": 800, "f2": 1400}
+
+
+@pytest.mark.requires_model
+def test_calibrate_real_rest_without_face_is_retry(
+    make_client, sample_video: bytes, face_model, data_dir
+) -> None:
+    client = make_client(mock_mode=False, face_model_path=face_model)
+    body = _calibrate(client, sample_video, "rest").json()
+    assert body["status"] == "retry" and body["saved"] is False
+    assert body["quality_flags"] == ["no_face"]  # audio flags are not checked for the silent rest
+    assert not (data_dir / "calibration").exists()

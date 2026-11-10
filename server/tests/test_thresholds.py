@@ -39,7 +39,7 @@ def test_a1_assumptions_are_marked() -> None:
         assert "asumsi A1, disetel di A6" in line, line
     # Every assumption names the phase in which it gets tuned.
     for line in text.splitlines():
-        if "asumsi A1" in line or "asumsi A2" in line:
+        if any(f"asumsi A{p}" in line for p in (1, 2, 3)):
             assert "disetel di A6" in line, line
     assert text.count("asumsi A2") >= 2  # default_mouth_to_eye_ratio, closed_gap_ratio
 

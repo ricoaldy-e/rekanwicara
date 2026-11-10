@@ -115,6 +115,7 @@ def audio_metrics(
     quality: QualityConfig,
     segment: SegmentConfig,
     audio: AudioConfig,
+    calibrated_floor_db: float | None = None,  # §6.2: the calibration floor, when there is one
 ) -> AudioMetrics:
     if samples is None or samples.size == 0:
         return AudioMetrics(
@@ -137,10 +138,16 @@ def audio_metrics(
 
     step_ms = audio.time_step_s * 1000
     max_gap = int(segment.gap_tolerance_ms // step_ms)
-    floor = float(np.percentile(db, quality.noise_floor_percentile))
+    known_floor = calibrated_floor_db is not None
+    floor = (
+        calibrated_floor_db
+        if calibrated_floor_db is not None
+        else float(np.percentile(db, quality.noise_floor_percentile))
+    )
 
     rel = longest_run(db > floor + segment.speech_margin_db, max_gap)
-    absolute = longest_run(db > quality.abs_speech_db, max_gap)
+    # A measured floor is never "uncertain": the safeguard below is for the percentile only.
+    absolute = None if known_floor else longest_run(db > quality.abs_speech_db, max_gap)
 
     def coverage(run: tuple[int, int] | None) -> float:
         return 0.0 if run is None else (run[1] - run[0]) / db.size
@@ -153,7 +160,7 @@ def audio_metrics(
         loud_voiced = voiced_ratio(samples, sr, audio, db_frame_span_s(absolute, audio.time_step_s))
         abs_is_voice = loud_voiced >= quality.floor_uncertain_min_voiced_ratio
 
-    uncertain = coverage(rel) > limit or abs_is_voice
+    uncertain = not known_floor and (coverage(rel) > limit or abs_is_voice)
     region = absolute if abs_is_voice else rel
 
     speech_frames = 0 if region is None else region[1] - region[0]

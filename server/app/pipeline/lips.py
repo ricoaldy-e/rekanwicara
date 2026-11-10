@@ -6,7 +6,8 @@ and height, so a portrait frame (e.g. 270 x 480) would otherwise squash horizont
 Normalisation: every distance is divided by ``mouth_width_rest``. That rest width is stored
 relative to the outer eye distance (33-263) of the same frame, so it holds at any distance from
 the camera. With calibration (phase A3) it is the user's own ratio; without it,
-``default_mouth_to_eye_ratio``.
+``default_mouth_to_eye_ratio``
+(see ``calibration.lip_rest``).
 
 Times: ``t_ms`` is ms since the start of the AUDIO (frame time minus ``av_offset_ms``), the same
 clock as ``audio.AudioSeries``.
@@ -21,7 +22,7 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
 
-from app.core.thresholds import LipsConfig
+from app.core.thresholds import LipsConfig, Thresholds
 from app.pipeline.face import FaceFrame
 
 # MediaPipe blendshape category names.
@@ -54,8 +55,13 @@ class LipSeries:
     closed: np.ndarray  # bool
 
 
-def default_rest(cfg: LipsConfig) -> LipRest:
-    return LipRest(mouth_width_rest=cfg.default_mouth_to_eye_ratio)
+def default_lip_rest(t: Thresholds) -> LipRest:
+    """§6.3 population defaults, used without calibration."""
+    return LipRest(
+        mouth_width_rest=t.lips.default_mouth_to_eye_ratio,
+        jaw_open=t.defaults.rest_jaw_open,
+        rounding=t.defaults.rest_rounding,
+    )
 
 
 def median_filter(x: np.ndarray, size: int) -> np.ndarray:
@@ -74,9 +80,8 @@ def lip_series(
     image_size: tuple[int, int],
     av_offset_ms: int,
     cfg: LipsConfig,
-    rest: LipRest | None = None,
+    rest: LipRest,  # calibration.lip_rest(): the user's values or the §6.3 defaults
 ) -> LipSeries:
-    rest = rest or default_rest(cfg)
     lm = cfg.landmarks
     scale = np.array(image_size, dtype=float)  # (width, height)
     n = len(frames)
@@ -100,16 +105,45 @@ def lip_series(
 
     k = cfg.median_filter_frames
     smooth = {name: median_filter(v, k) for name, v in raw.items()}
-    gap = smooth["gap"]
+    closed = np.nan_to_num(smooth["gap"], nan=np.inf) < cfg.closed_gap_ratio
     return LipSeries(
         t_ms=np.array([f.timestamp_ms - av_offset_ms for f in frames], dtype=int),
         jaw_open=smooth["jaw"],
-        lip_gap_ratio=gap,
+        lip_gap_ratio=smooth["gap"],
         lip_width_ratio=smooth["width"],
         rounding=smooth["round"],
         mouth_close=smooth["close"],
-        closed=np.nan_to_num(gap, nan=np.inf) < cfg.closed_gap_ratio,
+        closed=closed,
     )
+
+
+def middle_median(
+    values: np.ndarray, t_ms: np.ndarray, start_ms: float, end_ms: float, fraction: float
+) -> float:
+    """Median over the frames in the middle ``fraction`` of [start, end) (§6.3, §6.7 vowels).
+
+    Short vowels can hold no frame in their middle half: then the frame nearest the centre is used.
+    NaN when there is no face there.
+    """
+    margin = (end_ms - start_ms) * (1 - fraction) / 2
+    inside = (t_ms >= start_ms + margin) & (t_ms < end_ms - margin) & np.isfinite(values)
+    if inside.any():
+        return float(np.median(values[inside]))
+    if t_ms.size == 0:
+        return float("nan")
+    return float(values[int(np.argmin(np.abs(t_ms - (start_ms + end_ms) / 2)))])
+
+
+def span_peak(
+    values: np.ndarray, t_ms: np.ndarray, start_ms: float, end_ms: float, highest: bool
+) -> float:
+    """Highest (or lowest) value of the frames in [start, end): how far the mouth got towards the
+    target shape. Vowels in words last only 3-6 frames at 15 fps, so their middle is too short to
+    hold the target (A3). Falls back to the frame nearest the centre; NaN without a face."""
+    inside = (t_ms >= start_ms) & (t_ms < end_ms) & np.isfinite(values)
+    if inside.any():
+        return float(values[inside].max() if highest else values[inside].min())
+    return middle_median(values, t_ms, start_ms, end_ms, 1.0)
 
 
 def lip_contour(

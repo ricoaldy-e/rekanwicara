@@ -24,8 +24,7 @@ from app.api.schemas import (
     Visuals,
     VowelAnchors,
 )
-
-_SEVERITY: dict[Status, int] = {"hijau": 0, "kuning": 1, "merah": 2}
+from app.pipeline.rules import score_of, worst  # the same §6.8 functions as the real pipeline
 
 _ANCHORS = VowelAnchors(
     a=FormantPoint(f1=780, f2=1350),
@@ -48,16 +47,6 @@ _VOWEL_LIP_PROBLEM: dict[str, tuple[ReasonCode, str]] = {
 _VOWEL_ACOUSTIC_HINT = {"e": "i_spread", "o": "u_round"}
 
 Indicator = Literal["bibir", "suara"]
-
-
-def worst(statuses: list[Status]) -> Status:
-    return max(statuses, key=lambda s: _SEVERITY[s])
-
-
-def score_of(statuses: list[Status]) -> float:
-    """SPEC §6.8: (hijau + 0.5 x kuning) / number of units."""
-    value = sum(1.0 if s == "hijau" else 0.5 if s == "kuning" else 0.0 for s in statuses)
-    return round(value / len(statuses), 3)
 
 
 def _problem_for(item: Item, unit: str) -> tuple[Indicator, ReasonCode, str]:

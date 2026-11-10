@@ -82,8 +82,8 @@ cermin-wicara/
 |---|---|---|
 | `GET /health` | status, versi, `mock_mode` | selalu |
 | `GET /items` | materi aktif (Level 0–3) dari `items.json` | selalu |
-| `POST /analyze` | analisis rekaman — **masih mock** (`?mock=hijau\|kuning\|merah\|retry`) | `MOCK_MODE=true` (tanpa mock → 503 sampai A3) |
-| `POST /calibrate` | kalibrasi — **masih mock** | sama |
+| `POST /analyze` | analisis rekaman: **sungguhan** saat `MOCK_MODE=false` (A3), contoh saat `true` (`?mock=hijau\|kuning\|merah\|retry`) | selalu |
+| `POST /calibrate` | kalibrasi: sungguhan saat `MOCK_MODE=false` (simpan angka ke `data/calibration/`), contoh saat `true` | selalu |
 | `POST /dataset/upload` | simpan klip ke `data/raw/{speaker}/{item}__r{rep}__{error}__{cond}.mp4` + baris `data/raw/metadata.csv`; `purpose=model_video` → `data/model_videos/{item}.mp4` (timpa) | `DATASET_MODE=true` (selain itu 404) |
 | `GET /model-video/{item_id}` | kirim video model (mendukung `Range`; 404 bila belum ada) | selalu |
 | `GET/POST /debug/features` | ringkasan kualitas rekaman sungguhan (flag, % frame berwajah, av_offset, timing) | `DEBUG=true` (selain itu 404) |
@@ -302,4 +302,4 @@ laporan akurasi, model card).
 | App: "Server belum dalam Mode Dataset" | `DATASET_MODE=true` di `server/.env`, jalankan ulang uvicorn |
 | Tombol Mode Dataset tidak muncul | `EXPO_PUBLIC_DATASET_MODE=true` di `app/.env`, lalu `npx expo start -c` |
 | Expo Go: "Project is incompatible with this version of Expo Go" | Expo Go di HP bukan SDK 58. App harus dinaikkan (`npx expo install expo@^<SDK> --fix`) — tanya tim dulu |
-| `/v1/analyze` 503 `analysis_unavailable` | wajar: analisis sungguhan baru ada di A3; pakai `MOCK_MODE=true` |
+| `/v1/analyze` selalu hasil contoh | `MOCK_MODE=true`; untuk analisis sungguhan set `MOCK_MODE=false` lalu jalankan ulang uvicorn |

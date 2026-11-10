@@ -163,11 +163,16 @@ Rekaman disalin ke satu direktori sementara (`cw_media_*`) dan dihapus sebelum r
 
 - **Error** selalu berbentuk `{"detail": {"code": "...", "message": "..."}}`. Tampilkan teks Indonesia
   berdasarkan `code`, bukan `message`. Kode: `invalid_request` (422), `invalid_item_id` (422),
-  `empty_file` (422), `unsupported_media_type` (415), `file_too_large` (413), `analysis_unavailable` (503),
+  `empty_file` (422), `unsupported_media_type` (415), `file_too_large` (413),
   `not_found` / `model_video_not_found` (404), `internal_error` (500); khusus dataset juga
   `invalid_speaker_id`, `invalid_intended_error`, `intended_error_item_mismatch` (422).
-  Khusus endpoint debug: `invalid_media` (422, ffmpeg tidak bisa membaca video),
-  `media_tools_missing` (503), `face_model_missing` (503).
+  `/analyze`, `/calibrate` (tanpa mock) dan debug: `invalid_media` (422, ffmpeg tidak bisa membaca
+  video), `media_tools_missing` (503), `face_model_missing` (503); `/analyze` juga `item_inactive`
+  (422, item bonus yang belum dinilai).
+- **Analisis sungguhan** (`MOCK_MODE=false`, fase A3): ±0,8 s per klip (request pertama ±1,7 s).
+  Tanpa kalibrasi lengkap, `quality_flags` berisi `"uncalibrated"` (bukan penyebab retry) dan
+  jangkar vokal memakai default populasi. Kalibrasi tersimpan sebagai angka di
+  `DATA_DIR/calibration/{user_id}.json`. Untuk mencoba tanpa app: buka `http://<IP>:8000/docs`.
 - `GET /v1/items` mengembalikan **array** item aktif. Item bonus (`l1_e`, `l1_o`, `l3_mau`, `l3_bau`, `l3_boba`)
   ada di `items.json` dengan `active: false`.
 - Saat `status: "retry"`: `overall`, `score`, `units`, dan **`indicators`** bernilai `null`; semua kunci `visuals` `null`.

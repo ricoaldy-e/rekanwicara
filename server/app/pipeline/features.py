@@ -17,7 +17,7 @@ import soundfile as sf
 from app.core.thresholds import Thresholds
 from app.pipeline.audio import AudioSeries, audio_series
 from app.pipeline.face import FaceFrame, FaceModelMissing, track_faces
-from app.pipeline.lips import LipRest, LipSeries, lip_series
+from app.pipeline.lips import LipRest, LipSeries, default_lip_rest, lip_series
 from app.pipeline.media import prepared_media
 from app.pipeline.quality import (
     AudioMetrics,
@@ -61,7 +61,8 @@ def extract_clip_features(
     thresholds: Thresholds,
     model_path: Path,
     tmp_root: Path | None = None,
-    lip_rest: LipRest | None = None,  # calibration (A3); None = uncalibrated fallback
+    lip_rest: LipRest | None = None,  # calibration (A3); None = §6.3 defaults
+    noise_floor_db: float | None = None,  # calibration (A3); None = from the clip (§6.2)
 ) -> ClipFeatures:
     if not model_path.is_file():  # fail before spending time on ffmpeg
         raise FaceModelMissing("face_landmarker.task not found; run scripts/download_models.py")
@@ -80,7 +81,9 @@ def extract_clip_features(
         av_offset_ms = media.av_offset_ms
 
     t_audio = time.perf_counter()
-    audio = audio_metrics(samples, sr, thresholds.quality, thresholds.segment, thresholds.audio)
+    audio = audio_metrics(
+        samples, sr, thresholds.quality, thresholds.segment, thresholds.audio, noise_floor_db
+    )
     voice = audio_series(samples, sr, thresholds.audio)
     audio_ms = _ms_since(t_audio)
     face = face_metrics(track.frames, thresholds.lips.landmarks)
@@ -91,7 +94,13 @@ def extract_clip_features(
         samples=samples,
         sample_rate=sr,
         av_offset_ms=av_offset_ms,
-        lips=lip_series(track.frames, track.image_size, av_offset_ms, thresholds.lips, lip_rest),
+        lips=lip_series(
+            track.frames,
+            track.image_size,
+            av_offset_ms,
+            thresholds.lips,
+            lip_rest or default_lip_rest(thresholds),
+        ),
         voice=voice,
         audio=audio,
         face=face,

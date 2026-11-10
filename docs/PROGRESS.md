@@ -10,7 +10,7 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | A1 | Server | Media + cek kualitas + MediaPipe dasar | Selasa 10 Nov | selesai | mediapipe 1.2.2, parselmouth 0.4.7. 243 tes hijau (0 skip; 6 `requires_model` jalan dengan model asli). Uji rekaman HP ke `/v1/debug/features`: menunggu cek tim |
 | B1 | App | Perekaman, upload, Mode Dataset | Selasa 10 Nov | selesai | Diuji di HP (Expo Go SDK 58) oleh 3 perekam di 3 iPhone (iOS 26.5, 26.6.2, 27.0): sesi 27 klip per orang tanpa crash, 81 klip + 16 video model tersimpan di `data/`, metadata 81 baris. Cek kualitas A1 atas 81 klip: 5 klip cacat (lihat Keputusan, 11 Nov) |
 | A2 | Server | Fitur bibir + fitur suara + alat plot | Rabu 11 Nov pagi | selesai | `pipeline/lips.py`, `pipeline/audio.py`, `ml/tools/draw_landmarks.py`, `ml/tools/plot_features.py`; deret waktu di `/v1/debug/features`. 255 tes hijau. Indeks 13/14/61/291/33/263 + kontur bibir diverifikasi dengan gambar (P1, P2). l3_mama/l3_papa P1–P3: 2 penutupan di keenam klip; /m/ tengah 100% bersuara (3/3); /p/ tengah P3 0%, P2 38%, P1 57% bersuara (lihat Keputusan) |
-| A3 | Server | Kalibrasi, segmentasi, aturan L0–3, petunjuk | Rabu 11 Nov | belum | |
+| A3 | Server | Kalibrasi, segmentasi, aturan L0–3, petunjuk | Rabu 11 Nov | selesai | `pipeline/calibration.py`, `segment.py`, `rules.py`, `hints.py`; `/analyze` dan `/calibrate` sungguhan saat `MOCK_MODE=false`. 313 tes hijau. Data tim tanpa kalibrasi (L1–L3, klip benar): L1 18/21 hijau (+1 retry klip cacat), L2 12/18, L3 4/18; a_narrow 3/3 dan mama_no_closure 3/3 merah. processing_ms median 803 (749–943, request pertama 1669) pada 68 rekaman |
 | B2 | App | Onboarding, kalibrasi, alur latihan, hasil | Rabu 11 Nov | belum | |
 | A4 | ML | Proses dataset, alat cek label, putaran LOSO | Rabu 11 Nov | belum | |
 | B3 | App | Supabase, logika kemajuan, Mode Pendamping | Kamis 12 Nov | belum | |
@@ -54,6 +54,28 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
   `await render(...)` di tes, `types: ["jest","node"]` di tsconfig (TS 6), `newArchEnabled`/`edgeToEdgeEnabled`
   dihapus dari app.json. Aturan lint baru `react-hooks/refs` dan `set-state-in-effect` sementara `warn`.
   66 tes jest, tsc, expo-doctor 20/20, bundle Android bersih. Uji di HP: menunggu.
+- Rabu 11 Nov (A3): prompt A3 meminta "mama dengan penutupan kedua senyap → skor 0,75"; rumus §6.8
+  memberi **0,5** (hijau + merah) ÷ 2, sama seperti contoh §5 yang sudah dibetulkan. Tes memakai 0,5.
+- Rabu 11 Nov (A3): kuning = dalam 15% relatif terhadap nilai ambang (mis. jaw_open ≥ 0,34 untuk ambang
+  0,40); batas kuning eksplisit di SPEC (L0, p, b) dipakai apa adanya. Vokal e/o (bonus, `active: false`)
+  tidak dinilai: `/analyze` mengembalikan 422 `item_inactive`. Langkah kalibrasi `rest` hanya mengecek
+  flag wajah (klip diam pasti `too_quiet`). Bonus §6.7 untuk /m/ (closure_ms, closure_db) tidak mengubah status.
+- Rabu 11 Nov (A3): default populasi §6.3 diukur dari dataset: rest `jaw_open` 0, rest `rounding` 0,16;
+  jangkar a (819, 1410), i (310, 2521), u (416, 931) Hz.
+- Rabu 11 Nov (A3), segmentasi: penutupan dihitung bila bibir terbuka di dalam wilayah ucapan (toleransi
+  150 ms); waktu buka = titik tengah frame rapat terakhir dan frame terbuka pertama (sebelumnya ujung frame
+  menelan sampai 67 ms vokal berikutnya → /p/ terbaca bersuara); jendela ukur maks. 300 ms sebelum buka dan
+  tidak sebelum awal wilayah ucapan (senandung /m/ awal kata termasuk ucapan, diam tidak). Wilayah ucapan
+  untuk segmentasi menjembatani celah sampai 300 ms supaya penutupan /p/ yang senyap tidak memotong kata.
+- Rabu 11 Nov (A3), aturan vokal: fitur bibir = nilai puncak ke arah bentuk target di bagian vokal (a: jaw
+  maks; i: lebar maks, rounding min; u: rounding maks, lebar min). Median 50% tengah membuat "a" dalam kata
+  (3–6 frame) selalu kurang terbuka. Kalibrasi tetap median 50% tengah (§6.3).
+- Rabu 11 Nov (A3), untuk A6 (penyebab klip benar L2/L3 tidak hijau): `closure_missing` ×12 (penutupan
+  cepat jatuh di antara frame 15 fps; celah bibir saat rapat kadang 0,08–0,10; "u" yang membulat bisa
+  terbaca rapat, celah 0,06–0,07: mengecualikan frame membulat memperbaiki 2 klip tapi merusak 3 klip
+  tanpa kalibrasi, jadi tidak dipakai; `mouthClose` tidak berguna, selalu ±0); `vowel_open_low` ×8 ("a"
+  dalam kata kurang terbuka, terutama P3); /p/ bersuara ×4. Label meragukan: `mama_as_papa` P2 (hijau,
+  tetap bersenandung) dan `u_flat_lips` P3 (bibir tetap membulat).
 - Rabu 11 Nov (A2): jarak landmark dihitung dalam piksel (x dan y MediaPipe dinormalkan terpisah; frame
   HP berdiri 360×480). `mouth_width_rest` disimpan relatif terhadap jarak mata 33–263; tanpa kalibrasi
   dipakai `default_mouth_to_eye_ratio` 0,59 (diukur: P1 0,62, P2 0,59, P3 0,55). Selisih antarorang ±6%

@@ -5,6 +5,8 @@ from fastapi import Depends, Request
 from app.content.loader import Content
 from app.core.settings import Settings
 from app.core.storage import DatasetStore
+from app.core.thresholds import Thresholds
+from app.pipeline.calibration import CalibrationStore
 
 
 def _settings(request: Request) -> Settings:
@@ -19,6 +21,16 @@ def _dataset_store(request: Request) -> DatasetStore:
     return request.app.state.dataset_store
 
 
+def _thresholds(request: Request) -> Thresholds:
+    return request.app.state.thresholds
+
+
+def _calibration_store(request: Request) -> CalibrationStore:
+    return request.app.state.calibration_store
+
+
 SettingsDep = Annotated[Settings, Depends(_settings)]
 ContentDep = Annotated[Content, Depends(_content)]
 DatasetStoreDep = Annotated[DatasetStore, Depends(_dataset_store)]
+ThresholdsDep = Annotated[Thresholds, Depends(_thresholds)]
+CalibrationStoreDep = Annotated[CalibrationStore, Depends(_calibration_store)]

@@ -12,7 +12,7 @@ import numpy as np
 from fastapi import APIRouter, File, Request, UploadFile
 
 from app.api.deps import SettingsDep
-from app.api.errors import ApiError
+from app.api.extract import extract_or_error
 from app.api.schemas import (
     DebugAudioSummary,
     DebugFaceSummary,
@@ -26,9 +26,6 @@ from app.api.schemas import (
 from app.api.uploads import check_video_upload
 from app.api.v1.prefix import API_PREFIX
 from app.core.thresholds import Thresholds
-from app.pipeline.face import FaceModelMissing
-from app.pipeline.features import extract_clip_features
-from app.pipeline.media import MediaError, MediaToolsMissing
 
 router = APIRouter(prefix=API_PREFIX, tags=["debug"])
 
@@ -74,18 +71,7 @@ def debug_features(
     thresholds: Thresholds = request.app.state.thresholds
     try:
         check_video_upload(file, settings.max_upload_bytes)
-        try:
-            feats = extract_clip_features(
-                file.file, thresholds, settings.face_model_path, tmp_root=settings.tmp_dir
-            )
-        except FaceModelMissing as exc:
-            raise ApiError(
-                503, exc.code, "Face model missing: run python scripts/download_models.py"
-            ) from exc
-        except MediaToolsMissing as exc:
-            raise ApiError(503, exc.code, "ffmpeg/ffprobe not found on PATH.") from exc
-        except MediaError as exc:
-            raise ApiError(422, exc.code, "The upload could not be read as a video.") from exc
+        feats = extract_or_error(file.file, settings, thresholds)
     finally:
         file.file.close()
 

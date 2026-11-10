@@ -17,6 +17,7 @@ from app.core.logging import AccessLogMiddleware, configure_logging
 from app.core.settings import Settings, get_settings
 from app.core.storage import DatasetStore
 from app.core.thresholds import load_thresholds
+from app.pipeline.calibration import CalibrationStore
 
 SUPPORTED_PYTHON = ((3, 10), (3, 11))
 _startup_logger = logging.getLogger("cermin_wicara.startup")
@@ -49,6 +50,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.content = content
     app.state.thresholds = thresholds
     app.state.dataset_store = DatasetStore(settings.data_dir)
+    app.state.calibration_store = CalibrationStore(settings.data_dir)
 
     register_error_handlers(app)
     app.include_router(build_v1_router(settings.dataset_mode, settings.debug))
