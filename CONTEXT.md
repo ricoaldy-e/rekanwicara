@@ -32,7 +32,7 @@ server yang berjalan di laptop itu.
 | A0 (+A0-fix) | Server FastAPI, mode mock, upload dataset | selesai | 188 tes saat itu |
 | B0 | Kerangka app Expo | selesai | Expo SDK 54 |
 | A1 | Pipeline media + cek kualitas + deteksi wajah MediaPipe | selesai | 243 tes server hijau |
-| **B1** | Perekaman, upload, Mode Dataset | **kode selesai, BELUM diuji di HP** | Commit `dc4008f`; 66 tes app hijau. `docs/PROGRESS.md` masih menulis "belum" → perbarui setelah uji HP (lihat §8) |
+| **B1** | Perekaman, upload, Mode Dataset | **selesai, diuji di 3 iPhone (11 Nov)** | Dataset 81 klip + 16 video model sudah ada di `data/`; catatan klip cacat di `docs/PROGRESS.md` |
 | A2 | Fitur bibir + fitur suara + alat plot | belum | Butuh beberapa rekaman asli dulu |
 | A3 | Kalibrasi, segmentasi, aturan L0–3, petunjuk | belum | Setelah ini `/v1/analyze` memberi hasil sungguhan |
 | B2 | Onboarding, kalibrasi, alur latihan, hasil | belum | |
@@ -62,7 +62,7 @@ cermin-wicara/
 │   ├── scripts/download_models.py  unduh model MediaPipe resmi
 │   ├── models/                     face_landmarker.task (TIDAK di-commit)
 │   └── tests/                      pytest
-├── app/                 Expo SDK 54 + expo-router + TypeScript strict
+├── app/                 Expo SDK 58 + expo-router + TypeScript strict
 │   ├── app/                        layar (route): onboarding, calibration, home, practice/[itemId],
 │   │                               companion, settings (tersembunyi), dataset/{index,session,model-videos}
 │   ├── src/api/                    types.ts (= SPEC §5), client.ts, upload.ts, apiError.ts, errors.ts
@@ -102,8 +102,8 @@ mp4/mov ≤ 15 MB; log hanya metode, rute, status, durasi; `speaker_id` dataset 
 
 ## 5. App (yang sudah ada)
 
-- **Expo SDK 54** (React Native 0.81.5, React 19.1.0, expo-router 6) — dipilih karena **Expo Go di HP tim
-  hanya mendukung SDK 54**. Semua modul bawaan Expo Go (tanpa modul native custom): expo-camera, expo-video,
+- **Expo SDK 58** (React Native 0.88.1, React 19.3.0, expo-router 58) — dinaikkan dari SDK 54 pada 10 Nov malam
+  karena **Expo Go di App Store kini SDK 58**. Semua modul bawaan Expo Go (tanpa modul native custom): expo-camera, expo-video,
   expo-file-system, expo-haptics, AsyncStorage.
 - **Home**: daftar materi dari `/v1/items` per level, catatan bila server mode mock, tombol Mode Pendamping,
   dan tombol **Mode Dataset** (hanya bila `EXPO_PUBLIC_DATASET_MODE=true`).
@@ -175,7 +175,7 @@ mp4/mov ≤ 15 MB; log hanya metode, rute, status, durasi; `speaker_id` dataset 
 | **Python 3.11** | 3.11.x (laptop lama 3.11.9) — **bukan 3.12+** | python.org atau `winget install -e --id Python.Python.3.11`; cek `py -3.11 --version` |
 | **FFmpeg + ffprobe** | laptop lama 9.0.2 | `winget install -e --id Gyan.FFmpeg`, lalu **tutup dan buka ulang VS Code/terminal**; cek `ffmpeg -version` dan `ffprobe -version` |
 | **Node.js** | ≥ 22.13 (laptop lama 22.13.0, npm 10.9.2) | nodejs.org (LTS); cek `node -v` |
-| HP Android | **Expo Go yang mendukung SDK 54** | Expo Go → Settings → "Supported SDK" harus 54. Jangan update Expo Go sampai demo selesai |
+| HP | **Expo Go yang mendukung SDK 58** | Expo Go → Settings → "Supported SDK" harus 58. Android: bila bukan 58, pasang dari expo.dev/go. Jangan update Expo Go sampai demo selesai |
 | Disk | ±2 GB bebas | venv (mediapipe, opencv) ±600 MB, node_modules ±500 MB |
 
 ### 9.2 Ambil kode
@@ -301,5 +301,5 @@ laporan akurasi, model card).
 | Browser HP timeout ke `/v1/health` | IP salah (cek `ipconfig`), profil jaringan Public, firewall, atau Wi-Fi mengisolasi perangkat → pakai hotspot HP |
 | App: "Server belum dalam Mode Dataset" | `DATASET_MODE=true` di `server/.env`, jalankan ulang uvicorn |
 | Tombol Mode Dataset tidak muncul | `EXPO_PUBLIC_DATASET_MODE=true` di `app/.env`, lalu `npx expo start -c` |
-| Expo Go: "Project is incompatible with this version of Expo Go" | Expo Go di HP bukan SDK 54. App harus dinaikkan (`npx expo install expo@^<SDK> --fix`) — tanya tim dulu |
+| Expo Go: "Project is incompatible with this version of Expo Go" | Expo Go di HP bukan SDK 58. App harus dinaikkan (`npx expo install expo@^<SDK> --fix`) — tanya tim dulu |
 | `/v1/analyze` 503 `analysis_unavailable` | wajar: analisis sungguhan baru ada di A3; pakai `MOCK_MODE=true` |
