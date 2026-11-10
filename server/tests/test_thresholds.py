@@ -24,7 +24,8 @@ def test_yaml_loads_with_spec_values() -> None:
     # §6.4 / §6.6 / §6.7 spot checks
     assert t.lips.landmarks.mouth == (13, 14, 61, 291)
     assert (t.lips.landmarks.eye_outer_left, t.lips.landmarks.eye_outer_right) == (33, 263)
-    assert t.lips.closed_gap_ratio == 0.05
+    assert t.lips.closed_gap_ratio == 0.08  # A2 measurement, SPEC 0.05 (see thresholds.yaml)
+    assert len(t.lips.outer_lip) == 20
     assert t.segment.gap_tolerance_ms == 100
     assert t.rules.l0_hold_a.yellow_min_voiced_s == 2.55
     assert t.rules.vowels.i.lip_width_ratio_min == 1.05
@@ -38,8 +39,9 @@ def test_a1_assumptions_are_marked() -> None:
         assert "asumsi A1, disetel di A6" in line, line
     # Every assumption names the phase in which it gets tuned.
     for line in text.splitlines():
-        if "asumsi A1" in line:
+        if "asumsi A1" in line or "asumsi A2" in line:
             assert "disetel di A6" in line, line
+    assert text.count("asumsi A2") >= 2  # default_mouth_to_eye_ratio, closed_gap_ratio
 
 
 def test_unknown_key_is_rejected(tmp_path: Path) -> None:

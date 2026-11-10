@@ -8,6 +8,7 @@ import shutil
 from importlib.metadata import PackageNotFoundError, version
 from typing import Annotated
 
+import numpy as np
 from fastapi import APIRouter, File, Request, UploadFile
 
 from app.api.deps import SettingsDep
@@ -16,8 +17,10 @@ from app.api.schemas import (
     DebugAudioSummary,
     DebugFaceSummary,
     DebugFeaturesResponse,
+    DebugLipSeries,
     DebugStatusResponse,
     DebugTimings,
+    DebugVoiceSeries,
     ErrorResponse,
 )
 from app.api.uploads import check_video_upload
@@ -35,6 +38,11 @@ _ERRORS: dict[int | str, dict[str, object]] = {
     422: {"model": ErrorResponse},
     503: {"model": ErrorResponse},
 }
+
+
+def _num(values: np.ndarray, digits: int) -> list[float | None]:
+    """Rounded floats for JSON; NaN (no face / unvoiced) becomes null."""
+    return [None if np.isnan(v) else round(float(v), digits) for v in values]
 
 
 def _version(package: str) -> str | None:
@@ -81,7 +89,7 @@ def debug_features(
     finally:
         file.file.close()
 
-    a, f = feats.audio, feats.face
+    a, f, lips, voice = feats.audio, feats.face, feats.lips, feats.voice
     return DebugFeaturesResponse(
         quality_flags=feats.quality_flags,  # type: ignore[arg-type]
         info=["noise_floor_uncertain"] if a.noise_floor_uncertain else [],
@@ -108,6 +116,23 @@ def debug_features(
         face=DebugFaceSummary(
             face_width_ratio=None if f.face_width_ratio is None else round(f.face_width_ratio, 3),
             mouth_out_ratio=None if f.mouth_out_ratio is None else round(f.mouth_out_ratio, 3),
+        ),
+        lips=DebugLipSeries(
+            t_ms=lips.t_ms.tolist(),
+            jaw_open=_num(lips.jaw_open, 3),
+            lip_gap_ratio=_num(lips.lip_gap_ratio, 3),
+            lip_width_ratio=_num(lips.lip_width_ratio, 3),
+            rounding=_num(lips.rounding, 3),
+            mouth_close=_num(lips.mouth_close, 3),
+            closed=lips.closed.tolist(),
+        ),
+        voice=DebugVoiceSeries(
+            t_ms=[round(float(x)) for x in voice.t_ms],
+            intensity_db=[round(float(x), 1) for x in voice.intensity_db],
+            voiced=voice.voiced.tolist(),
+            f0_hz=[round(float(x), 1) for x in voice.f0_hz],
+            f1_hz=_num(voice.f1_hz, 0),
+            f2_hz=_num(voice.f2_hz, 0),
         ),
         timings_ms=DebugTimings(**vars(feats.timings)),
         engine_version=settings.engine_version,

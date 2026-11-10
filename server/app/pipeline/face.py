@@ -40,6 +40,9 @@ class FaceFrame:
 @dataclass
 class FaceTrack:
     frames: list[FaceFrame] = field(default_factory=list)
+    # (width, height) in px of the analysed frames. Landmark x/y are normalised separately by
+    # width and height, so distances need this aspect ratio (A2).
+    image_size: tuple[int, int] = (0, 0)
     landmarker_init_ms: int = 0
     detect_ms: int = 0
 
@@ -72,6 +75,7 @@ def track_faces(
         start = time.perf_counter()
         for path, ts in zip(frame_paths, timestamps_ms, strict=True):
             image = mp.Image.create_from_file(str(path))
+            track.image_size = (image.width, image.height)
             result = landmarker.detect_for_video(image, int(ts))
             track.frames.append(_to_face_frame(result, int(ts)))
         track.detect_ms = _ms_since(start)

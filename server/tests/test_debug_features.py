@@ -81,6 +81,15 @@ def test_summary_for_clip_without_face(
         "media_ms", "landmarker_init_ms", "face_detect_ms", "audio_ms", "total_ms",
     }  # fmt: skip
     assert body["timings_ms"]["landmarker_init_ms"] >= 0
+    # A2 series: one lip value per frame (null without a face), on the audio clock (audio starts
+    # 500 ms after the video, so the first frame is at about -500 ms); the 0.5-1.5 s tone is voiced.
+    lips, voice = body["lips"], body["voice"]
+    assert len(lips["t_ms"]) == body["n_frames"]
+    assert lips["t_ms"][0] == -body["av_offset_ms"]
+    assert set(lips["lip_gap_ratio"]) == {None} and not any(lips["closed"])
+    voiced_t = [t for t, v in zip(voice["t_ms"], voice["voiced"], strict=True) if v]
+    assert voiced_t and 450 <= voiced_t[0] <= 650 and 1350 <= voiced_t[-1] <= 1550
+    assert all(f is None for f, v in zip(voice["f1_hz"], voice["voiced"], strict=True) if not v)
     # Nothing left on disk, nothing identifying in the logs.
     assert list(work.iterdir()) == []
     logs = " ".join(r.getMessage() for r in caplog.records)

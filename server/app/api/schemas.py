@@ -210,6 +210,29 @@ class DebugTimings(_Strict):
     total_ms: int
 
 
+class DebugLipSeries(_Strict):
+    """§6.4 per video frame; null where no face. t_ms = ms since audio start."""
+
+    t_ms: list[int]
+    jaw_open: list[float | None]
+    lip_gap_ratio: list[float | None]
+    lip_width_ratio: list[float | None]
+    rounding: list[float | None]
+    mouth_close: list[float | None]
+    closed: list[bool]
+
+
+class DebugVoiceSeries(_Strict):
+    """§6.5 per 10 ms frame; f1/f2 null where unvoiced. t_ms = ms since audio start."""
+
+    t_ms: list[int]
+    intensity_db: list[float]
+    voiced: list[bool]
+    f0_hz: list[float]
+    f1_hz: list[float | None]
+    f2_hz: list[float | None]
+
+
 class DebugFeaturesResponse(_Strict):
     status: Literal["ok"] = "ok"
     quality_flags: list[QualityFlag]
@@ -223,5 +246,7 @@ class DebugFeaturesResponse(_Strict):
     has_audio: bool
     audio: DebugAudioSummary
     face: DebugFaceSummary
+    lips: DebugLipSeries
+    voice: DebugVoiceSeries
     timings_ms: DebugTimings
     engine_version: str

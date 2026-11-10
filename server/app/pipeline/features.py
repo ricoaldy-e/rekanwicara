@@ -1,7 +1,7 @@
-"""Phase A1 orchestration: upload -> media -> face track + audio -> quality flags.
+"""Upload -> media -> face track + audio -> quality flags (A1) + lip/voice series (A2).
 
-``ClipFeatures`` keeps the raw per-frame face results and the audio samples in memory for phase A2;
-nothing derived from the recording is written to disk (the temp dir is gone when this returns).
+Everything stays in memory; nothing derived from the recording is written to disk (the temp dir
+is gone when this returns). Lip and voice series share one clock: ms since the audio start.
 """
 
 from __future__ import annotations
@@ -15,7 +15,9 @@ import numpy as np
 import soundfile as sf
 
 from app.core.thresholds import Thresholds
+from app.pipeline.audio import AudioSeries, audio_series
 from app.pipeline.face import FaceFrame, FaceModelMissing, track_faces
+from app.pipeline.lips import LipRest, LipSeries, lip_series
 from app.pipeline.media import prepared_media
 from app.pipeline.quality import (
     AudioMetrics,
@@ -37,10 +39,13 @@ class Timings:
 
 @dataclass(frozen=True)
 class ClipFeatures:
-    frames: list[FaceFrame]  # raw landmarks + blendshapes + timestamp_ms (for A2)
+    frames: list[FaceFrame]  # raw landmarks + blendshapes + timestamp_ms (video clock)
+    image_size: tuple[int, int]  # (width, height) px of the analysed frames
     samples: np.ndarray | None  # mono float64 in [-1, 1], or None without audio
     sample_rate: int
     av_offset_ms: int
+    lips: LipSeries  # §6.4, audio clock
+    voice: AudioSeries  # §6.5, audio clock
     audio: AudioMetrics
     face: FaceMetrics
     quality_flags: list[str]
@@ -52,7 +57,11 @@ def _ms_since(start: float) -> int:
 
 
 def extract_clip_features(
-    src: BinaryIO, thresholds: Thresholds, model_path: Path, tmp_root: Path | None = None
+    src: BinaryIO,
+    thresholds: Thresholds,
+    model_path: Path,
+    tmp_root: Path | None = None,
+    lip_rest: LipRest | None = None,  # calibration (A3); None = uncalibrated fallback
 ) -> ClipFeatures:
     if not model_path.is_file():  # fail before spending time on ffmpeg
         raise FaceModelMissing("face_landmarker.task not found; run scripts/download_models.py")
@@ -72,14 +81,18 @@ def extract_clip_features(
 
     t_audio = time.perf_counter()
     audio = audio_metrics(samples, sr, thresholds.quality, thresholds.segment, thresholds.audio)
+    voice = audio_series(samples, sr, thresholds.audio)
     audio_ms = _ms_since(t_audio)
     face = face_metrics(track.frames, thresholds.lips.landmarks)
 
     return ClipFeatures(
         frames=track.frames,
+        image_size=track.image_size,
         samples=samples,
         sample_rate=sr,
         av_offset_ms=av_offset_ms,
+        lips=lip_series(track.frames, track.image_size, av_offset_ms, thresholds.lips, lip_rest),
+        voice=voice,
         audio=audio,
         face=face,
         quality_flags=quality_flags(audio, face, thresholds.quality),

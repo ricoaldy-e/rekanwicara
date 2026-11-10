@@ -14,6 +14,10 @@ pyyaml==6.0.3
 mediapipe==1.2.2
 praat-parselmouth==0.4.7
 
+# Phase A2 tools (ml/tools/plot_features.py). Already installed by mediapipe; pinned so the tools
+# do not depend on that silently.
+matplotlib==3.11.2
+
 # Dev / test
 pytest==9.2.0
 httpx==0.28.1

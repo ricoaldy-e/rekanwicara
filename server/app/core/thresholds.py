@@ -66,9 +66,10 @@ class LipLandmarks(_Strict):
 
 class LipsConfig(_Strict):
     landmarks: LipLandmarks
+    outer_lip: tuple[Annotated[int, Field(ge=0, lt=478)], ...] = Field(min_length=3)
+    default_mouth_to_eye_ratio: float = Field(gt=0)
     closed_gap_ratio: float = Field(gt=0)
     median_filter_frames: int = Field(ge=1)
-    contour_points: int = Field(ge=3)
 
 
 class AudioConfig(_Strict):
