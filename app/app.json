@@ -32,7 +32,16 @@
           "backgroundColor": "#FFFFFF"
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      "expo-video",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Cermin Wicara memakai kamera depan untuk melihat bentuk bibir saat berlatih.",
+          "microphonePermission": "Cermin Wicara memakai mikrofon untuk merekam suara saat berlatih.",
+          "recordAudioAndroid": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

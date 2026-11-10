@@ -160,6 +160,8 @@ export interface DatasetUploadRequest {
   intended_error: string; // "none" when there is no intended error
   condition: RecordingCondition;
   session_id: string;
+  /** Optional metadata.csv `device` column (server: letters/digits/space/_.-, max 40). */
+  device?: string;
 }
 
 export interface DatasetUploadResponse {

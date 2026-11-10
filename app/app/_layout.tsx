@@ -27,7 +27,9 @@ export default function RootLayout() {
             <Stack.Screen name="home" options={{ title: 'Cermin Wicara', headerBackVisible: false }} />
             <Stack.Screen name="practice/[itemId]" options={{ title: 'Latihan' }} />
             <Stack.Screen name="companion" options={{ title: 'Mode Pendamping' }} />
-            <Stack.Screen name="dataset" options={{ title: 'Mode Dataset' }} />
+            <Stack.Screen name="dataset/index" options={{ title: 'Mode Dataset' }} />
+            <Stack.Screen name="dataset/session" options={{ title: 'Sesi Dataset' }} />
+            <Stack.Screen name="dataset/model-videos" options={{ title: 'Rekam Video Model' }} />
             <Stack.Screen name="settings" options={{ title: 'Pengaturan' }} />
           </Stack>
         </ContentProvider>
