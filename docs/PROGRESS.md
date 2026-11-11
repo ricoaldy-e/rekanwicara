@@ -20,6 +20,7 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | B4 | App | Polish, mode demo, build | Jumat 13 Nov | selesai (target Expo Go) | Layar Tentang, profil demo di memori (isolasi dari penyimpanan dan sinkronisasi pribadi), feedback sinkronisasi, label tombol panjang, pemulihan daftar materi kosong, aset cermin/bibir orisinal, dan README app selesai. 174 Jest dan tsc lolos; lint exit 0 dengan 8 warning lama; detektor UI tidak menemukan masalah mekanis. Setelah persetujuan pengguna, 11 patch Expo diperbarui (expo 58.0.24), manifest/lockfile lama dicadangkan; Doctor 20/20. Pengguna mengonfirmasi Tentang tampil baik di iPhone, demo benar dan angka percobaan pribadi kembali sama setelah demo dimatikan. APK/release splash, Android/tablet dan VoiceOver penuh belum diuji. npm: 28 advisori (1 rendah, 27 sedang). |
 | F | Bersama | Kunci fitur, README, tag submission | Jumat 13 Nov malam | selesai | Diselesaikan lebih awal dengan persetujuan pengguna. README setup/demo/evaluasi lengkap, lisensi model dari tiga model card Apache-2.0, inventaris Python/JS, scan Git/privasi dan perbaikan log CLI dataset. 389 pytest (0 skip), 174 Jest, tsc, Ruff check/format dan Doctor 20/20 lolos. Lint app exit 0 (8 warning lama), 1 warning deprecation pytest. Tag `v1.0-submission`; daftar berkas dan batas pemeriksaan di `docs/SUBMISSION_CHECKLIST.md`. Video/pengiriman manual belum dilakukan. |
 | F-fix1 | App | Penghapusan rekaman kalibrasi (masalah 1 audit) | Kamis 12 Nov | selesai | Freeze dibuka khusus perbaikan atas persetujuan pengguna. `discard(file)` memakai URI kiriman, bukan state render lama. Lima tes baru; dua tes penghapusan gagal pada kode lama lalu lulus. 179 Jest (17 suite), tsc lolos, lint exit 0 dengan 8 warning lama. Tidak mengubah server/API/dependency atau memindahkan tag lama. Masalah 2 belum diperbaiki; penghapusan fisik di iPhone dan cache lama belum diperiksa. |
+| F-fix2 | App | Hasil rekaman setelah komponen ditutup (masalah 2 audit) | Kamis 12 Nov | selesai untuk hasil ber-URI | RecordPanel menghapus hasil terlambat tanpa callback/getar selesai. Lima tes komponen dengan kamera, haptics dan operasi berkas sintetis; dua tes reproduksi gagal pada kode lama lalu lulus. 184 Jest (18 suite), tsc lolos, lint exit 0 dengan 8 warning lama. Native menolak tanpa URI masih butuh verifikasi cache di HP; cache lama tidak dibersihkan. Tag lama tidak dipindahkan, tanpa push. |
 
 ## Tugas manual
 
@@ -33,6 +34,21 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | 6 | Submission | Sabtu 14 Nov | belum |
 
 ## Keputusan penting
+- Kamis 12 Nov (F-fix2): pengguna menyetujui perbaikan khusus hasil rekaman yang datang
+  setelah RecordPanel ditutup. Pemakai komponen adalah latihan, kalibrasi, sesi dataset
+  dan video model; perbaikan dilakukan sekali di komponen bersama. Hasil terlambat ber-URI
+  dihapus melalui helper yang sudah ada; hasil normal tetap diserahkan ke pemanggil,
+  sehingga file tidak dihapus sebelum upload/preview. Tidak menambah dependency/API.
+  Tes komponen membuktikan hasil terlambat dihapus, hasil normal diteruskan tepat sekali,
+  kamera/timer dibersihkan saat pembatalan, hitung mundur tidak memulai rekaman setelah
+  ditutup, dan penolakan promise terlambat tertangani. Stop kamera yang melempar error
+  tidak menghalangi penghapusan hasil terlambat. Microtask React tetap asli; timer rekam
+  memakai timer sintetis. Lima tes baru; seluruh 184 Jest dan tsc lolos, lint 0 error
+  dengan 8 warning lama. Tes F-fix1 tetap lulus. Server/ML dan Doctor tidak diulang.
+  Batas: Expo iOS dapat menolak promise saat kamera ditutup tanpa mengembalikan URI.
+  Tidak ada penghapusan terarah yang bisa dibuktikan untuk jalur itu; perlu pemeriksaan
+  perangkat sebelum mengklaim seluruh privasi terpenuhi. Cache lama tidak dibersihkan,
+  folder data tidak dibaca. Tag lama dan dua panduan staged pengguna dipertahankan.
 - Kamis 12 Nov (F-fix1): pengguna menyetujui pembukaan freeze hanya untuk masalah 1.
   Callback respons kalibrasi sebelumnya menangkap `uri` lama saat rekaman diserahkan;
   sekarang penghapusan menerima argumen `file` yang dikirim. Respons sukses maupun

@@ -2,8 +2,32 @@
 
 Tanggal: 11 November 2026. Kunci fitur dilakukan lebih awal atas persetujuan pengguna.
 Snapshot awal: `main`, tag `v1.0-submission` pada `1c930f9`. Freeze kemudian dibuka
-atas persetujuan pengguna khusus F-fix1 (12 November); tag lama tidak dipindahkan.
+atas persetujuan pengguna untuk F-fix1 dan F-fix2 (12 November); tag lama tidak dipindahkan.
 Dokumen ini mencatat pemeriksaan repo; pengiriman ke panitia belum dilakukan.
+
+## Pembaruan F-fix2 — 12 November 2026
+
+RecordPanel menghapus file ber-URI yang dikembalikan kamera setelah komponen ditutup,
+tanpa memanggil onRecorded, getaran selesai, atau memperbarui tampilan. Pemakai komponen
+adalah latihan, kalibrasi dan dua layar dataset. Hasil saat masih aktif tetap diserahkan
+sekali ke pemanggil, tanpa dihapus sebelum upload/preview.
+
+Lima tes komponen baru memakai kamera/haptics/operasi berkas sintetis dan timer terkontrol:
+hasil terlambat, hasil normal, pembatalan hitung mundur, penolakan promise terlambat,
+serta hasil terlambat saat stop kamera melempar error. Timer bersih setelah pembatalan;
+callback dan getar selesai tidak dijalankan untuk hasil terlambat. Dua tes penghapusan
+gagal pada kode lama lalu lulus setelah perbaikan.
+
+Hasil terbaru: **184 Jest, 18 suite**, TypeScript lolos, lint exit 0 dengan 0 error dan
+8 warning lama; lima tes F-fix1 tetap lulus. Server/ML, Doctor dan audit dependency tidak
+diulang karena server, dependency dan konfigurasi tidak berubah. Tidak membaca dataset,
+membersihkan cache lama, mengubah tag, menambah dependency, atau push.
+
+Batas penting: Expo iOS bisa menolak promise saat kamera ditutup tanpa mengembalikan URI.
+Tes rejection hanya membuktikan penanganan promise dan tidak adanya callback; **bukan bukti
+file fisik terhapus**. Penghapusan cache iPhone/Android belum diperiksa langsung. Jangan
+menyatakan seluruh privasi terpenuhi. Tag `v1.0-submission` masih snapshot lama `1c930f9`,
+tanpa F-fix1/F-fix2; dua panduan staged pengguna tidak dimasukkan ke commit perbaikan.
 
 ## Pembaruan F-fix1 — 12 November 2026
 
@@ -17,7 +41,7 @@ setelah perbaikan. File tetap dipertahankan ketika pengiriman gagal.
 Hasil setelah perbaikan: **179 Jest, 17 suite**, TypeScript lolos, lint exit 0 dengan
 0 error dan 8 warning lama. Server/ML, Doctor dan audit dependency di bawah adalah
 hasil F sebelumnya; tidak diulang karena server, dependency dan konfigurasi tidak berubah.
-Masalah 2 (hasil rekaman yang datang setelah komponen ditutup) masih terbuka.
+Saat F-fix1, masalah 2 masih terbuka; perkembangan berikutnya ada pada bagian F-fix2 di atas.
 Tidak menguji penghapusan fisik di iPhone, membersihkan cache lama, atau membaca dataset.
 
 Tag `v1.0-submission` **belum mencakup perbaikan ini**. Jangan menyatakan seluruh

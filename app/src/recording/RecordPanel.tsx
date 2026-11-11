@@ -6,6 +6,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { BigButton } from '../components/BigButton';
 import { ProgressBar } from '../components/ProgressBar';
 import { colors, fontSize, radius, spacing } from '../theme';
+import { deleteLocalFile } from './localFile';
 import { PermissionGate } from './PermissionGate';
 import {
   DEFAULT_DURATION_MS,
@@ -117,7 +118,10 @@ function RecorderCamera({
     cam
       .recordAsync({ maxDuration: safetyMaxDurationS(durationMs) })
       .then((result) => {
-        if (!mounted.current) return;
+        if (!mounted.current) {
+          deleteLocalFile(result?.uri);
+          return;
+        }
         clearInterval(progress);
         if (result?.uri) {
           buzzDone();
@@ -128,6 +132,7 @@ function RecorderCamera({
         }
       })
       .catch(() => {
+        // shortcut: native rejection may omit the URI; verify device cache cleanup before claiming deletion.
         if (!mounted.current) return;
         clearInterval(progress);
         dispatch({ type: 'failed', message: 'Perekaman gagal. Coba lagi.' });
