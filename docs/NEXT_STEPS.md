@@ -4,6 +4,11 @@ Urutan: **tugas manual pengguna → I1 → B4 → F → video demo → submissio
 submission Sabtu 14 Nov (kirim minimal 3 jam sebelum tenggat). Tiap fase: rencana singkat dulu, tunggu persetujuan
 (lihat `AGENTS.md`). Aturan umum, privasi, dan batas produk ada di `AGENTS.md` dan `CLAUDE.md`.
 
+Pembaruan setelah I1: kalibrasi, latihan iPhone, sinkronisasi Supabase dan pemulihan antrean
+sudah diuji; p90 20 durasi manual 3,91 s. Uji putus WAN diganti simulasi kegagalan koneksi
+Supabase karena jaringan bersama. Lihat `docs/I1_CHECKLIST.md` untuk bukti dan keterbatasan.
+Fase berikutnya **B4**, belum dimulai; tetap perlu rencana dan persetujuan.
+
 ## Tugas manual pengguna (agen tidak bisa mengerjakannya)
 
 1. **Supabase:** buat proyek, aktifkan *Anonymous Sign-Ins* (Authentication → Sign In / Providers), jalankan seluruh
@@ -25,7 +30,7 @@ submission Sabtu 14 Nov (kirim minimal 3 jam sebelum tenggat). Tiap fase: rencan
 - Di Mode Pendamping, nyalakan **"Buka semua materi"** untuk uji dan demo (Level 2+ terkunci secara bawaan).
 - Pilih kata demo yang stabil: **"mama"**; hindari "ibu" dan "bumi" (lihat keterbatasan di `CONTEXT.md` §3).
 
-## I1 — Integrasi ujung ke ujung (Kamis malam) [Plan]
+## I1 — Integrasi ujung ke ujung (Kamis malam) [Selesai; prompt acuan]
 
 ```
 Fase I1. Baca AGENTS.md, CLAUDE.md, CONTEXT.md, docs/SPEC.md §5, §11.

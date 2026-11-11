@@ -13,9 +13,9 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | A3 | Server | Kalibrasi, segmentasi, aturan L0–3, petunjuk | Rabu 11 Nov | selesai | `pipeline/calibration.py`, `segment.py`, `rules.py`, `hints.py`; `/analyze` dan `/calibrate` sungguhan saat `MOCK_MODE=false`. 313 tes hijau. Data tim tanpa kalibrasi (L1–L3, klip benar): L1 18/21 hijau (+1 retry klip cacat), L2 12/18, L3 4/18; a_narrow 3/3 dan mama_no_closure 3/3 merah. processing_ms median 803 (749–943, request pertama 1669) pada 68 rekaman |
 | B2 | App | Onboarding, kalibrasi, alur latihan, hasil | Rabu 11 Nov | selesai | Onboarding (penjelasan, 2 persetujuan, PIN 4 angka di keystore), kalibrasi 4 langkah, Home (misi hari ini + status terakhir), Practice Lihat→Tiru→Bandingkan→Ulangi, ResultView (2 lencana, petunjuk, Peta Vokal, Cermin Bibir, grafik kekerasan L0, label perkiraan sistem). 99 tes jest, tsc, expo-doctor 20/20, bundle Android bersih. Uji di HP: menunggu |
 | A4 | ML | Proses dataset, alat cek label, putaran LOSO | Rabu 11 Nov | selesai | `ml/dataset/{process,folds,report}.py` (logika di `server/app/dataset/`), halaman `/labeler`. 81 klip diproses tanpa gagal (71 s; ulang = lewati semua), `auto_labels.csv` 81 baris, 3 fold LOSO (uji 27, setel 54). `/labeler` diuji di browser sungguhan (video, pintasan 1/2/3/4/spasi/←, simpan, lanjut setelah muat ulang). 368 tes server hijau. **Cek label manusia belum dilakukan** (Tugas 4) |
-| B3 | App | Supabase, logika kemajuan, Mode Pendamping | Kamis 12 Nov | selesai (kode) | `src/state/progression.ts` (aturan §8.4, 37 tes), antrean offline + Supabase (`src/data/sync.ts`, `supabase.ts`), `docs/supabase/schema.sql` (4 tabel, 12 kebijakan RLS), Home dengan sesi hari ini dan tahap materi, Mode Pendamping (PIN, ringkasan 7 hari, Uji Dengar, pengaturan, bagikan laporan, saran konsultasi). 164 tes jest, tsc, expo-doctor 20/20, bundle Android bersih. **Belum diuji dengan proyek Supabase sungguhan dan di HP** |
+| B3 | App | Supabase, logika kemajuan, Mode Pendamping | Kamis 12 Nov | selesai | `src/state/progression.ts` (aturan §8.4, 37 tes), antrean offline + Supabase (`src/data/sync.ts`, `supabase.ts`), `docs/supabase/schema.sql` (4 tabel, 12 kebijakan RLS), Home dengan sesi hari ini dan tahap materi, Mode Pendamping (PIN, ringkasan 7 hari, Uji Dengar, pengaturan, bagikan laporan, saran konsultasi). Saat B3: 164 tes jest, tsc, expo-doctor 20/20, bundle Android bersih. Integrasi iPhone dan Supabase nyata kemudian diuji di I1; rincian cek manual tersisa ada di checklist I1. |
 | A5 | ML | Scorer Wav2Vec2 | — | dilewati | data terlalu sedikit; roadmap |
-| I1 | Bersama | Integrasi ujung ke ujung di HP | Kamis 12 Nov malam | belum | |
+| I1 | Bersama | Integrasi ujung ke ujung di HP | Kamis 12 Nov malam | selesai (dengan keterbatasan uji) | Doctor 20/20, 383 pytest, 166 Jest, tsc dan lint perubahan lolos. Kalibrasi dan latihan L0–3 di iPhone berhasil menurut pengguna setelah server dijalankan di luar sandbox. Supabase online, antrean Uji Dengar offline→online, serta antrean percobaan video saat koneksi Supabase disimulasikan gagal lalu pulih otomatis berhasil. 20 durasi manual: p50 2385 ms, p90 3910 ms, maks 14500 ms (semua sampel dihitung). WAN jaringan bersama tidak diputus; lihat rincian dan cek manual tersisa di `docs/I1_CHECKLIST.md`. |
 | A6 | ML | Penyetelan ambang, evaluasi LOSO, model card | Kamis–Jumat | selesai | `ml/eval/{tune_thresholds,evaluate}.py` (logika `server/app/dataset/evaluation.py`), `docs/EVAL_REPORT.md`, `docs/MODEL_CARD.md`; ambang final ditulis ke `thresholds.yaml`. LOSO: bibir rapat 56/60 = 93% ✓, suara saat rapat 43/50 = 86% ✓, vokal 19/23 = 83% (target 85), status kata 12/22 = 55% (target 80); bad_face 3/3, salah tolak 1/74, p90 984 ms. 382 tes hijau |
 | B4 | App | Polish, mode demo, build | Jumat 13 Nov | belum | |
 | F | Bersama | Kunci fitur, README, tag submission | Jumat 13 Nov malam | belum | |
@@ -26,12 +26,25 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 |---|---|---|---|
 | 1 | Pasang Expo Go di HP | B0 | selesai (Expo Go: SDK 58; iPhone butuh login akun Expo yang sama dengan Expo CLI) |
 | 2 | Rekam: 3 orang × 27 klip + 16 video model | A2 | selesai (rekam ulang di ruang tenang, 10 Nov malam; 5 klip cacat, lihat Keputusan) |
-| 3 | Buat proyek Supabase (isi SQL dan .env saat B3) | B3 | belum |
+| 3 | Buat proyek Supabase (isi SQL dan .env saat B3) | B3 | selesai; login anonim/skema diterapkan dan sinkronisasi diuji saat I1 |
 | 4 | Cek label: tiap orang ±54 klip milik dua orang lain | A6 | selesai (162 penilaian; "sesuai materi" 90%, kappa 0.65) |
 | 5 | Video demo | setelah F | belum |
 | 6 | Submission | Sabtu 14 Nov | belum |
 
 ## Keputusan penting
+- Rabu 11 Nov (I1): pengujian WAN tidak dilakukan karena memakai jaringan bersama. Sebagai
+  pengganti, URL Supabase dioverride hanya pada proses Metro ke localhost tanpa layanan;
+  API latihan tetap di LAN. Satu hasil latihan tersimpan sebagai pending, kemudian otomatis
+  tersinkron setelah URL asli dipulihkan dan app dimuat ulang. `.env` tidak diubah untuk simulasi.
+  Pengguna melaporkan antrean Uji Dengar juga pulih setelah mode pesawat. Dua puluh durasi
+  manual termasuk retry dan umpan balik tersembunyi dihitung seluruhnya; p90 3,91 s lulus,
+  maksimum 14,5 s tetap dicatat sebagai keterbatasan, bukan dibuang sebagai outlier.
+- Rabu 11 Nov (baseline/I1): modul B3 `app/src/data` dipulihkan oleh commit teman `638d878`;
+  `.gitignore` kini `/data/`. Tidak perlu mengubah dependency atau mengecualikan pemeriksaan Doctor:
+  pemeriksaan ulang `expo-doctor@1.21.6 --verbose` lolos 20/20 dengan akses jaringan.
+  `DEBUG=release` dari proses terminal agen menimpa `.env`; override disingkirkan hanya untuk proses server/tes.
+  Baseline sebelum tambahan I1: 382 pytest, 164 Jest, tsc lolos; lint app exit 0 dengan 8 warning lama.
+  Fixture I1 bersifat sintetis dan tidak memakai dataset. Uji offline Supabase harus mempertahankan LAN ke server.
 - Selasa 10 Nov (A1): tanpa `opencv-python-headless`; mediapipe 1.2.2 sudah membawa `opencv-contrib-python`
   (modul `cv2` yang sama). Frame dibaca dari PNG hasil ffmpeg lewat `mp.Image.create_from_file`.
 - Selasa 10 Nov (A1): `face_off_frame` = median lebar wajah < 0,25 lebar frame ATAU > 10% frame berwajah

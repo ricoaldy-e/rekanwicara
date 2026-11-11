@@ -7,7 +7,7 @@ pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks 
 2. `CONTEXT.md` (berkas ini): ringkasan, status, keterbatasan, cara menyiapkan laptop.
 3. `docs/SPEC.md`: spesifikasi. **§5 = kontrak API (sumber kebenaran)**.
 4. `docs/PROGRESS.md`: status tiap fase dan **semua keputusan** beserta alasannya (bagian "Keputusan penting").
-5. `docs/NEXT_STEPS.md`: pekerjaan yang tersisa (I1, B4, F) lengkap dengan prompt-nya.
+5. `docs/NEXT_STEPS.md`: pekerjaan yang tersisa (B4, F) lengkap dengan prompt-nya; hasil I1 di `docs/I1_CHECKLIST.md`.
 6. `docs/EVAL_REPORT.md`, `docs/MODEL_CARD.md`: hasil evaluasi dan batasan jujur.
 
 ---
@@ -39,14 +39,19 @@ pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks 
 | B2 | onboarding, kalibrasi, latihan, hasil (SVG) | selesai, diuji di HP |
 | A4 | proses dataset, halaman `/labeler`, fold LOSO, laporan | selesai; cek label manusia selesai (162 penilaian) |
 | A6 | penyetelan ambang, evaluasi LOSO, model card | selesai |
-| B3 | Supabase, aturan kemajuan §8.4, Mode Pendamping | **kode selesai, belum diuji dengan proyek Supabase nyata dan di HP** |
+| B3 | Supabase, aturan kemajuan §8.4, Mode Pendamping | kode selesai; sinkronisasi nyata dan antrean diuji saat I1 (rincian manual tersisa di checklist I1) |
 | A5 | scorer Wav2Vec2 | dilewati (roadmap) |
-| **I1** | **integrasi ujung ke ujung di HP** | **BELUM** |
+| **I1** | **integrasi ujung ke ujung di HP** | selesai dengan keterbatasan uji; iPhone, p90 manual 3,91 s; pemulihan antrean video diuji dengan simulasi koneksi Supabase gagal |
 | **B4** | polish, layar "Tentang", mode demo, ikon, (APK bila perlu) | **BELUM** |
 | **F** | kunci fitur, README root, tag `v1.0-submission` | **BELUM** |
 
-Commit terakhir: `95b3745 phase B3`. Remote: `https://github.com/ricoaldy-e/rekanwicara` (branch `main`, repo **publik**).
-Tes: server **382** lulus (`cd server && pytest -q`), app **164** lulus (`cd app && npm test`).
+Commit basis sebelum I1: `638d878` (modul B3 dipulihkan; `/data/` di gitignore). Lihat `git log -1` untuk commit terkini.
+Remote: `https://github.com/ricoaldy-e/rekanwicara` (repo **publik**, jangan push tanpa instruksi).
+Tes setelah I1: server **383** lulus (`cd server && pytest -q`), app **166** lulus (`cd app && npm test`).
+I1: kalibrasi dan latihan L0–3, Supabase online dan antrean sudah diuji melalui pengguna.
+Latensi 20 percobaan: p50 2,385 s, p90 3,91 s, maksimum 14,5 s; semua sampel dihitung.
+WAN jaringan bersama tidak diputus; kegagalan koneksi Supabase disimulasikan, lalu endpoint asli dipulihkan.
+Rincian bukti dan pemeriksaan manual yang belum dilakukan ada di `docs/I1_CHECKLIST.md`.
 
 ## 3. Hasil terukur dan keterbatasan (jujur, jangan dilebih-lebihkan)
 
@@ -165,12 +170,12 @@ py -3.11 -m venv .venv
 python -m pip install -r requirements.txt
 copy .env.example .env
 python scripts/download_models.py        # SHA-256 yang diharapkan: 64184e229b263107…
-pytest -q                                # harus 382 lulus, 0 skip
+pytest -q                                # harus 383 lulus, 0 skip
 # App
 cd ..\app
 npm ci
 copy .env.example .env
-npm test                                 # harus 164 lulus
+npm test                                 # harus 166 lulus
 npx tsc --noEmit
 npx --yes expo-doctor@1.21.6             # 20/20 (versi "latest" sempat rusak)
 ```
