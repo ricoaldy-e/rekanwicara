@@ -1,21 +1,40 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { errorMessage } from '../src/api/errors';
-import { BigButton, Body, Card, InfoNote, Screen, StatusBadge } from '../src/components';
+import { BigButton, Body, Card, InfoNote, Screen, StageBadge, StatusBadge } from '../src/components';
 import { DATASET_MODE } from '../src/config';
 import { groupByLevel, LEVEL_NAMES } from '../src/content/levels';
 import { useContent } from '../src/state/content';
+import { planSession, seededRng, type Role } from '../src/state/progression';
 import { useUser } from '../src/state/user';
-import { lastStatus, pickMission } from '../src/user/pure';
 import { colors, fontSize, spacing } from '../src/theme';
+
+const ROLE_LABEL: Record<Role, string> = {
+  pemanasan: 'Pemanasan',
+  ulasan: 'Ulasan',
+  inti: 'Latihan inti',
+  tantangan: 'Tantangan',
+};
 
 export default function Home() {
   const router = useRouter();
   const { health, healthError, items, loading, error, reload } = useContent();
-  const { profile } = useUser();
-  const mission = items ? pickMission(items, profile.attempts) : null;
+  const { profile, progress } = useUser();
   const open = (itemId: string) => router.push({ pathname: '/practice/[itemId]', params: { itemId } });
+
+  // Today's session (SPEC §8.4): warm-up, reviews, core material, challenge. The day seeds the random
+  // challenge, so the plan does not change every time the screen is drawn.
+  const plan = useMemo(() => {
+    if (!items) return [];
+    const now = new Date();
+    const day = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+    return planSession(items, progress, profile.attempts, profile.settings.sessionMinutes, now, seededRng(day));
+  }, [items, progress, profile.attempts, profile.settings.sessionMinutes]);
+  const itemOf = (id: string) => items?.find((it) => it.item_id === id);
+  const next = plan.find((s) => !s.done);
 
   return (
     <Screen>
@@ -36,14 +55,33 @@ export default function Home() {
         </View>
       ) : null}
 
-      {mission ? (
-        <Card onPress={() => open(mission.item_id)} accessibilityLabel={`Misi hari ini: latihan ${mission.text}`} testID="mission">
-          <Text style={styles.missionLabel}>Misi hari ini</Text>
-          <View style={styles.itemRow}>
-            {mission.emoji ? <Text style={styles.emoji}>{mission.emoji}</Text> : null}
-            <Text style={styles.itemText}>{mission.text}</Text>
-          </View>
-          <Body muted>Tekan untuk mulai berlatih.</Body>
+      {plan.length > 0 ? (
+        <Card testID="mission">
+          <Text style={styles.missionLabel}>Sesi hari ini · ±{profile.settings.sessionMinutes} menit</Text>
+          {plan.map((step, k) => {
+            const it = itemOf(step.itemId);
+            if (!it) return null;
+            return (
+              <Pressable
+                key={`${step.itemId}-${k}`}
+                onPress={() => open(step.itemId)}
+                accessibilityRole="button"
+                accessibilityLabel={`${ROLE_LABEL[step.role]}: ${it.text}${step.done ? ', sudah dilatih hari ini' : ''}`}
+                style={styles.step}
+              >
+                <Ionicons name={step.done ? 'checkmark-circle' : 'ellipse-outline'} size={28} color={colors.primary} />
+                <Text style={styles.stepText}>
+                  {ROLE_LABEL[step.role]}: {it.emoji ? `${it.emoji} ` : ''}
+                  {it.text}
+                </Text>
+              </Pressable>
+            );
+          })}
+          {next ? (
+            <BigButton label="Mulai" icon="play" onPress={() => open(next.itemId)} testID="mission-start" />
+          ) : (
+            <Body>Sesi hari ini selesai. Terima kasih sudah berlatih!</Body>
+          )}
         </Card>
       ) : (
         <Body muted>Pilih satu materi untuk mulai berlatih.</Body>
@@ -73,20 +111,28 @@ export default function Home() {
                 Level {group.level}: {LEVEL_NAMES[group.level] ?? ''}
               </Text>
               {group.items.map((item) => {
-                const last = lastStatus(profile.attempts, item.item_id);
+                const p = progress.get(item.item_id);
+                const locked = p?.locked ?? false;
                 return (
                   <Card
                     key={item.item_id}
-                    onPress={() => open(item.item_id)}
+                    onPress={locked ? undefined : () => open(item.item_id)}
                     accessibilityLabel={`Latihan ${item.text}`}
-                    accessibilityHint="Buka latihan"
+                    accessibilityHint={locked ? undefined : 'Buka latihan'}
                     testID={`item-${item.item_id}`}
                   >
                     <View style={styles.itemRow}>
                       {item.emoji ? <Text style={styles.emoji}>{item.emoji}</Text> : null}
                       <Text style={styles.itemText}>{item.text}</Text>
                     </View>
-                    {last ? <StatusBadge status={last} label="Terakhir" /> : <Body muted>Belum dicoba</Body>}
+                    {p ? <StageBadge stage={p.stage} testID={`stage-${item.item_id}`} /> : null}
+                    {locked ? (
+                      <Body muted>Lulus satu materi Level {item.level - 1} dulu untuk membuka ini.</Body>
+                    ) : p?.last ? (
+                      <StatusBadge status={p.last} label="Terakhir" />
+                    ) : (
+                      <Body muted>Belum dicoba</Body>
+                    )}
                   </Card>
                 );
               })}
@@ -114,7 +160,9 @@ const styles = StyleSheet.create({
   levelTitle: { fontSize: fontSize.large, fontWeight: '800', color: colors.primary, marginTop: spacing.sm },
   center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.lg },
   gap: { gap: spacing.sm },
-  missionLabel: { fontSize: fontSize.small, fontWeight: '800', color: colors.primary },
+  missionLabel: { fontSize: fontSize.body, fontWeight: '800', color: colors.primary, marginBottom: spacing.xs },
+  step: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 48, paddingVertical: spacing.xs },
+  stepText: { flex: 1, fontSize: fontSize.body, color: colors.text },
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   emoji: { fontSize: fontSize.title },
   itemText: { fontSize: fontSize.large, fontWeight: '700', color: colors.text },

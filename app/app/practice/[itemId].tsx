@@ -12,9 +12,11 @@ import { RecordPanel } from '../../src/recording/RecordPanel';
 import { useUpload } from '../../src/recording/useUpload';
 import { ResultView } from '../../src/results/ResultView';
 import { useContent } from '../../src/state/content';
+import { feedbackDetail, type Detail } from '../../src/state/progression';
 import { useSettings } from '../../src/state/settings';
 import { SESSION_ID, useUser } from '../../src/state/user';
 import { colors } from '../../src/theme';
+import { attemptFromResponse } from '../../src/user/pure';
 
 /** SPEC §2 cycle: Lihat → Tiru → Bandingkan → Ulangi ("Ulangi" is the button that loops back to Tiru). */
 type Stage = 'look' | 'record' | 'send' | 'result';
@@ -31,12 +33,13 @@ export default function Practice() {
   const { itemId } = useLocalSearchParams<{ itemId: string }>();
   const { items, loading } = useContent();
   const { api } = useSettings();
-  const { profile, addAttempt } = useUser();
+  const { profile, progress, addAttempt } = useUser();
   const item = items?.find((it) => it.item_id === itemId);
 
   const [stage, setStage] = useState<Stage>('look');
   const [uri, setUri] = useState<string | null>(null);
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
+  const [detail, setDetail] = useState<Detail>('full');
   const { state: upload, run, reset } = useUpload();
 
   // A recording that was never analysed is deleted when leaving the screen (CLAUDE.md: no leftovers).
@@ -66,11 +69,19 @@ export default function Practice() {
       deleteLocalFile(file);
       setUri(null);
       reset();
-      if (res.status === 'ok' && res.overall) addAttempt(item.item_id, res.overall); // retry is not an attempt
+      const attempt = attemptFromResponse(res, SESSION_ID); // null for a retry: not an attempt (SPEC §8.4)
+      if (attempt) {
+        // The machine scored it; how much the user sees follows the progression rules (SPEC §8.4).
+        const inSession = profile.attempts.filter((a) => a.itemId === item.item_id && a.sessionId === SESSION_ID).length + 1;
+        setDetail(feedbackDetail(item.level, progress.get(item.item_id)?.pattern ?? 'berblok', inSession));
+        addAttempt(attempt);
+      } else {
+        setDetail('full');
+      }
       setResult(res);
       setStage('result');
     },
-    [api, item, profile.userId, run, reset, addAttempt],
+    [api, item, profile.userId, profile.attempts, progress, run, reset, addAttempt],
   );
 
   if (!item) {
@@ -135,7 +146,7 @@ export default function Practice() {
 
       {stage === 'result' && result ? (
         <>
-          <ResultView result={result} />
+          <ResultView result={result} detail={detail} />
           <BigButton
             label="Ulangi"
             icon="refresh"

@@ -1,9 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { BigButton, Body, Card, InfoNote, Screen, StepHeader } from '../src/components';
+import { BigButton, Body, Card, CheckRow, InfoNote, Screen, StepHeader } from '../src/components';
 import { useUser } from '../src/state/user';
 import { isValidPin } from '../src/user/pure';
 import { colors, fontSize, radius, spacing, touchTarget } from '../src/theme';
@@ -14,21 +14,6 @@ const CYCLE = [
   { icon: 'git-compare', text: 'Bandingkan hasilnya.' },
   { icon: 'refresh', text: 'Ulangi sampai terasa pas.' },
 ] as const;
-
-function CheckRow({ checked, onToggle, text }: { checked: boolean; onToggle: () => void; text: string }) {
-  return (
-    <Pressable
-      onPress={onToggle}
-      accessibilityRole="checkbox"
-      accessibilityState={{ checked }}
-      accessibilityLabel={text}
-      style={[styles.check, checked && styles.checkOn]}
-    >
-      <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={34} color={colors.primary} />
-      <Text style={styles.checkText}>{text}</Text>
-    </Pressable>
-  );
-}
 
 export default function Onboarding() {
   const router = useRouter();
@@ -78,7 +63,10 @@ export default function Onboarding() {
 
       {step === 2 ? (
         <>
-          <Body>Rekaman wajah dan suaramu hanya dikirim ke server latihan untuk dinilai, lalu dihapus. Yang disimpan hanya hasil berupa angka.</Body>
+          <Body>
+            Rekaman wajah dan suaramu hanya dikirim ke server latihan untuk dinilai, lalu dihapus. Yang disimpan hanya
+            hasil berupa angka. Angka hasil latihan juga disimpan online tanpa namamu, supaya kemajuanmu tidak hilang.
+          </Body>
           <CheckRow
             checked={consentUser}
             onToggle={() => setConsentUser((v) => !v)}
@@ -139,18 +127,6 @@ export default function Onboarding() {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   rowText: { flex: 1, fontSize: fontSize.body, fontWeight: '700', color: colors.text },
-  check: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    minHeight: touchTarget,
-    padding: spacing.md,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: radius.lg,
-  },
-  checkOn: { backgroundColor: colors.infoBg, borderColor: colors.primary },
-  checkText: { flex: 1, fontSize: fontSize.body, color: colors.text },
   input: {
     minHeight: touchTarget,
     borderWidth: 3,

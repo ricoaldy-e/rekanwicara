@@ -158,6 +158,28 @@ describe('ResultView', () => {
     expect(screen.queryByTestId('lip-mirror')).toBeNull();
   });
 
+  it('reduced feedback "overall" shows one badge and nothing else of the result', async () => {
+    await render(<ResultView result={MERAH} detail="overall" />);
+    expect(screen.getByTestId('result-overall-badge')).toHaveAccessibleName('Hasil: Belum sesuai');
+    for (const id of ['result-bibir', 'result-suara', 'result-hint', 'vowel-map', 'lip-mirror']) {
+      expect(screen.queryByTestId(id)).toBeNull();
+    }
+    expect(screen.getByTestId('result-disclaimer')).toBeTruthy();
+  });
+
+  it('reduced feedback "hidden" only says the attempt was recorded', async () => {
+    await render(<ResultView result={MERAH} detail="hidden" />);
+    expect(screen.getByTestId('result-hidden')).toBeTruthy();
+    for (const id of ['result-overall-badge', 'result-bibir', 'result-suara', 'result-hint']) {
+      expect(screen.queryByTestId(id)).toBeNull();
+    }
+  });
+
+  it('a retry is always explained, whatever the detail', async () => {
+    await render(<ResultView result={RETRY} detail="hidden" />);
+    expect(screen.getByTestId('result-hint')).toBeTruthy();
+  });
+
   it('never uses clinical wording', async () => {
     await render(<ResultView result={MERAH} />);
     expect(JSON.stringify(screen.toJSON())).not.toMatch(/\b(normal|abnormal|gangguan|diagnosis)\b/i);

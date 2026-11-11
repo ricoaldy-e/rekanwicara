@@ -13,7 +13,7 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | A3 | Server | Kalibrasi, segmentasi, aturan L0–3, petunjuk | Rabu 11 Nov | selesai | `pipeline/calibration.py`, `segment.py`, `rules.py`, `hints.py`; `/analyze` dan `/calibrate` sungguhan saat `MOCK_MODE=false`. 313 tes hijau. Data tim tanpa kalibrasi (L1–L3, klip benar): L1 18/21 hijau (+1 retry klip cacat), L2 12/18, L3 4/18; a_narrow 3/3 dan mama_no_closure 3/3 merah. processing_ms median 803 (749–943, request pertama 1669) pada 68 rekaman |
 | B2 | App | Onboarding, kalibrasi, alur latihan, hasil | Rabu 11 Nov | selesai | Onboarding (penjelasan, 2 persetujuan, PIN 4 angka di keystore), kalibrasi 4 langkah, Home (misi hari ini + status terakhir), Practice Lihat→Tiru→Bandingkan→Ulangi, ResultView (2 lencana, petunjuk, Peta Vokal, Cermin Bibir, grafik kekerasan L0, label perkiraan sistem). 99 tes jest, tsc, expo-doctor 20/20, bundle Android bersih. Uji di HP: menunggu |
 | A4 | ML | Proses dataset, alat cek label, putaran LOSO | Rabu 11 Nov | selesai | `ml/dataset/{process,folds,report}.py` (logika di `server/app/dataset/`), halaman `/labeler`. 81 klip diproses tanpa gagal (71 s; ulang = lewati semua), `auto_labels.csv` 81 baris, 3 fold LOSO (uji 27, setel 54). `/labeler` diuji di browser sungguhan (video, pintasan 1/2/3/4/spasi/←, simpan, lanjut setelah muat ulang). 368 tes server hijau. **Cek label manusia belum dilakukan** (Tugas 4) |
-| B3 | App | Supabase, logika kemajuan, Mode Pendamping | Kamis 12 Nov | belum | |
+| B3 | App | Supabase, logika kemajuan, Mode Pendamping | Kamis 12 Nov | selesai (kode) | `src/state/progression.ts` (aturan §8.4, 37 tes), antrean offline + Supabase (`src/data/sync.ts`, `supabase.ts`), `docs/supabase/schema.sql` (4 tabel, 12 kebijakan RLS), Home dengan sesi hari ini dan tahap materi, Mode Pendamping (PIN, ringkasan 7 hari, Uji Dengar, pengaturan, bagikan laporan, saran konsultasi). 164 tes jest, tsc, expo-doctor 20/20, bundle Android bersih. **Belum diuji dengan proyek Supabase sungguhan dan di HP** |
 | A5 | ML | Scorer Wav2Vec2 | — | dilewati | data terlalu sedikit; roadmap |
 | I1 | Bersama | Integrasi ujung ke ujung di HP | Kamis 12 Nov malam | belum | |
 | A6 | ML | Penyetelan ambang, evaluasi LOSO, model card | Kamis–Jumat | selesai | `ml/eval/{tune_thresholds,evaluate}.py` (logika `server/app/dataset/evaluation.py`), `docs/EVAL_REPORT.md`, `docs/MODEL_CARD.md`; ambang final ditulis ke `thresholds.yaml`. LOSO: bibir rapat 56/60 = 93% ✓, suara saat rapat 43/50 = 86% ✓, vokal 19/23 = 83% (target 85), status kata 12/22 = 55% (target 80); bad_face 3/3, salah tolak 1/74, p90 984 ms. 382 tes hijau |
@@ -54,6 +54,28 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
   `await render(...)` di tes, `types: ["jest","node"]` di tsconfig (TS 6), `newArchEnabled`/`edgeToEdgeEnabled`
   dihapus dari app.json. Aturan lint baru `react-hooks/refs` dan `set-state-in-effect` sementara `warn`.
   66 tes jest, tsc, expo-doctor 20/20, bundle Android bersih. Uji di HP: menunggu.
+- Rabu 11 Nov (B3): dependency baru, disetujui: `@supabase/supabase-js` dan `react-native-url-polyfill` (pola resmi
+  Supabase untuk React Native; JavaScript murni, jalan di Expo Go). Tanpa `netinfo`: sinkron dicoba setelah tiap
+  percobaan, saat app kembali aktif, tiap 30 detik, dan lewat tombol "Sinkronkan sekarang".
+- Rabu 11 Nov (B3): riwayat lokal berubah dari `{materi: [status]}` menjadi daftar percobaan lengkap (UUID, sesi, waktu,
+  hasil), karena §8.4 butuh waktu dan sesi. Format B2 dibuang saat dibaca. Percobaan `retry` tetap tidak disimpan.
+  Setiap percobaan punya UUID dari HP dan dikirim dengan upsert: kirim ulang setelah balasan hilang tidak membuat baris ganda.
+- Rabu 11 Nov (B3): `user_id` ke server (kalibrasi) tetap id lokal; baris Supabase memakai `auth.uid()` (login anonim,
+  wajib untuk RLS). Mengganti id server akan menghilangkan kalibrasi dan butuh internet saat peluncuran pertama.
+  Tanpa URL dan kunci Supabase di `app/.env`, app berjalan penuh dan hanya sinkron yang nonaktif.
+- Rabu 11 Nov (B3), tafsiran §8.4 (tiap pilihan ada tesnya): **lulus** = ≥ 8 hijau dari 10 percobaan terakhir dan 10
+  percobaan itu mencakup ≥ 2 sesi (kurang dari 10 percobaan tidak pernah lulus); Level 3 + Uji Dengar wajib butuh ≥ 1
+  "jelas". **Ulasan** 1, 3, 7, 14 hari setelah lulus; percobaan hijau pada atau setelah jatuh tempo menyelesaikannya, dan
+  ulasan berikutnya paling cepat sehari sesudahnya. **Macet** = < 40% hijau pada 3 sesi terakhir materi itu (≥ 6
+  percobaan). **Acak** mulai di akurasi ≥ 80% dari 10 terakhir (≥ 5 percobaan). **Umpan balik berkurang** (Level 3,
+  status keseluruhan tiap 2 percobaan sesi) hanya dalam pola acak, sehingga percobaan awal selalu menampilkan hasil
+  penuh. Mesin tetap menilai semua percobaan.
+- Rabu 11 Nov (B3): kunci materi: Level 0–1 terbuka; Level N terbuka bila ≥ 1 materi Level N−1 lulus (materi yang sudah
+  punya percobaan tidak terkunci lagi). Saklar **"Buka semua materi"** di Mode Pendamping untuk demo.
+- Rabu 11 Nov (B3): sesi hari ini = pemanasan Level 0, ulasan jatuh tempo (maks. 2), materi inti (diulang 3× selama
+  pola berblok), tantangan acak (benih per hari); panjangnya dari pengaturan 5/10/15 menit (3/5/8 langkah).
+  Uji Dengar tanpa rekaman: pendamping menilai suara langsung. PIN 4 angka tanpa penguncian setelah salah berkali-kali.
+- Rabu 11 Nov (B3): `expo-doctor@latest` terbit rusak (hilang `@expo/env`); gunakan `npx expo-doctor@1.21.6`.
 - Rabu 11 Nov (A6): urutan diubah dari runbook (B3 → I1 → A6) menjadi A6 dulu: cek label sudah selesai, I1
   butuh Mode Pendamping dari B3, dan I1 sebaiknya memakai ambang final.
 - Rabu 11 Nov (A6): kebenaran = kesepakatan kedua penilai; 8 klip yang penilainya berbeda pendapat tidak dipakai

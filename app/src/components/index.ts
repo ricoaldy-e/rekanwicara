@@ -1,8 +1,10 @@
 export { BigButton } from './BigButton';
 export { Card } from './Card';
+export { CheckRow } from './CheckRow';
 export { InfoNote } from './InfoNote';
 export { FaceGuide, LipIllustration } from './LipIllustration';
 export { Screen } from './Screen';
+export { StageBadge, stageLabel } from './StageBadge';
 export { StatusBadge } from './StatusBadge';
 export { StepHeader } from './StepHeader';
 export { Body, Title } from './Typography';

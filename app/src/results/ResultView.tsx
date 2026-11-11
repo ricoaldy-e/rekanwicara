@@ -3,15 +3,38 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { AnalyzeResponse } from '../api/types';
 import { Body, Card, InfoNote, StatusBadge } from '../components';
 import { getHint } from '../content/hints';
+import type { Detail } from '../state/progression';
 import { colors, fontSize, spacing } from '../theme';
 import { LipMirror, LoudnessChart, VowelMap } from './charts';
 import { targetShape } from './lipShapes';
 
 export const DISCLAIMER = 'Hasil ini perkiraan sistem untuk latihan, bukan penilaian klinis.';
 
-/** "Bandingkan" step (SPEC §8.3): two indicators, one hint, the charts that apply, and the disclaimer. */
-export function ResultView({ result }: { result: AnalyzeResponse }) {
+/**
+ * "Bandingkan" step (SPEC §8.3): two indicators, one hint, the charts that apply, and the disclaimer.
+ * `detail` is the reduced feedback of SPEC §8.4 (the machine scored the attempt either way):
+ * 'overall' shows only the overall status, 'hidden' only says the attempt was recorded.
+ */
+export function ResultView({ result, detail = 'full' }: { result: AnalyzeResponse; detail?: Detail }) {
   const hint = getHint(result.hint_id);
+
+  if (result.status === 'ok' && detail === 'hidden') {
+    return (
+      <View style={styles.wrap} testID="result-hidden">
+        <InfoNote text="Percobaan tercatat. Ucapkan sekali lagi, hasilnya ditampilkan setiap dua percobaan." />
+        <Disclaimer />
+      </View>
+    );
+  }
+
+  if (result.status === 'ok' && detail === 'overall' && result.overall) {
+    return (
+      <View style={styles.wrap} testID="result-overall">
+        <StatusBadge status={result.overall} label="Hasil" size="lg" testID="result-overall-badge" />
+        <Disclaimer />
+      </View>
+    );
+  }
 
   if (result.status === 'retry') {
     return (

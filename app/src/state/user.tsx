@@ -1,29 +1,74 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { AppState } from 'react-native';
 
-import type { Status } from '../api/types';
-import { makeId, newProfile, recordAttempt, type Profile } from '../user/pure';
-import { loadProfile, saveProfile, savePin } from '../user/storage';
+import { createRemote } from '../data/supabase';
+import { syncPending } from '../data/sync';
+import {
+  addAttempt as withAttempt,
+  addListenCheck,
+  makeId,
+  makeUuid,
+  markSynced,
+  newProfile,
+  pendingCount,
+  type Attempt,
+  type ListenResult,
+  type Profile,
+  type Settings,
+} from '../user/pure';
+import { loadProfile, savePin, saveProfile } from '../user/storage';
+import { useContent } from './content';
+import { buildProgress, type ItemProgress } from './progression';
 
 /** One id per app launch, sent as `session_id`. */
 export const SESSION_ID = makeId('s');
+
+const SYNC_INTERVAL_MS = 30_000;
+
+export interface SyncStatus {
+  /** False when app/.env has no Supabase URL and key: everything then stays on the phone. */
+  configured: boolean;
+  running: boolean;
+  pending: number;
+  lastError: string | null;
+  lastSyncedAt: string | null;
+}
 
 interface UserValue {
   /** False until the saved profile has been read. */
   ready: boolean;
   profile: Profile;
+  /** Progress per item (SPEC §8.4), recomputed when attempts or settings change. */
+  progress: ReadonlyMap<string, ItemProgress>;
+  sync: SyncStatus;
   /** Stores consent and the companion PIN (keystore), then marks onboarding done. */
   completeOnboarding(pin: string): Promise<void>;
   markCalibrated(): void;
-  /** Records a scored attempt. Retry results are not attempts; callers skip them. */
-  addAttempt(itemId: string, status: Status): void;
+  /** Records a scored attempt and starts a sync. Retry results are not attempts; callers skip them. */
+  addAttempt(attempt: Attempt): void;
+  addListenCheck(itemId: string, result: ListenResult): void;
+  updateSettings(change: Partial<Settings>): void;
+  syncNow(): Promise<void>;
 }
 
 const UserContext = createContext<UserValue | null>(null);
 
 export function UserProvider({ children }: { children: ReactNode }) {
+  const { items } = useContent();
   const [profile, setProfile] = useState<Profile>(newProfile);
   const [ready, setReady] = useState(false);
   const latest = useRef(profile);
+  const remote = useMemo(() => createRemote(), []);
+  const itemsRef = useRef(items);
+  useEffect(() => {
+    itemsRef.current = items; // the sync reads the newest list without being recreated when it loads
+  }, [items]);
+  const running = useRef(false);
+  const [status, setStatus] = useState<Pick<SyncStatus, 'running' | 'lastError' | 'lastSyncedAt'>>({
+    running: false,
+    lastError: null,
+    lastSyncedAt: null,
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -46,6 +91,36 @@ export function UserProvider({ children }: { children: ReactNode }) {
     void saveProfile(next);
   }, []);
 
+  const syncNow = useCallback(async () => {
+    if (!remote || running.current || !itemsRef.current) return;
+    running.current = true;
+    setStatus((s) => ({ ...s, running: true }));
+    try {
+      const result = await syncPending(latest.current, itemsRef.current, remote);
+      // Mark exactly what was sent, on the latest profile: attempts added meanwhile stay pending.
+      update((p) => markSynced(p, new Set(result.attemptIds), new Set(result.listenIds)));
+      setStatus({
+        running: false,
+        lastError: result.error,
+        lastSyncedAt: result.error ? null : new Date().toISOString(),
+      });
+    } finally {
+      running.current = false;
+    }
+  }, [remote, update]);
+
+  // Sync when the profile is read, when the app comes back to the foreground, and every 30 s while open.
+  useEffect(() => {
+    if (!ready || !remote) return;
+    void syncNow();
+    const sub = AppState.addEventListener('change', (s) => s === 'active' && void syncNow());
+    const timer = setInterval(() => void syncNow(), SYNC_INTERVAL_MS);
+    return () => {
+      sub.remove();
+      clearInterval(timer);
+    };
+  }, [ready, remote, syncNow, items]);
+
   const completeOnboarding = useCallback(
     async (pin: string) => {
       await savePin(pin);
@@ -55,14 +130,50 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
   const markCalibrated = useCallback(() => update((p) => ({ ...p, calibrated: true })), [update]);
   const addAttempt = useCallback(
-    (itemId: string, status: Status) =>
-      update((p) => ({ ...p, attempts: recordAttempt(p.attempts, itemId, status) })),
+    (attempt: Attempt) => {
+      update((p) => withAttempt(p, attempt));
+      void syncNow();
+    },
+    [update, syncNow],
+  );
+  const addCheck = useCallback(
+    (itemId: string, result: ListenResult) => {
+      update((p) => addListenCheck(p, { id: makeUuid(), itemId, result, at: new Date().toISOString(), synced: false }));
+      void syncNow();
+    },
+    [update, syncNow],
+  );
+  const updateSettings = useCallback(
+    (change: Partial<Settings>) => update((p) => ({ ...p, settings: { ...p.settings, ...change } })),
     [update],
   );
 
-  const value = useMemo(
-    () => ({ ready, profile, completeOnboarding, markCalibrated, addAttempt }),
-    [ready, profile, completeOnboarding, markCalibrated, addAttempt],
+  const progress = useMemo(
+    () =>
+      buildProgress(
+        items ?? [],
+        profile.attempts,
+        profile.listenChecks,
+        { listenCheckRequired: profile.settings.listenCheckRequired, unlockAll: profile.settings.unlockAll },
+        new Date(),
+      ),
+    [items, profile.attempts, profile.listenChecks, profile.settings.listenCheckRequired, profile.settings.unlockAll],
+  );
+
+  const value = useMemo<UserValue>(
+    () => ({
+      ready,
+      profile,
+      progress,
+      sync: { configured: remote !== null, pending: pendingCount(profile), ...status },
+      completeOnboarding,
+      markCalibrated,
+      addAttempt,
+      addListenCheck: addCheck,
+      updateSettings,
+      syncNow,
+    }),
+    [ready, profile, progress, remote, status, completeOnboarding, markCalibrated, addAttempt, addCheck, updateSettings, syncNow],
   );
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }

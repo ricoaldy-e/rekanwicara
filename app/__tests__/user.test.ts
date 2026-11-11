@@ -1,27 +1,16 @@
-import type { Item, QualityFlag } from '../src/api/types';
+import type { AnalyzeResponse, QualityFlag } from '../src/api/types';
 import { retryHint } from '../src/content/hints';
 import { lipRing, lipPolygon, RING_POINTS, targetShape, unitShapes } from '../src/results/lipShapes';
 import { downsample, loudnessXY, nearestAnchor, vowelMapXY } from '../src/results/scale';
 import {
+  addAttempt,
+  attemptFromResponse,
   isValidPin,
-  lastStatus,
   makeId,
-  MAX_HISTORY,
+  MAX_ATTEMPTS,
   newProfile,
   parseProfile,
-  pickMission,
-  recordAttempt,
 } from '../src/user/pure';
-
-const item = (item_id: string): Item => ({
-  item_id,
-  level: 1,
-  text: item_id,
-  units: ['a'],
-  priority: 'required',
-  emoji: null,
-  active: true,
-});
 
 describe('user ids and PIN', () => {
   it('makeId fits the server pattern (letters, digits, _ and -, max 64)', () => {
@@ -35,38 +24,52 @@ describe('user ids and PIN', () => {
   });
 });
 
+const RESPONSE: AnalyzeResponse = {
+  status: 'ok',
+  quality_flags: [],
+  item_id: 'l3_mama',
+  level: 3,
+  overall: 'kuning',
+  score: 0.5,
+  indicators: { bibir: 'hijau', suara: 'kuning' },
+  units: [],
+  hint_id: 'm_voicing',
+  visuals: { vowel_point: null, vowel_anchors: null, lip_contour: null, loudness: null },
+  scorer: 'rules',
+  engine_version: '0.1.0',
+  processing_ms: 800,
+};
+
 describe('attempts', () => {
-  it('keeps the newest 10 and does not mutate', () => {
-    let h = {};
-    const first = recordAttempt(h, 'l1_a', 'merah');
-    expect(h).toEqual({});
-    h = first;
-    for (let k = 0; k < 12; k++) h = recordAttempt(h, 'l1_a', 'hijau');
-    expect((h as Record<string, string[]>).l1_a).toHaveLength(MAX_HISTORY);
-    expect((h as Record<string, string[]>).l1_a.every((s) => s === 'hijau')).toBe(true);
+  it('an analysis result becomes an unsynced attempt with its own uuid, session and time', () => {
+    const now = new Date('2026-11-11T08:00:00Z');
+    const a = attemptFromResponse(RESPONSE, 's_abc', now)!;
+    expect(a).toMatchObject({
+      itemId: 'l3_mama', level: 3, sessionId: 's_abc', at: now.toISOString(), overall: 'kuning',
+      score: 0.5, hintId: 'm_voicing', synced: false,
+    }); // fmt: skip
+    expect(a.id).toMatch(/^[0-9a-f-]{36}$/);
+    expect(attemptFromResponse(RESPONSE, 's_abc', now)!.id).not.toBe(a.id);
   });
 
-  it('lastStatus is null for an item without attempts', () => {
-    expect(lastStatus({}, 'l1_a')).toBeNull();
-    expect(lastStatus({ l1_a: ['merah', 'kuning'] }, 'l1_a')).toBe('kuning');
+  it('a retry result is not an attempt', () => {
+    const retry: AnalyzeResponse = { ...RESPONSE, status: 'retry', overall: null, score: null, indicators: null, units: null };
+    expect(attemptFromResponse(retry, 's')).toBeNull();
   });
 
-  it("today's mission is the first item not yet green, else the first item", () => {
-    const items = [item('l1_a'), item('l1_i'), item('l1_u')];
-    expect(pickMission(items, {})?.item_id).toBe('l1_a');
-    expect(pickMission(items, { l1_a: ['hijau'] })?.item_id).toBe('l1_i');
-    expect(pickMission(items, { l1_a: ['hijau'], l1_i: ['kuning'] })?.item_id).toBe('l1_i');
-    expect(pickMission(items, { l1_a: ['hijau'], l1_i: ['hijau'], l1_u: ['hijau'] })?.item_id).toBe('l1_a');
-    expect(pickMission([], {})).toBeNull();
+  it('keeps the newest MAX_ATTEMPTS and does not mutate the profile', () => {
+    const first = attemptFromResponse(RESPONSE, 's')!;
+    let p = newProfile();
+    const before = p;
+    p = addAttempt(p, first);
+    expect(before.attempts).toEqual([]);
+    for (let k = 0; k < MAX_ATTEMPTS; k++) p = addAttempt(p, { ...first, id: `x${k}` });
+    expect(p.attempts).toHaveLength(MAX_ATTEMPTS);
+    expect(p.attempts.some((a) => a.id === first.id)).toBe(false); // the oldest was dropped
   });
 });
 
 describe('stored profile', () => {
-  it('round-trips a valid profile', () => {
-    const p = { ...newProfile(), onboarded: true, calibrated: true, attempts: { l1_a: ['hijau' as const] } };
-    expect(parseProfile(JSON.stringify(p))).toEqual(p);
-  });
-
   it('falls back to a fresh profile for missing, corrupt or unsafe data', () => {
     for (const raw of [null, '', 'not json', '{"userId":"../etc"}', '{"userId":123}']) {
       const p = parseProfile(raw);
@@ -75,15 +78,9 @@ describe('stored profile', () => {
     }
   });
 
-  it('drops invalid statuses and oversized histories', () => {
-    const raw = JSON.stringify({
-      ...newProfile(),
-      attempts: { l1_a: ['hijau', 'biru', ...Array(20).fill('merah')], l1_i: 'oops' },
-    });
-    const p = parseProfile(raw);
-    expect(p.attempts.l1_a).toHaveLength(MAX_HISTORY);
-    expect(p.attempts.l1_a.every((s) => s === 'merah')).toBe(true);
-    expect(p.attempts.l1_i).toBeUndefined();
+  it('keeps onboarding, consent and calibration flags', () => {
+    const p = { ...newProfile(), onboarded: true, consentUser: true, consentCompanion: true, calibrated: true };
+    expect(parseProfile(JSON.stringify(p))).toEqual(p);
   });
 });
 
