@@ -1,6 +1,6 @@
 # CONTEXT — Cermin Wicara (serah terima ke agen AI lain / laptop lain)
 
-Status: **Kamis 12 November 2026, setelah F-fix2**. Dokumen ini ditulis untuk agen AI (mis. Codex) yang melanjutkan
+Status: **Kamis 12 November 2026, setelah F-fix3**. Dokumen ini ditulis untuk agen AI (mis. Codex) yang melanjutkan
 pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks penting ada di berkas repo:
 
 1. `AGENTS.md` / `CLAUDE.md`: aturan kerja (wajib).
@@ -43,9 +43,10 @@ pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks 
 | A5 | scorer Wav2Vec2 | dilewati (roadmap) |
 | **I1** | **integrasi ujung ke ujung di HP** | selesai dengan keterbatasan uji; iPhone, p90 manual 3,91 s; pemulihan antrean video diuji dengan simulasi koneksi Supabase gagal |
 | **B4** | polish, layar "Tentang", mode demo, ikon, (APK bila perlu) | selesai untuk Expo Go; Tentang/demo/pemulihan profil dikonfirmasi di iPhone. APK belum diminta/disiapkan; splash release dan VoiceOver penuh belum diuji |
-| **F** | kunci fitur, README root, tag `v1.0-submission` | snapshot awal selesai; freeze dibuka atas persetujuan pengguna untuk F-fix1 dan F-fix2. Tag lama tetap menunjuk `1c930f9`, tanpa kedua perbaikan ini |
+| **F** | kunci fitur, README root, tag `v1.0-submission` | snapshot awal selesai; freeze dibuka atas persetujuan pengguna untuk F-fix1–F-fix3. Tag lama tetap menunjuk `1c930f9`, tanpa ketiga perbaikan ini |
 | **F-fix1** | penghapusan rekaman kalibrasi setelah respons | selesai; memakai URI kiriman secara eksplisit, 5 tes regresi baru |
 | **F-fix2** | hasil rekaman yang datang setelah komponen ditutup | selesai untuk hasil ber-URI; file dihapus tanpa callback atau getar selesai. Penolakan native tanpa URI masih memerlukan verifikasi cache di HP |
+| **F-fix3** | pengalihan materi macet dalam sesi otomatis | selesai; utamakan alternatif terbuka satu level lebih rendah, lalu selevel. Tanpa alternatif, beranda mengarahkan ke Mode Pendamping. Efektivitas untuk pengguna sasaran belum diuji |
 
 Commit basis sebelum I1: `638d878` (modul B3 dipulihkan; `/data/` di gitignore). Lihat `git log -1` untuk commit terkini.
 Remote: `https://github.com/ricoaldy-e/rekanwicara` (repo **publik**, jangan push tanpa instruksi).
@@ -56,6 +57,12 @@ Server/ML dan Doctor tidak dijalankan ulang karena tidak ada perubahan server/de
 Sesudah F-fix2: app **184** lulus (18 suite), TypeScript lolos, lint exit 0 dengan
 8 warning lama. Lima tes komponen baru; dua reproduksi penghapusan gagal pada kode lama
 lalu lulus. Hasil normal tetap diserahkan ke pemanggil tanpa dihapus oleh RecordPanel.
+Sesudah F-fix3: app **194** lulus (18 suite), TypeScript lolos, lint exit 0 dengan
+8 warning lama. Sepuluh tes baru mencakup pengalihan, pengecualian materi macet dari
+pemanasan/tantangan, tanpa alternatif, dan sesi pendek berisi ulasan. Sembilan tes
+reproduksi gagal pada kode lama sebelum perbaikan. Tes F-fix1/F-fix2 tetap lulus.
+Riwayat, status kelulusan, penguncian dan ambang deteksi macet tidak diubah. Tidak ada
+perubahan server/API/dependency; server/ML dan Doctor tidak dijalankan ulang.
 Penghapusan diuji melalui mock berkas sintetis, belum filesystem iPhone. Cache lama tidak
 dibersihkan. Jangan menyatakan seluruh persyaratan privasi terpenuhi: penolakan native
 tanpa URI belum membuktikan file fisik terhapus. API/dependency/server tidak diubah.
@@ -159,6 +166,11 @@ hasil hijau contoh (bukan analisis). Setelah mengubah `.env`, server harus dijal
   10 percobaan terakhir di ≥ 2 sesi; Level 2+ terkunci sampai satu materi tingkat di bawahnya lulus.
   Checkbox "Buka semua materi" di Mode Pendamping membuka akses tanpa membuat materi lulus.
   Profil demo B4 memiliki a/ma lulus dan terpisah dari profil pribadi; dapat dipilih di pengaturan tersembunyi.
+- **Pengalihan macet (F-fix3):** bila calon inti macet, pilih materi terbuka yang tidak macet
+  satu level lebih rendah, lalu materi lain selevel, mengikuti urutan konten. Pemanasan dan
+  tantangan juga mengecualikan materi macet. Jika tidak ada pengganti, inti ditiadakan dan
+  beranda mengarahkan ke Mode Pendamping. Riwayat/status tidak diturunkan atau dihapus;
+  materi tetap dapat dipilih manual. Ini aturan pemilihan sesi, belum bukti manfaat belajar.
 - **Variabel `app/.env`**: `EXPO_PUBLIC_API_URL` (IP laptop server), `EXPO_PUBLIC_SUPABASE_URL`,
   `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_DATASET_MODE` (`false` untuk demo). Setelah mengubah `.env`:
   `npx expo start -c`.
@@ -195,7 +207,7 @@ pytest -q                                # harus 389 lulus, 0 skip
 cd ..\app
 npm ci
 copy .env.example .env
-npm test                                 # harus 184 lulus
+npm test                                 # harus 194 lulus
 npx tsc --noEmit
 npx --yes expo-doctor@1.21.6             # 20/20 (versi "latest" sempat rusak)
 ```

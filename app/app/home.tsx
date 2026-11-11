@@ -8,7 +8,7 @@ import { BigButton, Body, Card, InfoNote, Screen, StageBadge, StatusBadge } from
 import { DATASET_MODE } from '../src/config';
 import { groupByLevel, LEVEL_NAMES } from '../src/content/levels';
 import { useContent } from '../src/state/content';
-import { planSession, seededRng, type Role } from '../src/state/progression';
+import { planSession, seededRng, selectCore, type Role } from '../src/state/progression';
 import { useUser } from '../src/state/user';
 import { colors, fontSize, spacing } from '../src/theme';
 
@@ -35,6 +35,7 @@ export default function Home() {
   }, [items, progress, profile.attempts, profile.settings.sessionMinutes]);
   const itemOf = (id: string) => items?.find((it) => it.item_id === id);
   const next = plan.find((s) => !s.done);
+  const needsHelp = items?.some((i) => progress.get(i.item_id)?.stage === 'macet') && !selectCore(items, progress);
 
   return (
     <Screen>
@@ -54,6 +55,10 @@ export default function Home() {
           <InfoNote text="Kalibrasi belum dilakukan. Dengan kalibrasi, hasil latihan lebih tepat untukmu." testID="calibration-banner" />
           <BigButton label="Kalibrasi sekarang" icon="options" onPress={() => router.push('/calibration')} />
         </View>
+      ) : null}
+
+      {needsHelp ? (
+        <InfoNote testID="mission-needs-help" text="Belum ada materi pengganti untuk latihan inti. Buka Mode Pendamping untuk memilih langkah berikutnya." />
       ) : null}
 
       {plan.length > 0 ? (
@@ -80,11 +85,11 @@ export default function Home() {
           })}
           {next ? (
             <BigButton label="Mulai" icon="play" onPress={() => open(next.itemId)} testID="mission-start" />
-          ) : (
+          ) : needsHelp ? null : (
             <Body>Sesi hari ini selesai. Terima kasih sudah berlatih!</Body>
           )}
         </Card>
-      ) : (
+      ) : needsHelp ? null : (
         <Body muted>Pilih satu materi untuk mulai berlatih.</Body>
       )}
 

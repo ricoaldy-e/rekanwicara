@@ -267,6 +267,71 @@ describe('planSession', () => {
     expect([a(), a(), a()]).toEqual([b(), b(), b()]);
     expect(planSession([], new Map(), [], 10, NOW, rng)).toEqual([]);
   });
+
+  it('replaces a stuck core with the first eligible material one level below', () => {
+    const items = [item('l2_mi', 2), item('l2_ma', 2), item('l3_mama', 3), item('l3_papa', 3)];
+    const attempts = [
+      ...run('l2_mi', 'gggggggggg'), ...run('l2_ma', 'gggggggggg'),
+      ...run('l3_mama', 'rrrrrrrrr', 3, 10), ...run('l3_papa', 'g', 1, 10),
+    ];
+    const p = buildProgress(items, attempts, [], RULES, NOW);
+    const before = JSON.stringify({ attempts, progress: [...p] });
+    const plan = planSession(items, p, attempts, 10, NOW, rng);
+    expect(plan.filter((s) => s.role === 'inti').map((s) => s.itemId)).toEqual(['l2_mi']);
+    expect(plan.some((s) => s.itemId === 'l3_mama')).toBe(false);
+    expect(plan).toEqual(planSession(items, p, attempts, 10, NOW, rng));
+    expect(JSON.stringify({ attempts, progress: [...p] })).toBe(before);
+  });
+
+  it('uses another material at the same level when the lower level is unavailable', () => {
+    const items = [item('l1_a', 1), item('l1_i', 1)];
+    const attempts = run('l1_a', 'rrrrrrrrr', 3);
+    const p = buildProgress(items, attempts, [], RULES, NOW);
+    const plan = planSession(items, p, attempts, 10, NOW, rng);
+    expect(plan.filter((s) => s.role === 'inti').map((s) => s.itemId)).toEqual(['l1_i', 'l1_i', 'l1_i']);
+    expect(plan.some((s) => s.itemId === 'l1_a')).toBe(false);
+  });
+
+  it.each(['macet', 'terkunci'] as const)('skips a lower-level alternative that is %s', (stage) => {
+    const items = [item('l3_mama', 3), item('l2_ma', 2), item('l3_papa', 3)];
+    const attempts = [
+      ...run('l3_mama', 'rrrrrrrrr', 3), ...run('l3_papa', 'g'),
+      ...(stage === 'macet' ? run('l2_ma', 'rrrrrrrrr', 3) : []),
+    ];
+    const p = buildProgress(items, attempts, [], RULES, NOW);
+    expect(p.get('l2_ma')?.stage).toBe(stage);
+    const plan = planSession(items, p, attempts, 10, NOW, rng);
+    expect(plan.filter((s) => s.role === 'inti').every((s) => s.itemId === 'l3_papa')).toBe(true);
+    expect(plan.some((s) => s.role === 'inti')).toBe(true);
+    expect(plan.some((s) => s.itemId !== 'l3_papa')).toBe(false);
+  });
+
+  it('chooses an eligible warm-up even when the older warm-up is stuck', () => {
+    const items = [item('l0_hold_a', 0), item('l0_soft_loud', 0)];
+    const attempts = [...run('l0_hold_a', 'rrrrrrrrr', 3), ...run('l0_soft_loud', 'g', 1, 3)];
+    const p = buildProgress(items, attempts, [], RULES, NOW);
+    expect(planSession(items, p, attempts, 10, NOW, rng)).toEqual([
+      { itemId: 'l0_soft_loud', role: 'pemanasan', done: false },
+    ]);
+  });
+
+  it('does not reintroduce a stuck material as a random challenge', () => {
+    const attempts = run('l1_i', 'rrrrrrrrr', 3);
+    const p = buildProgress(ITEMS, attempts, [], RULES, NOW);
+    const plan = planSession(ITEMS, p, attempts, 10, NOW, rng);
+    expect(plan.some((s) => s.role === 'inti' && s.itemId === 'l1_a')).toBe(true);
+    expect(plan.some((s) => s.itemId === 'l1_i')).toBe(false);
+  });
+
+  it('keeps the warm-up without forcing a core when all alternatives are unavailable', () => {
+    const items = [item('l0_hold_a', 0), item('l2_ma', 2), item('l3_mama', 3)];
+    const attempts = run('l3_mama', 'rrrrrrrrr', 3);
+    const p = buildProgress(items, attempts, [], RULES, NOW);
+    expect(p.get('l2_ma')?.locked).toBe(true);
+    expect(planSession(items, p, attempts, 10, NOW, rng)).toEqual([
+      { itemId: 'l0_hold_a', role: 'pemanasan', done: false },
+    ]);
+  });
 });
 
 describe('weekly summary and report', () => {

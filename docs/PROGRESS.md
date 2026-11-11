@@ -21,6 +21,7 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | F | Bersama | Kunci fitur, README, tag submission | Jumat 13 Nov malam | selesai | Diselesaikan lebih awal dengan persetujuan pengguna. README setup/demo/evaluasi lengkap, lisensi model dari tiga model card Apache-2.0, inventaris Python/JS, scan Git/privasi dan perbaikan log CLI dataset. 389 pytest (0 skip), 174 Jest, tsc, Ruff check/format dan Doctor 20/20 lolos. Lint app exit 0 (8 warning lama), 1 warning deprecation pytest. Tag `v1.0-submission`; daftar berkas dan batas pemeriksaan di `docs/SUBMISSION_CHECKLIST.md`. Video/pengiriman manual belum dilakukan. |
 | F-fix1 | App | Penghapusan rekaman kalibrasi (masalah 1 audit) | Kamis 12 Nov | selesai | Freeze dibuka khusus perbaikan atas persetujuan pengguna. `discard(file)` memakai URI kiriman, bukan state render lama. Lima tes baru; dua tes penghapusan gagal pada kode lama lalu lulus. 179 Jest (17 suite), tsc lolos, lint exit 0 dengan 8 warning lama. Tidak mengubah server/API/dependency atau memindahkan tag lama. Masalah 2 belum diperbaiki; penghapusan fisik di iPhone dan cache lama belum diperiksa. |
 | F-fix2 | App | Hasil rekaman setelah komponen ditutup (masalah 2 audit) | Kamis 12 Nov | selesai untuk hasil ber-URI | RecordPanel menghapus hasil terlambat tanpa callback/getar selesai. Lima tes komponen dengan kamera, haptics dan operasi berkas sintetis; dua tes reproduksi gagal pada kode lama lalu lulus. 184 Jest (18 suite), tsc lolos, lint exit 0 dengan 8 warning lama. Native menolak tanpa URI masih butuh verifikasi cache di HP; cache lama tidak dibersihkan. Tag lama tidak dipindahkan, tanpa push. |
+| F-fix3 | App | Pengalihan materi macet (masalah 3 audit) | Kamis 12 Nov | selesai | Calon inti macet dialihkan satu level ke bawah, lalu selevel, hanya ke materi terbuka yang tidak macet. Pemanasan/tantangan mengecualikan macet. Tanpa pengganti, beranda mengarahkan ke Mode Pendamping. 10 tes baru, 9 reproduksi gagal pada kode lama; seluruh 194 Jest (18 suite), tsc lolos, lint exit 0 dengan 8 warning lama. Riwayat/status/ambang tetap; manfaat pada pengguna sasaran dan tampilan HP belum diuji. Tanpa push/perubahan tag. |
 
 ## Tugas manual
 
@@ -34,6 +35,23 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | 6 | Submission | Sabtu 14 Nov | belum |
 
 ## Keputusan penting
+- Kamis 12 Nov (F-fix3): pengguna menyetujui penanganan materi macet sesuai SPEC §8.4.
+  Pemilihan inti dipakai bersama oleh planner dan beranda: jika calon pertama macet,
+  cari materi terbuka yang tidak macet satu level di bawahnya, lalu selevel, dengan
+  urutan konten sebagai penentu. Alternatif boleh sudah lulus/berstatus ulasan;
+  pengalihan tidak menghapus riwayat atau membatalkan kelulusan. Materi macet tetap
+  tersedia untuk pilihan manual, tetapi tidak dipilih otomatis sebagai pemanasan,
+  inti atau tantangan. Deteksi macet, pola berblok/acak dan aturan lulus tidak diubah.
+  Tanpa alternatif, inti tidak dipaksakan dan beranda mengarahkan ke Mode Pendamping,
+  memakai InfoNote yang sudah ada. Pesan sesi selesai tidak ditampilkan pada keadaan
+  ini. Sesi pendek yang terisi ulasan tidak keliru diberi pesan tanpa alternatif;
+  kelayakan inti diperiksa terpisah dari pemotongan jumlah langkah.
+  Sepuluh tes baru, sembilan reproduksi gagal pada kode lama; 194 Jest (18 suite),
+  tsc lolos, lint exit 0 dengan 8 warning lama. Tes privasi F-fix1/F-fix2 tetap lulus.
+  Server/ML dan Doctor tidak diulang karena server/dependency/config tidak diubah.
+  Tidak membaca dataset atau mengubah tag lama; dua panduan staged pengguna tetap
+  di luar commit. Pengalihan belum diuji di HP atau pada pengguna sasaran; tidak
+  mengklaim efektivitas belajar. Batas privasi native tanpa URI dari F-fix2 tetap ada.
 - Kamis 12 Nov (F-fix2): pengguna menyetujui perbaikan khusus hasil rekaman yang datang
   setelah RecordPanel ditutup. Pemakai komponen adalah latihan, kalibrasi, sesi dataset
   dan video model; perbaikan dilakukan sekali di komponen bersama. Hasil terlambat ber-URI

@@ -222,6 +222,19 @@ export function seededRng(seed: string): () => number {
   };
 }
 
+function canSchedule(item: Item, progress: ReadonlyMap<string, ItemProgress>): boolean {
+  const p = progress.get(item.item_id);
+  return p !== undefined && !p.locked && p.stage !== 'macet';
+}
+
+/** SPEC §8.4: a stuck core is replaced one level below, then at the same level, in content order. */
+export function selectCore(items: readonly Item[], progress: ReadonlyMap<string, ItemProgress>): Item | undefined {
+  const candidate = items.find((i) => i.level > 0 && !progress.get(i.item_id)?.locked && ['berlatih', 'macet'].includes(progress.get(i.item_id)?.stage ?? ''));
+  if (!candidate || progress.get(candidate.item_id)?.stage !== 'macet') return candidate;
+  return items.find((i) => i.level === candidate.level - 1 && canSchedule(i, progress))
+    ?? items.find((i) => i.level === candidate.level && canSchedule(i, progress));
+}
+
 /** SPEC §8.4 session: warm-up (Level 0), reviews, the core material, a random challenge. */
 export function planSession(
   items: readonly Item[],
@@ -235,7 +248,7 @@ export function planSession(
   const lastTime = (id: string) => Math.max(0, ...attempts.filter((a) => a.itemId === id).map((a) => ms(a.at)));
   const plan: { itemId: string; role: Role }[] = [];
 
-  const warmup = items.filter((i) => i.level === 0).sort((a, b) => lastTime(a.item_id) - lastTime(b.item_id))[0];
+  const warmup = items.filter((i) => i.level === 0 && canSchedule(i, progress)).sort((a, b) => lastTime(a.item_id) - lastTime(b.item_id))[0];
   if (warmup) plan.push({ itemId: warmup.item_id, role: 'pemanasan' });
 
   const due = items
@@ -243,9 +256,9 @@ export function planSession(
     .sort((a, b) => ms(progress.get(a.item_id)!.nextReviewAt!) - ms(progress.get(b.item_id)!.nextReviewAt!));
   for (const it of due.slice(0, 2)) plan.push({ itemId: it.item_id, role: 'ulasan' });
 
-  const core = items.find((i) => i.level > 0 && ['berlatih', 'macet'].includes(progress.get(i.item_id)?.stage ?? ''));
+  const core = selectCore(items, progress);
   const challengePool = items.filter(
-    (i) => (progress.get(i.item_id)?.attempts ?? 0) > 0 && !progress.get(i.item_id)?.locked && !plan.some((p) => p.itemId === i.item_id) && i.item_id !== core?.item_id,
+    (i) => (progress.get(i.item_id)?.attempts ?? 0) > 0 && canSchedule(i, progress) && !plan.some((p) => p.itemId === i.item_id) && i.item_id !== core?.item_id,
   );
   const challenge = challengePool.length > 0 ? challengePool[Math.floor(rng() * challengePool.length)] : null;
   if (core) {

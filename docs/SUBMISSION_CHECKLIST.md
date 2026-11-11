@@ -2,8 +2,30 @@
 
 Tanggal: 11 November 2026. Kunci fitur dilakukan lebih awal atas persetujuan pengguna.
 Snapshot awal: `main`, tag `v1.0-submission` pada `1c930f9`. Freeze kemudian dibuka
-atas persetujuan pengguna untuk F-fix1 dan F-fix2 (12 November); tag lama tidak dipindahkan.
+atas persetujuan pengguna untuk F-fix1–F-fix3 (12 November); tag lama tidak dipindahkan.
 Dokumen ini mencatat pemeriksaan repo; pengiriman ke panitia belum dilakukan.
+
+## Pembaruan F-fix3 — 12 November 2026
+
+Bila calon inti macet, sesi otomatis memilih materi terbuka yang tidak macet satu level
+lebih rendah, lalu materi lain selevel, mengikuti urutan konten. Materi macet juga
+dikecualikan dari pemanasan dan tantangan. Tanpa pengganti, latihan inti ditiadakan;
+beranda memberi petunjuk membuka Mode Pendamping, tanpa klaim sesi selesai. Riwayat,
+kelulusan, kunci level, ambang macet dan saran konsultasi yang sudah ada tidak diubah.
+Materi tetap dapat dipilih manual.
+
+Sepuluh tes baru memeriksa pilihan alternatif, urutan yang konsisten, penolakan calon
+macet/terkunci, pemanasan/tantangan, keadaan tanpa alternatif dengan/tanpa pemanasan,
+dan sesi pendek yang penuh ulasan. Sembilan reproduksi gagal pada kode lama sebelum
+perbaikan. Tes juga memastikan planner tidak mengubah riwayat atau progres.
+Hasil terbaru: **194 Jest, 18 suite**, TypeScript lolos, lint exit 0 dengan 0 error dan
+8 warning lama. Tes F-fix1/F-fix2 tetap lulus. Server/ML, Doctor dan audit dependency
+tidak diulang karena server, konfigurasi dan dependency tidak berubah.
+
+Belum memeriksa tampilan pengalihan di HP atau efektivitasnya bagi pengguna sasaran.
+Batas privasi native tanpa URI dari F-fix2 masih berlaku. Tidak membaca dataset,
+melakukan push atau mengubah tag lama. Tag `v1.0-submission` tetap `1c930f9`, belum
+memuat F-fix1–F-fix3; dua panduan staged pengguna tetap di luar commit perbaikan.
 
 ## Pembaruan F-fix2 — 12 November 2026
 
