@@ -15,7 +15,7 @@ komponen di bawah tetap memakai lisensinya masing-masing.
 | Hugging Face Transformers | ditunda (roadmap, tidak dipasang di MVP) | Apache-2.0 | https://github.com/huggingface/transformers/blob/main/LICENSE |
 | PyTorch | ditunda (roadmap, tidak dipasang di MVP) | BSD-3-Clause | https://github.com/pytorch/pytorch/blob/main/LICENSE |
 | torchaudio | ditunda (roadmap, tidak dipasang di MVP) | BSD-2-Clause | https://github.com/pytorch/audio/blob/main/LICENSE |
-| scikit-learn | ml (metrik evaluasi) | BSD-3-Clause | https://github.com/scikit-learn/scikit-learn/blob/main/COPYING |
+| scikit-learn | tidak dipakai (kappa dan metrik A6 dihitung sendiri di `server/app/dataset/`) | BSD-3-Clause | https://github.com/scikit-learn/scikit-learn/blob/main/COPYING |
 | OpenCV (`opencv-contrib-python`, dependensi mediapipe; tidak di-import kode kita) | server | Apache-2.0 | https://github.com/opencv/opencv/blob/4.x/LICENSE |
 | FastAPI | server | MIT | https://github.com/fastapi/fastapi/blob/master/LICENSE |
 | Expo | app | MIT | https://github.com/expo/expo/blob/main/LICENSE |

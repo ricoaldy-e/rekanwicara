@@ -66,7 +66,7 @@ lips:
   # §6.4 says 0.05. Measured in A2 (18 words with a medial m/p/b, P1-P3): the inner lips rarely meet during
   # speech; medial closure minimum median 0.028, p90 0.061, max 0.089, while vowel peaks are >= 0.121 and
   # rest is ~0.002. 0.05 missed 5/18 real closures; 0.08 misses 1/18. (asumsi A2, SPEC 0.05, disetel di A6)
-  closed_gap_ratio: 0.08
+  closed_gap_ratio: 0.1  # disetel A6 (LOSO, 3 penutur), sebelumnya 0.08
   # Known limit (A3, for A6): rounded "u" can leave an inner gap below 0.08 (0.06-0.07 in P2 "bu"),
   # which then reads as closed. Excluding rounded frames fixed 2 clips but broke 3 uncalibrated ones
   # (round-lipped rest, /m/ after "u"), so it is not used. The §6.4 mouthClose cross-check is
@@ -91,10 +91,10 @@ rules:
     yellow_min_diff_db: 5.0  # §6.7
   vowels:                    # §6.7 table (bibir; suara relative to the user's anchors)
     a:
-      jaw_open_min: 0.40
+      jaw_open_min: 0.3  # disetel A6 (LOSO, 3 penutur), sebelumnya 0.40
       f1_margin_hz: 100.0    # F1 >= max(F1_i, F1_u) + 100 Hz
     i:
-      lip_width_ratio_min: 1.05
+      lip_width_ratio_min: 1  # disetel A6 (LOSO, 3 penutur), sebelumnya 1.05
       rounding_max: 0.20
       f2_margin_hz: 300.0    # F2 >= F2_u + 300 Hz
     u:
@@ -116,13 +116,13 @@ rules:
   consonants:
     closure_min_ms: 80       # §6.7: closure >= 80 ms then open
     p:
-      voiced_ratio_max: 0.3        # §6.7
-      yellow_voiced_ratio_max: 0.4 # §6.7
+      voiced_ratio_max: 0.6  # disetel A6 (LOSO, 3 penutur), sebelumnya 0.3; §6.7
+      yellow_voiced_ratio_max: 0.7  # disetel A6 (LOSO, 3 penutur), sebelumnya 0.4; §6.7
     b:
-      voiced_ratio_min: 0.5        # §6.7
-      yellow_voiced_ratio_min: 0.4 # §6.7
+      voiced_ratio_min: 0.3  # disetel A6 (LOSO, 3 penutur), sebelumnya 0.5; §6.7
+      yellow_voiced_ratio_min: 0.2  # disetel A6 (LOSO, 3 penutur), sebelumnya 0.4; §6.7
     m:
-      voiced_ratio_min: 0.5        # §6.7
+      voiced_ratio_min: 0.4  # disetel A6 (LOSO, 3 penutur), sebelumnya 0.5; §6.7
       bonus_closure_ms: 100        # §6.7 bonus
       bonus_closure_db_margin: 15.0  # §6.7 bonus: closure_db >= noise_floor + 15
 

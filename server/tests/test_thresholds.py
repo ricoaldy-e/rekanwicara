@@ -24,12 +24,23 @@ def test_yaml_loads_with_spec_values() -> None:
     # §6.4 / §6.6 / §6.7 spot checks
     assert t.lips.landmarks.mouth == (13, 14, 61, 291)
     assert (t.lips.landmarks.eye_outer_left, t.lips.landmarks.eye_outer_right) == (33, 263)
-    assert t.lips.closed_gap_ratio == 0.08  # A2 measurement, SPEC 0.05 (see thresholds.yaml)
     assert len(t.lips.outer_lip) == 20
     assert t.segment.gap_tolerance_ms == 100
     assert t.rules.l0_hold_a.yellow_min_voiced_s == 2.55
-    assert t.rules.vowels.i.lip_width_ratio_min == 1.05
-    assert t.rules.consonants.p.voiced_ratio_max == 0.3
+    # A6 (LOSO on the team dataset) tuned these; the old values stay in the line comments.
+    assert t.lips.closed_gap_ratio == 0.1  # SPEC 0.05, A2 0.08
+    assert t.rules.vowels.i.lip_width_ratio_min == 1.0  # SPEC 1.05
+    assert t.rules.consonants.p.voiced_ratio_max == 0.6  # SPEC 0.3
+    assert t.rules.consonants.p.yellow_voiced_ratio_max == 0.7  # keeps the 0.1 step of SPEC
+    b = t.rules.consonants.b
+    assert b.yellow_voiced_ratio_min == pytest.approx(b.voiced_ratio_min - 0.1)
+
+
+def test_a6_values_keep_their_old_value_in_a_comment() -> None:
+    text = THRESHOLDS_PATH.read_text(encoding="utf-8")
+    tuned = [ln for ln in text.splitlines() if "disetel A6" in ln]
+    assert len(tuned) >= 6
+    assert all("sebelumnya" in ln for ln in tuned)
 
 
 def test_a1_assumptions_are_marked() -> None:

@@ -166,7 +166,7 @@ def score_hum(lips: LipSeries, voice: AudioSeries, region: Span, t: Thresholds) 
     return ItemScore([_unit(0, region, "m_hum", [lip], [sound])])
 
 
-def _vowel_checks(
+def vowel_checks(
     vowel: str, lips: LipSeries, voice: AudioSeries, span: Span, anchors: Anchors, t: Thresholds
 ) -> tuple[Check, Check, tuple[float, float] | None]:
     frac, margin, rules = t.audio.vowel_center_fraction, t.rules.yellow_margin, t.rules.vowels
@@ -205,7 +205,7 @@ def _vowel_checks(
     )
 
 
-def _consonant_checks(span: UnitSpan, t: Thresholds) -> tuple[Check, Check]:
+def consonant_checks(span: UnitSpan, t: Thresholds) -> tuple[Check, Check]:
     c, margin, rules = span.target[0], t.rules.yellow_margin, t.rules.consonants
     closure = span.closure
     if closure is None:  # §6.6.5: no closure found for this consonant
@@ -236,12 +236,12 @@ def score_units(
     spans = segment_units(units, closures, voice, region, t.segment)
     scored: list[UnitScore] = []
     for k, span in enumerate(spans):
-        vowel_lip, vowel_voice, formants = _vowel_checks(
+        vowel_lip, vowel_voice, formants = vowel_checks(
             span.target[-1], lips, voice, (span.vowel_start_ms, span.end_ms), anchors, t
         )
         lip_checks, voice_checks = [vowel_lip], [vowel_voice]
         if has_consonant(span.target):
-            c_lip, c_voice = _consonant_checks(span, t)
+            c_lip, c_voice = consonant_checks(span, t)
             lip_checks.insert(0, c_lip)
             voice_checks.insert(0, c_voice)
         scored.append(

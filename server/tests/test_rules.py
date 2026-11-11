@@ -3,12 +3,23 @@
 import pytest
 
 from app.core.thresholds import load_thresholds
+from app.dataset.evaluation import with_params
 from app.pipeline.calibration import anchors
 from app.pipeline.hints import pick_hint
 from app.pipeline.rules import at_least, at_most, score_item, score_of, worst
 from tests import synth
 
-T = load_thresholds()
+# These tests check the rule LOGIC, so they pin the SPEC §6.7 starting values; A6 tunes the
+# values in thresholds.yaml (see test_thresholds.py).
+SPEC_VALUES = {
+    "lips.closed_gap_ratio": 0.08,
+    "rules.vowels.a.jaw_open_min": 0.40,
+    "rules.vowels.i.lip_width_ratio_min": 1.05,
+    "rules.consonants.p.voiced_ratio_max": 0.3,
+    "rules.consonants.b.voiced_ratio_min": 0.5,
+    "rules.consonants.m.voiced_ratio_min": 0.5,
+}
+T = with_params(load_thresholds(), SPEC_VALUES)
 ANCHORS = anchors(None, T)  # §6.3 defaults: a (819, 1410), i (310, 2521), u (416, 931)
 
 

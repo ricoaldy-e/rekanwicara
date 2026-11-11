@@ -16,7 +16,7 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | B3 | App | Supabase, logika kemajuan, Mode Pendamping | Kamis 12 Nov | belum | |
 | A5 | ML | Scorer Wav2Vec2 | — | dilewati | data terlalu sedikit; roadmap |
 | I1 | Bersama | Integrasi ujung ke ujung di HP | Kamis 12 Nov malam | belum | |
-| A6 | ML | Penyetelan ambang, evaluasi LOSO, model card | Kamis–Jumat | belum | |
+| A6 | ML | Penyetelan ambang, evaluasi LOSO, model card | Kamis–Jumat | selesai | `ml/eval/{tune_thresholds,evaluate}.py` (logika `server/app/dataset/evaluation.py`), `docs/EVAL_REPORT.md`, `docs/MODEL_CARD.md`; ambang final ditulis ke `thresholds.yaml`. LOSO: bibir rapat 56/60 = 93% ✓, suara saat rapat 43/50 = 86% ✓, vokal 19/23 = 83% (target 85), status kata 12/22 = 55% (target 80); bad_face 3/3, salah tolak 1/74, p90 984 ms. 382 tes hijau |
 | B4 | App | Polish, mode demo, build | Jumat 13 Nov | belum | |
 | F | Bersama | Kunci fitur, README, tag submission | Jumat 13 Nov malam | belum | |
 
@@ -27,7 +27,7 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | 1 | Pasang Expo Go di HP | B0 | selesai (Expo Go: SDK 58; iPhone butuh login akun Expo yang sama dengan Expo CLI) |
 | 2 | Rekam: 3 orang × 27 klip + 16 video model | A2 | selesai (rekam ulang di ruang tenang, 10 Nov malam; 5 klip cacat, lihat Keputusan) |
 | 3 | Buat proyek Supabase (isi SQL dan .env saat B3) | B3 | belum |
-| 4 | Cek label: tiap orang ±54 klip milik dua orang lain | A6 | belum |
+| 4 | Cek label: tiap orang ±54 klip milik dua orang lain | A6 | selesai (162 penilaian; "sesuai materi" 90%, kappa 0.65) |
 | 5 | Video demo | setelah F | belum |
 | 6 | Submission | Sabtu 14 Nov | belum |
 
@@ -54,6 +54,21 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
   `await render(...)` di tes, `types: ["jest","node"]` di tsconfig (TS 6), `newArchEnabled`/`edgeToEdgeEnabled`
   dihapus dari app.json. Aturan lint baru `react-hooks/refs` dan `set-state-in-effect` sementara `warn`.
   66 tes jest, tsc, expo-doctor 20/20, bundle Android bersih. Uji di HP: menunggu.
+- Rabu 11 Nov (A6): urutan diubah dari runbook (B3 → I1 → A6) menjadi A6 dulu: cek label sudah selesai, I1
+  butuh Mode Pendamping dari B3, dan I1 sebaiknya memakai ambang final.
+- Rabu 11 Nov (A6): kebenaran = kesepakatan kedua penilai; 8 klip yang penilainya berbeda pendapat tidak dipakai
+  untuk status kata. Kesalahan sengaja yang dinilai "sesuai" dengan bibir benar oleh keduanya dianggap tidak
+  dilakukan (`P2 mama_as_papa`, `P2 a_narrow`). Klip "benar" yang ditolak keduanya tidak dipakai untuk metrik per
+  unit (aspeknya tidak diketahui).
+- Rabu 11 Nov (A6): penyetelan = grid kecil satu parameter per langkah, objektif akurasi seimbang metriknya
+  sendiri; seri → status kata → nilai terdekat dengan yang lama. Tie-break status kata ditambahkan karena "a"
+  tunggal tidak bisa memilih di antara nilai `jaw_open` yang sama baiknya, sedangkan "a" di dalam kata kurang
+  terbuka (temuan A3). Jangkar vokal per putaran hanya dari 2 penutur penyetel.
+- Rabu 11 Nov (A6): **rentang /p/ (≤ 0,6) dan /b/ (≥ 0,3) kini tumpang tindih**; sistem belum andal menangkap /p/
+  yang terlalu bersuara. p 0,6 di ujung grid. Tes `test_rules.py` mengunci nilai awal SPEC karena menguji
+  logika, bukan angka hasil penyetelan.
+- Rabu 11 Nov (A6): label yang bertentangan dengan ukuran: `P3 u_flat_lips` (penilai "tidak sesuai", rounding
+  terukur 0,87) dan `P2 a_narrow` (penilai "sesuai", jaw_open 0,17). Dihitung sebagai kesalahan mesin.
 - Rabu 11 Nov (A4): logika dataset ada di `server/app/dataset/` (server tidak boleh bergantung pada `ml/`, dan tes
   tetap lewat pytest); `ml/dataset/*.py` hanya skrip perintah. Klip diproses TANPA kalibrasi (default §6.3).
   `.npz` menyimpan deret bibir dan suara supaya A6 bisa menilai ulang tanpa MediaPipe. Berkas `.json` memuat
