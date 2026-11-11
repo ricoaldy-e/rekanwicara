@@ -1,6 +1,6 @@
 # CONTEXT — Cermin Wicara (serah terima ke agen AI lain / laptop lain)
 
-Status: **Kamis 12 November 2026, setelah F-fix3**. Dokumen ini ditulis untuk agen AI (mis. Codex) yang melanjutkan
+Status: **Kamis 12 November 2026, setelah F-fix4**. Dokumen ini ditulis untuk agen AI (mis. Codex) yang melanjutkan
 pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks penting ada di berkas repo:
 
 1. `AGENTS.md` / `CLAUDE.md`: aturan kerja (wajib).
@@ -43,10 +43,11 @@ pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks 
 | A5 | scorer Wav2Vec2 | dilewati (roadmap) |
 | **I1** | **integrasi ujung ke ujung di HP** | selesai dengan keterbatasan uji; iPhone, p90 manual 3,91 s; pemulihan antrean video diuji dengan simulasi koneksi Supabase gagal |
 | **B4** | polish, layar "Tentang", mode demo, ikon, (APK bila perlu) | selesai untuk Expo Go; Tentang/demo/pemulihan profil dikonfirmasi di iPhone. APK belum diminta/disiapkan; splash release dan VoiceOver penuh belum diuji |
-| **F** | kunci fitur, README root, tag `v1.0-submission` | snapshot awal selesai; freeze dibuka atas persetujuan pengguna untuk F-fix1–F-fix3. Tag lama tetap menunjuk `1c930f9`, tanpa ketiga perbaikan ini |
+| **F** | kunci fitur, README root, tag `v1.0-submission` | snapshot awal selesai; freeze dibuka atas persetujuan pengguna untuk F-fix1–F-fix4. Tag lama tetap menunjuk `1c930f9`, tanpa keempat perbaikan ini |
 | **F-fix1** | penghapusan rekaman kalibrasi setelah respons | selesai; memakai URI kiriman secara eksplisit, 5 tes regresi baru |
 | **F-fix2** | hasil rekaman yang datang setelah komponen ditutup | selesai untuk hasil ber-URI; file dihapus tanpa callback atau getar selesai. Penolakan native tanpa URI masih memerlukan verifikasi cache di HP |
 | **F-fix3** | pengalihan materi macet dalam sesi otomatis | selesai; utamakan alternatif terbuka satu level lebih rendah, lalu selevel. Tanpa alternatif, beranda mengarahkan ke Mode Pendamping. Efektivitas untuk pengguna sasaran belum diuji |
+| **F-fix4** | pemulihan kegagalan video contoh | selesai di kode/tes; status memuat, pesan gagal/404, ilustrasi cadangan dan coba ulang. Pemutaran native di iPhone/Android belum diuji |
 
 Commit basis sebelum I1: `638d878` (modul B3 dipulihkan; `/data/` di gitignore). Lihat `git log -1` untuk commit terkini.
 Remote: `https://github.com/ricoaldy-e/rekanwicara` (repo **publik**, jangan push tanpa instruksi).
@@ -63,6 +64,11 @@ pemanasan/tantangan, tanpa alternatif, dan sesi pendek berisi ulasan. Sembilan t
 reproduksi gagal pada kode lama sebelum perbaikan. Tes F-fix1/F-fix2 tetap lulus.
 Riwayat, status kelulusan, penguncian dan ambang deteksi macet tidak diubah. Tidak ada
 perubahan server/API/dependency; server/ML dan Doctor tidak dijalankan ulang.
+Sesudah F-fix4: app **202** lulus (19 suite), TypeScript lolos, lint exit 0 dengan
+8 warning lama. Delapan tes baru; tujuh gagal pada kode lama. Tes memakai hook event
+Expo asli, API dan pemutar native sintetis. Cleanup yang diuji adalah pelepasan listener
+dan pemanggilan cleanup pada mock; kompatibilitas video/native tetap memerlukan uji HP.
+Tes F-fix1–F-fix3 tetap lulus. Tidak menambah dependency atau mengubah API/server.
 Penghapusan diuji melalui mock berkas sintetis, belum filesystem iPhone. Cache lama tidak
 dibersihkan. Jangan menyatakan seluruh persyaratan privasi terpenuhi: penolakan native
 tanpa URI belum membuktikan file fisik terhapus. API/dependency/server tidak diubah.
@@ -159,6 +165,10 @@ hasil hijau contoh (bukan analisis). Setelah mengubah `.env`, server harus dijal
   hari ini, tahap materi) → Practice (Lihat → Tiru → Bandingkan → Ulangi) → Mode Pendamping (PIN, ringkasan 7 hari,
   Uji Dengar, pengaturan, bagikan laporan).
 - **Pengaturan tersembunyi:** tekan lama 2 detik judul "Misi hari ini" di Home → ganti URL server, tes koneksi.
+- **Video contoh (F-fix4):** loading memiliki indikator/teks. Jika video tidak ada atau
+  pemutar gagal, tampil pesan + teks/ilustrasi bibir serta "Coba muat video lagi".
+  Coba ulang memeriksa ketersediaan kembali; hook Expo mengelola pemutar dan listener.
+  Tombol Mulai rekam tetap berada di layar latihan; tidak ada kewajiban menonton video.
 - **Supabase** (login anonim, RLS `auth.uid()`): `docs/supabase/schema.sql` + variabel `EXPO_PUBLIC_SUPABASE_URL` dan
   `EXPO_PUBLIC_SUPABASE_ANON_KEY` di `app/.env`. Tanpa itu app berjalan penuh dan hanya sinkron yang nonaktif.
   `user_id` ke server (kalibrasi) = id lokal; baris Supabase memakai `auth.uid()`.
@@ -207,7 +217,7 @@ pytest -q                                # harus 389 lulus, 0 skip
 cd ..\app
 npm ci
 copy .env.example .env
-npm test                                 # harus 194 lulus
+npm test                                 # harus 202 lulus
 npx tsc --noEmit
 npx --yes expo-doctor@1.21.6             # 20/20 (versi "latest" sempat rusak)
 ```

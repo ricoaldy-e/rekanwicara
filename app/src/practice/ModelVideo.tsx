@@ -1,55 +1,78 @@
+import { useEvent } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import type { Item } from '../api/types';
-import { Card, LipIllustration } from '../components';
+import { BigButton, Body, Card, InfoNote, LipIllustration } from '../components';
 import { unitShapes } from '../results/lipShapes';
 import { useSettings } from '../state/settings';
 import { colors, fontSize, radius, spacing } from '../theme';
 
-/**
- * "Lihat" step: the model video from the server, or big text + emoji + lip drawings when there is none (404).
- * The practice screen mounts one per item, so `available` never has to be reset.
- */
+/** "Lihat": play the model video, with text and lip drawings when it is missing or fails. */
 export function ModelVideo({ item }: { item: Item }) {
   const { api } = useSettings();
-  const [available, setAvailable] = useState<boolean | null>(null);
+  const [state, setState] = useState<'loading' | 'available' | 'missing' | 'error'>('loading');
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     api
       .hasModelVideo(item.item_id)
-      .then((yes) => !cancelled && setAvailable(yes))
-      .catch(() => !cancelled && setAvailable(false)); // unreachable server: the text fallback still teaches
+      .then((yes) => !cancelled && setState(yes ? 'available' : 'missing'))
+      .catch(() => !cancelled && setState('error'));
     return () => {
       cancelled = true;
     };
-  }, [api, item.item_id]);
+  }, [api, item.item_id, attempt]);
 
-  if (available === null) {
-    return (
-      <View style={styles.center} accessible accessibilityLabel="Memuat contoh">
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
-  return available ? (
-    <Player url={`${api.baseUrl}/v1/model-video/${encodeURIComponent(item.item_id)}`} text={item.text} />
-  ) : (
-    <TextFallback item={item} />
+  if (state === 'loading') return <Loading />;
+  if (state === 'available') return (
+    <Player url={`${api.baseUrl}/v1/model-video/${encodeURIComponent(item.item_id)}`} text={item.text} onError={() => setState('error')} />
+  );
+  return (
+    <>
+      <InfoNote
+        testID={state === 'error' ? 'model-video-error' : 'model-video-missing'}
+        tone={state === 'error' ? 'warning' : 'info'}
+        text={state === 'error'
+          ? 'Video contoh belum bisa dimuat. Ikuti tulisan dan gambar bibir, atau coba muat lagi.'
+          : 'Video contoh belum tersedia. Ikuti tulisan dan gambar bibir.'}
+      />
+      <TextFallback item={item} />
+      <BigButton label="Coba muat video lagi" icon="refresh" variant="secondary" onPress={() => {
+        setState('loading');
+        setAttempt((n) => n + 1);
+      }} />
+    </>
   );
 }
 
-function Player({ url, text }: { url: string; text: string }) {
+function Loading() {
+  return (
+    <View style={styles.center} accessible accessibilityLabel="Memuat video contoh" accessibilityLiveRegion="polite">
+      <ActivityIndicator size="large" color={colors.primary} />
+      <Body>Memuat video contoh…</Body>
+    </View>
+  );
+}
+
+function Player({ url, text, onError }: { url: string; text: string; onError: () => void }) {
   const player = useVideoPlayer(url, (p) => {
     p.loop = true;
     p.play();
   });
+  const { status } = useEvent(player, 'statusChange', { status: player.status });
+  useEffect(() => {
+    if (status === 'error') onError();
+  }, [status, onError]);
   return (
-    <View style={styles.frame} accessible accessibilityLabel={`Video contoh mengucapkan ${text}`}>
-      <VideoView player={player} style={styles.video} nativeControls contentFit="contain" />
-    </View>
+    <>
+      {status !== 'readyToPlay' ? <Loading /> : null}
+      <View style={styles.frame} accessible accessibilityLabel={`Video contoh mengucapkan ${text}`}>
+        <VideoView player={player} style={styles.video} nativeControls contentFit="contain" />
+      </View>
+    </>
   );
 }
 
@@ -79,7 +102,7 @@ function TextFallback({ item }: { item: Item }) {
 }
 
 const styles = StyleSheet.create({
-  center: { alignItems: 'center', paddingVertical: spacing.xl },
+  center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
   frame: {
     width: '100%',
     aspectRatio: 3 / 4,

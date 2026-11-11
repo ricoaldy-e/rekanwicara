@@ -22,6 +22,7 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | F-fix1 | App | Penghapusan rekaman kalibrasi (masalah 1 audit) | Kamis 12 Nov | selesai | Freeze dibuka khusus perbaikan atas persetujuan pengguna. `discard(file)` memakai URI kiriman, bukan state render lama. Lima tes baru; dua tes penghapusan gagal pada kode lama lalu lulus. 179 Jest (17 suite), tsc lolos, lint exit 0 dengan 8 warning lama. Tidak mengubah server/API/dependency atau memindahkan tag lama. Masalah 2 belum diperbaiki; penghapusan fisik di iPhone dan cache lama belum diperiksa. |
 | F-fix2 | App | Hasil rekaman setelah komponen ditutup (masalah 2 audit) | Kamis 12 Nov | selesai untuk hasil ber-URI | RecordPanel menghapus hasil terlambat tanpa callback/getar selesai. Lima tes komponen dengan kamera, haptics dan operasi berkas sintetis; dua tes reproduksi gagal pada kode lama lalu lulus. 184 Jest (18 suite), tsc lolos, lint exit 0 dengan 8 warning lama. Native menolak tanpa URI masih butuh verifikasi cache di HP; cache lama tidak dibersihkan. Tag lama tidak dipindahkan, tanpa push. |
 | F-fix3 | App | Pengalihan materi macet (masalah 3 audit) | Kamis 12 Nov | selesai | Calon inti macet dialihkan satu level ke bawah, lalu selevel, hanya ke materi terbuka yang tidak macet. Pemanasan/tantangan mengecualikan macet. Tanpa pengganti, beranda mengarahkan ke Mode Pendamping. 10 tes baru, 9 reproduksi gagal pada kode lama; seluruh 194 Jest (18 suite), tsc lolos, lint exit 0 dengan 8 warning lama. Riwayat/status/ambang tetap; manfaat pada pengguna sasaran dan tampilan HP belum diuji. Tanpa push/perubahan tag. |
+| F-fix4 | App | Pemulihan video contoh gagal diputar (masalah 4 audit) | Kamis 12 Nov | selesai di kode/tes | ModelVideo memantau statusChange, menampilkan loading atau pesan gagal/404 beserta teks/ilustrasi, dan menyediakan coba ulang dengan pemutar baru. Delapan tes baru, tujuh gagal pada kode lama. Seluruh 202 Jest (19 suite), tsc lolos, lint exit 0 dengan 8 warning lama. Pemutaran/cleanup native di HP belum diuji. Tanpa dependency/API baru, push atau perubahan tag. |
 
 ## Tugas manual
 
@@ -35,6 +36,22 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | 6 | Submission | Sabtu 14 Nov | belum |
 
 ## Keputusan penting
+- Kamis 12 Nov (F-fix4): pengguna menyetujui perbaikan khusus video contoh yang gagal
+  diputar setelah pemeriksaan ketersediaan. ModelVideo memakai useEvent/statusChange
+  dari Expo dan lifecycle useVideoPlayer yang sudah terpasang; API diperiksa dari source
+  paket lokal. Kegagalan sebelum listener terpasang juga ditangani lewat status awal.
+  Loading memakai indikator/teks; 404 dan error memakai InfoNote, ilustrasi yang sudah
+  ada dan tombol Coba muat video lagi. Error mentah tidak ditampilkan atau dicatat.
+  Beralih ke cadangan melepas komponen Player; coba ulang memeriksa ketersediaan dan
+  membuat pemutar baru. Tidak ada pengulangan otomatis atau perubahan ClipPreview.
+  Delapan tes baru memakai hook event Expo asli dengan API/pemutar native sintetis;
+  tujuh gagal pada kode lama. Tes membuktikan status, cadangan, retry, pelepasan listener,
+  cleanup mock, dan pengabaian hasil pemeriksaan setelah layar ditutup. Seluruh 202 Jest,
+  tsc lolos, lint exit 0 dengan 8 warning lama; tes F-fix1–F-fix3 tetap lulus.
+  Server/ML dan Doctor tidak diulang karena server/dependency/config tidak diubah.
+  Tidak membuka data, memutar video wajah atau mengunggah media. Pemutaran/cleanup
+  native dan tampilan di iPhone/Android belum diuji. Tag lama serta dua panduan staged
+  pengguna dipertahankan; tanpa push. Batas privasi F-fix2 tanpa URI tetap berlaku.
 - Kamis 12 Nov (F-fix3): pengguna menyetujui penanganan materi macet sesuai SPEC §8.4.
   Pemilihan inti dipakai bersama oleh planner dan beranda: jika calon pertama macet,
   cari materi terbuka yang tidak macet satu level di bawahnya, lalu selevel, dengan

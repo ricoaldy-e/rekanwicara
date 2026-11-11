@@ -2,8 +2,33 @@
 
 Tanggal: 11 November 2026. Kunci fitur dilakukan lebih awal atas persetujuan pengguna.
 Snapshot awal: `main`, tag `v1.0-submission` pada `1c930f9`. Freeze kemudian dibuka
-atas persetujuan pengguna untuk F-fix1–F-fix3 (12 November); tag lama tidak dipindahkan.
+atas persetujuan pengguna untuk F-fix1–F-fix4 (12 November); tag lama tidak dipindahkan.
 Dokumen ini mencatat pemeriksaan repo; pengiriman ke panitia belum dilakukan.
+
+## Pembaruan F-fix4 — 12 November 2026
+
+Video contoh memiliki indikator dan teks selama pemeriksaan maupun buffering pemutar.
+Jika 404 atau pemutaran gagal, layar menyediakan pesan Indonesia, teks/ilustrasi bibir
+yang sudah ada dan tombol Coba muat video lagi. Tombol itu memeriksa ulang ketersediaan
+dan membuat pemutar baru. Kegagalan awal dan setelah video siap sama-sama ditangani.
+Pemutar lama dilepas bersama listener saat beralih ke cadangan atau meninggalkan layar,
+menggunakan lifecycle hook Expo yang sudah ada; tidak menambah dependency atau API.
+Detail error internal tidak ditampilkan atau dicatat. Tombol Mulai rekam di layar latihan
+tetap tersedia; video bukan syarat untuk melanjutkan.
+
+Delapan tes baru (tujuh gagal pada kode lama) memakai hook event Expo asli serta API dan
+pemutar native sintetis. Cakupan: checking/buffering/ready, error awal dan setelah ready,
+error sebelum listener terpasang, 404/jaringan gagal, retry, dan hasil pemeriksaan setelah
+unmount. Teks/ilustrasi, pelepasan listener dan cleanup mock juga diperiksa.
+Hasil terbaru: **202 Jest, 19 suite**, TypeScript lolos, lint exit 0 dengan 0 error dan
+8 warning lama. Tes F-fix1–F-fix3 tetap lulus. Server/ML, Doctor dan audit dependency
+tidak diulang karena server, konfigurasi dan dependency tidak berubah.
+
+Belum diuji: pemutaran video/codec dan cleanup native serta tampilan di iPhone/Android.
+Tes mock tidak membuktikan hal tersebut. Tidak membaca data atau memutar/mengunggah
+video wajah. Batas privasi native tanpa URI dari F-fix2 masih berlaku. Tag
+`v1.0-submission` tetap `1c930f9`, belum memuat F-fix1–F-fix4. Dua panduan staged pengguna
+dipertahankan di luar commit perbaikan; tanpa push atau tag pengganti.
 
 ## Pembaruan F-fix3 — 12 November 2026
 
