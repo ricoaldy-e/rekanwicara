@@ -7,7 +7,10 @@ submission Sabtu 14 Nov (kirim minimal 3 jam sebelum tenggat). Tiap fase: rencan
 Pembaruan setelah I1: kalibrasi, latihan iPhone, sinkronisasi Supabase dan pemulihan antrean
 sudah diuji; p90 20 durasi manual 3,91 s. Uji putus WAN diganti simulasi kegagalan koneksi
 Supabase karena jaringan bersama. Lihat `docs/I1_CHECKLIST.md` untuk bukti dan keterbatasan.
-Fase berikutnya **B4**, belum dimulai; tetap perlu rencana dan persetujuan.
+B4 kemudian selesai untuk target Expo Go: Tentang/demo/pemulihan profil diuji pengguna di iPhone,
+174 Jest dan tsc lolos, Doctor 20/20 setelah 11 patch Expo diperbarui dengan persetujuan.
+APK belum diminta/disiapkan; splash release, Android/tablet dan VoiceOver penuh belum diuji.
+Fase berikutnya **F**, belum dimulai; tetap perlu rencana dan persetujuan.
 
 ## Tugas manual pengguna (agen tidak bisa mengerjakannya)
 
@@ -53,7 +56,7 @@ server, dan daftar periksa skenario. Bagian di HP dikerjakan pengguna mengikuti 
 melaporkan hasilnya. Ini juga saat pertama B3 (Supabase, antrean offline) diuji sungguhan: uji dengan mode pesawat
 (lakukan percobaan saat offline, pastikan tabel `attempts` kosong, matikan mode pesawat, baris muncul dalam ±30 detik).
 
-## B4 — Polish, mode demo, build (Jumat) [Plan]
+## B4 — Polish, mode demo, build (Jumat) [Selesai untuk Expo Go; prompt acuan]
 
 ```
 Fase B4. Baca AGENTS.md, CLAUDE.md, docs/SPEC.md §8.5.

@@ -17,7 +17,7 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | A5 | ML | Scorer Wav2Vec2 | — | dilewati | data terlalu sedikit; roadmap |
 | I1 | Bersama | Integrasi ujung ke ujung di HP | Kamis 12 Nov malam | selesai (dengan keterbatasan uji) | Doctor 20/20, 383 pytest, 166 Jest, tsc dan lint perubahan lolos. Kalibrasi dan latihan L0–3 di iPhone berhasil menurut pengguna setelah server dijalankan di luar sandbox. Supabase online, antrean Uji Dengar offline→online, serta antrean percobaan video saat koneksi Supabase disimulasikan gagal lalu pulih otomatis berhasil. 20 durasi manual: p50 2385 ms, p90 3910 ms, maks 14500 ms (semua sampel dihitung). WAN jaringan bersama tidak diputus; lihat rincian dan cek manual tersisa di `docs/I1_CHECKLIST.md`. |
 | A6 | ML | Penyetelan ambang, evaluasi LOSO, model card | Kamis–Jumat | selesai | `ml/eval/{tune_thresholds,evaluate}.py` (logika `server/app/dataset/evaluation.py`), `docs/EVAL_REPORT.md`, `docs/MODEL_CARD.md`; ambang final ditulis ke `thresholds.yaml`. LOSO: bibir rapat 56/60 = 93% ✓, suara saat rapat 43/50 = 86% ✓, vokal 19/23 = 83% (target 85), status kata 12/22 = 55% (target 80); bad_face 3/3, salah tolak 1/74, p90 984 ms. 382 tes hijau |
-| B4 | App | Polish, mode demo, build | Jumat 13 Nov | belum | |
+| B4 | App | Polish, mode demo, build | Jumat 13 Nov | selesai (target Expo Go) | Layar Tentang, profil demo di memori (isolasi dari penyimpanan dan sinkronisasi pribadi), feedback sinkronisasi, label tombol panjang, pemulihan daftar materi kosong, aset cermin/bibir orisinal, dan README app selesai. 174 Jest dan tsc lolos; lint exit 0 dengan 8 warning lama; detektor UI tidak menemukan masalah mekanis. Setelah persetujuan pengguna, 11 patch Expo diperbarui (expo 58.0.24), manifest/lockfile lama dicadangkan; Doctor 20/20. Pengguna mengonfirmasi Tentang tampil baik di iPhone, demo benar dan angka percobaan pribadi kembali sama setelah demo dimatikan. APK/release splash, Android/tablet dan VoiceOver penuh belum diuji. npm: 28 advisori (1 rendah, 27 sedang). |
 | F | Bersama | Kunci fitur, README, tag submission | Jumat 13 Nov malam | belum | |
 
 ## Tugas manual
@@ -32,6 +32,17 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | 6 | Submission | Sabtu 14 Nov | belum |
 
 ## Keputusan penting
+- Rabu 11 Nov (B4): target fase Expo Go; APK belum diminta dan belum disiapkan. Profil demo
+  hanya di memori, memakai user_id terpisah, dengan a/ma lulus lewat aturan kemajuan asli;
+  kalibrasi tidak dipalsukan. Penyimpanan profil/PIN dan semua jalur sinkronisasi hasil demo
+  diblokir. Pergantian profil ditahan selama sinkronisasi pribadi; mematikan demo atau memulai
+  ulang app mengembalikan profil pribadi. Isolasi diuji dengan Jest dan pergantian profil
+  dikonfirmasi pengguna di iPhone. Laporan demo diberi label data contoh.
+- Rabu 11 Nov (B4): pengguna menyetujui 11 pembaruan patch Expo untuk mengembalikan Doctor
+  ke 20/20. Manifest dan lockfile lama dicadangkan di Temp sebelum pembaruan; 174 Jest,
+  tsc dan bundle iOS lolos sesudahnya. npm melaporkan 28 advisori (1 rendah, 27 sedang);
+  tidak menjalankan audit fix. Ikon/splash orisinal dihasilkan skrip dengan Pillow yang sudah
+  terpasang, tanpa dependency baru. Splash akhir membutuhkan release build, bukan bukti Expo Go.
 - Rabu 11 Nov (I1): pengujian WAN tidak dilakukan karena memakai jaringan bersama. Sebagai
   pengganti, URL Supabase dioverride hanya pada proses Metro ke localhost tanpa layanan;
   API latihan tetap di LAN. Satu hasil latihan tersimpan sebagai pending, kemudian otomatis

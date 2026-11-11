@@ -25,7 +25,7 @@ export function BigButton({
   accessibilityHint,
   testID,
 }: BigButtonProps) {
-  const fg = disabled ? colors.background : variant === 'primary' ? colors.onPrimary : colors.onSecondary;
+  const fg = disabled ? colors.textMuted : variant === 'primary' ? colors.onPrimary : colors.onSecondary;
   return (
     <Pressable
       testID={testID}
@@ -43,7 +43,7 @@ export function BigButton({
       ]}
     >
       <View style={styles.row}>
-        {icon ? <Ionicons name={icon} size={28} color={fg} /> : null}
+        {icon ? <Ionicons name={icon} size={28} color={fg} accessible={false} /> : null}
         <Text style={[styles.label, { color: fg }]}>{label}</Text>
       </View>
     </Pressable>
@@ -65,5 +65,5 @@ const styles = StyleSheet.create({
   disabled: { backgroundColor: colors.disabled, borderColor: colors.disabled },
   pressed: { opacity: 0.8, transform: [{ scale: 0.98 }] },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  label: { fontSize: fontSize.large, fontWeight: '700', textAlign: 'center' },
+  label: { flexShrink: 1, fontSize: fontSize.large, fontWeight: '700', textAlign: 'center' },
 });

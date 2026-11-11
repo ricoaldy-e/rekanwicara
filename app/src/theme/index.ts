@@ -2,7 +2,7 @@ import type { Status } from '../api/types';
 
 /**
  * Accessible theme (SPEC §8.5): high contrast, large text, large touch targets.
- * Text/background pairs below are at least 7:1 (WCAG AAA) except `danger` on white (≈6.8:1, AAA for large text).
+ * Main text/status pairs exceed 4.5:1; primary is 10.04:1 and red is 6.57:1.
  */
 export const colors = {
   background: '#FFFFFF',
@@ -14,7 +14,7 @@ export const colors = {
   onPrimary: '#FFFFFF',
   secondary: '#FFFFFF',
   onSecondary: '#0B3D91',
-  disabled: '#9E9E9E',
+  disabled: '#E0E0E0',
   danger: '#B71C1C',
   infoBg: '#E8F0FE',
   infoBorder: '#0B3D91',

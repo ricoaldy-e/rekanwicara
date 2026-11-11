@@ -1,11 +1,17 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Text } from 'react-native';
 
 import { ContentProvider } from '../src/state/content';
 import { SettingsProvider } from '../src/state/settings';
-import { UserProvider } from '../src/state/user';
+import { UserProvider, useUser } from '../src/state/user';
 import { colors, fontSize } from '../src/theme';
+
+function DemoIndicator() {
+  const { demo } = useUser();
+  return demo ? <Text accessibilityLabel="Mode demo aktif" style={{ color: colors.primary, fontSize: fontSize.small, fontWeight: '700' }}>Mode demo</Text> : null;
+}
 
 export default function RootLayout() {
   return (
@@ -21,6 +27,7 @@ export default function RootLayout() {
               headerTitleStyle: { fontSize: fontSize.large, fontWeight: '700', color: colors.text },
               contentStyle: { backgroundColor: colors.background },
               headerBackTitle: 'Kembali',
+              headerRight: () => <DemoIndicator />,
             }}
           >
             <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -33,6 +40,7 @@ export default function RootLayout() {
             <Stack.Screen name="dataset/session" options={{ title: 'Sesi Dataset' }} />
             <Stack.Screen name="dataset/model-videos" options={{ title: 'Rekam Video Model' }} />
             <Stack.Screen name="settings" options={{ title: 'Pengaturan' }} />
+            <Stack.Screen name="about" options={{ title: 'Tentang aplikasi' }} />
           </Stack>
           </UserProvider>
         </ContentProvider>

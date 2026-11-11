@@ -17,7 +17,7 @@ const MINUTE_OPTIONS = SESSION_MINUTES.map((m) => ({ value: String(m), label: `$
 /** Mode Pendamping (SPEC §8.1): PIN, weekly summary, Uji Dengar, session length, text report. */
 export default function Companion() {
   const { items } = useContent();
-  const { profile, progress, sync, addListenCheck, updateSettings, syncNow } = useUser();
+  const { profile, progress, sync, demo, addListenCheck, updateSettings, syncNow } = useUser();
   const [stage, setStage] = useState<Stage>('pin');
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export default function Companion() {
   const share = async () => {
     setShareError(false);
     try {
-      await Share.share({ message: reportText(summary, nameOf) });
+      await Share.share({ message: `${demo ? 'MODE DEMO — data contoh\n\n' : ''}${reportText(summary, nameOf)}` });
     } catch {
       setShareError(true); // the share sheet could not open; nothing is lost
     }
@@ -209,15 +209,18 @@ export default function Companion() {
       />
 
       <Text style={styles.heading}>Penyimpanan online</Text>
-      {!sync.configured ? (
+      {demo ? (
+        <InfoNote text="Mode demo: hasil hanya ada selama sesi ini dan tidak dikirim ke penyimpanan online." testID="sync-demo" />
+      ) : !sync.configured ? (
         <InfoNote text="Penyimpanan online belum disambungkan. Hasil latihan tersimpan di HP ini." testID="sync-off" />
       ) : (
         <>
-          <View testID="sync-status">
-            <Body>{sync.pending > 0 ? `${sync.pending} catatan menunggu dikirim.` : 'Semua catatan sudah tersimpan online.'}</Body>
+          <View testID="sync-status" accessibilityLiveRegion="polite">
+            <Body>{sync.running ? 'Sedang menyinkronkan catatan…' : sync.pending > 0 ? `${sync.pending} catatan menunggu dikirim.` : profile.attempts.length + profile.listenChecks.length > 0 ? 'Semua catatan sudah tersimpan online.' : 'Belum ada catatan untuk dikirim.'}</Body>
+            {sync.lastSyncedAt ? <Body muted>Terakhir disinkronkan: {new Date(sync.lastSyncedAt).toLocaleString('id-ID')}</Body> : null}
           </View>
           {sync.lastError ? <InfoNote tone="warning" text={`Belum terkirim: ${sync.lastError}`} testID="sync-error" /> : null}
-          <BigButton label="Sinkronkan sekarang" icon="cloud-upload" variant="secondary" disabled={sync.running} onPress={syncNow} />
+          <BigButton label={sync.running ? 'Menyinkronkan…' : 'Sinkronkan sekarang'} icon="cloud-upload" variant="secondary" disabled={sync.running} onPress={syncNow} />
         </>
       )}
 

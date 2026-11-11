@@ -17,6 +17,7 @@ import {
   type Settings,
 } from '../user/pure';
 import { loadProfile, savePin, saveProfile } from '../user/storage';
+import { createDemoProfile } from '../user/demo';
 import { useContent } from './content';
 import { buildProgress, type ItemProgress } from './progression';
 
@@ -35,6 +36,8 @@ export interface SyncStatus {
 }
 
 interface UserValue {
+  demo: boolean;
+  setDemo(enabled: boolean): void;
   /** False until the saved profile has been read. */
   ready: boolean;
   profile: Profile;
@@ -57,6 +60,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const { items } = useContent();
   const [profile, setProfile] = useState<Profile>(newProfile);
   const [ready, setReady] = useState(false);
+  const [demo, setDemoState] = useState(false);
+  const demoRef = useRef(false);
+  const personal = useRef<Profile | null>(null);
   const latest = useRef(profile);
   const remote = useMemo(() => createRemote(), []);
   const itemsRef = useRef(items);
@@ -88,11 +94,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const next = change(latest.current);
     latest.current = next;
     setProfile(next);
-    void saveProfile(next);
+    if (!demoRef.current) void saveProfile(next);
   }, []);
 
   const syncNow = useCallback(async () => {
-    if (!remote || running.current || !itemsRef.current) return;
+    if (demoRef.current || !ready || !remote || running.current || !itemsRef.current) return;
     running.current = true;
     setStatus((s) => ({ ...s, running: true }));
     try {
@@ -107,11 +113,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
     } finally {
       running.current = false;
     }
-  }, [remote, update]);
+  }, [ready, remote, update]);
+
+  const setDemo = useCallback((enabled: boolean) => {
+    if (!ready || running.current || enabled === demoRef.current) return;
+    if (enabled) personal.current = latest.current;
+    const next = enabled ? createDemoProfile() : personal.current!;
+    demoRef.current = enabled;
+    latest.current = next;
+    setProfile(next);
+    setDemoState(enabled);
+    setStatus({ running: false, lastError: null, lastSyncedAt: null });
+  }, [ready]);
 
   // Sync when the profile is read, when the app comes back to the foreground, and every 30 s while open.
   useEffect(() => {
-    if (!ready || !remote) return;
+    if (!ready || demo || !remote) return;
     void syncNow();
     const sub = AppState.addEventListener('change', (s) => s === 'active' && void syncNow());
     const timer = setInterval(() => void syncNow(), SYNC_INTERVAL_MS);
@@ -119,10 +136,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
       sub.remove();
       clearInterval(timer);
     };
-  }, [ready, remote, syncNow, items]);
+  }, [ready, demo, remote, syncNow, items]);
 
   const completeOnboarding = useCallback(
     async (pin: string) => {
+      if (demoRef.current) return;
       await savePin(pin);
       update((p) => ({ ...p, onboarded: true, consentUser: true, consentCompanion: true }));
     },
@@ -162,10 +180,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<UserValue>(
     () => ({
+      demo,
+      setDemo,
       ready,
       profile,
       progress,
-      sync: { configured: remote !== null, pending: pendingCount(profile), ...status },
+      sync: { configured: !demo && remote !== null, pending: demo ? 0 : pendingCount(profile), ...status },
       completeOnboarding,
       markCalibrated,
       addAttempt,
@@ -173,7 +193,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       updateSettings,
       syncNow,
     }),
-    [ready, profile, progress, remote, status, completeOnboarding, markCalibrated, addAttempt, addCheck, updateSettings, syncNow],
+    [demo, setDemo, ready, profile, progress, remote, status, completeOnboarding, markCalibrated, addAttempt, addCheck, updateSettings, syncNow],
   );
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }

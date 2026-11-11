@@ -7,7 +7,7 @@ pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks 
 2. `CONTEXT.md` (berkas ini): ringkasan, status, keterbatasan, cara menyiapkan laptop.
 3. `docs/SPEC.md`: spesifikasi. **§5 = kontrak API (sumber kebenaran)**.
 4. `docs/PROGRESS.md`: status tiap fase dan **semua keputusan** beserta alasannya (bagian "Keputusan penting").
-5. `docs/NEXT_STEPS.md`: pekerjaan yang tersisa (B4, F) lengkap dengan prompt-nya; hasil I1 di `docs/I1_CHECKLIST.md`.
+5. `docs/NEXT_STEPS.md`: pekerjaan yang tersisa (F) lengkap dengan prompt-nya; hasil I1 di `docs/I1_CHECKLIST.md`, B4 di `app/README.md`.
 6. `docs/EVAL_REPORT.md`, `docs/MODEL_CARD.md`: hasil evaluasi dan batasan jujur.
 
 ---
@@ -42,12 +42,17 @@ pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks 
 | B3 | Supabase, aturan kemajuan §8.4, Mode Pendamping | kode selesai; sinkronisasi nyata dan antrean diuji saat I1 (rincian manual tersisa di checklist I1) |
 | A5 | scorer Wav2Vec2 | dilewati (roadmap) |
 | **I1** | **integrasi ujung ke ujung di HP** | selesai dengan keterbatasan uji; iPhone, p90 manual 3,91 s; pemulihan antrean video diuji dengan simulasi koneksi Supabase gagal |
-| **B4** | polish, layar "Tentang", mode demo, ikon, (APK bila perlu) | **BELUM** |
+| **B4** | polish, layar "Tentang", mode demo, ikon, (APK bila perlu) | selesai untuk Expo Go; Tentang/demo/pemulihan profil dikonfirmasi di iPhone. APK belum diminta/disiapkan; splash release dan VoiceOver penuh belum diuji |
 | **F** | kunci fitur, README root, tag `v1.0-submission` | **BELUM** |
 
 Commit basis sebelum I1: `638d878` (modul B3 dipulihkan; `/data/` di gitignore). Lihat `git log -1` untuk commit terkini.
 Remote: `https://github.com/ricoaldy-e/rekanwicara` (repo **publik**, jangan push tanpa instruksi).
-Tes setelah I1: server **383** lulus (`cd server && pytest -q`), app **166** lulus (`cd app && npm test`).
+Tes terkini: server **383** lulus (terakhir I1; B4 tidak mengubah server), app **174** lulus setelah B4.
+B4: TypeScript dan Doctor 20/20 lolos, lint app exit 0 dengan 8 warning lama.
+11 patch Expo diperbarui dengan persetujuan pengguna (expo 58.0.24); npm melaporkan 28 advisori
+(1 rendah, 27 sedang), belum diaudit lebih lanjut. Mode demo di pengaturan tersembunyi hanya di memori,
+memakai progres contoh dan tidak menimpa profil/PIN pribadi atau mengirim hasil ke Supabase.
+Mode demo nonaktif lagi setelah app dimulai ulang. README app memuat checklist dan batas uji.
 I1: kalibrasi dan latihan L0–3, Supabase online dan antrean sudah diuji melalui pengguna.
 Latensi 20 percobaan: p50 2,385 s, p90 3,91 s, maksimum 14,5 s; semua sampel dihitung.
 WAN jaringan bersama tidak diputus; kegagalan koneksi Supabase disimulasikan, lalu endpoint asli dipulihkan.
@@ -175,7 +180,7 @@ pytest -q                                # harus 383 lulus, 0 skip
 cd ..\app
 npm ci
 copy .env.example .env
-npm test                                 # harus 166 lulus
+npm test                                 # harus 174 lulus
 npx tsc --noEmit
 npx --yes expo-doctor@1.21.6             # 20/20 (versi "latest" sempat rusak)
 ```

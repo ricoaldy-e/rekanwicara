@@ -3,7 +3,8 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { createApiClient, isValidBaseUrl } from '../src/api/client';
 import { errorMessage } from '../src/api/errors';
-import { BigButton, Body, Card, InfoNote, Screen, Title } from '../src/components';
+import { BigButton, Body, Card, CheckRow, InfoNote, Screen, Title } from '../src/components';
+import { useUser } from '../src/state/user';
 import { DATASET_MODE } from '../src/config';
 import { useContent } from '../src/state/content';
 import { useSettings } from '../src/state/settings';
@@ -15,6 +16,7 @@ type TestResult = { ok: true; text: string } | { ok: false; text: string } | nul
 export default function Settings() {
   const { apiUrl, envApiUrl, isOverridden, setApiUrl, resetApiUrl } = useSettings();
   const { health } = useContent();
+  const { demo, setDemo, sync, ready } = useUser();
   const [draft, setDraft] = useState(apiUrl);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<TestResult>(null);
@@ -53,6 +55,8 @@ export default function Settings() {
     try {
       await resetApiUrl();
       setResult({ ok: true, text: 'Kembali ke alamat bawaan.' });
+    } catch {
+      setResult({ ok: false, text: 'Alamat bawaan belum bisa dipulihkan. Coba lagi.' });
     } finally {
       setBusy(false);
     }
@@ -89,6 +93,12 @@ export default function Settings() {
           <BigButton label="Kembalikan ke bawaan" variant="secondary" icon="arrow-undo" onPress={reset} disabled={busy} />
         </View>
       ) : null}
+      <Title>Mode demo</Title>
+      <Body>Contoh progres: a dan ma sudah lulus. Latihan tetap dianalisis server. Progres demo tidak dikirim online dan hilang saat keluar dari mode demo atau app dimulai ulang.</Body>
+      {ready && !sync.running ? (
+        <CheckRow checked={demo} onToggle={() => setDemo(!demo)} text="Gunakan profil demo" testID="demo-toggle" />
+      ) : <Body>Tunggu penyimpanan selesai sebelum mengganti profil.</Body>}
+      <InfoNote text={demo ? 'Mode demo aktif. Data latihan asli tetap tersimpan.' : 'Profil latihan pribadi aktif.'} />
     </Screen>
   );
 }

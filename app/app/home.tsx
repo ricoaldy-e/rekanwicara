@@ -22,7 +22,7 @@ const ROLE_LABEL: Record<Role, string> = {
 export default function Home() {
   const router = useRouter();
   const { health, healthError, items, loading, error, reload } = useContent();
-  const { profile, progress } = useUser();
+  const { profile, progress, demo } = useUser();
   const open = (itemId: string) => router.push({ pathname: '/practice/[itemId]', params: { itemId } });
 
   // Today's session (SPEC §8.4): warm-up, reviews, core material, challenge. The day seeds the random
@@ -47,6 +47,7 @@ export default function Home() {
       >
         <Text style={styles.title}>Misi hari ini</Text>
       </Pressable>
+      {demo ? <InfoNote text="Mode demo: progres contoh. Hasil latihan di mode ini tidak disimpan online." /> : null}
 
       {!profile.calibrated ? (
         <View style={styles.gap}>
@@ -103,6 +104,12 @@ export default function Home() {
           <BigButton label="Coba lagi" icon="refresh" onPress={reload} disabled={loading} />
         </View>
       ) : null}
+      {!loading && !error && items?.length === 0 ? (
+        <View style={styles.gap}>
+          <InfoNote text="Materi belum tersedia. Coba muat ulang atau periksa koneksi server di pengaturan." />
+          <BigButton label="Muat ulang materi" icon="refresh" onPress={reload} />
+        </View>
+      ) : null}
 
       {items
         ? groupByLevel(items).map((group) => (
@@ -147,6 +154,7 @@ export default function Home() {
           variant="secondary"
           onPress={() => router.push('/companion')}
         />
+        <BigButton label="Tentang aplikasi" icon="information-circle" variant="secondary" onPress={() => router.push('/about')} />
         {DATASET_MODE ? (
           <BigButton label="Mode Dataset" icon="videocam" variant="secondary" onPress={() => router.push('/dataset')} />
         ) : null}

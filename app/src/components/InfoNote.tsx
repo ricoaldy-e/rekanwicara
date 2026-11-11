@@ -16,6 +16,7 @@ export function InfoNote({ text, tone = 'info', testID }: InfoNoteProps) {
       testID={testID}
       accessible
       accessibilityLabel={text}
+      accessibilityLiveRegion="polite"
       style={[styles.box, warning && styles.warning]}
     >
       <Ionicons

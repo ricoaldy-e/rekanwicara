@@ -14,6 +14,7 @@ const mockVerifyPin = jest.fn();
 const mockAddListenCheck = jest.fn();
 const mockUpdateSettings = jest.fn();
 let mockProfile: Profile;
+let mockDemo = false;
 let mockSync: { configured: boolean; running: boolean; pending: number; lastError: string | null; lastSyncedAt: string | null };
 
 jest.mock('../src/user/storage', () => ({ verifyPin: (pin: string) => mockVerifyPin(pin) }));
@@ -21,6 +22,7 @@ jest.mock('../src/state/content', () => ({ useContent: () => ({ items: mockItems
 jest.mock('../src/state/user', () => ({
   useUser: () => ({
     profile: mockProfile,
+    demo: mockDemo,
     // The real progression rules, so the screen shows what the app would show.
     progress: jest
       .requireActual<typeof import('../src/state/progression')>('../src/state/progression')
@@ -45,6 +47,7 @@ beforeEach(() => {
   mockAddListenCheck.mockReset();
   mockUpdateSettings.mockReset();
   mockProfile = newProfile();
+  mockDemo = false;
   mockSync = { configured: false, running: false, pending: 0, lastError: null, lastSyncedAt: null };
 });
 
@@ -128,5 +131,24 @@ describe('Mode Pendamping', () => {
     await waitFor(() => expect(screen.getAllByTestId('sync-status').length).toBeGreaterThan(0));
     expect(screen.getAllByText('3 catatan menunggu dikirim.').length).toBeGreaterThan(0);
     expect(screen.getAllByTestId('sync-error').length).toBeGreaterThan(0);
+  });
+
+  it('shows ongoing sync and last success as visible feedback', async () => {
+    mockSync = { ...mockSync, configured: true, running: true, lastSyncedAt: '2026-11-11T12:00:00Z' };
+    await unlock();
+    expect(screen.getByText('Sedang menyinkronkan catatan…')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Menyinkronkan…' })).toBeDisabled();
+    expect(screen.getByText(/Terakhir disinkronkan:/)).toBeTruthy();
+  });
+
+  it('labels demo storage and shared reports as synthetic', async () => {
+    mockDemo = true;
+    const share = jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction', activityType: undefined });
+    await unlock();
+    expect(screen.getByTestId('sync-demo')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Sinkronkan sekarang' })).toBeNull();
+    await fireEvent.press(screen.getByTestId('share-report'));
+    expect(share.mock.calls[0][0].message).toMatch(/^MODE DEMO/);
+    share.mockRestore();
   });
 });

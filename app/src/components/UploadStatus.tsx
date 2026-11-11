@@ -17,10 +17,10 @@ export interface UploadStatusProps {
 export function UploadStatus({ state, onRetry, describeError }: UploadStatusProps) {
   if (state.status === 'uploading') {
     const pct = state.fraction === null ? null : Math.round(state.fraction * 100);
-    const label = pct === null ? 'Mengirim…' : `Mengirim… ${pct}%`;
+    const label = pct === 100 ? 'Rekaman terkirim. Menunggu hasil…' : pct === null ? 'Mengirim…' : `Mengirim… ${pct}%`;
     return (
       <View style={styles.wrap}>
-        <Text style={styles.text}>{label}</Text>
+        <Text accessibilityLiveRegion="polite" style={styles.text}>{label}</Text>
         <ProgressBar value={state.fraction} accessibilityLabel={label} />
         {state.attempt > 1 ? <Text style={styles.muted}>Percobaan ke-{state.attempt}</Text> : null}
       </View>
