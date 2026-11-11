@@ -1,5 +1,5 @@
 # ---------- Data and model artifacts (never committed) ----------
-data/
+/data/
 server/models/*.task
 *.joblib
 *.pt
