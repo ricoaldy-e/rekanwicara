@@ -25,7 +25,9 @@ Tidak ada model yang dilatih oleh tim. Penilaian = model pralatih + pengukuran a
 | Ambang | `server/app/config/thresholds.yaml` | nilai awal SPEC, disetel A2/A3 dan A6 (LOSO) |
 
 Lingkungan: Python 3.11, numpy 2.4.6, scipy 1.17.1, FastAPI 0.162.2. Lisensi komponen ada di
-`docs/THIRD_PARTY.md` (lisensi berkas model Face Landmarker belum terverifikasi).
+`docs/THIRD_PARTY.md`. Tiga model card resmi komponen Face Landmarker menyatakan
+Apache-2.0; tautan dan SHA-256 bundle tercantum di dokumen tersebut. Lingkungan
+evaluasi di atas berasal dari A6; pemeriksaan laptop penerus ada di checklist submission.
 
 ## Data
 

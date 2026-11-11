@@ -20,6 +20,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "server"))
 
 from app.content.loader import load_content  # noqa: E402
+from app.core.cli import run_cli  # noqa: E402
 from app.core.thresholds import load_thresholds  # noqa: E402
 from app.dataset.labels import clip_path, read_metadata, write_auto_labels  # noqa: E402
 from app.dataset.process import is_processed, process_clip, thresholds_sha  # noqa: E402
@@ -39,7 +40,7 @@ def main() -> int:
     raw, processed = args.data_dir / "raw", args.data_dir / "processed"
     metadata = [r for r in read_metadata(raw) if not args.only or r["speaker_id"] == args.only]
     if not metadata:
-        print("No clips found in", raw / "metadata.csv")
+        print("No clips found.")
         return 1
     if not MODEL.is_file():
         print(
@@ -60,10 +61,10 @@ def main() -> int:
             summary = process_clip(clip_path(raw, row), row, content, thresholds, MODEL, processed)
             done += 1
             flags = summary["quality_flags"] or ""
-            print(f"[{number}/{len(metadata)}] {cid}: {summary['status']} {flags}")
+            print(f"[{number}/{len(metadata)}] {summary['status']} {flags}")
         except Exception as exc:  # noqa: BLE001 (report and go on: one bad clip must not stop the batch)
-            failed.append({"clip_id": cid, "error": f"{type(exc).__name__}: {exc}"[:200]})
-            print(f"[{number}/{len(metadata)}] {cid}: FAILED {failed[-1]['error']}")
+            failed.append({"clip_id": cid, "error": type(exc).__name__})
+            print(f"[{number}/{len(metadata)}] FAILED type={type(exc).__name__}")
 
     processed.mkdir(parents=True, exist_ok=True)
     (processed / "_failures.json").write_text(json.dumps(failed, indent=2), encoding="utf-8")
@@ -72,9 +73,9 @@ def main() -> int:
     )
     seconds = time.perf_counter() - start
     print(f"\nprocessed {done}, skipped {skipped}, failed {len(failed)} in {seconds:.0f} s")
-    print(f"auto labels: {rows} rows -> {args.data_dir / 'labels' / 'auto_labels.csv'}")
+    print(f"auto labels: {rows} rows")
     return 1 if failed else 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    run_cli(main)

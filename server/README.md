@@ -1,13 +1,13 @@
 # Cermin Wicara — server
 
 FastAPI server untuk analisis rekaman latihan. Kontrak API: [docs/SPEC.md §5](../docs/SPEC.md).
-Fase A0: endpoint lengkap dengan **mode mock**, plus upload dataset.
-Fase A1: pipeline media (ffmpeg) + cek kualitas rekaman + deteksi wajah MediaPipe, diperiksa lewat
-endpoint debug. Analisis `/analyze` sungguhan menyusul (A2–A3).
+Analisis `/analyze` dan kalibrasi `/calibrate` sudah memakai pipeline sungguhan bila
+`MOCK_MODE=false`. Produk/demo juga memakai `DATASET_MODE=false`, `DEBUG=false`, dan
+`SCORER_MODE=rules`. Panduan setup terpadu ada di [README root](../README.md).
 
 ## Prasyarat
 
-- **Python 3.11** (bukan 3.12+: MediaPipe/torch di fase berikutnya butuh 3.11)
+- **Python 3.11** (versi yang dipakai dan diuji; torch tidak dipasang di MVP)
 - **FFmpeg + ffprobe** di PATH (`ffmpeg -version`)
   - Windows: `winget install -e --id Gyan.FFmpeg`, lalu buka ulang terminal/VS Code
   - macOS: `brew install ffmpeg`
@@ -71,7 +71,7 @@ Semua ambang penilaian dan kualitas ada di `app/config/thresholds.yaml` (dimuat 
 ## Menjalankan
 
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --no-access-log
 ```
 
 `--host 0.0.0.0` wajib supaya HP di Wi-Fi yang sama bisa mengakses laptop.

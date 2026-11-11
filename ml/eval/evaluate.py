@@ -4,7 +4,7 @@ thresholds; block G retries, wrongly rejected clips, latency.
 Usage (from the repo root, with the server venv; run ml/eval/tune_thresholds.py first):
     server\\.venv\\Scripts\\python ml/eval/evaluate.py
 
-Prints the tables and saves them to data/processed/eval_results.md (numbers and clip ids only).
+Saves tables to data/processed/eval_results.md; prints no clip details.
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "server"))
 
 from app.content.loader import load_content  # noqa: E402
+from app.core.cli import run_cli  # noqa: E402
 from app.core.thresholds import load_thresholds  # noqa: E402
 from app.dataset import evaluation as ev  # noqa: E402
 
@@ -135,11 +136,9 @@ def main() -> int:
     text = "\n".join(lines)
     out = args.data_dir / "processed" / "eval_results.md"
     out.write_text(text, encoding="utf-8")
-    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
-    print(text)
-    print("saved:", out)
+    print("Evaluation report saved locally.")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    run_cli(main)

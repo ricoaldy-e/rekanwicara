@@ -7,7 +7,7 @@ pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks 
 2. `CONTEXT.md` (berkas ini): ringkasan, status, keterbatasan, cara menyiapkan laptop.
 3. `docs/SPEC.md`: spesifikasi. **§5 = kontrak API (sumber kebenaran)**.
 4. `docs/PROGRESS.md`: status tiap fase dan **semua keputusan** beserta alasannya (bagian "Keputusan penting").
-5. `docs/NEXT_STEPS.md`: pekerjaan yang tersisa (F) lengkap dengan prompt-nya; hasil I1 di `docs/I1_CHECKLIST.md`, B4 di `app/README.md`.
+5. `docs/NEXT_STEPS.md`: tugas manual video/submission; I1 di `docs/I1_CHECKLIST.md`, B4 di `app/README.md`, F di `docs/SUBMISSION_CHECKLIST.md`.
 6. `docs/EVAL_REPORT.md`, `docs/MODEL_CARD.md`: hasil evaluasi dan batasan jujur.
 
 ---
@@ -43,14 +43,16 @@ pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks 
 | A5 | scorer Wav2Vec2 | dilewati (roadmap) |
 | **I1** | **integrasi ujung ke ujung di HP** | selesai dengan keterbatasan uji; iPhone, p90 manual 3,91 s; pemulihan antrean video diuji dengan simulasi koneksi Supabase gagal |
 | **B4** | polish, layar "Tentang", mode demo, ikon, (APK bila perlu) | selesai untuk Expo Go; Tentang/demo/pemulihan profil dikonfirmasi di iPhone. APK belum diminta/disiapkan; splash release dan VoiceOver penuh belum diuji |
-| **F** | kunci fitur, README root, tag `v1.0-submission` | **BELUM** |
+| **F** | kunci fitur, README root, tag `v1.0-submission` | selesai; kode dibekukan, video dan pengiriman ke panitia masih tugas manual |
 
 Commit basis sebelum I1: `638d878` (modul B3 dipulihkan; `/data/` di gitignore). Lihat `git log -1` untuk commit terkini.
 Remote: `https://github.com/ricoaldy-e/rekanwicara` (repo **publik**, jangan push tanpa instruksi).
-Tes terkini: server **383** lulus (terakhir I1; B4 tidak mengubah server), app **174** lulus setelah B4.
-B4: TypeScript dan Doctor 20/20 lolos, lint app exit 0 dengan 8 warning lama.
+Tes akhir F: server/ML **389** lulus, **0 skip**, app **174** lulus.
+TypeScript, Ruff check/format dan Doctor 20/20 lolos; lint app exit 0 dengan 8 warning lama.
+Pytest memiliki 1 peringatan deprecation Starlette/HTTPX. Rincian di checklist submission.
 11 patch Expo diperbarui dengan persetujuan pengguna (expo 58.0.24); npm melaporkan 28 advisori
-(1 rendah, 27 sedang), belum diaudit lebih lanjut. Mode demo di pengaturan tersembunyi hanya di memori,
+(1 rendah, 27 sedang; audit baca-saja F: tidak ada tinggi/kritis, dampak belum ditelaah per advisori).
+Mode demo di pengaturan tersembunyi hanya di memori,
 memakai progres contoh dan tidak menimpa profil/PIN pribadi atau mengirim hasil ke Supabase.
 Mode demo nonaktif lagi setelah app dimulai ulang. README app memuat checklist dan batas uji.
 I1: kalibrasi dan latihan L0–3, Supabase online dan antrean sudah diuji melalui pengguna.
@@ -89,7 +91,7 @@ Keterbatasan yang sudah diketahui (detail di `docs/EVAL_REPORT.md` dan `docs/PRO
 rekanwicara/
 ├── AGENTS.md, CLAUDE.md, CONTEXT.md     aturan dan konteks
 ├── docs/                SPEC.md, PROGRESS.md, NEXT_STEPS.md, EVAL_REPORT.md, MODEL_CARD.md,
-│                        THIRD_PARTY.md, supabase/schema.sql
+│                        THIRD_PARTY.md, SUBMISSION_CHECKLIST.md, supabase/schema.sql
 ├── server/              Python 3.11 + FastAPI
 │   ├── app/main.py                  create_app
 │   ├── app/api/v1/                  health, items, analysis, dataset, model_video, debug
@@ -143,7 +145,8 @@ hasil hijau contoh (bukan analisis). Setelah mengubah `.env`, server harus dijal
   `user_id` ke server (kalibrasi) = id lokal; baris Supabase memakai `auth.uid()`.
 - **Aturan kemajuan §8.4** (`src/state/progression.ts`, tafsiran lengkap di `docs/PROGRESS.md`): lulus = ≥ 8 hijau dari
   10 percobaan terakhir di ≥ 2 sesi; Level 2+ terkunci sampai satu materi tingkat di bawahnya lulus.
-  **Saklar "Buka semua materi" di Mode Pendamping wajib dinyalakan untuk demo.**
+  Checkbox "Buka semua materi" di Mode Pendamping membuka akses tanpa membuat materi lulus.
+  Profil demo B4 memiliki a/ma lulus dan terpisah dari profil pribadi; dapat dipilih di pengaturan tersembunyi.
 - **Variabel `app/.env`**: `EXPO_PUBLIC_API_URL` (IP laptop server), `EXPO_PUBLIC_SUPABASE_URL`,
   `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_DATASET_MODE` (`false` untuk demo). Setelah mengubah `.env`:
   `npx expo start -c`.
@@ -175,7 +178,7 @@ py -3.11 -m venv .venv
 python -m pip install -r requirements.txt
 copy .env.example .env
 python scripts/download_models.py        # SHA-256 yang diharapkan: 64184e229b263107…
-pytest -q                                # harus 383 lulus, 0 skip
+pytest -q                                # harus 389 lulus, 0 skip
 # App
 cd ..\app
 npm ci

@@ -20,6 +20,7 @@ sys.path.insert(0, str(REPO / "server"))
 
 import cv2  # noqa: E402  (bundled with mediapipe)
 
+from app.core.cli import run_cli  # noqa: E402
 from app.core.thresholds import load_thresholds  # noqa: E402
 from app.pipeline.face import track_faces  # noqa: E402
 from app.pipeline.media import prepared_media  # noqa: E402
@@ -84,10 +85,10 @@ def main() -> None:
     )
 
     cv2.imwrite(str(out), img)
-    print(out)
+    print("Landmark preview saved locally.")
 
 
 if __name__ == "__main__":
     if shutil.which("ffmpeg") is None:
         sys.exit("ffmpeg not found on PATH")
-    main()
+    run_cli(main)

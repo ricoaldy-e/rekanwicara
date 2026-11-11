@@ -26,6 +26,7 @@ import matplotlib  # noqa: E402
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
+from app.core.cli import run_cli  # noqa: E402
 from app.core.thresholds import load_thresholds  # noqa: E402
 from app.pipeline.features import ClipFeatures, extract_clip_features  # noqa: E402
 
@@ -103,7 +104,7 @@ def plot(video: Path) -> Path:
     out = OUT_DIR / f"{video.parent.name}__{video.stem}__features.png"
     fig.savefig(out, dpi=90)
     plt.close(fig)
-    print(f"{out}\n  closures={len(runs)}  {summary or '-'}")
+    print(f"Feature plot saved locally; closures={len(runs)}.")
     return out
 
 
@@ -117,4 +118,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    run_cli(main)

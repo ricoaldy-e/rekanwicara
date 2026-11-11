@@ -12,13 +12,13 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | A2 | Server | Fitur bibir + fitur suara + alat plot | Rabu 11 Nov pagi | selesai | `pipeline/lips.py`, `pipeline/audio.py`, `ml/tools/draw_landmarks.py`, `ml/tools/plot_features.py`; deret waktu di `/v1/debug/features`. 255 tes hijau. Indeks 13/14/61/291/33/263 + kontur bibir diverifikasi dengan gambar (P1, P2). l3_mama/l3_papa P1–P3: 2 penutupan di keenam klip; /m/ tengah 100% bersuara (3/3); /p/ tengah P3 0%, P2 38%, P1 57% bersuara (lihat Keputusan) |
 | A3 | Server | Kalibrasi, segmentasi, aturan L0–3, petunjuk | Rabu 11 Nov | selesai | `pipeline/calibration.py`, `segment.py`, `rules.py`, `hints.py`; `/analyze` dan `/calibrate` sungguhan saat `MOCK_MODE=false`. 313 tes hijau. Data tim tanpa kalibrasi (L1–L3, klip benar): L1 18/21 hijau (+1 retry klip cacat), L2 12/18, L3 4/18; a_narrow 3/3 dan mama_no_closure 3/3 merah. processing_ms median 803 (749–943, request pertama 1669) pada 68 rekaman |
 | B2 | App | Onboarding, kalibrasi, alur latihan, hasil | Rabu 11 Nov | selesai | Onboarding (penjelasan, 2 persetujuan, PIN 4 angka di keystore), kalibrasi 4 langkah, Home (misi hari ini + status terakhir), Practice Lihat→Tiru→Bandingkan→Ulangi, ResultView (2 lencana, petunjuk, Peta Vokal, Cermin Bibir, grafik kekerasan L0, label perkiraan sistem). 99 tes jest, tsc, expo-doctor 20/20, bundle Android bersih. Uji di HP: menunggu |
-| A4 | ML | Proses dataset, alat cek label, putaran LOSO | Rabu 11 Nov | selesai | `ml/dataset/{process,folds,report}.py` (logika di `server/app/dataset/`), halaman `/labeler`. 81 klip diproses tanpa gagal (71 s; ulang = lewati semua), `auto_labels.csv` 81 baris, 3 fold LOSO (uji 27, setel 54). `/labeler` diuji di browser sungguhan (video, pintasan 1/2/3/4/spasi/←, simpan, lanjut setelah muat ulang). 368 tes server hijau. **Cek label manusia belum dilakukan** (Tugas 4) |
+| A4 | ML | Proses dataset, alat cek label, putaran LOSO | Rabu 11 Nov | selesai | `ml/dataset/{process,folds,report}.py` (logika di `server/app/dataset/`), halaman `/labeler`. 81 klip diproses tanpa gagal (71 s; ulang = lewati semua), `auto_labels.csv` 81 baris, 3 fold LOSO (uji 27, setel 54). `/labeler` diuji di browser sungguhan (video, pintasan 1/2/3/4/spasi/←, simpan, lanjut setelah muat ulang). Saat A4: 368 tes server hijau; cek label manusia kemudian selesai untuk A6 (162 penilaian, Tugas 4). |
 | B3 | App | Supabase, logika kemajuan, Mode Pendamping | Kamis 12 Nov | selesai | `src/state/progression.ts` (aturan §8.4, 37 tes), antrean offline + Supabase (`src/data/sync.ts`, `supabase.ts`), `docs/supabase/schema.sql` (4 tabel, 12 kebijakan RLS), Home dengan sesi hari ini dan tahap materi, Mode Pendamping (PIN, ringkasan 7 hari, Uji Dengar, pengaturan, bagikan laporan, saran konsultasi). Saat B3: 164 tes jest, tsc, expo-doctor 20/20, bundle Android bersih. Integrasi iPhone dan Supabase nyata kemudian diuji di I1; rincian cek manual tersisa ada di checklist I1. |
 | A5 | ML | Scorer Wav2Vec2 | — | dilewati | data terlalu sedikit; roadmap |
 | I1 | Bersama | Integrasi ujung ke ujung di HP | Kamis 12 Nov malam | selesai (dengan keterbatasan uji) | Doctor 20/20, 383 pytest, 166 Jest, tsc dan lint perubahan lolos. Kalibrasi dan latihan L0–3 di iPhone berhasil menurut pengguna setelah server dijalankan di luar sandbox. Supabase online, antrean Uji Dengar offline→online, serta antrean percobaan video saat koneksi Supabase disimulasikan gagal lalu pulih otomatis berhasil. 20 durasi manual: p50 2385 ms, p90 3910 ms, maks 14500 ms (semua sampel dihitung). WAN jaringan bersama tidak diputus; lihat rincian dan cek manual tersisa di `docs/I1_CHECKLIST.md`. |
 | A6 | ML | Penyetelan ambang, evaluasi LOSO, model card | Kamis–Jumat | selesai | `ml/eval/{tune_thresholds,evaluate}.py` (logika `server/app/dataset/evaluation.py`), `docs/EVAL_REPORT.md`, `docs/MODEL_CARD.md`; ambang final ditulis ke `thresholds.yaml`. LOSO: bibir rapat 56/60 = 93% ✓, suara saat rapat 43/50 = 86% ✓, vokal 19/23 = 83% (target 85), status kata 12/22 = 55% (target 80); bad_face 3/3, salah tolak 1/74, p90 984 ms. 382 tes hijau |
 | B4 | App | Polish, mode demo, build | Jumat 13 Nov | selesai (target Expo Go) | Layar Tentang, profil demo di memori (isolasi dari penyimpanan dan sinkronisasi pribadi), feedback sinkronisasi, label tombol panjang, pemulihan daftar materi kosong, aset cermin/bibir orisinal, dan README app selesai. 174 Jest dan tsc lolos; lint exit 0 dengan 8 warning lama; detektor UI tidak menemukan masalah mekanis. Setelah persetujuan pengguna, 11 patch Expo diperbarui (expo 58.0.24), manifest/lockfile lama dicadangkan; Doctor 20/20. Pengguna mengonfirmasi Tentang tampil baik di iPhone, demo benar dan angka percobaan pribadi kembali sama setelah demo dimatikan. APK/release splash, Android/tablet dan VoiceOver penuh belum diuji. npm: 28 advisori (1 rendah, 27 sedang). |
-| F | Bersama | Kunci fitur, README, tag submission | Jumat 13 Nov malam | belum | |
+| F | Bersama | Kunci fitur, README, tag submission | Jumat 13 Nov malam | selesai | Diselesaikan lebih awal dengan persetujuan pengguna. README setup/demo/evaluasi lengkap, lisensi model dari tiga model card Apache-2.0, inventaris Python/JS, scan Git/privasi dan perbaikan log CLI dataset. 389 pytest (0 skip), 174 Jest, tsc, Ruff check/format dan Doctor 20/20 lolos. Lint app exit 0 (8 warning lama), 1 warning deprecation pytest. Tag `v1.0-submission`; daftar berkas dan batas pemeriksaan di `docs/SUBMISSION_CHECKLIST.md`. Video/pengiriman manual belum dilakukan. |
 
 ## Tugas manual
 
@@ -32,6 +32,21 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | 6 | Submission | Sabtu 14 Nov | belum |
 
 ## Keputusan penting
+- Rabu 11 Nov (F): kode dibekukan lebih awal atas persetujuan pengguna. Tidak menambah
+  fitur, dependency atau mengubah API/ambang. CLI dataset/evaluasi sebelumnya mencetak
+  nama/path rekaman dan exception mentah; kini mencetak jumlah/kode, menyimpan laporan
+  rinci hanya lokal, dan menahan traceback tak terduga lewat helper bersama. Enam tes
+  sintetis baru menguji exit code, error aman serta proses berhasil/gagal tanpa membaca
+  dataset. Persyaratan environment tidak diakali: venv 3.11.5, Node 24.11.0,
+  FFmpeg/ffprobe di PATH. `DEBUG=release` disingkirkan hanya dari proses tes.
+- Rabu 11 Nov (F): model card resmi BlazeFace, Face Mesh V2 dan Blendshape V2 berhasil
+  dibaca; ketiganya Apache-2.0. THIRD_PARTY kini mencatat dependency langsung Python/JS,
+  komponen native utama serta batas kewajiban GPL. Audit npm baca-saja mengonfirmasi
+  28 advisori (1 rendah, 27 sedang, 0 tinggi/kritis); tidak mengubah paket karena lolos
+  kompatibilitas Expo dan dampak advisori belum dinilai per kasus. Pemindaian pola
+  rahasia tidak membuktikan tidak ada semua jenis rahasia; riwayat dipindai nama berkasnya,
+  bukan seluruh isi blob historis. Folder data tidak dibaca. Dua panduan pengguna yang
+  tidak terlacak dibiarkan di luar commit. Tidak melakukan push.
 - Rabu 11 Nov (B4): target fase Expo Go; APK belum diminta dan belum disiapkan. Profil demo
   hanya di memori, memakai user_id terpisah, dengan a/ma lulus lewat aturan kemajuan asli;
   kalibrasi tidak dipalsukan. Penyimpanan profil/PIN dan semua jalur sinkronisasi hasil demo

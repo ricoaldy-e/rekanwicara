@@ -10,7 +10,11 @@ Supabase karena jaringan bersama. Lihat `docs/I1_CHECKLIST.md` untuk bukti dan k
 B4 kemudian selesai untuk target Expo Go: Tentang/demo/pemulihan profil diuji pengguna di iPhone,
 174 Jest dan tsc lolos, Doctor 20/20 setelah 11 patch Expo diperbarui dengan persetujuan.
 APK belum diminta/disiapkan; splash release, Android/tablet dan VoiceOver penuh belum diuji.
-Fase berikutnya **F**, belum dimulai; tetap perlu rencana dan persetujuan.
+F selesai setelah persetujuan pengguna: 389 pytest (0 skip), 174 Jest, tsc, Ruff dan
+Doctor 20/20 lolos; lint app exit 0 dengan 8 warning lama. README dan lisensi diperbarui,
+log CLI dataset tidak lagi mencetak path/nama rekaman. Bukti dan batas pemindaian di
+`docs/SUBMISSION_CHECKLIST.md`. Setelah tag `v1.0-submission`, jangan mengubah kode.
+Langkah berikutnya hanya **video demo → submission oleh tim**, bukan fase fitur baru.
 
 ## Tugas manual pengguna (agen tidak bisa mengerjakannya)
 
@@ -78,7 +82,7 @@ Catatan B4: tanyakan dulu apakah panitia membutuhkan APK (nomor 5): semua uji sa
 butuh akun EAS serta waktu build. Mode demo tidak boleh mengirim data demo ke Supabase pengguna sungguhan. Jangan
 menambah fitur baru: fokus pada stabilitas.
 
-## F — Kunci fitur dan persiapan submission (Jumat malam) [Plan]
+## F — Kunci fitur dan persiapan submission (Jumat malam) [Selesai; prompt acuan]
 
 ```
 Fase F. Baca AGENTS.md, CLAUDE.md dan docs/PROGRESS.md.
@@ -98,9 +102,10 @@ Kerjakan:
 Kriteria selesai: checklist di atas terpenuhi; laporkan daftar berkas yang dikumpulkan.
 ```
 
-Catatan F: lisensi berkas model `face_landmarker.task` di `docs/THIRD_PARTY.md` **belum terverifikasi**; baca model card
-resmi MediaPipe dan perbarui barisnya (atau tulis jujur bahwa belum terverifikasi). Tambahkan dependency Python
-(`requirements.txt`) dan JS yang kini dipakai (supabase-js, react-native-svg, expo-secure-store, dll.) ke tabel itu.
+Hasil F: tiga model card resmi komponen bundle menyatakan Apache-2.0; tautan dan hash ada di
+`docs/THIRD_PARTY.md`. Inventaris dependency langsung Python/JS dan komponen native utama
+sudah ditambahkan; ini bukan SBOM semua dependency transitif. Advisori npm: 1 rendah dan 27 sedang,
+tanpa tinggi/kritis; tidak menjalankan audit fix. APK tetap belum diminta/disiapkan.
 Setelah tag dibuat, **jangan ubah kode lagi**.
 
 ## Opsional bila waktu ada (bukan syarat submission)

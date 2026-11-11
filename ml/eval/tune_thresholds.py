@@ -19,6 +19,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "server"))
 
 from app.content.loader import load_content  # noqa: E402
+from app.core.cli import run_cli  # noqa: E402
 from app.core.thresholds import THRESHOLDS_PATH, load_thresholds  # noqa: E402
 from app.dataset import evaluation as ev  # noqa: E402
 
@@ -60,7 +61,7 @@ def main() -> int:
     for _, path, _ in ev.GRID:
         cells = " ".join(f"{f.params[path]:6g}" for f in folds)
         print(f"{path:42s} {baseline[path]:7g} {cells}   {final[path]:g}")
-    print("saved:", out)
+    print("Tuning results saved locally.")
 
     if args.write:
         text = THRESHOLDS_PATH.read_text(encoding="utf-8")
@@ -72,9 +73,9 @@ def main() -> int:
             THRESHOLDS_PATH.write_text(text, encoding="utf-8")  # put the old file back
             raise
         assert all(ev.get_param(written, p) == v for p, v in final.items()), "value not written"
-        print("written:", THRESHOLDS_PATH)
+        print("Thresholds updated.")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    run_cli(main)

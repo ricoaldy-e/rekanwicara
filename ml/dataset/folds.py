@@ -15,6 +15,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "server"))
 
+from app.core.cli import run_cli  # noqa: E402
 from app.dataset.folds import loso_folds, write_folds  # noqa: E402
 from app.dataset.labels import read_metadata  # noqa: E402
 
@@ -28,16 +29,16 @@ def main() -> int:
 
     metadata = read_metadata(args.data_dir / "raw")
     if not metadata:
-        print("No clips found in", args.data_dir / "raw" / "metadata.csv")
+        print("No clips found.")
         return 1
     write_folds(metadata, args.data_dir / "splits")
     for fold in loso_folds(metadata):
         print(
-            f"fold {fold['fold']}: test {fold['test_speaker']} ({len(fold['test_clips'])} clips), "  # type: ignore[arg-type]
-            f"tune {'+'.join(fold['tune_speakers'])} ({len(fold['tune_clips'])} clips)"  # type: ignore[arg-type]
+            f"fold {fold['fold']}: test {len(fold['test_clips'])} clips, "  # type: ignore[arg-type]
+            f"tune {len(fold['tune_clips'])} clips"  # type: ignore[arg-type]
         )
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    run_cli(main)

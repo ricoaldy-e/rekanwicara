@@ -10,7 +10,7 @@ pyyaml==6.0.3
 
 # Phase A1: face landmarks (Tasks API) and Praat acoustics.
 # mediapipe pulls in opencv-contrib-python (provides cv2), so opencv-python-headless is NOT added:
-# both install the same cv2 module. Our code does not import cv2 (frames are PNGs from ffmpeg).
+# both install the same cv2 module. Only the local landmark preview tool imports cv2.
 mediapipe==1.2.2
 praat-parselmouth==0.4.7
 
