@@ -43,8 +43,8 @@ export default function Calibration() {
   }, [uri]);
   useEffect(() => () => deleteLocalFile(uriRef.current), []);
 
-  const discard = () => {
-    deleteLocalFile(uri);
+  const discard = (file: string | null = uri) => {
+    deleteLocalFile(file);
     setUri(null);
     reset();
   };
@@ -55,7 +55,7 @@ export default function Calibration() {
       api.calibrate({ file: videoUpload(file, `${current.step}.mp4`), user_id: profile.userId, step: current.step }, opts),
     );
     if (!res) return; // network error: UploadStatus offers "Coba kirim lagi", the file stays
-    discard();
+    discard(file);
     if (res.status === 'retry') {
       setRetryText(retryHint(res.quality_flags) ?? 'Rekaman belum bisa dipakai. Coba rekam lagi.');
       setStage('retry');

@@ -1,8 +1,28 @@
 # Pemeriksaan submission — fase F
 
 Tanggal: 11 November 2026. Kunci fitur dilakukan lebih awal atas persetujuan pengguna.
-Target Git: `main`, tag `v1.0-submission`. Setelah tag dibuat, kode tidak diubah lagi.
+Snapshot awal: `main`, tag `v1.0-submission` pada `1c930f9`. Freeze kemudian dibuka
+atas persetujuan pengguna khusus F-fix1 (12 November); tag lama tidak dipindahkan.
 Dokumen ini mencatat pemeriksaan repo; pengiriman ke panitia belum dilakukan.
+
+## Pembaruan F-fix1 — 12 November 2026
+
+Masalah 1 audit: callback kalibrasi menghapus URI state dari render lama. Penghapusan
+sekarang menerima URI file kiriman secara eksplisit. Lima tes regresi baru memakai
+komponen kalibrasi dan hook upload asli dengan kamera/API/operasi berkas sintetis:
+sukses, kualitas retry, gagal jaringan, kirim ulang sukses, dan Rekam ulang.
+Dua tes penghapusan gagal pada kode lama (operasi delete nol), lalu seluruhnya lulus
+setelah perbaikan. File tetap dipertahankan ketika pengiriman gagal.
+
+Hasil setelah perbaikan: **179 Jest, 17 suite**, TypeScript lolos, lint exit 0 dengan
+0 error dan 8 warning lama. Server/ML, Doctor dan audit dependency di bawah adalah
+hasil F sebelumnya; tidak diulang karena server, dependency dan konfigurasi tidak berubah.
+Masalah 2 (hasil rekaman yang datang setelah komponen ditutup) masih terbuka.
+Tidak menguji penghapusan fisik di iPhone, membersihkan cache lama, atau membaca dataset.
+
+Tag `v1.0-submission` **belum mencakup perbaikan ini**. Jangan menyatakan seluruh
+persyaratan privasi sudah terpenuhi atau tag lama sudah diperbaiki. Dua panduan staged
+milik pengguna tetap di luar commit perbaikan; tidak ada push atau tag pengganti dibuat.
 
 ## Hasil nyata
 

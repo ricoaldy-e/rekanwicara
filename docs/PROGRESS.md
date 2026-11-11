@@ -19,6 +19,7 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | A6 | ML | Penyetelan ambang, evaluasi LOSO, model card | Kamis–Jumat | selesai | `ml/eval/{tune_thresholds,evaluate}.py` (logika `server/app/dataset/evaluation.py`), `docs/EVAL_REPORT.md`, `docs/MODEL_CARD.md`; ambang final ditulis ke `thresholds.yaml`. LOSO: bibir rapat 56/60 = 93% ✓, suara saat rapat 43/50 = 86% ✓, vokal 19/23 = 83% (target 85), status kata 12/22 = 55% (target 80); bad_face 3/3, salah tolak 1/74, p90 984 ms. 382 tes hijau |
 | B4 | App | Polish, mode demo, build | Jumat 13 Nov | selesai (target Expo Go) | Layar Tentang, profil demo di memori (isolasi dari penyimpanan dan sinkronisasi pribadi), feedback sinkronisasi, label tombol panjang, pemulihan daftar materi kosong, aset cermin/bibir orisinal, dan README app selesai. 174 Jest dan tsc lolos; lint exit 0 dengan 8 warning lama; detektor UI tidak menemukan masalah mekanis. Setelah persetujuan pengguna, 11 patch Expo diperbarui (expo 58.0.24), manifest/lockfile lama dicadangkan; Doctor 20/20. Pengguna mengonfirmasi Tentang tampil baik di iPhone, demo benar dan angka percobaan pribadi kembali sama setelah demo dimatikan. APK/release splash, Android/tablet dan VoiceOver penuh belum diuji. npm: 28 advisori (1 rendah, 27 sedang). |
 | F | Bersama | Kunci fitur, README, tag submission | Jumat 13 Nov malam | selesai | Diselesaikan lebih awal dengan persetujuan pengguna. README setup/demo/evaluasi lengkap, lisensi model dari tiga model card Apache-2.0, inventaris Python/JS, scan Git/privasi dan perbaikan log CLI dataset. 389 pytest (0 skip), 174 Jest, tsc, Ruff check/format dan Doctor 20/20 lolos. Lint app exit 0 (8 warning lama), 1 warning deprecation pytest. Tag `v1.0-submission`; daftar berkas dan batas pemeriksaan di `docs/SUBMISSION_CHECKLIST.md`. Video/pengiriman manual belum dilakukan. |
+| F-fix1 | App | Penghapusan rekaman kalibrasi (masalah 1 audit) | Kamis 12 Nov | selesai | Freeze dibuka khusus perbaikan atas persetujuan pengguna. `discard(file)` memakai URI kiriman, bukan state render lama. Lima tes baru; dua tes penghapusan gagal pada kode lama lalu lulus. 179 Jest (17 suite), tsc lolos, lint exit 0 dengan 8 warning lama. Tidak mengubah server/API/dependency atau memindahkan tag lama. Masalah 2 belum diperbaiki; penghapusan fisik di iPhone dan cache lama belum diperiksa. |
 
 ## Tugas manual
 
@@ -32,6 +33,16 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | 6 | Submission | Sabtu 14 Nov | belum |
 
 ## Keputusan penting
+- Kamis 12 Nov (F-fix1): pengguna menyetujui pembukaan freeze hanya untuk masalah 1.
+  Callback respons kalibrasi sebelumnya menangkap `uri` lama saat rekaman diserahkan;
+  sekarang penghapusan menerima argumen `file` yang dikirim. Respons sukses maupun
+  kualitas `retry` menghapus file; gagal jaringan menyimpannya untuk kirim ulang.
+  Tes memakai layar dan hook upload asli, kamera/API serta operasi berkas dimock:
+  sukses, retry kualitas, gagal jaringan, kirim ulang sukses, dan Rekam ulang.
+  Tidak membaca dataset atau menghapus cache lama. Server/ML dan Doctor tidak diulang
+  karena perubahan hanya pada layar kalibrasi dan tesnya. Tag `v1.0-submission` tetap
+  menunjuk commit lama `1c930f9`; bukan versi yang sudah mengandung perbaikan ini.
+  Dua panduan staged milik pengguna dipertahankan di luar commit perbaikan. Tidak push.
 - Rabu 11 Nov (F): kode dibekukan lebih awal atas persetujuan pengguna. Tidak menambah
   fitur, dependency atau mengubah API/ambang. CLI dataset/evaluasi sebelumnya mencetak
   nama/path rekaman dan exception mentah; kini mencetak jumlah/kode, menyimpan laporan

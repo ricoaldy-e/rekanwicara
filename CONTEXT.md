@@ -1,6 +1,6 @@
 # CONTEXT — Cermin Wicara (serah terima ke agen AI lain / laptop lain)
 
-Status: **Rabu 11 November 2026 malam**. Dokumen ini ditulis untuk agen AI (mis. Codex) yang melanjutkan
+Status: **Kamis 12 November 2026, setelah F-fix1**. Dokumen ini ditulis untuk agen AI (mis. Codex) yang melanjutkan
 pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks penting ada di berkas repo:
 
 1. `AGENTS.md` / `CLAUDE.md`: aturan kerja (wajib).
@@ -43,12 +43,19 @@ pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks 
 | A5 | scorer Wav2Vec2 | dilewati (roadmap) |
 | **I1** | **integrasi ujung ke ujung di HP** | selesai dengan keterbatasan uji; iPhone, p90 manual 3,91 s; pemulihan antrean video diuji dengan simulasi koneksi Supabase gagal |
 | **B4** | polish, layar "Tentang", mode demo, ikon, (APK bila perlu) | selesai untuk Expo Go; Tentang/demo/pemulihan profil dikonfirmasi di iPhone. APK belum diminta/disiapkan; splash release dan VoiceOver penuh belum diuji |
-| **F** | kunci fitur, README root, tag `v1.0-submission` | selesai; kode dibekukan, video dan pengiriman ke panitia masih tugas manual |
+| **F** | kunci fitur, README root, tag `v1.0-submission` | snapshot awal selesai; freeze dibuka atas persetujuan pengguna khusus F-fix1. Tag lama tetap menunjuk `1c930f9`, tanpa perbaikan ini |
+| **F-fix1** | penghapusan rekaman kalibrasi setelah respons | selesai; memakai URI kiriman secara eksplisit, 5 tes regresi baru. Temuan pembatalan rekaman (masalah 2) belum diperbaiki |
 
 Commit basis sebelum I1: `638d878` (modul B3 dipulihkan; `/data/` di gitignore). Lihat `git log -1` untuk commit terkini.
 Remote: `https://github.com/ricoaldy-e/rekanwicara` (repo **publik**, jangan push tanpa instruksi).
 Tes akhir F: server/ML **389** lulus, **0 skip**, app **174** lulus.
-TypeScript, Ruff check/format dan Doctor 20/20 lolos; lint app exit 0 dengan 8 warning lama.
+Sesudah F-fix1: app **179** lulus (17 suite), TypeScript lolos, lint exit 0 dengan
+8 warning lama. Dua tes penghapusan gagal pada kode lama lalu lulus setelah perbaikan.
+Server/ML dan Doctor tidak dijalankan ulang karena tidak ada perubahan server/dependency/config.
+Penghapusan diuji melalui mock berkas sintetis, belum filesystem iPhone. Cache lama tidak
+dibersihkan. Jangan menyatakan seluruh persyaratan privasi terpenuhi: masalah 2 masih terbuka.
+Verifikasi F awal (11 Nov): TypeScript, Ruff check/format dan Doctor 20/20 lolos;
+lint app exit 0 dengan 8 warning lama.
 Pytest memiliki 1 peringatan deprecation Starlette/HTTPX. Rincian di checklist submission.
 11 patch Expo diperbarui dengan persetujuan pengguna (expo 58.0.24); npm melaporkan 28 advisori
 (1 rendah, 27 sedang; audit baca-saja F: tidak ada tinggi/kritis, dampak belum ditelaah per advisori).
@@ -183,7 +190,7 @@ pytest -q                                # harus 389 lulus, 0 skip
 cd ..\app
 npm ci
 copy .env.example .env
-npm test                                 # harus 174 lulus
+npm test                                 # harus 179 lulus
 npx tsc --noEmit
 npx --yes expo-doctor@1.21.6             # 20/20 (versi "latest" sempat rusak)
 ```
