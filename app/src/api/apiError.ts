@@ -6,8 +6,9 @@ import type { ErrorResponse } from './types';
  * - http: the server answered with a non-2xx status (`code` comes from the server body when present).
  * - parse: the server answered 2xx but the body was not valid JSON.
  * - cancelled: the caller aborted the request (e.g. left the screen).
+ * - file: a local recording is missing, empty, or unreadable before upload.
  */
-export type ApiErrorKind = 'network' | 'timeout' | 'http' | 'parse' | 'cancelled';
+export type ApiErrorKind = 'network' | 'timeout' | 'http' | 'parse' | 'cancelled' | 'file';
 
 export class ApiError extends Error {
   readonly kind: ApiErrorKind;

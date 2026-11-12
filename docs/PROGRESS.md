@@ -23,8 +23,28 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | F-fix2 | App | Hasil rekaman setelah komponen ditutup (masalah 2 audit) | Kamis 12 Nov | selesai untuk hasil ber-URI | RecordPanel menghapus hasil terlambat tanpa callback/getar selesai. Lima tes komponen dengan kamera, haptics dan operasi berkas sintetis; dua tes reproduksi gagal pada kode lama lalu lulus. 184 Jest (18 suite), tsc lolos, lint exit 0 dengan 8 warning lama. Native menolak tanpa URI masih butuh verifikasi cache di HP; cache lama tidak dibersihkan. Tag lama tidak dipindahkan, tanpa push. |
 | F-fix3 | App | Pengalihan materi macet (masalah 3 audit) | Kamis 12 Nov | selesai | Calon inti macet dialihkan satu level ke bawah, lalu selevel, hanya ke materi terbuka yang tidak macet. Pemanasan/tantangan mengecualikan macet. Tanpa pengganti, beranda mengarahkan ke Mode Pendamping. 10 tes baru, 9 reproduksi gagal pada kode lama; seluruh 194 Jest (18 suite), tsc lolos, lint exit 0 dengan 8 warning lama. Riwayat/status/ambang tetap; manfaat pada pengguna sasaran dan tampilan HP belum diuji. Tanpa push/perubahan tag. |
 | F-fix4 | App | Pemulihan video contoh gagal diputar (masalah 4 audit) | Kamis 12 Nov | selesai di kode/tes | ModelVideo memantau statusChange, menampilkan loading atau pesan gagal/404 beserta teks/ilustrasi, dan menyediakan coba ulang dengan pemutar baru. Delapan tes baru, tujuh gagal pada kode lama. Seluruh 202 Jest (19 suite), tsc lolos, lint exit 0 dengan 8 warning lama. Pemutaran/cleanup native di HP belum diuji. Tanpa dependency/API baru, push atau perubahan tag. |
+| Allosaurus PoC | Riset | CLI fonetik CPU terisolasi | Kamis 12 Nov | selesai untuk eksekusi; akurasi belum diuji | Branch experiment/allosaurus-poc, ml/.venv Python 3.11.5, Allosaurus 1.0.2, Torch 2.15.0+cpu, model uni2005. CLI WAV PCM 16-bit mono 16 kHz, JSON mentah, error aman. 406 pytest termasuk 17 tes baru; Ruff lolos. Inferensi nada sintetis dan pembatasan koneksi Python berhasil; bukan bukti akurasi ucapan. Dependency/config backend tetap sama. Tanpa perubahan pipeline/scoring/API/frontend, commit, merge, push, atau tag. Rincian di docs/ALLOSAURUS_POC.md. |
+| Allosaurus App | Riset | Rekam dan lihat prediksi langsung di aplikasi | Kamis 12 Nov | selesai di kode/tes; uji native HP belum | Pengguna menyetujui layar Uji Allosaurus dari Pengaturan versi dev dan endpoint DEBUG-only /v1/experiments/allosaurus. Video -> WAV sementara -> CLI ml/.venv -> JSON mentah. 419 pytest, 214 Jest, tsc dan Ruff lolos; lint 0 error/8 warning lama. Bundle iOS HTTP 200; HTTP server asli dengan video sintetis sukses. Cleanup diuji sintetis, tanpa data pribadi. Rekam/tampilan native serta akurasi belum diuji. Tidak menambah dependency, mengubah scoring/pipeline utama, commit/merge/push atau tag. |
+
+| Wav2Vec2 ASR PoC | Riset | Kata/frasa komunikasi dalam eksperimen | Jumat 13 Nov | berfungsi untuk eksekusi; akurasi belum diuji | Pengguna menyetujui transkripsi dibanding target dan materi eksperimen Tolong/Saya Tuli/Hai/Makan, tanpa mengganti Level 3. Venv ml/wav2vec2/.venv, Python 3.11.5, Torch 2.15.0+cpu, Transformers 5.22.2, checkpoint Wikidepia XLS-R 300M Indonesia dipin revisi/hash. CLI offline, endpoint DEBUG-only, layar rekam native. 455 pytest, 250 Jest, tsc/Ruff lolos; lint 0 error/8 warning lama. CLI offline dan HTTP asli memakai data sintetis sukses; bundle iOS 200. Dependency/config backend identik. Tanpa commit/merge/push/deploy/tag; rincian docs/WAV2VEC2_POC.md. |
 
 ## Tugas manual
+
+Revisi terbaru 13 November: pengguna memilih **MediaPipe + Wav2Vec2**, tanpa Parselmouth
+di jalur Uji Gabungan. MediaPipe menjadi syarat indikasi berbicara; kecocokan teks memakai
+Levenshtein generik menjadi Berhasil/Mendekati/Coba lagi, error proses tetap terpisah.
+493 pytest, 280 Jest, tsc dan Ruff lolos; lint 8 warning lama. Model asli sudah diuji
+sintetis; pengguna mengonfirmasi kategori Berhasil atau Mendekati muncul di HP.
+Validasi ambang terhadap pendengar masih menunggu. Rincian terbaru
+di docs/COMBINED_POC.md; catatan tiga observasi di bawah merujuk versi sebelumnya.
+
+Fase eksperimen terbaru (13 November): **Uji Gabungan berfungsi untuk eksekusi/tes**.
+Satu konversi untuk MediaPipe, Parselmouth dan Wav2Vec2, hasil terpisah tanpa skor gabungan,
+dukungan hasil sebagian, batas ASR terpusat di YAML. **474 pytest, 279 Jest, tsc dan Ruff
+lolos**; lint 0 error/8 warning lama. Model asli dan hasil sebagian diuji sintetis;
+latensi gabungan n=3 p50 6137,8 ms/p90 6948,7 ms, belum target total 5 detik.
+Pengguna mengonfirmasi ketiga bagian hasil gabungan muncul di HP. Akurasi masih perlu
+dievaluasi. Detail di docs/COMBINED_POC.md.
 
 | No | Isi | Sebelum prompt | Status |
 |---|---|---|---|
@@ -36,6 +56,158 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 | 6 | Submission | Sabtu 14 Nov | belum |
 
 ## Keputusan penting
+
+- Jumat 13 Nov (publikasi Git): pengguna secara eksplisit meminta push ke main, menggantikan
+  batas sebelumnya tanpa commit/merge/push untuk eksperimen. Cakupan publikasi adalah kode,
+  tes, konfigurasi dan dokumentasi eksperimen yang telah disetujui, termasuk hasil akhir
+  MediaPipe + Wav2Vec2 dan kategori Levenshtein. Validasi terakhir: 493 pytest, 280 Jest,
+  tsc/Ruff lolos, lint 8 warning lama. Pemeriksaan calon berkas tidak menemukan pola
+  kredensial; rekaman, dataset, model, venv dan .env tidak disertakan. Tag submission lama
+  tetap tidak dipindahkan.
+
+- Jumat 13 Nov (kategori latihan dua komponen): pengguna menyetujui MediaPipe sebagai
+  pemeriksaan indikasi berbicara dan seluruh kecocokan ucapan dari Wav2Vec2, mengeluarkan
+  Parselmouth dari jalur eksperimen ini. Hanya Berhasil bila gate visual lulus dan teks
+  cocok; Mendekati tidak menjadi lulus. Audio dasar NumPy/RMS menolak senyap/terlalu singkat.
+  Landmark digunakan sepanjang bagian audio aktif dengan offset AV, normalisasi skala mata
+  dan filter median; gerak di luar audio atau bibir statis tidak meluluskan. Ini heuristik
+  indikasi, bukan bukti sumber suara atau identitas. Ambang awal semuanya dalam YAML.
+  Levenshtein generik menggantikan rencana regex variasi; normalisasi Unicode/casefold/
+  tanda baca dan spasi, ambang panjang 0,75 atau maksimal satu edit untuk target <=3 karakter.
+  Target multipart wajib dan dibatasi empat materi; hanya dipakai setelah inferensi,
+  tidak sebagai prompt ASR. Teks mentah dipertahankan, tanpa persentase ketepatan pelafalan.
+  Kegagalan model/timeout tidak menjadi ucapan salah: outcome null. SPEC/schema/types,
+  fixture, native upload, validator dan layar hasil disinkronkan. 493 pytest, 280 Jest,
+  tsc/Ruff lolos; lint 8 warning lama. Jalur baru terbukti dapat diimpor dan memeriksa audio
+  dengan impor parselmouth diblokir. Regresi latihan utama lulus. HTTP model asli pada
+  video sintetis no_face: Coba lagi/visual_gate, 6224,6 ms; target invalid 422, tipe salah
+  415. Pengguna kemudian mengonfirmasi Berhasil atau Mendekati muncul di HP pada versi ini.
+  Itu konfirmasi eksekusi/tampilan, belum pengujian masing-masing kategori atau validasi
+  ambang terhadap pendengar. Tidak menambah dependency, mengganti progres/Level 3 utama,
+  commit/merge/push/deploy/tag, atau membaca dataset pribadi.
+
+- Jumat 13 Nov (Uji Gabungan): implementasi disetujui pengguna setelah rencana satu fase.
+  MediaPipe untuk observasi wajah/bibir, Parselmouth untuk ciri/kualitas audio, Wav2Vec2
+  untuk transkripsi bebas; target tetap Tolong/Saya Tuli/Hai/Makan di mode eksperimen.
+  Tidak menggabungkan menjadi skor, voting, koreksi kata, atau penilaian semua fonem.
+  Reuse langsung helper media/komponen yang sudah ada; tidak perlu refactor pipeline
+  utama features.py/media.py. Satu upload dan satu konversi, validasi WAV sebelum komponen,
+  audio berlebih ditolak. Kegagalan komponen menjadi partial tanpa menghapus hasil lainnya;
+  wajah hilang/audio kurang baik tidak menghilangkan teks. Tidak ada syarat F0 baru.
+  POST /v1/experiments/combined DEBUG-only, schema/SPEC/types disinkronkan. Wav2Vec2 tetap
+  lokal CPU pada venv terpisah; dependency backend identik. Timeout ASR gabungan 30 detik
+  ditambahkan ke thresholds.yaml, nilai aturan/kualitas lama tetap. Shared SpeechExperiment
+  menjaga alur rekam/upload/cleanup kedua layar sama. Fixture kontrak sintetis diuji kedua
+  sisi. 474 pytest, 279 Jest (24 suite), tsc/Ruff lolos; lint 8 warning lama. HTTP asli
+  tiga pasang sintetis berhasil; contoh gabungan visual no_face tidak membatalkan teks.
+  Hasil partial juga diuji dengan model wajah hilang dan subprocess ASR timeout sungguhan,
+  temporary kosong. Latensi 6–7 detik belum target 5 detik dan bukan benchmark pengguna.
+  Pengguna kemudian mengonfirmasi ketiga bagian hasil gabungan muncul di HP, sehingga
+  alur rekam-ke-hasil terkonfirmasi. Akurasi/perbandingan dengan pendengar, waktu ujung
+  ke ujung dari HP dan penghapusan fisik cache native belum dievaluasi.
+  Tidak ada dependency baru, penggantian Level 3/progres/Supabase, commit/merge/push/deploy/tag.
+
+- Jumat 13 Nov (pemulihan Expo/uji native): pengguna melaporkan Expo Go tertahan di
+  Opening project. Manifest LAN laptop merespons 200 dan menunjuk host/bundle
+  192.168.101.22:8081 dengan akun rekanwicara; ini belum membuktikan akses dari HP.
+  Log Metro juga memperlihatkan TypeError Cannot convert BigInt to number pada progres
+  upload iOS. Helper native kini mengonversi kedua counter byte ke Number sebelum membagi,
+  berlaku untuk Allosaurus dan Wav2Vec2. Empat kasus regresi BigInt/mixed/zero gagal pada kode
+  lama lalu lulus; 254 Jest dan tsc lolos. Metro dijalankan ulang dengan --clear pada 8081;
+  backend tetap 8000. Penyebab macet Opening project masih menunggu cek koneksi/browser HP.
+  Pembaruan: pengguna mengonfirmasi /status dari browser HP menampilkan
+  packager-status:running. Log backend setelah restart juga mencatat beberapa upload
+  Wav2Vec2 dengan respons 200; tampilan hasil di HP masih menunggu konfirmasi, tanpa membaca
+  atau menyimpan isi rekaman/transkripsinya untuk pemeriksaan ini.
+  Pengguna kemudian mengonfirmasi aplikasi sudah terbuka dan hasil teks muncul di HP.
+  Pemulihan pembukaan dan alur rekam-ke-teks terkonfirmasi; akurasi transkripsi serta
+  penghapusan fisik cache native belum dinilai.
+
+- Jumat 13 Nov (Wav2Vec2 ASR PoC): arah materi baru adalah kata/frasa komunikasi sehari-hari
+  dan meminta bantuan: Tolong, Saya Tuli, Hai, Makan. Pengguna memilih memasukkannya ke mode
+  eksperimen dahulu dan meminta teks ucapan dibanding target, belum skor pelafalan per bunyi.
+  Dependency/model baru dan endpoint disetujui sebelum implementasi. Checkpoint komunitas
+  Wikidepia/wav2vec2-xls-r-300m-indonesian, revisi 8a9d507f0804f8e5fca07b17214b2c0266ba7491,
+  bobot SHA-256 e0068f2a14d76c98bf99a3a656bb6a76f71381675055e2ca43d98516aa143bda.
+  Tidak melakukan training. Memakai feature extractor/tokenizer eksplisit dan greedy CTC
+  tanpa LM; target tidak dikirim ke decoder. Teks mentah dipertahankan; pembandingan hanya
+  mengabaikan kapitalisasi/tanda baca/spasi berulang. Tidak ada fuzzy matching atau skor.
+  Validasi WAV/konversi sementara dibagi dengan Allosaurus agar privasi dan penolakan durasi
+  tetap konsisten; helper upload native juga dipakai ulang. Regresi Allosaurus nyata lulus.
+  Model lokal CPU, weights_only=True, tanpa jaringan saat inferensi; venv backend/config/
+  pip freeze tidak berubah. CLI offline: 611,954 ms; HTTP video sintetis: 200, total 5649,1 ms,
+  inferensi 638,072 ms, teks kosong. 455 pytest, 250 Jest, tsc, Ruff lolos, lint 8 warning lama.
+  Ini bukti eksekusi, bukan akurasi. HP/ucapan manusia masih menunggu uji pengguna. Level 3,
+  scorer rules, progres dan Supabase tidak diganti. Tetap di working tree eksperimen yang
+  sudah berisi pekerjaan Allosaurus, tanpa pindah branch, commit, merge, push atau tag.
+- Allosaurus Indonesia: pengguna melaporkan output HP sulit dibaca, memilih bunyi Indonesia
+  umum dengan huruf, lalu menyetujui implementasi. Decoder dibatasi ke inventaris repo 32
+  token yang semuanya didukung uni2005, mencakup tʃ/dʒ (tidak ada pada ind bawaan model).
+  Inventaris yang hilang/duplikat/tidak didukung gagal tanpa fallback universal.
+  Layar memetakan ng/ny/sy/kh/c/j; IPA j dipetakan ke y. Variasi e/o digabung hanya untuk
+  tampilan; glotal diberi label henti glotal. Token asing ditandai bunyi lain, tidak dihapus.
+  IPA mentah dipertahankan lewat Lihat detail dan pada API; tidak mengoreksi ke kata target.
+  SPEC, schemas.py dan types.ts mencatat semantik, tanpa field kontrak atau dependency baru.
+  424 pytest, 231 Jest, tsc dan Ruff lolos; lint 0 error dengan 8 warning lama. Model asli
+  terverifikasi 32 token di luar blank, c/j tersedia, tetap CPU. CLI/API sintetis sukses,
+  bukan bukti akurasi ucapan. Bundle iOS lolos; tampilan baru masih perlu Reload dan uji HP.
+  Tidak membaca data/ atau mengubah scoring, bobot model, snapshot, commit/merge/push.
+- Kamis 12 Nov (reset layanan Allosaurus): setelah dua jalur upload tetap timeout, pengguna
+  meminta mulai ulang server agar sesuai dengan app. Backend lama 8000, pembanding 8001,
+  dan Metro 8082 dihentikan; satu backend baru berjalan di luar sandbox pada 8000 dan
+  Expo online pada 8081. Manifest username rekanwicara dan host Wi-Fi diverifikasi.
+  Health dan POST sintetis melalui IP LAN sukses HTTP 200 (prediksi kosong, 577,696 ms).
+  App/.env sudah menunjuk 192.168.101.22:8000, sehingga tidak perlu diubah. Override URL
+  yang tersimpan pada HP harus dipulihkan lewat tombol Kembalikan ke bawaan; tidak
+  menghapus AsyncStorage/profil/progres, data, kredensial atau Git. Uji ulang HP masih menunggu.
+- Kamis 12 Nov (upload Allosaurus App): pengguna melaporkan progres 0% lalu gagal/timeout,
+  sementara Tes koneksi berhasil. Log belum menunjukkan POST baru yang selesai; akar
+  penyebab native/jaringan belum terkonfirmasi. Upload khusus Allosaurus diganti dari XHR
+  menjadi UploadTask expo-file-system yang sudah terpasang, sesi foreground, multipart file.
+  File lokal diperiksa ada/tidak kosong sebelum upload; progres awal tidak mengarang persen,
+  timeout membatalkan task, pembatalan layar diteruskan dan resource native selalu dilepas.
+  Pesan file lokal dibedakan dari jaringan. Jalur latihan/kalibrasi/dataset tidak diubah;
+  tanpa dependency atau perubahan kontrak server baru. 220 Jest, tsc dan bundle iOS lolos;
+  lint exit 0 dengan 8 warning lama.
+  pengujian ulang upload HP diminta lewat Reload. Tes native memakai mock; belum mengklaim
+  keluhan perangkat selesai. Server tidak diubah sehingga 419 pytest sebelumnya tidak diulang.
+- Kamis 12 Nov (koneksi Allosaurus App): Expo Go iPhone melaporkan CLI belum login.
+  `expo whoami` online membuktikan akun CLI sudah `rekanwicara`; sesi Metro sebelumnya
+  memakai --offline sehingga manifest anonim. Sesi offline dihentikan, Metro online
+  dijalankan di port 8082. Manifest diverifikasi menyertakan username rekanwicara dan
+  host Wi-Fi 192.168.101.22:8082; backend tetap sehat di port 8000. Panduan diperbaiki,
+  tanpa mengubah kode aplikasi/dependency/.env; tidak meminta token atau password.
+  Pengujian ulang pada HP masih menunggu pengguna. Tes kode tidak diulang untuk perubahan panduan ini.
+- Kamis 12 Nov (Allosaurus App): pengguna memilih hasil langsung di layar dan menyetujui
+  perubahan frontend/API eksperimen. RecordPanel dan upload client dipakai ulang; tombol masuk
+  ada di Pengaturan saat __DEV__, endpoint hanya saat DEBUG=true. Kontrak ditambahkan bersama
+  di SPEC §5, schemas.py dan types.ts. Tidak mengubah /analyze, /calibrate atau dependency utama.
+  Server mengonversi audio saja, membatasi decode sampai satu sampel di atas batas agar CLI
+  menolak klip berlebih, lalu menjalankan CLI terisolasi dengan timeout tanpa shell. Tidak
+  meneruskan stderr/path. File sementara dan upload ditutup pada sukses/error. App menghapus
+  rekaman setelah percobaan upload, tanpa retry otomatis; keluar layar membatalkan upload,
+  mencoba cleanup dan mengabaikan hasil terlambat. Batas penghapusan native tanpa URI tetap ada.
+  419 pytest (13 endpoint baru), 214 Jest (12 baru), tsc/Ruff lolos; lint 8 warning lama.
+  Uji API video sintetis 2,5 detik sukses; 4,2 detik ditolak; direktori sementara kosong.
+  Server HTTP asli juga sukses (prediksi kosong, inferensi 1172,308 ms). Bukan bukti akurasi.
+  Bundle iOS berhasil dan manifest menunjuk IP Wi-Fi; belum ada pemeriksaan visual/kamera HP.
+  Expo perlu izin menulis berkas tipe/cache; tipe route dibuat Expo, tanpa cast untuk melewati tsc.
+  Snapshot, .env, daftar dependency/config venv backend dan data pribadi tetap tidak diubah.
+  Backend dan Metro dijalankan untuk uji HP, tanpa commit/merge/push/deploy.
+- Kamis 12 Nov (Allosaurus PoC): pengguna menyetujui eksperimen terpisah dari MVP/submission,
+  termasuk dependency Torch hanya di ml/.venv dan branch experiment/allosaurus-poc.
+  Python 3.11.5 memakai executable langsung karena launcher py hanya mencantumkan 3.12.
+  Model resmi uni2005 dimuat pada CPU tanpa patch library atau pelonggaran pengamanan checkpoint.
+  CLI hanya menerima WAV yang sesuai, memakai batas durasi/sample rate dari thresholds.yaml,
+  tidak mengunduh saat inferensi, dan tidak menyimpan atau mengubah input. Prediksi mentah
+  termasuk string kosong dipertahankan; error dan keluaran library ditahan agar path tidak bocor.
+  Nada sintetis menghasilkan string kosong (892,545 ms); uji dengan koneksi socket Python diblokir
+  juga sukses (722,083 ms, nol upaya koneksi). Belum menguji ucapan atau akurasi Bahasa Indonesia.
+  406 pytest lulus (17 baru), Ruff check/format lolos; warning Starlette/HTTPX lama tetap ada.
+  DEBUG=false dan larangan bytecode hanya di proses tes; tidak mengubah .env atau paket backend.
+  Hash requirements/pyvenv.cfg dan pip freeze backend cocok sebelum/sesudah. Tidak membaca data/,
+  mengubah kontrak/scoring/app, memindahkan tag, atau melakukan commit/merge/push/deploy.
+  Ketentuan bobot model sebelum redistribusi serta akurasi pengguna sasaran belum diverifikasi.
 - Kamis 12 Nov (F-fix4): pengguna menyetujui perbaikan khusus video contoh yang gagal
   diputar setelah pemeriksaan ketersediaan. ModelVideo memakai useEvent/statusChange
   dari Expo dan lifecycle useVideoPlayer yang sudah terpasang; API diperiksa dari source

@@ -12,6 +12,7 @@ def test_yaml_loads_with_spec_values() -> None:
     # §6.1
     assert (t.media.max_duration_s, t.media.fps, t.media.frame_height_px) == (4.0, 15, 480)
     assert t.media.audio_sample_rate_hz == 16000
+    assert t.experiments.combined_asr_timeout_s > 0
     # §6.2
     q = t.quality
     assert q.face_min_frame_ratio == 0.90

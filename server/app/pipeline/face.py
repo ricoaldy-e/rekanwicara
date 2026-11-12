@@ -19,6 +19,54 @@ from pathlib import Path
 
 import numpy as np
 
+from app.core.thresholds import LipLandmarks, QualityConfig
+
+
+@dataclass(frozen=True)
+class FaceMetrics:
+    n_frames: int
+    face_frames: int
+    face_frame_ratio: float
+    face_width_ratio: float | None  # median over face frames, share of frame width
+    mouth_out_ratio: float | None  # share of face frames with a mouth point outside [0, 1]
+
+
+def face_metrics(frames: Sequence[FaceFrame], landmarks: LipLandmarks) -> FaceMetrics:
+    with_face = [f.landmarks for f in frames if f.landmarks is not None]
+    n = len(frames)
+    if not with_face:
+        return FaceMetrics(
+            n_frames=n, face_frames=0, face_frame_ratio=0.0,
+            face_width_ratio=None, mouth_out_ratio=None,
+        )  # fmt: skip
+
+    widths = [float(lm[:, 0].max() - lm[:, 0].min()) for lm in with_face]
+    mouth_idx = list(landmarks.mouth)
+    out = 0
+    for lm in with_face:
+        pts = lm[mouth_idx, :2]
+        if np.any((pts < 0.0) | (pts > 1.0)):
+            out += 1
+    return FaceMetrics(
+        n_frames=n,
+        face_frames=len(with_face),
+        face_frame_ratio=len(with_face) / n,
+        face_width_ratio=float(np.median(widths)),
+        mouth_out_ratio=out / len(with_face),
+    )
+
+
+def face_quality_flags(face: FaceMetrics, q: QualityConfig) -> list[str]:
+    flags: list[str] = []
+    if face.n_frames == 0 or face.face_frame_ratio < q.face_min_frame_ratio:
+        flags.append("no_face")
+    if face.face_frames > 0:
+        too_small = (face.face_width_ratio or 0.0) < q.face_min_width_ratio
+        mouth_out = (face.mouth_out_ratio or 0.0) > q.mouth_out_max_frame_ratio
+        if too_small or mouth_out:
+            flags.append("face_off_frame")
+    return flags
+
 
 class FaceModelMissing(Exception):
     code = "face_model_missing"

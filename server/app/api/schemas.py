@@ -197,6 +197,91 @@ class DebugAudioSummary(_Strict):
     too_noisy_evaluated: bool
 
 
+class Wav2Vec2Response(_Strict):
+    """Free Indonesian ASR transcription, without pronunciation scores (SPEC §5)."""
+
+    status: Literal["success"] = "success"
+    model: Literal["Wikidepia/wav2vec2-xls-r-300m-indonesian"] = (
+        "Wikidepia/wav2vec2-xls-r-300m-indonesian"
+    )
+    transcription: str
+    inference_ms: float = Field(ge=0, allow_inf_nan=False)
+
+
+class ExperimentFailure(_Strict):
+    status: Literal["unavailable"] = "unavailable"
+    code: Literal[
+        "audio_analysis_failed",
+        "face_model_missing",
+        "face_analysis_failed",
+        "wav2vec2_unavailable",
+        "wav2vec2_timeout",
+        "wav2vec2_invalid_result",
+    ]
+
+
+CommunicationTarget = Literal["tolong", "saya tuli", "hai", "makan"]
+SpeechOutcome = Literal["berhasil", "mendekati", "coba_lagi"]
+
+
+class SpeechFeedback(_Strict):
+    outcome: SpeechOutcome | None
+    reason: Literal[
+        "matched",
+        "near_match",
+        "different_text",
+        "empty_text",
+        "visual_gate",
+        "silent_audio",
+        "short_audio",
+        "component_unavailable",
+    ]
+
+
+class CombinedAudio(_Strict):
+    status: Literal["ok"] = "ok"
+    duration_ms: int = Field(ge=0)
+    active_ms: int = Field(ge=0)
+    warnings: list[Literal["silent", "too_short"]]
+
+
+class CombinedVisual(_Strict):
+    status: Literal["ok"] = "ok"
+    n_frames: int = Field(ge=0)
+    face_frames: int = Field(ge=0)
+    warnings: list[Literal["no_face", "face_off_frame", "motion_missing"]]
+    gate: Literal["passed", "retry"]
+    motion_steps: int = Field(ge=0)
+    lip_contour: LipContour | None
+
+
+class CombinedTimings(_Strict):
+    media_ms: int = Field(ge=0)
+    audio_ms: int = Field(ge=0)
+    visual_ms: int = Field(ge=0)
+    asr_ms: int = Field(ge=0)
+
+
+class CombinedResponse(_Strict):
+    status: Literal["complete", "partial"]
+    target: CommunicationTarget
+    feedback: SpeechFeedback
+    audio: CombinedAudio | ExperimentFailure
+    visual: CombinedVisual | ExperimentFailure
+    asr: Wav2Vec2Response | ExperimentFailure
+    timings: CombinedTimings
+    processing_ms: int = Field(ge=0)
+
+
+class AllosaurusResponse(_Strict):
+    """Raw IPA decoded with the Indonesian experiment inventory (SPEC §5)."""
+
+    status: Literal["success"] = "success"
+    model: Literal["uni2005"] = "uni2005"
+    phonetic_prediction: str
+    inference_ms: float = Field(ge=0, allow_inf_nan=False)
+
+
 class DebugFaceSummary(_Strict):
     face_width_ratio: float | None
     mouth_out_ratio: float | None

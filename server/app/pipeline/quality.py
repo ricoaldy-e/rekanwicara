@@ -10,14 +10,15 @@ voice. While uncertain, too_quiet uses the absolute peak limit and too_noisy is 
 
 from __future__ import annotations
 
-from collections.abc import Sequence
 from dataclasses import dataclass
 
 import numpy as np
 import parselmouth
 
-from app.core.thresholds import AudioConfig, LipLandmarks, QualityConfig, SegmentConfig
-from app.pipeline.face import FaceFrame
+from app.core.thresholds import AudioConfig, QualityConfig, SegmentConfig
+from app.pipeline.face import FaceMetrics as FaceMetrics
+from app.pipeline.face import face_metrics as face_metrics
+from app.pipeline.face import face_quality_flags
 
 # Praat reports digital silence as -300 dB; clamp so percentiles/medians stay meaningful.
 SILENCE_DB = 0.0
@@ -43,15 +44,6 @@ class AudioMetrics:
     loud_region_voiced_ratio: float | None
     clip_ratio: float  # share of samples with |x| >= clip_amplitude
     too_noisy_evaluated: bool
-
-
-@dataclass(frozen=True)
-class FaceMetrics:
-    n_frames: int
-    face_frames: int
-    face_frame_ratio: float
-    face_width_ratio: float | None  # median over face frames, share of frame width
-    mouth_out_ratio: float | None  # share of face frames with a mouth point outside [0, 1]
 
 
 # ---------- Audio ----------
@@ -183,44 +175,13 @@ def audio_metrics(
 # ---------- Face ----------
 
 
-def face_metrics(frames: Sequence[FaceFrame], landmarks: LipLandmarks) -> FaceMetrics:
-    with_face = [f.landmarks for f in frames if f.landmarks is not None]
-    n = len(frames)
-    if not with_face:
-        return FaceMetrics(
-            n_frames=n, face_frames=0, face_frame_ratio=0.0,
-            face_width_ratio=None, mouth_out_ratio=None,
-        )  # fmt: skip
-
-    widths = [float(lm[:, 0].max() - lm[:, 0].min()) for lm in with_face]
-    mouth_idx = list(landmarks.mouth)
-    out = 0
-    for lm in with_face:
-        pts = lm[mouth_idx, :2]
-        if np.any((pts < 0.0) | (pts > 1.0)):
-            out += 1
-    return FaceMetrics(
-        n_frames=n,
-        face_frames=len(with_face),
-        face_frame_ratio=len(with_face) / n,
-        face_width_ratio=float(np.median(widths)),
-        mouth_out_ratio=out / len(with_face),
-    )
-
-
 # ---------- Flags ----------
 
 
 def quality_flags(audio: AudioMetrics, face: FaceMetrics, q: QualityConfig) -> list[str]:
     flags: set[str] = set()
 
-    if face.n_frames == 0 or face.face_frame_ratio < q.face_min_frame_ratio:
-        flags.add("no_face")
-    if face.face_frames > 0:  # computed over face frames only
-        too_small = (face.face_width_ratio or 0.0) < q.face_min_width_ratio
-        mouth_out = (face.mouth_out_ratio or 0.0) > q.mouth_out_max_frame_ratio
-        if too_small or mouth_out:
-            flags.add("face_off_frame")
+    flags.update(face_quality_flags(face, q))
 
     if not audio.has_audio:
         flags.update({"too_quiet", "too_short"})

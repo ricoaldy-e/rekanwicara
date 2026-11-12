@@ -1,6 +1,16 @@
 from fastapi import APIRouter
 
-from app.api.v1 import analysis, dataset, debug, health, items, model_video
+from app.api.v1 import (
+    allosaurus,
+    analysis,
+    combined,
+    dataset,
+    debug,
+    health,
+    items,
+    model_video,
+    wav2vec2,
+)
 
 
 def build_v1_router(dataset_mode: bool, debug_mode: bool = False) -> APIRouter:
@@ -15,4 +25,7 @@ def build_v1_router(dataset_mode: bool, debug_mode: bool = False) -> APIRouter:
     if debug_mode:
         # Development only; absent (404) unless DEBUG=true.
         router.include_router(debug.router)
+        router.include_router(allosaurus.router)
+        router.include_router(wav2vec2.router)
+        router.include_router(combined.router)
     return router

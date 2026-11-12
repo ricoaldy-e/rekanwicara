@@ -1,0 +1,55 @@
+{
+  "status": "complete",
+  "asr": {
+    "status": "success",
+    "model": "Wikidepia/wav2vec2-xls-r-300m-indonesian",
+    "transcription": " Tolong! ",
+    "inference_ms": 650.5
+  },
+  "audio": {
+    "status": "ok",
+    "duration_ms": 2500,
+    "active_ms": 1200,
+    "warnings": []
+  },
+  "visual": {
+    "status": "ok",
+    "n_frames": 38,
+    "face_frames": 38,
+    "warnings": [],
+    "lip_contour": {
+      "points": [
+        [
+          0,
+          0.5
+        ],
+        [
+          0.5,
+          0
+        ],
+        [
+          1,
+          0.5
+        ],
+        [
+          0.5,
+          1
+        ]
+      ]
+    },
+    "gate": "passed",
+    "motion_steps": 5
+  },
+  "timings": {
+    "media_ms": 200,
+    "audio_ms": 20,
+    "visual_ms": 500,
+    "asr_ms": 5000
+  },
+  "processing_ms": 5720,
+  "target": "tolong",
+  "feedback": {
+    "outcome": "berhasil",
+    "reason": "matched"
+  }
+}

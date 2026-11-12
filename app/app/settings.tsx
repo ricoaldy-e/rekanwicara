@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import { createApiClient, isValidBaseUrl } from '../src/api/client';
 import { errorMessage } from '../src/api/errors';
@@ -14,6 +15,7 @@ type TestResult = { ok: true; text: string } | { ok: false; text: string } | nul
 
 /** Hidden settings (long-press the Home title). Lets the demo operator change the server URL. */
 export default function Settings() {
+  const router = useRouter();
   const { apiUrl, envApiUrl, isOverridden, setApiUrl, resetApiUrl } = useSettings();
   const { health } = useContent();
   const { demo, setDemo, sync, ready } = useUser();
@@ -92,6 +94,13 @@ export default function Settings() {
         <View>
           <BigButton label="Kembalikan ke bawaan" variant="secondary" icon="arrow-undo" onPress={reset} disabled={busy} />
         </View>
+      ) : null}
+      {__DEV__ ? (
+        <>
+          <BigButton label="Uji Wav2Vec2" icon="chatbox-ellipses" variant="secondary" onPress={() => router.push('/wav2vec2')} />
+          <BigButton label="Uji Gabungan" icon="layers" variant="secondary" onPress={() => router.push('/combined')} />
+          <BigButton label="Uji Allosaurus" icon="flask" variant="secondary" onPress={() => router.push('/allosaurus')} />
+        </>
       ) : null}
       <Title>Mode demo</Title>
       <Body>Contoh progres: a dan ma sudah lulus. Latihan tetap dianalisis server. Progres demo tidak dikirim online dan hilang saat keluar dari mode demo atau app dimulai ulang.</Body>

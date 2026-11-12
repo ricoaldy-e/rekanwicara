@@ -190,6 +190,20 @@ class DefaultsConfig(_Strict):
     vowel_anchors: DefaultAnchors
 
 
+class ExperimentsConfig(_Strict):
+    combined_asr_timeout_s: float = Field(gt=0)
+    near_similarity_min: Ratio
+    short_target_max_chars: int = Field(ge=1)
+    short_near_max_edits: int = Field(ge=0)
+    activity_frame_ms: int = Field(gt=0)
+    activity_rms_min: float = Field(gt=0, le=1)
+    activity_min_ms: int = Field(gt=0)
+    activity_margin_ms: int = Field(ge=0)
+    motion_range_min: float = Field(gt=0)
+    motion_step_min: float = Field(gt=0)
+    motion_steps_min: int = Field(ge=1)
+
+
 class Thresholds(_Strict):
     media: MediaConfig
     quality: QualityConfig
@@ -199,6 +213,7 @@ class Thresholds(_Strict):
     rules: RulesConfig
     calibration: CalibrationConfig
     defaults: DefaultsConfig
+    experiments: ExperimentsConfig
 
 
 def load_thresholds(path: Path = THRESHOLDS_PATH) -> Thresholds:

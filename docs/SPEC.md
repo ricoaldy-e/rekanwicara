@@ -154,6 +154,130 @@ menampilkan teks + ilustrasi bibir saja.
 Bila `MOCK_MODE=true`, `/analyze` dan `/calibrate` mengembalikan contoh valid tanpa analisis.
 Query `?mock=hijau|kuning|merah|retry` memilih variasi.
 
+### POST /v1/experiments/allosaurus (eksperimen, hanya `DEBUG=true`)
+
+Field multipart: `file` (video MP4/MOV dengan audio, mengikuti batas ukuran upload).
+Respons: `status: "success"`, `model: "uni2005"`, `phonetic_prediction: string`,
+`inference_ms: number` (hingga milidetik pecahan, nonnegatif dan finite).
+String prediksi mentah, termasuk string kosong, dipertahankan tanpa koreksi atau skor.
+Decoder dibatasi ke inventaris eksperimen `ml/config/indonesian_phones.txt` (32 bunyi),
+bukan seluruh inventaris universal. Inventaris mencakup bunyi c/j (`tʃ`/`dʒ`) serta bunyi
+umum Indonesia dan serapan; ini bukan klaim cakupan semua dialek. Semua token harus tersedia
+di model; inventaris yang hilang/tidak valid menyebabkan error, tanpa fallback universal.
+App menampilkan padanan huruf bunyi (ng, ny, sy, kh, c, j); IPA `j` menjadi huruf y.
+Huruf e/o menggabungkan beberapa variasi bunyi; `ʔ` ditampilkan sebagai "henti glotal".
+Token tak dikenal ditandai "bunyi lain", tidak dihapus. String IPA asli tersedia lewat
+Lihat detail. Ini penyederhanaan tampilan, bukan transkripsi ejaan kata atau skor pelafalan.
+Waktu hanya mencakup inferensi CLI, tidak termasuk upload, konversi, atau pemuatan model.
+
+Server mengekstrak audio WAV PCM 16-bit mono dengan sample rate/batas durasi dari thresholds.yaml,
+tanpa frame atau MediaPipe. Decode dibatasi sampai satu sampel melewati batas durasi untuk
+menolak klip berlebih lewat validasi CLI; tidak mengembalikan prediksi dari klip yang dipotong.
+CLI dijalankan sebagai subprocess memakai `ml/.venv`, tanpa Torch pada venv backend.
+Upload dan WAV sementara dibersihkan pada sukses maupun error. Tidak menulis ke dataset/Supabase.
+Endpoint tidak tersedia (404) saat `DEBUG=false`; tidak mengubah `/analyze`, `/calibrate`, atau scoring.
+
+Error mengikuti format §5: 413/415 validasi upload; 422 video/audio tidak dapat dibaca, tidak
+memiliki audio (`audio_missing`), durasi/format WAV tidak sesuai, atau konversi timeout
+(`media_timeout`); 503 alat media, venv/model belum siap (`allosaurus_unavailable`), hasil CLI
+tidak valid (`allosaurus_invalid_result`), atau berkas sementara gagal (`media_unavailable`);
+504 inferensi timeout (`allosaurus_timeout`). Tidak meneruskan path, stderr, atau traceback CLI.
+
+### POST /v1/experiments/wav2vec2 (eksperimen, hanya `DEBUG=true`)
+
+Field multipart: `file` (video MP4/MOV dengan audio, batas upload yang sama).
+Respons:
+
+```json
+{"status":"success","model":"Wikidepia/wav2vec2-xls-r-300m-indonesian","transcription":"tolong","inference_ms":664.0}
+```
+
+Contoh di atas ilustrasi kontrak, bukan hasil pengukuran akurasi. `transcription` adalah
+teks asli hasil greedy CTC bebas (termasuk kosong), tanpa koreksi, kamus target, atau model
+bahasa tambahan. `inference_ms` finite dan nonnegatif, hanya forward model dan decoding;
+tidak mencakup pemuatan model, persiapan audio, upload, atau konversi.
+
+Model tetap pada revisi `8a9d507f0804f8e5fca07b17214b2c0266ba7491`, CPU, `eval` dan
+`inference_mode`; dimuat lokal sekali per subprocess lewat `ml/wav2vec2/.venv`.
+Inferensi tidak mengunduh model; setup terpisah memverifikasi SHA-256 bobot.
+Pengamanan `weights_only=True` dipertahankan. Venv dan dependency backend tidak diubah.
+Validasi WAV, batas durasi/sample rate dari thresholds.yaml, konversi audio tanpa frame,
+dan pembersihan sementara sama seperti eksperimen Allosaurus di atas.
+
+Error mengikuti format §5: 413/415 validasi upload; 422 media/audio/format/durasi tidak
+sesuai atau konversi timeout; 503 alat media/temp tidak tersedia, model/venv belum siap
+(`wav2vec2_unavailable`) atau hasil tidak valid (`wav2vec2_invalid_result`);
+504 inferensi timeout (`wav2vec2_timeout`). Tidak meneruskan stderr, path, atau traceback.
+Endpoint tidak didaftarkan saat `DEBUG=false` dan tidak bergantung pada `MOCK_MODE`.
+
+Layar pengembangan menawarkan Tolong / Saya Tuli / Hai / Makan. Target dipilih dan dikunci
+sebelum merekam, tidak dikirim sebagai prompt ke model. App hanya membandingkan teks
+setelah mengabaikan kapitalisasi, tanda baca, dan spasi berulang; tidak melakukan fuzzy
+matching atau koreksi kata. Hasil mentah tetap ditampilkan. Kecocokan teks bukan skor
+pelafalan. Tidak mengubah Level 3, kelulusan, riwayat/Supabase, scorer rules, atau roadmap
+scorer §7. Kualitas pada ucapan pengguna Tuli belum tervalidasi.
+
+### POST /v1/experiments/combined (eksperimen, hanya `DEBUG=true`)
+
+Revisi 13 November: MediaPipe memeriksa indikasi berbicara, Wav2Vec2 menjadi sumber
+transkripsi untuk kategori teks. Parselmouth tidak dijalankan pada endpoint ini.
+Pipeline utama `/analyze` untuk materi lama tetap terpisah.
+
+Multipart: `file` (MP4/MOV dengan audio, batas upload yang sama) dan `target`, salah satu
+`tolong`, `saya tuli`, `hai`, `makan`. Target dikunci sebelum merekam dan hanya dipakai
+untuk pembandingan sesudah inferensi; tidak diberikan kepada decoder Wav2Vec2.
+
+| Field respons | Kontrak |
+|---|---|
+| `status` | `complete` bila semua komponen berjalan, `partial` bila ada komponen gagal; bukan status kelulusan. |
+| `target` | Target kanonis; app menolak respons untuk target berbeda. |
+| `feedback` | `outcome`: `berhasil`, `mendekati`, `coba_lagi`, atau null jika proses gagal; `reason` seperti di bawah. |
+| `asr` | Respons Wav2Vec2 asli di atas, termasuk teks kosong, atau kegagalan komponen. |
+| `audio` | `status: ok`, `duration_ms`, `active_ms` (integer nonnegatif), `warnings`: `silent`/`too_short`; atau kegagalan komponen. Pemeriksaan RMS NumPy, bukan skor suara. |
+| `visual` | `status: ok`, `n_frames`, `face_frames`, `motion_steps` (integer nonnegatif), `gate`: `passed`/`retry`, `warnings`: `no_face`/`face_off_frame`/`motion_missing`, `lip_contour` (LipContour atau null); atau kegagalan komponen. |
+| `timings` | `media_ms`, `audio_ms`, `visual_ms`, `asr_ms`: integer nonnegatif; ASR mencakup startup/pemuatan subprocess. |
+| `processing_ms` | Integer nonnegatif, total server termasuk konversi dan cleanup, tanpa upload HP. |
+
+Urutan feedback: komponen gagal -> outcome null dengan `component_unavailable`;
+audio senyap/singkat -> `coba_lagi` dengan `silent_audio`/`short_audio`;
+MediaPipe tidak lulus -> `coba_lagi` dengan `visual_gate`; teks kosong -> `coba_lagi`
+dengan `empty_text`; teks cocok -> `berhasil`/`matched`; dekat -> `mendekati`/`near_match`;
+sisanya `coba_lagi`/`different_text`. Hanya berhasil berarti kedua pemeriksaan lulus.
+Kegagalan teknis tidak dihitung sebagai ucapan salah. Prediksi mentah tetap ditampilkan.
+
+Perapian teks memakai Unicode NFC, casefold, tanda baca menjadi spasi dan peringkasan spasi.
+Levenshtein menghitung minimum penambahan/penghapusan/penggantian karakter, tanpa daftar
+variasi salah ucap. Untuk target panjang, kemiripan = `1 - distance / max(panjang_target,
+panjang_teks)`; untuk target pendek, batas jumlah edit. Ambang awal dalam experiments YAML:
+`near_similarity_min=0.75`, `short_target_max_chars=3`, `short_near_max_edits=1`.
+Mendekati berarti teks mendekati target, bukan persentase ketepatan pelafalan.
+
+Audio diperiksa pada frame 20 ms dengan RMS minimal 0.005 dan total aktif minimal 200 ms.
+Gerak bibir dihitung pada waktu audio aktif (toleransi 100 ms), memperhitungkan offset AV.
+Jarak bibir dinormalisasi terhadap skala mata dan disaring median. Minimal dua perubahan
+antar-frame bersebelahan sebesar 0.015, serta rentang perubahan minimal 0.04; celah/lebar
+bibir keduanya dipertimbangkan. Frame tanpa wajah dan gerak di luar audio aktif tidak
+meluluskan. Keterlihatan wajah memakai ambang kualitas lama. Semua nilai baru berada di
+thresholds.yaml dan masih heuristik awal. Ini bukan verifikasi identitas, liveness atau
+bukti sumber suara. Kontur satu cuplikan hanya pendamping; gate memakai rangkaian frame.
+
+Kegagalan komponen: `status: unavailable` dan `code` salah satu `audio_analysis_failed`,
+`face_model_missing`, `face_analysis_failed`, `wav2vec2_unavailable`, `wav2vec2_timeout`,
+`wav2vec2_invalid_result`. HTTP tetap 200 untuk partial, feedback null, hasil lain tetap
+tersedia tanpa angka/teks pengganti. Error HTTP: 413/415 upload tidak sesuai; 422 target,
+media/audio atau durasi tidak sesuai; 503 alat media/temp tidak tersedia.
+
+Satu upload dan satu konversi; decode dibatasi satu sampel melewati durasi maksimum lalu
+WAV divalidasi untuk menolak audio berlebih. Wav2Vec2 tetap CPU lokal/offline,
+weights_only=True, timeout experiments.combined_asr_timeout_s (30 detik). Tanpa dependency
+baru. Upload, WAV dan frame sementara dibersihkan pada semua jalur; tidak meneruskan
+path/stderr/traceback. Tidak mengubah kelulusan/progres/Supabase atau `/analyze`.
+
+App menampilkan warna + ikon + teks untuk tiga hasil latihan. Proses gagal menampilkan
+Penilaian belum tersedia tanpa status latihan. Waktu kirim+proses diukur dari callback
+rekaman sampai respons. Fixture sintetis bersama: app/test-fixtures/contract/combined.json,
+divalidasi pytest dan validator TypeScript.
+
 ## §6 Pipeline server
 
 ### §6.1 Media

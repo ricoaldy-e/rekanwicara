@@ -77,6 +77,12 @@ Transformers, PyTorch, torchaudio dan scikit-learn tidak dipasang/dipakai dalam 
 
 ## Distribusi dan batas pemeriksaan
 
+Eksperimen lokal Wav2Vec2 (13 November 2026) menambahkan Torch 2.15.0+cpu dan Transformers
+5.22.2 hanya di `ml/wav2vec2/.venv`; daftar runtime di `ml/requirements-wav2vec2.txt`.
+Checkpoint komunitas [Wikidepia/wav2vec2-xls-r-300m-indonesian](https://huggingface.co/Wikidepia/wav2vec2-xls-r-300m-indonesian)
+menyatakan Apache-2.0 pada model card. Revisi, hash, sumber, dan batas penggunaan eksperimen
+di [WAV2VEC2_POC.md](WAV2VEC2_POC.md). Model/venv tidak dibundel atau di-commit.
+
 - MIT repo hanya berlaku untuk kode milik tim. Parselmouth/Praat tetap GPL; distribusi
   gabungan yang menautkannya perlu memenuhi ketentuan kompatibilitas, lisensi dan sumber
   yang berlaku. Ketentuan tidak hanya bergantung pada apakah hasil distribusinya binary.

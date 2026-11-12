@@ -169,7 +169,63 @@ export interface DatasetUploadResponse {
   clip_id: string;
 }
 
+// ---------- Development-only POST /v1/experiments/allosaurus ----------
+
+export interface AllosaurusResponse {
+  status: 'success';
+  model: 'uni2005';
+  /** Raw IPA from the restricted Indonesian inventory; the screen formats readable labels. */
+  phonetic_prediction: string;
+  inference_ms: number;
+}
+
 // ---------- Errors (all endpoints) ----------
+
+export interface Wav2Vec2Response {
+  status: 'success';
+  model: 'Wikidepia/wav2vec2-xls-r-300m-indonesian';
+  /** Free greedy CTC transcription, preserved without target correction. */
+  transcription: string;
+  inference_ms: number;
+}
+
+export interface ExperimentFailure {
+  status: 'unavailable';
+  code: 'audio_analysis_failed' | 'face_model_missing' | 'face_analysis_failed' |
+    'wav2vec2_unavailable' | 'wav2vec2_timeout' | 'wav2vec2_invalid_result';
+}
+
+export interface CombinedAudio {
+  status: 'ok';
+  duration_ms: number;
+  active_ms: number;
+  warnings: ('silent' | 'too_short')[];
+}
+
+export interface CombinedVisual {
+  status: 'ok';
+  n_frames: number;
+  face_frames: number;
+  warnings: ('no_face' | 'face_off_frame' | 'motion_missing')[];
+  gate: 'passed' | 'retry';
+  motion_steps: number;
+  lip_contour: LipContour | null;
+}
+
+export interface CombinedResponse {
+  status: 'complete' | 'partial';
+  target: 'tolong' | 'saya tuli' | 'hai' | 'makan';
+  feedback: {
+    outcome: 'berhasil' | 'mendekati' | 'coba_lagi' | null;
+    reason: 'matched' | 'near_match' | 'different_text' | 'empty_text' | 'visual_gate' |
+      'silent_audio' | 'short_audio' | 'component_unavailable';
+  };
+  asr: Wav2Vec2Response | ExperimentFailure;
+  audio: CombinedAudio | ExperimentFailure;
+  visual: CombinedVisual | ExperimentFailure;
+  timings: { media_ms: number; audio_ms: number; visual_ms: number; asr_ms: number };
+  processing_ms: number;
+}
 
 export interface ErrorDetail {
   code: string;

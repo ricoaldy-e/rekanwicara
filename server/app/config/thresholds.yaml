@@ -5,6 +5,20 @@
 # Intensity unit: Praat dB (samples treated as pascal, re 2e-5 Pa).
 # A full-scale sine is ~91 dB; amplitude 0.03 (about -30 dBFS) is ~61 dB; digital silence is clamped to 0 dB.
 
+experiments:
+  combined_asr_timeout_s: 30.0  # Leaves time for media and observations within the app's upload timeout.
+  # Initial experimental heuristics, not validated pronunciation or speaker-verification thresholds.
+  near_similarity_min: 0.75
+  short_target_max_chars: 3
+  short_near_max_edits: 1
+  activity_frame_ms: 20
+  activity_rms_min: 0.005
+  activity_min_ms: 200
+  activity_margin_ms: 100
+  motion_range_min: 0.04
+  motion_step_min: 0.015
+  motion_steps_min: 2
+
 media:
   max_duration_s: 4.0          # §6.1: cut longer clips
   fps: 15                      # §6.1: frame rate normalised to 15 fps

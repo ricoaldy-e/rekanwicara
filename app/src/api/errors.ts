@@ -4,6 +4,8 @@ import { ApiError } from './apiError';
 export function errorMessage(err: unknown): string {
   if (!(err instanceof ApiError)) return 'Terjadi kesalahan. Coba lagi.';
   switch (err.kind) {
+    case 'file':
+      return 'Rekaman tidak dapat dibaca. Coba rekam lagi.';
     case 'network':
       return 'Tidak dapat terhubung ke server. Pastikan HP dan laptop memakai Wi-Fi yang sama, lalu coba lagi.';
     case 'timeout':
