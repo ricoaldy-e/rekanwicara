@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { BigButton } from '../components/BigButton';
 import { ProgressBar } from '../components/ProgressBar';
-import { colors, fontSize, overlay, radius, spacing } from '../theme';
+import { colors, fontSize, overlay, radius, spacing, stroke } from '../theme';
 import { deleteLocalFile } from './localFile';
 import { PermissionGate } from './PermissionGate';
 import {
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.card,
     overflow: 'hidden',
     backgroundColor: overlay.background,
-    borderWidth: 3,
+    borderWidth: stroke.thick,
     borderColor: colors.border,
   },
   ovalOuter: {

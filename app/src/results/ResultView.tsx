@@ -118,6 +118,6 @@ const styles = StyleSheet.create({
   badges: { gap: spacing.sm },
   hint: { fontSize: fontSize.large, fontWeight: '700', color: colors.text, lineHeight: 32 },
   section: { gap: spacing.sm },
-  sectionTitle: { fontSize: fontSize.large, fontWeight: '700', color: colors.primary },
+  sectionTitle: { fontSize: fontSize.large, fontWeight: '700', color: colors.text },
   disclaimer: { fontSize: fontSize.small, color: colors.textMuted },
 });

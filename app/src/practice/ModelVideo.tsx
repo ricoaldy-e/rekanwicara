@@ -51,7 +51,7 @@ export function ModelVideo({ item }: { item: Item }) {
 function Loading() {
   return (
     <View style={styles.center} accessible accessibilityLabel="Memuat video contoh" accessibilityLiveRegion="polite">
-      <ActivityIndicator size="large" color={colors.primary} />
+      <ActivityIndicator size="large" color={colors.text} />
       <Body>Memuat video contoh…</Body>
     </View>
   );

@@ -36,7 +36,7 @@ export function OptionGroup<T extends string>({ label, options, value, onChange,
               <Ionicons
                 name={selected ? 'checkmark-circle' : 'ellipse-outline'}
                 size={26}
-                color={selected ? colors.onPrimary : colors.primary}
+                color={selected ? colors.onPrimary : colors.text}
               />
               <Text style={[styles.text, selected && styles.textSelected]}>{o.label}</Text>
             </Pressable>
@@ -62,10 +62,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: radius.tile,
     borderWidth: 3,
-    borderColor: colors.primary,
+    borderColor: colors.border,
     backgroundColor: colors.background,
   },
   selected: { backgroundColor: colors.primary },
-  text: { fontSize: fontSize.large, fontWeight: '600', color: colors.primary },
+  text: { fontSize: fontSize.large, fontWeight: '600', color: colors.text },
   textSelected: { color: colors.onPrimary, fontWeight: '700' },
 });

@@ -24,7 +24,7 @@ export function PermissionGate({ children, purpose = DEFAULT_PURPOSE }: Permissi
   if (!camera || !mic) {
     return (
       <View style={styles.center} accessible accessibilityLabel="Memeriksa izin">
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={colors.text} />
       </View>
     );
   }
@@ -69,7 +69,7 @@ export function PermissionGate({ children, purpose = DEFAULT_PURPOSE }: Permissi
 function PermissionIcon({ name, granted }: { name: 'camera' | 'mic'; granted: boolean }) {
   return (
     <View style={[styles.iconBox, granted && styles.iconGranted]}>
-      <Ionicons name={name} size={48} color={granted ? colors.onPrimary : colors.primary} />
+      <Ionicons name={name} size={48} color={granted ? colors.onPrimary : colors.text} />
     </View>
   );
 }
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     height: 88,
     borderRadius: 44,
     borderWidth: 3,
-    borderColor: colors.primary,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.background,

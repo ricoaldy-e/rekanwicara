@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     letterSpacing: 6,
   },
-  heading: { fontSize: fontSize.large, fontWeight: '700', color: colors.primary, marginBottom: spacing.xs },
+  heading: { fontSize: fontSize.large, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
   center: { alignItems: 'center', paddingVertical: spacing.md },
   big: { fontSize: fontSize.display, fontWeight: '700', color: colors.text },
   pickText: { fontSize: fontSize.large, fontWeight: '700', color: colors.text },

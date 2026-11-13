@@ -11,7 +11,7 @@ export interface ProgressBarProps {
   testID?: string;
 }
 
-export function ProgressBar({ value, color = colors.primary, height = 14, accessibilityLabel, testID }: ProgressBarProps) {
+export function ProgressBar({ value, color = colors.text, height = 14, accessibilityLabel, testID }: ProgressBarProps) {
   const pct = value === null ? 100 : Math.round(Math.min(Math.max(value, 0), 1) * 100);
   return (
     <View

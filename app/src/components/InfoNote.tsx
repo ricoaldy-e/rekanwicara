@@ -22,7 +22,7 @@ export function InfoNote({ text, tone = 'info', testID }: InfoNoteProps) {
       <Ionicons
         name={warning ? 'warning' : 'information-circle'}
         size={28}
-        color={warning ? colors.danger : colors.primary}
+        color={warning ? colors.danger : colors.text}
       />
       <Text style={styles.text}>{text}</Text>
     </View>

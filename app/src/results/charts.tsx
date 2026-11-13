@@ -44,13 +44,14 @@ export function VowelMap({ point, anchors, testID }: VowelMapProps) {
         <Polygon
           points={toSvgPoints(corners.map((c) => c.at))}
           fill={colors.infoBg}
-          stroke={colors.primary}
+          stroke={colors.textMuted}
           strokeWidth={3}
+          strokeDasharray="8 6"
           strokeLinejoin="round"
         />
       ) : null}
       {corners.map(({ name, at }) => (
-        <SvgText key={name} x={at[0]} y={at[1] + 6} fontSize={22} fontWeight="bold" fill={colors.primary} textAnchor="middle">
+        <SvgText key={name} x={at[0]} y={at[1] + 6} fontSize={22} fontWeight="bold" fill={colors.text} textAnchor="middle">
           {name}
         </SvgText>
       ))}
@@ -93,7 +94,7 @@ export function LipMirror({ user, target, testID }: LipMirrorProps) {
       <Polygon
         points={toSvgPoints(mirrorPoints(lipRing(target)))}
         fill="none"
-        stroke={colors.primary}
+        stroke={colors.textMuted}
         strokeWidth={3}
         strokeDasharray="8 6"
         strokeLinejoin="round"
@@ -136,7 +137,7 @@ export function LoudnessChart({ loudness, testID }: LoudnessChartProps) {
       <Rect x={CHART.x} y={CHART.y} width={CHART.w} height={CHART.h} fill={colors.surface} stroke={colors.border} strokeWidth={2} />
       <Line x1={CHART.x} y1={CHART.y + CHART.h} x2={CHART.x + CHART.w} y2={CHART.y + CHART.h} stroke={colors.border} strokeWidth={2} />
       {points.length > 1 ? (
-        <Polyline points={toSvgPoints(points)} fill="none" stroke={colors.primary} strokeWidth={4} strokeLinejoin="round" />
+        <Polyline points={toSvgPoints(points)} fill="none" stroke={colors.text} strokeWidth={4} strokeLinejoin="round" />
       ) : null}
       <SvgText x={CHART.x} y={134} textAnchor="start" {...LABEL}>awal</SvgText>
       <SvgText x={CHART.x + CHART.w} y={134} textAnchor="end" {...LABEL}>akhir</SvgText>

@@ -1,7 +1,7 @@
 import Svg, { Ellipse, Line, Path, Polygon, Circle } from 'react-native-svg';
 
 import { lipOpening, lipPolygon, LIP_LABELS, toSvgPoints, type LipShape } from '../results/lipShapes';
-import { colors, lip } from '../theme';
+import { colors } from '../theme';
 
 
 function Lips({ shape, cx, cy, scale = 1 }: { shape: LipShape; cx: number; cy: number; scale?: number }) {
@@ -10,14 +10,14 @@ function Lips({ shape, cx, cy, scale = 1 }: { shape: LipShape; cx: number; cy: n
     <>
       <Polygon
         points={toSvgPoints(lipPolygon(shape, cx, cy, scale))}
-        fill={lip.fill}
+        fill="none"
         stroke={colors.text}
-        strokeWidth={2}
+        strokeWidth={3}
         strokeLinejoin="round"
       />
-      {opening ? <Polygon points={toSvgPoints(opening)} fill={lip.mouthDark} /> : null}
+      {opening ? <Polygon points={toSvgPoints(opening)} fill={colors.background} stroke={colors.text} strokeWidth={3} strokeLinejoin="round" /> : null}
       {shape === 'closed' ? (
-        <Line x1={cx - 36 * scale} y1={cy} x2={cx + 36 * scale} y2={cy} stroke={lip.mouthDark} strokeWidth={2.5} />
+        <Line x1={cx - 36 * scale} y1={cy} x2={cx + 36 * scale} y2={cy} stroke={colors.text} strokeWidth={3} />
       ) : null}
     </>
   );
@@ -65,7 +65,7 @@ export function FaceGuide({ shape, size = 150, testID }: FaceGuideProps) {
       accessibilityRole="image"
       accessibilityLabel={`Wajah di tengah oval. ${LIP_LABELS[shape]}.`}
     >
-      <Ellipse cx={60} cy={75} rx={50} ry={68} fill={colors.background} stroke={colors.primary} strokeWidth={4} />
+      <Ellipse cx={60} cy={75} rx={50} ry={68} fill={colors.background} stroke={colors.text} strokeWidth={4} />
       <Circle cx={42} cy={56} r={4.5} fill={colors.text} />
       <Circle cx={78} cy={56} r={4.5} fill={colors.text} />
       <Path d="M60 64 L55 86 L65 86" fill="none" stroke={colors.text} strokeWidth={2} strokeLinecap="round" />

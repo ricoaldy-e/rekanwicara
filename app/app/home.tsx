@@ -75,7 +75,7 @@ export default function Home() {
                 accessibilityLabel={`${ROLE_LABEL[step.role]}: ${it.text}${step.done ? ', sudah dilatih hari ini' : ''}`}
                 style={styles.step}
               >
-                <Ionicons name={step.done ? 'checkmark-circle' : 'ellipse-outline'} size={28} color={colors.primary} />
+                <Ionicons name={step.done ? 'checkmark-circle' : 'ellipse-outline'} size={28} color={colors.text} />
                 <Text style={styles.stepText}>
                   {ROLE_LABEL[step.role]}: {it.emoji ? `${it.emoji} ` : ''}
                   {it.text}
@@ -98,7 +98,7 @@ export default function Home() {
 
       {loading && !items ? (
         <View style={styles.center} accessible accessibilityLabel="Memuat materi">
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size="large" color={colors.text} />
           <Body>Memuat materi…</Body>
         </View>
       ) : null}
@@ -170,10 +170,10 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   title: { fontSize: fontSize.title, fontWeight: '700', color: colors.text },
-  levelTitle: { fontSize: fontSize.large, fontWeight: '700', color: colors.primary, marginTop: spacing.sm },
+  levelTitle: { fontSize: fontSize.large, fontWeight: '700', color: colors.text, marginTop: spacing.sm },
   center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.lg },
   gap: { gap: spacing.sm },
-  missionLabel: { fontSize: fontSize.body, fontWeight: '700', color: colors.primary, marginBottom: spacing.xs },
+  missionLabel: { fontSize: fontSize.body, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
   step: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 48, paddingVertical: spacing.xs },
   stepText: { flex: 1, fontSize: fontSize.body, color: colors.text },
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },

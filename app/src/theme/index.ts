@@ -1,37 +1,38 @@
+import { Platform } from 'react-native';
+
 import type { Status } from '../api/types';
 
 /**
- * Accessible theme (SPEC §8.5): high contrast, large text, large touch targets.
- * Main text/status pairs exceed 4.5:1; primary is 10.04:1 and red is 6.57:1.
+ * "Hutan Malam" dark theme (docs/design.md v6 §3). Contrast ratios are listed in design.md §3.2.
  */
 export const colors = {
-  background: '#FFFFFF',
-  surface: '#F4F6F8',
-  text: '#111111',
-  textMuted: '#3A3A3A',
-  border: '#1F1F1F',
-  primary: '#0B3D91',
-  onPrimary: '#FFFFFF',
-  secondary: '#FFFFFF',
-  onSecondary: '#0B3D91',
-  disabled: '#E0E0E0',
-  danger: '#B71C1C',
-  infoBg: '#E8F0FE',
-  infoBorder: '#0B3D91',
+  background: '#08110B',
+  surface: '#131C16',
+  surfaceRaised: '#1B261E',
+  hero: '#3A5A46',
+  onHero: '#FAFCF9',
+  onHeroMuted: '#D5E0D5',
+  text: '#FAFCF9',
+  textMuted: '#AEB8AD',
+  primary: '#FAFCF9',
+  onPrimary: '#08110B',
+  primaryPressed: '#D9DED6',
+  border: '#6E7F71',
+  accent: '#E8693F',
+  onAccent: '#08110B',
+  infoBg: '#16261C',
+  warningBg: '#2B1A1E',
+  danger: '#FF8FA3',
+  success: '#7FD1A0',
   focus: '#FFB300',
-  success: '#1B5E20',
-  warningBg: '#FDECEA',
-  // nilai v6 di UI-2b
-  surfaceRaised: '#E0E0E0',
-  hero: '#0B3D91',
-  onHero: '#FFFFFF',
-  onHeroMuted: '#FFFFFF',
-  primaryPressed: '#0B3D91',
-  accent: '#0B3D91',
-  onAccent: '#FFFFFF',
+  // Legacy names (design.md §3.3 mapping); removed in UI-3.
+  secondary: 'transparent',
+  onSecondary: '#FAFCF9',
+  infoBorder: '#6E7F71',
+  disabled: '#1B261E',
 } as const;
 
-/** Camera layer colors. */
+/** Camera layer colors (design.md §9). */
 export const overlay = {
   background: '#000000',
   text: '#FFFFFF',
@@ -39,22 +40,24 @@ export const overlay = {
   scrim: 'rgba(0,0,0,0.45)',
 } as const;
 
-export const lip = { fill: '#B04A5A', mouthDark: '#2B0A10' } as const;
+export const chart = { userFill: 'rgba(250,252,249,0.18)' } as const;
 
-export const chart = { userFill: 'rgba(17,17,17,0.18)' } as const;
-
-// nilai v6 di UI-2b
 export const stroke = { thin: 1.5, thick: 2 } as const;
 
-// nilai v6 di UI-2b
-export const fontFamily = { display: undefined, text: undefined } as const;
+export const fontFamily = {
+  /** Serif for titles only (design.md §4); Playfair Display is optional step 0.2 A. */
+  display: Platform.select({ ios: 'Georgia', android: 'serif' }),
+  /** undefined = system font. */
+  text: undefined,
+} as const;
 
 export const fontSize = {
-  small: 17,
-  body: 20,
-  large: 24,
-  title: 30,
-  display: 44,
+  small: 15,
+  body: 17,
+  label: 17,
+  large: 22,
+  title: 28,
+  display: 40,
 } as const;
 
 export const spacing = {
@@ -66,13 +69,13 @@ export const spacing = {
 } as const;
 
 export const radius = {
-  tile: 12,
-  card: 18,
+  tile: 14,
+  card: 20,
   pill: 999,
 } as const;
 
-/** Minimum touch target (dp). Platform guidance is 48; we go larger for comfort. */
-export const touchTarget = 64;
+/** Minimum touch target (dp), design.md §2. */
+export const touchTarget = 48;
 
 export interface StatusStyle {
   label: string;
@@ -83,9 +86,9 @@ export interface StatusStyle {
 
 /** Status is never conveyed by color alone: color + icon + text (CLAUDE.md). */
 export const statusStyles: Record<Status, StatusStyle> = {
-  hijau: { label: 'Sesuai', icon: 'checkmark-circle', background: '#1B5E20', foreground: '#FFFFFF' },
-  kuning: { label: 'Mendekati', icon: 'alert-circle', background: '#FFC400', foreground: '#111111' },
-  merah: { label: 'Belum sesuai', icon: 'close-circle', background: '#B71C1C', foreground: '#FFFFFF' },
+  hijau: { label: 'Sesuai', icon: 'checkmark-circle', background: colors.surface, foreground: '#7FD1A0' },
+  kuning: { label: 'Mendekati', icon: 'alert-circle', background: colors.surface, foreground: '#F2C14E' },
+  merah: { label: 'Belum sesuai', icon: 'close-circle', background: colors.surface, foreground: '#FF8FA3' },
 };
 
-export const theme = { colors, fontSize, spacing, radius, touchTarget, statusStyles, overlay, lip, chart, stroke, fontFamily } as const;
+export const theme = { colors, fontSize, spacing, radius, touchTarget, statusStyles, overlay, chart, stroke, fontFamily } as const;

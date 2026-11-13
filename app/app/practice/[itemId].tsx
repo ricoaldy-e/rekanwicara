@@ -88,7 +88,7 @@ export default function Practice() {
     return (
       <Screen>
         {loading ? (
-          <ActivityIndicator size="large" color={colors.primary} accessibilityLabel="Memuat materi" />
+          <ActivityIndicator size="large" color={colors.text} accessibilityLabel="Memuat materi" />
         ) : (
           <InfoNote tone="warning" text="Materi tidak ditemukan. Kembali ke beranda dan pilih materi lain." />
         )}

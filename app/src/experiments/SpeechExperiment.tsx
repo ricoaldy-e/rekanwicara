@@ -103,7 +103,7 @@ export function SpeechExperiment({ combined = false }: { combined?: boolean }) {
       ) : null}
       {upload.status === 'uploading' ? (
         <>
-          <ActivityIndicator size="large" color={colors.primary} accessibilityLabel="Membaca ucapan" />
+          <ActivityIndicator size="large" color={colors.text} accessibilityLabel="Membaca ucapan" />
           <UploadStatus state={upload} />
           <Body muted>Ucapan sedang diproses di laptop. Tunggu sebentar…</Body>
         </>

@@ -44,5 +44,5 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   pressable: { minHeight: touchTarget, justifyContent: 'center' },
-  pressed: { backgroundColor: colors.infoBg },
+  pressed: { backgroundColor: colors.surfaceRaised },
 });

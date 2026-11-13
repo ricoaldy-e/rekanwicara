@@ -10,7 +10,7 @@ import { colors, fontSize } from '../src/theme';
 
 function DemoIndicator() {
   const { demo } = useUser();
-  return demo ? <Text accessibilityLabel="Mode demo aktif" style={{ color: colors.primary, fontSize: fontSize.small, fontWeight: '700' }}>Mode demo</Text> : null;
+  return demo ? <Text accessibilityLabel="Mode demo aktif" style={{ color: colors.text, fontSize: fontSize.small, fontWeight: '700' }}>Mode demo</Text> : null;
 }
 
 export default function RootLayout() {
@@ -19,11 +19,11 @@ export default function RootLayout() {
       <SettingsProvider>
         <ContentProvider>
           <UserProvider>
-          <StatusBar style="dark" />
+          <StatusBar style="light" />
           <Stack
             screenOptions={{
               headerStyle: { backgroundColor: colors.background },
-              headerTintColor: colors.primary,
+              headerTintColor: colors.text,
               headerTitleStyle: { fontSize: fontSize.large, fontWeight: '700', color: colors.text },
               contentStyle: { backgroundColor: colors.background },
               headerBackTitle: 'Kembali',

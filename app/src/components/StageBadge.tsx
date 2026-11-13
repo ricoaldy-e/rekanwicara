@@ -20,7 +20,7 @@ export function StageBadge({ stage, testID }: { stage: Stage; testID?: string })
   const s = STAGES[stage];
   return (
     <View testID={testID} accessible accessibilityLabel={`Tahap: ${s.label}`} style={styles.badge}>
-      <Ionicons name={s.icon} size={22} color={colors.primary} />
+      <Ionicons name={s.icon} size={22} color={colors.text} />
       <Text style={styles.text}>{s.label}</Text>
     </View>
   );
@@ -36,8 +36,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     borderRadius: radius.tile,
     borderWidth: 2,
-    borderColor: colors.primary,
+    borderColor: colors.border,
     backgroundColor: colors.infoBg,
   },
-  text: { fontSize: fontSize.small, fontWeight: '700', color: colors.primary },
+  text: { fontSize: fontSize.small, fontWeight: '700', color: colors.text },
 });

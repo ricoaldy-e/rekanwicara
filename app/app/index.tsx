@@ -11,7 +11,7 @@ export default function Index() {
   if (!ready) {
     return (
       <Screen>
-        <ActivityIndicator size="large" color={colors.primary} accessibilityLabel="Memuat" />
+        <ActivityIndicator size="large" color={colors.text} accessibilityLabel="Memuat" />
       </Screen>
     );
   }

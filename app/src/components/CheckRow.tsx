@@ -21,7 +21,7 @@ export function CheckRow({ checked, onToggle, text, testID }: CheckRowProps) {
       accessibilityLabel={text}
       style={[styles.row, checked && styles.on]}
     >
-      <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={34} color={colors.primary} />
+      <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={34} color={colors.text} />
       <Text style={styles.text}>{text}</Text>
     </Pressable>
   );
@@ -38,6 +38,6 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radius.card,
   },
-  on: { backgroundColor: colors.infoBg, borderColor: colors.primary },
+  on: { backgroundColor: colors.infoBg, borderColor: colors.text },
   text: { flex: 1, fontSize: fontSize.body, color: colors.text },
 });

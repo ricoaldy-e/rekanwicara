@@ -82,7 +82,7 @@ export default function Allosaurus() {
       ) : null}
       {upload.status === 'uploading' ? (
         <>
-          <ActivityIndicator size="large" color={colors.primary} accessibilityLabel="Memproses bunyi ucapan" />
+          <ActivityIndicator size="large" color={colors.text} accessibilityLabel="Memproses bunyi ucapan" />
           <UploadStatus state={upload} />
           <Body muted>Allosaurus memproses bunyi di laptop. Tunggu sebentar…</Body>
         </>

@@ -48,7 +48,7 @@ export function CombinedObservations({ result }: { result: CombinedResponse }) {
           {visual.lip_contour ? (
             <>
               <Svg width="100%" viewBox="0 0 320 140" style={{ aspectRatio: 320 / 140 }} accessible accessibilityRole="image" accessibilityLabel="Kontur bibir dari satu cuplikan rekaman, tanpa bentuk target atau penilaian ketepatan.">
-                <Polygon points={visual.lip_contour.points.map(([x, y]) => `${30 + x * 260},${20 + y * 100}`).join(' ')} fill={colors.infoBg} stroke={colors.primary} strokeWidth={4} strokeLinejoin="round" />
+                <Polygon points={visual.lip_contour.points.map(([x, y]) => `${30 + x * 260},${20 + y * 100}`).join(' ')} fill={colors.infoBg} stroke={colors.text} strokeWidth={4} strokeLinejoin="round" />
               </Svg>
               <Body muted>Kontur satu cuplikan, diskalakan untuk tampilan. Pemeriksaan gerak memakai rangkaian cuplikan.</Body>
             </>

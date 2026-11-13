@@ -51,7 +51,7 @@ export default function Onboarding() {
           {CYCLE.map((c) => (
             <Card key={c.text}>
               <View style={styles.row}>
-                <Ionicons name={c.icon} size={32} color={colors.primary} />
+                <Ionicons name={c.icon} size={32} color={colors.text} />
                 <Text style={styles.rowText}>{c.text}</Text>
               </View>
             </Card>

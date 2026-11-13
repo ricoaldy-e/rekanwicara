@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   primary: { backgroundColor: colors.primary, borderColor: colors.primary },
-  secondary: { backgroundColor: colors.secondary, borderColor: colors.primary },
+  secondary: { backgroundColor: colors.secondary, borderColor: colors.border },
   disabled: { backgroundColor: colors.disabled, borderColor: colors.disabled },
   pressed: { opacity: 0.8, transform: [{ scale: 0.98 }] },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },

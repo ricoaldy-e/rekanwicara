@@ -135,7 +135,7 @@ export default function DatasetSessionScreen() {
   if (stage === 'loading') {
     return (
       <Screen>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={colors.text} />
       </Screen>
     );
   }
