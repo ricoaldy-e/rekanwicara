@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
 
 import { darkStackOptions } from '../src/navigation/stackOptions';
+import { PinSessionProvider } from '../src/pin/PinSession';
 import { ContentProvider } from '../src/state/content';
 import { SettingsProvider } from '../src/state/settings';
 import { UserProvider } from '../src/state/user';
@@ -28,9 +29,11 @@ export default function RootLayout() {
       <SettingsProvider>
         <ContentProvider>
           <UserProvider>
+          <PinSessionProvider>
           <StatusBar style="light" />
           <Stack screenOptions={darkStackOptions}>
             <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="auth/create-pin" options={{ title: 'Buat PIN', headerBackVisible: false }} />
             <Stack.Screen name="onboarding" options={{ title: 'Selamat datang' }} />
             <Stack.Screen name="calibration" options={{ title: 'Kalibrasi' }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -40,6 +43,7 @@ export default function RootLayout() {
             <Stack.Screen name="dataset/model-videos" options={{ title: 'Rekam Video Model' }} />
             <Stack.Screen name="about" options={{ title: 'Tentang aplikasi' }} />
           </Stack>
+          </PinSessionProvider>
           </UserProvider>
         </ContentProvider>
       </SettingsProvider>

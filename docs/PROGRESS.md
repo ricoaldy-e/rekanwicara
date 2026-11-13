@@ -580,6 +580,19 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   - `Snackbar` absolut di dasar scene (di dalam tab ia berada di atas bar bawah), minimal 5 detik, ketuk untuk menutup, tanpa animasi.
   - `ConfirmDialog`: fokus pembaca layar awal ke Batal (`setAccessibilityFocus`, belum teruji di perangkat); latar memakai `overlay.scrim`.
   Belum dikerjakan (bukan bagian prompt): `VideoField`, `SyllableRow` (FL-8). Belum teruji: pengumuman pembaca layar (iOS `announceForAccessibility`, Android live region), fokus garis 3 dp, skala teks 200%.
+- FL-6 (13 Nov 2026): PIN Pendamping per akun. Baru: `src/pin/lock.ts` (murni: `lockState`, `afterFailure`, `parseLock`), `pinStore.ts` (SecureStore: `hasPin`, `savePin`, `verifyPin`,
+  `getLock`, `recordFailure`, `clearFailures`, `attemptPin`; migrasi sekali dari `cw.companionPin`), `PinSession.tsx` (terbuka/terkunci; kunci saat `AppState` bukan `active`, saat tab Latihan tampil,
+  dan 5 menit tanpa sentuhan), `PinScreenBody.tsx` (+ `usePinInput`), `PinGate.tsx`; layar `app/auth/create-pin.tsx` dan `(tabs)/settings/change-pin.tsx`; `src/forms/flash.ts` (snackbar "PIN diganti." di Pengaturan).
+  `PIN_LIMITS` di `src/forms/limits.ts` (5 salah, kunci 30 detik, diam 5 menit). Gerbang ada di `_layout` tab Pendamping dan Pengaturan; tab Latihan dan sesi latihan tidak pernah meminta PIN.
+  `index.tsx`: tanpa PIN → `/auth/create-pin`, lalu `/onboarding` atau `/home`. Onboarding kini 2 langkah; `completeOnboarding()` tanpa argumen dan tidak lagi menyimpan PIN;
+  `savePin`/`verifyPin` lama di `user/storage.ts` dihapus. Pengaturan punya tombol "Ganti PIN". Teks PIN tidak mengklaim keamanan (hanya pengunci tampilan, disimpan di HP ini).
+  Keputusan: (1) kunci SecureStore `rw.companionPin.<uid>` dan `rw.pinLock.<uid>` (tanda `:` dari kontrak §2 ditolak SecureStore: hanya huruf/angka/`.`/`-`/`_`); `uid` = `'local'` sampai FL-7.
+  (2) Setelah kunci 30 detik habis, hitungan salah mulai dari 0 (5 percobaan baru). (3) Getar salah = `buzzLight` (impact ringan, mengikuti sakelar Getar), bukan pola error; tanpa animasi goyang.
+  (4) Pindah ke Latihan memakai `useSegments` di layout tab; membuka sesi latihan (di luar tab) tidak mengunci, tetapi app ke latar mengunci. (5) Berbagi laporan (`Share`) dari Pendamping bisa
+  membuat `AppState` bukan `active` di sebagian perangkat → sesi terkunci; belum dicek di perangkat. (6) "Lupa PIN?" **belum ada** (butuh sandi akun dari FL-7); tautan disembunyikan.
+  Tes diubah: `onboarding.test.tsx` (langkah PIN dan tes keystore dibuang; kini tes dua langkah), `demo.test.tsx` (`completeOnboarding()` tanpa PIN; asersi `savePin` dibuang karena fungsinya pindah),
+  `companion.test.tsx` (tes layar PIN diganti tes "tidak meminta PIN sendiri + Kunci kembali memanggil `lock`"; pembantu `unlock` hanya merender). Baru: `pin.test.tsx` (17). 38 suite / 472 tes.
+  Belum teruji: di perangkat (iOS, TalkBack), `isValidPin` di `user/pure.ts` kini tak dipakai UI (dibiarkan).
 
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah

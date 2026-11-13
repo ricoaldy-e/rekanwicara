@@ -1,11 +1,20 @@
 import { Stack } from 'expo-router';
+import { View } from 'react-native';
 
 import { darkStackOptions } from '../../../src/navigation/stackOptions';
+import { PinGate } from '../../../src/pin/PinGate';
+import { usePinSession } from '../../../src/pin/PinSession';
 
+/** Open only after the companion PIN; every touch restarts the 5-minute idle timer. */
 export default function Layout() {
+  const { touch } = usePinSession();
   return (
-    <Stack screenOptions={darkStackOptions}>
-      <Stack.Screen name="index" options={{ title: 'Mode Pendamping' }} />
-    </Stack>
+    <PinGate>
+      <View style={{ flex: 1 }} onTouchStart={touch}>
+        <Stack screenOptions={darkStackOptions}>
+          <Stack.Screen name="index" options={{ title: 'Mode Pendamping' }} />
+        </Stack>
+      </View>
+    </PinGate>
   );
 }

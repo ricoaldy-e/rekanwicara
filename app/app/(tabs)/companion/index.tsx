@@ -1,46 +1,31 @@
 import { useState } from 'react';
-import { Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Share, StyleSheet, Text, View } from 'react-native';
 
 import { BigButton, Body, Card, CheckRow, InfoNote, Screen, StageBadge, Title } from '../../../src/components';
 import { OptionGroup } from '../../../src/components/OptionGroup';
+import { usePinSession } from '../../../src/pin/PinSession';
 import { useContent } from '../../../src/state/content';
 import { useUser } from '../../../src/state/user';
 import { colors, fontSize, radius, spacing, touchTarget } from '../../../src/theme';
-import { SESSION_MINUTES, isValidPin, type SessionMinutes } from '../../../src/user/pure';
+import { SESSION_MINUTES, type SessionMinutes } from '../../../src/user/pure';
 import { CONSULT_ADVICE, reportText, weeklySummary } from '../../../src/user/report';
-import { verifyPin } from '../../../src/user/storage';
 
-type Stage = 'pin' | 'home' | 'pick' | 'listen';
+type Stage = 'home' | 'pick' | 'listen';
 
 const MINUTE_OPTIONS = SESSION_MINUTES.map((m) => ({ value: String(m), label: `${m} menit` }));
 
-/** Mode Pendamping (SPEC §8.1): PIN, weekly summary, Uji Dengar, session length, text report. */
+/** Mode Pendamping (SPEC §8.1): weekly summary, Uji Dengar, session length, text report. */
 export default function Companion() {
   const { items } = useContent();
   const { profile, progress, sync, demo, addListenCheck, updateSettings, syncNow } = useUser();
-  const [stage, setStage] = useState<Stage>('pin');
-  const [pin, setPin] = useState('');
-  const [pinError, setPinError] = useState<string | null>(null);
+  const { lock } = usePinSession(); // the PIN gate lives in this tab's layout
+  const [stage, setStage] = useState<Stage>('home');
   const [checkId, setCheckId] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
   const [shareError, setShareError] = useState(false);
 
   const nameOf = (id: string) => items?.find((it) => it.item_id === id)?.text ?? id;
   const summary = weeklySummary(progress, profile.attempts, new Date());
-
-  const unlock = async () => {
-    if (!isValidPin(pin)) return setPinError('PIN harus 4 angka.');
-    let ok = false;
-    try {
-      ok = await verifyPin(pin);
-    } catch {
-      return setPinError('PIN belum bisa dibaca dari HP ini. Coba lagi.');
-    }
-    if (!ok) return setPinError('PIN salah.');
-    setPin('');
-    setPinError(null);
-    setStage('home');
-  };
 
   const share = async () => {
     setShareError(false);
@@ -50,37 +35,6 @@ export default function Companion() {
       setShareError(true); // the share sheet could not open; nothing is lost
     }
   };
-
-  const lock = () => {
-    setSaved(null);
-    setStage('pin');
-  };
-
-  if (stage === 'pin') {
-    return (
-      <Screen>
-        <Title>Mode Pendamping</Title>
-        <Body>Bagian ini untuk orang tua, keluarga, atau guru. Masukkan PIN 4 angka.</Body>
-        <TextInput
-          value={pin}
-          onChangeText={(t) => {
-            setPin(t.replace(/\D/g, '').slice(0, 4));
-            setPinError(null);
-          }}
-          style={styles.input}
-          keyboardType="number-pad"
-          secureTextEntry
-          maxLength={4}
-          placeholder="PIN"
-          placeholderTextColor={colors.textMuted}
-          accessibilityLabel="PIN pendamping"
-          testID="companion-pin"
-        />
-        {pinError ? <InfoNote tone="warning" text={pinError} testID="companion-pin-error" /> : null}
-        <BigButton label="Buka" icon="lock-open" disabled={pin.length !== 4} onPress={unlock} testID="companion-unlock" />
-      </Screen>
-    );
-  }
 
   if (stage === 'pick') {
     const practised = (items ?? []).filter((it) => (progress.get(it.item_id)?.attempts ?? 0) > 0).sort((a, b) => b.level - a.level);
@@ -230,16 +184,6 @@ export default function Companion() {
 }
 
 const styles = StyleSheet.create({
-  input: {
-    minHeight: touchTarget,
-    borderWidth: 3,
-    borderColor: colors.border,
-    borderRadius: radius.card,
-    paddingHorizontal: spacing.md,
-    fontSize: fontSize.large,
-    color: colors.text,
-    letterSpacing: 6,
-  },
   heading: { fontSize: fontSize.large, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
   center: { alignItems: 'center', paddingVertical: spacing.md },
   big: { fontSize: fontSize.display, fontWeight: '700', color: colors.text },

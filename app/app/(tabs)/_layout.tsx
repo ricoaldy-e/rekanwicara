@@ -1,7 +1,9 @@
-import { Tabs } from 'expo-router';
+import { Tabs, useSegments } from 'expo-router';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 
 import { BottomBar, type BottomBarItem } from '../../src/components/BottomBar';
+import { usePinSession } from '../../src/pin/PinSession';
 import { colors } from '../../src/theme';
 
 const TABS: { name: string; label: string; accessibilityLabel?: string; icon: BottomBarItem['icon'] }[] = [
@@ -12,6 +14,12 @@ const TABS: { name: string; label: string; accessibilityLabel?: string; icon: Bo
 
 // Practice sessions live in the root Stack, so they cover this navigator and hide the bar.
 export default function TabsLayout() {
+  const { lock } = usePinSession();
+  const segments = useSegments() as string[];
+  // Coming back to Latihan ends the companion session (flow §5.5).
+  useEffect(() => {
+    if (segments[0] === '(tabs)' && segments[1] === 'home') lock();
+  }, [segments, lock]);
   return (
     <Tabs
       screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: colors.background } }}

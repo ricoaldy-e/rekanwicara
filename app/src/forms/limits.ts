@@ -20,3 +20,12 @@ export const LIMITS = {
 
 /** The counter "n / max" shows from this share of the limit (flow §7.7.1). */
 export const COUNTER_FROM = 0.8;
+
+/** First guesses of the FE (kontrak §11), kept in one place. */
+export const PIN_LIMITS = {
+  /** Wrong tries before the pad locks. */
+  maxFailures: 5,
+  lockMs: 30_000,
+  /** The companion session ends after this long without a touch. */
+  idleMs: 5 * 60_000,
+} as const;

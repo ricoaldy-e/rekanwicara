@@ -8,7 +8,6 @@ import { createDemoProfile } from '../src/user/demo';
 import { newProfile, parseProfile } from '../src/user/pure';
 
 const mockSave = jest.fn();
-const mockSavePin = jest.fn();
 const mockEnsureUser = jest.fn().mockResolvedValue('11111111-1111-4111-8111-111111111111');
 const mockUpsert = jest.fn().mockResolvedValue(undefined);
 const mockPersonal = { ...newProfile(), onboarded: true, calibrated: true };
@@ -22,7 +21,6 @@ jest.mock('../src/state/content', () => ({ useContent: () => ({ items: mockItems
 jest.mock('../src/user/storage', () => ({
   loadProfile: async () => mockLoadedProfile,
   saveProfile: (...args: unknown[]) => mockSave(...args),
-  savePin: (...args: unknown[]) => mockSavePin(...args),
 }));
 jest.mock('../src/data/supabase', () => ({ createRemote: () => ({
   ensureUser: () => mockEnsureUser(), upsert: (...args: unknown[]) => mockUpsert(...args),
@@ -41,7 +39,7 @@ function Controls() {
     <Pressable testID="check" onPress={() => user.addListenCheck('l3_mama', 'jelas')} />
     <Pressable testID="attempt" onPress={() => user.addAttempt({ ...user.profile.attempts[0], synced: false })} />
     <Pressable testID="sync" onPress={() => void user.syncNow()} />
-    <Pressable testID="pin" onPress={() => void user.completeOnboarding('9999')} />
+    <Pressable testID="pin" onPress={() => user.completeOnboarding()} />
   </>;
 }
 
@@ -75,7 +73,6 @@ it('never persists or syncs demo data and restores the personal profile on exit'
   expect(screen.getByTestId('count')).toHaveTextContent('1');
   expect(screen.getByTestId('attempts')).toHaveTextContent('21');
   expect(mockSave).not.toHaveBeenCalled();
-  expect(mockSavePin).not.toHaveBeenCalled();
   expect(mockEnsureUser).not.toHaveBeenCalled();
   expect(mockUpsert).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByTestId('off'));

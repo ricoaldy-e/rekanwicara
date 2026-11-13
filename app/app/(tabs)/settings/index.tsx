@@ -4,7 +4,8 @@ import { useRouter } from 'expo-router';
 
 import { createApiClient, isValidBaseUrl } from '../../../src/api/client';
 import { errorMessage } from '../../../src/api/errors';
-import { BigButton, Body, Card, CheckRow, InfoNote, Screen, Title } from '../../../src/components';
+import { BigButton, Body, Card, CheckRow, InfoNote, Screen, Snackbar, Title } from '../../../src/components';
+import { useFlash } from '../../../src/forms/flash';
 import { useUser } from '../../../src/state/user';
 import { DATASET_MODE } from '../../../src/config';
 import { useContent } from '../../../src/state/content';
@@ -64,8 +65,10 @@ export default function Settings() {
     }
   }
 
+  const [flash, clearFlash] = useFlash();
+
   return (
-    <Screen>
+    <Screen footer={<Snackbar message={flash} onDismiss={clearFlash} />}>
       <Title>Getar</Title>
       <View style={styles.switchRow}>
         <Text style={styles.switchLabel}>Getar saat merekam dan saat hasil muncul</Text>
@@ -124,6 +127,8 @@ export default function Settings() {
           <BigButton label="Uji Allosaurus" icon="flask" variant="secondary" onPress={() => router.push('/allosaurus')} />
         </>
       ) : null}
+      <Title>PIN Pendamping</Title>
+      <BigButton label="Ganti PIN" icon="key-outline" variant="secondary" onPress={() => router.push('/settings/change-pin')} />
       <Title>Mode demo</Title>
       <Body>Contoh progres: a dan ma sudah lulus. Latihan tetap dianalisis server. Progres demo tidak dikirim online dan hilang saat keluar dari mode demo atau app dimulai ulang.</Body>
       {ready && !sync.running ? (

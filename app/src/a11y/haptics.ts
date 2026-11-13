@@ -19,6 +19,9 @@ export const buzz = (style: Haptics.ImpactFeedbackStyle = Haptics.ImpactFeedback
   }
 };
 
+/** A light tap (follows the Getar switch); for "not right yet" moments such as a wrong PIN. */
+export const buzzLight = () => buzz(Haptics.ImpactFeedbackStyle.Light);
+
 export const buzzDone = () => {
   if (!enabled) return;
   try {

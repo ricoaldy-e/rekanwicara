@@ -10,14 +10,14 @@ const item = (item_id: string, level: number, text: string): Item => ({
 }); // fmt: skip
 const mockItems = [item('l1_a', 1, 'a'), item('l1_i', 1, 'i'), item('l3_mama', 3, 'mama')];
 
-const mockVerifyPin = jest.fn();
+const mockLock = jest.fn();
 const mockAddListenCheck = jest.fn();
 const mockUpdateSettings = jest.fn();
 let mockProfile: Profile;
 let mockDemo = false;
 let mockSync: { configured: boolean; running: boolean; pending: number; lastError: string | null; lastSyncedAt: string | null };
 
-jest.mock('../src/user/storage', () => ({ verifyPin: (pin: string) => mockVerifyPin(pin) }));
+jest.mock('../src/pin/PinSession', () => ({ usePinSession: () => ({ lock: mockLock }) }));
 jest.mock('../src/state/content', () => ({ useContent: () => ({ items: mockItems }) }));
 jest.mock('../src/state/user', () => ({
   useUser: () => ({
@@ -43,7 +43,7 @@ function attempt(itemId: string, overall: Attempt['overall'], session: string, m
 }
 
 beforeEach(() => {
-  mockVerifyPin.mockReset();
+  mockLock.mockReset();
   mockAddListenCheck.mockReset();
   mockUpdateSettings.mockReset();
   mockProfile = newProfile();
@@ -51,20 +51,18 @@ beforeEach(() => {
   mockSync = { configured: false, running: false, pending: 0, lastError: null, lastSyncedAt: null };
 });
 
-async function unlock(pin = '4821', correct = true) {
-  mockVerifyPin.mockResolvedValue(correct);
+/** The PIN gate is in the tab layout (PinGate); the screen itself opens straight to the summary. */
+async function unlock() {
   await render(<Companion />);
-  await fireEvent.changeText(screen.getByTestId('companion-pin'), pin);
-  await fireEvent.press(screen.getByTestId('companion-unlock'));
 }
 
 describe('Mode Pendamping', () => {
-  it('shows nothing but the PIN screen until the PIN is right', async () => {
-    await unlock('1111', false);
-    await waitFor(() => expect(screen.getByTestId('companion-pin-error')).toBeTruthy());
-    expect(screen.getByLabelText('PIN salah.')).toBeTruthy();
-    expect(screen.queryByTestId('weekly-summary')).toBeNull();
-    expect(mockVerifyPin).toHaveBeenCalledWith('1111');
+  it('no longer asks for a PIN itself and locks the session on "Kunci kembali"', async () => {
+    await unlock();
+    expect(screen.queryByTestId('companion-pin')).toBeNull();
+    expect(screen.getByTestId('weekly-summary')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Kunci kembali' }));
+    expect(mockLock).toHaveBeenCalledTimes(1);
   });
 
   it('opens with the right PIN and shows the weekly summary', async () => {
@@ -126,8 +124,6 @@ describe('Mode Pendamping', () => {
     await waitFor(() => expect(screen.getByTestId('sync-off')).toBeTruthy());
     mockSync = { ...mockSync, configured: true, pending: 3, lastError: 'Network request failed' };
     await render(<Companion />);
-    await fireEvent.changeText(screen.getAllByTestId('companion-pin').at(-1)!, '4821');
-    await fireEvent.press(screen.getAllByTestId('companion-unlock').at(-1)!);
     await waitFor(() => expect(screen.getAllByTestId('sync-status').length).toBeGreaterThan(0));
     expect(screen.getAllByText('3 catatan menunggu dikirim.').length).toBeGreaterThan(0);
     expect(screen.getAllByTestId('sync-error').length).toBeGreaterThan(0);

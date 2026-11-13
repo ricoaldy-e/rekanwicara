@@ -10,7 +10,7 @@ jest.mock('../src/state/user', () => ({ useUser: () => ({ completeOnboarding: mo
 
 beforeEach(() => {
   mockReplace.mockClear();
-  mockComplete.mockReset().mockResolvedValue(undefined);
+  mockComplete.mockReset();
 });
 
 async function toConsent() {
@@ -26,7 +26,7 @@ describe('Onboarding', () => {
 
   it('needs both consents before continuing', async () => {
     await toConsent();
-    const next = () => screen.getByRole('button', { name: 'Lanjut' });
+    const next = () => screen.getByRole('button', { name: 'Lanjut ke kalibrasi' });
     expect(next()).toBeDisabled();
     await fireEvent.press(screen.getByRole('checkbox', { name: /Saya mengerti/ }));
     expect(next()).toBeDisabled();
@@ -34,41 +34,14 @@ describe('Onboarding', () => {
     expect(next()).toBeEnabled();
   });
 
-  async function toPin() {
+  it('has two steps and finishes at the consent: no PIN here any more', async () => {
     await toConsent();
+    expect(screen.getByLabelText(/^Langkah 2 dari 2/)).toBeTruthy();
     await fireEvent.press(screen.getByRole('checkbox', { name: /Saya mengerti/ }));
     await fireEvent.press(screen.getByRole('checkbox', { name: /Pendamping/ }));
-    await fireEvent.press(screen.getByRole('button', { name: 'Lanjut' }));
-  }
-
-  it('rejects a PIN that is too short or does not match, and keeps digits only', async () => {
-    await toPin();
-    const save = () => screen.getByRole('button', { name: /Simpan/ });
-    await fireEvent.changeText(screen.getByTestId('pin-input'), '12a4');
-    expect(screen.getByTestId('pin-input').props.value).toBe('124');
-    expect(save()).toBeDisabled();
-    await fireEvent.changeText(screen.getByTestId('pin-input'), '1234');
-    await fireEvent.changeText(screen.getByTestId('pin-again-input'), '1235');
-    expect(save()).toBeDisabled();
-    expect(screen.getByLabelText('Kedua PIN belum sama.')).toBeTruthy();
-  });
-
-  it('stores the PIN and goes to calibration', async () => {
-    await toPin();
-    await fireEvent.changeText(screen.getByTestId('pin-input'), '4821');
-    await fireEvent.changeText(screen.getByTestId('pin-again-input'), '4821');
-    await fireEvent.press(screen.getByRole('button', { name: /Simpan/ }));
+    expect(screen.queryByTestId('pin-input')).toBeNull();
+    await fireEvent.press(screen.getByRole('button', { name: 'Lanjut ke kalibrasi' }));
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/calibration'));
-    expect(mockComplete).toHaveBeenCalledWith('4821');
-  });
-
-  it('stays on the PIN step when the keystore refuses the PIN', async () => {
-    mockComplete.mockRejectedValue(new Error('keystore'));
-    await toPin();
-    await fireEvent.changeText(screen.getByTestId('pin-input'), '4821');
-    await fireEvent.changeText(screen.getByTestId('pin-again-input'), '4821');
-    await fireEvent.press(screen.getByRole('button', { name: /Simpan/ }));
-    await waitFor(() => expect(screen.getByLabelText('PIN belum bisa disimpan. Coba lagi.')).toBeTruthy());
-    expect(mockReplace).not.toHaveBeenCalled();
+    expect(mockComplete).toHaveBeenCalledWith();
   });
 });

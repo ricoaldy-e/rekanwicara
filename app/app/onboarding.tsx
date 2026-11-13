@@ -1,12 +1,11 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { BigButton, Body, Card, CheckRow, InfoNote, Screen, StepHeader } from '../src/components';
 import { useUser } from '../src/state/user';
-import { isValidPin } from '../src/user/pure';
-import { colors, fontSize, radius, spacing, stroke, touchTarget } from '../src/theme';
+import { colors, fontSize, spacing } from '../src/theme';
 
 const CYCLE = [
   { icon: 'eye', text: 'Lihat contoh bentuk bibir.' },
@@ -21,29 +20,14 @@ export default function Onboarding() {
   const [step, setStep] = useState(1);
   const [consentUser, setConsentUser] = useState(false);
   const [consentCompanion, setConsentCompanion] = useState(false);
-  const [pin, setPin] = useState('');
-  const [pinAgain, setPinAgain] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState(false);
-
-  const pinError = !isValidPin(pin) ? 'PIN harus 4 angka.' : pin !== pinAgain ? 'Kedua PIN belum sama.' : null;
-
-  const finish = async () => {
-    if (pinError) return;
-    setSaving(true);
-    setSaveError(false);
-    try {
-      await completeOnboarding(pin);
-      router.replace('/calibration');
-    } catch {
-      setSaveError(true); // keystore refused the PIN: stay here so it can be retried
-      setSaving(false);
-    }
+  const finish = () => {
+    completeOnboarding();
+    router.replace('/calibration');
   };
 
   return (
     <Screen>
-      <StepHeader step={step} total={3} title={['Kenali Rekan Wicara', 'Persetujuan', 'PIN pendamping'][step - 1]} />
+      <StepHeader step={step} total={2} title={['Kenali Rekan Wicara', 'Persetujuan'][step - 1]} />
 
       {step === 1 ? (
         <>
@@ -78,52 +62,15 @@ export default function Onboarding() {
             text="Pendamping (orang tua, keluarga, atau guru) tahu dan setuju."
           />
           <BigButton
-            label="Lanjut"
+            label="Lanjut ke kalibrasi"
             icon="arrow-forward"
             disabled={!consentUser || !consentCompanion}
-            onPress={() => setStep(3)}
+            onPress={finish}
           />
           <BigButton label="Kembali" variant="secondary" onPress={() => setStep(1)} />
         </>
       ) : null}
 
-      {step === 3 ? (
-        <>
-          <Body>
-            PIN 4 angka mengunci Mode Pendamping: membuka semua materi, mengubah lama sesi, dan Uji Dengar. Dengan PIN,
-            pengaturan latihan tidak berubah tanpa sengaja. Berlatih sendiri? Buat PIN yang mudah kamu ingat.
-          </Body>
-          <Body muted>PIN disimpan aman di HP ini dan tidak dikirim ke server.</Body>
-          <TextInput
-            value={pin}
-            onChangeText={(t) => setPin(t.replace(/\D/g, '').slice(0, 4))}
-            style={styles.input}
-            keyboardType="number-pad"
-            secureTextEntry
-            maxLength={4}
-            placeholder="PIN 4 angka"
-            placeholderTextColor={colors.textMuted}
-            accessibilityLabel="PIN pendamping, 4 angka"
-            testID="pin-input"
-          />
-          <TextInput
-            value={pinAgain}
-            onChangeText={(t) => setPinAgain(t.replace(/\D/g, '').slice(0, 4))}
-            style={styles.input}
-            keyboardType="number-pad"
-            secureTextEntry
-            maxLength={4}
-            placeholder="Ulangi PIN"
-            placeholderTextColor={colors.textMuted}
-            accessibilityLabel="Ulangi PIN pendamping"
-            testID="pin-again-input"
-          />
-          {pin.length > 0 && pinAgain.length > 0 && pinError ? <InfoNote tone="warning" text={pinError} /> : null}
-          {saveError ? <InfoNote tone="warning" text="PIN belum bisa disimpan. Coba lagi." /> : null}
-          <BigButton label="Simpan, lanjut ke kalibrasi" icon="checkmark" disabled={pinError !== null || saving} onPress={finish} />
-          <BigButton label="Kembali" variant="secondary" onPress={() => setStep(2)} />
-        </>
-      ) : null}
     </Screen>
   );
 }
@@ -131,14 +78,4 @@ export default function Onboarding() {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   rowText: { flex: 1, fontSize: fontSize.body, color: colors.text },
-  input: {
-    minHeight: touchTarget,
-    borderWidth: stroke.thick,
-    borderColor: colors.border,
-    borderRadius: radius.tile,
-    paddingHorizontal: spacing.md,
-    fontSize: fontSize.large,
-    color: colors.text,
-    letterSpacing: 6,
-  },
 });

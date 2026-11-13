@@ -31,6 +31,7 @@ export const MESSAGES = {
   pinWrong: 'PIN salah. Sisa {n} percobaan.',
   pinLocked: 'Terlalu banyak percobaan. Coba lagi dalam {n} detik.',
   pinChanged: 'PIN diganti.',
+  pinSaveFailed: 'PIN belum bisa disimpan. Coba lagi.',
   // Word and syllables
   wordEmpty: 'Isi kata yang akan dilatih.',
   wordChars: 'Gunakan huruf saja. Spasi atau tanda hubung boleh di antara huruf.',
