@@ -25,11 +25,6 @@ export const colors = {
   danger: '#FF8FA3',
   success: '#7FD1A0',
   focus: '#FFB300',
-  // Legacy names (design.md §3.3 mapping); removed in UI-3.
-  secondary: 'transparent',
-  onSecondary: '#FAFCF9',
-  infoBorder: '#6E7F71',
-  disabled: '#1B261E',
 } as const;
 
 /** Camera layer colors (design.md §9). */
@@ -77,6 +72,9 @@ export const radius = {
 /** Minimum touch target (dp), design.md §2. */
 export const touchTarget = 48;
 
+/** Height of the main button (design.md §5.1). */
+export const buttonHeight = 52;
+
 export interface StatusStyle {
   label: string;
   icon: 'checkmark-circle' | 'alert-circle' | 'close-circle';
@@ -91,4 +89,4 @@ export const statusStyles: Record<Status, StatusStyle> = {
   merah: { label: 'Belum sesuai', icon: 'close-circle', background: colors.surface, foreground: '#FF8FA3' },
 };
 
-export const theme = { colors, fontSize, spacing, radius, touchTarget, statusStyles, overlay, chart, stroke, fontFamily } as const;
+export const theme = { colors, fontSize, spacing, radius, touchTarget, buttonHeight, statusStyles, overlay, chart, stroke, fontFamily } as const;

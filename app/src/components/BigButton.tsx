@@ -2,7 +2,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSize, radius, spacing, touchTarget } from '../theme';
+import { useReduceMotion } from '../a11y/useReduceMotion';
+import { buttonHeight, colors, fontSize, radius, spacing, stroke } from '../theme';
 
 type Variant = 'primary' | 'secondary';
 
@@ -25,7 +26,8 @@ export function BigButton({
   accessibilityHint,
   testID,
 }: BigButtonProps) {
-  const fg = disabled ? colors.textMuted : variant === 'primary' ? colors.onPrimary : colors.onSecondary;
+  const reduceMotion = useReduceMotion();
+  const fg = disabled ? colors.textMuted : variant === 'primary' ? colors.onPrimary : colors.text;
   return (
     <Pressable
       testID={testID}
@@ -38,13 +40,14 @@ export function BigButton({
       style={({ pressed }) => [
         styles.base,
         variant === 'primary' ? styles.primary : styles.secondary,
+        pressed && !disabled && (variant === 'primary' ? styles.primaryPressed : styles.secondaryPressed),
+        pressed && !disabled && !reduceMotion && styles.scaled,
         disabled && styles.disabled,
-        pressed && !disabled && styles.pressed,
       ]}
     >
       <View style={styles.row}>
-        {icon ? <Ionicons name={icon} size={28} color={fg} accessible={false} /> : null}
-        <Text style={[styles.label, { color: fg }]}>{label}</Text>
+        {icon ? <Ionicons name={icon} size={22} color={fg} accessible={false} /> : null}
+        <Text maxFontSizeMultiplier={2} style={[styles.label, { color: fg }]}>{label}</Text>
       </View>
     </Pressable>
   );
@@ -52,18 +55,21 @@ export function BigButton({
 
 const styles = StyleSheet.create({
   base: {
-    minHeight: touchTarget,
-    borderRadius: radius.card,
-    borderWidth: 3,
+    minHeight: buttonHeight,
+    borderRadius: radius.pill,
+    borderWidth: stroke.thick,
+    borderColor: 'transparent',
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  primary: { backgroundColor: colors.primary, borderColor: colors.primary },
-  secondary: { backgroundColor: colors.secondary, borderColor: colors.border },
-  disabled: { backgroundColor: colors.disabled, borderColor: colors.disabled },
-  pressed: { opacity: 0.8, transform: [{ scale: 0.98 }] },
+  primary: { backgroundColor: colors.primary },
+  primaryPressed: { backgroundColor: colors.primaryPressed },
+  secondary: { backgroundColor: 'transparent', borderColor: colors.border },
+  secondaryPressed: { backgroundColor: colors.surfaceRaised },
+  disabled: { backgroundColor: colors.surfaceRaised, borderColor: 'transparent' },
+  scaled: { transform: [{ scale: 0.98 }] },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  label: { flexShrink: 1, fontSize: fontSize.large, fontWeight: '700', textAlign: 'center' },
+  label: { flexShrink: 1, fontSize: fontSize.label, fontWeight: '700', textAlign: 'center' },
 });

@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.tile,
     borderWidth: 2,
-    borderColor: colors.infoBorder,
+    borderColor: colors.border,
     backgroundColor: colors.infoBg,
   },
   warning: { borderColor: colors.danger, backgroundColor: colors.warningBg },
