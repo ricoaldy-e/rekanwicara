@@ -514,6 +514,12 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
 - Belum teruji: klien v2 belum pernah memanggil server sungguhan (server lokal hanya punya `/v1`). Hasil `ANALYZE_API=mock` ditandai `sample: true`;
   layar wajib memberi label "Hasil contoh" (K10).
 
+- FL-1 (13 Nov 2026): verifikasi aset, tanpa perubahan kode. `splash-icon.png`, `android-icon-foreground.png`, `favicon.png`: PNG RGBA, sudut transparan
+  (RGB krem `#FAFCF9`, alfa 0), tanpa piksel tepi putih/abu di area transparan. `android-icon-monochrome.png`: RGBA, sudut transparan.
+  `icon.png` dan `android-icon-background.png`: PNG RGB tanpa alfa (latar penuh `#08110B`, piksel pertama (8,17,11), bukan putih). `splash-wordmark.png` belum ada:
+  splash tetap memakai ikon; wordmark menunggu aset dari Rico. Belum diuji: splash di build sungguhan (Expo Go memakai splash sendiri).
+  Pengingat FL-2: setiap layout baru (`(tabs)/_layout`, Stack bersarang) wajib memakai `contentStyle`/`sceneStyle` berlatar `colors.background`.
+
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah
   encode AAC, sinyal yang di-clip keras hanya punya 0,04% sampel ≥ 0,99 (31% ≥ 0,9). Fixture tes memakai
