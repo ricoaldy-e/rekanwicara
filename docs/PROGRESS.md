@@ -451,6 +451,28 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
 - Senin 9 Nov (A0): format error `{"detail":{"code","message"}}`; daftar kode di `server/README.md`.
 
 ## Perubahan UI (design v6)
+- Fase UI (13 Nov 2026, cabang `design`): UI-1 sampai UI-10 selesai dan di-commit; UI-11 audit. Langkah opsional 0.2
+  (Playfair Display, cincin fokus) tidak dikerjakan: judul memakai serif sistem (`Georgia`/`serif`).
+- `npm run typecheck` masih gagal di `app/settings.tsx` (rute `/wav2vec2`, `/combined`, `/allosaurus`): `.expo/types/router.d.ts`
+  usang sejak commit 7b06448. Perbaikan: jalankan `npx expo start` sekali di `app/` agar tipe rute dibuat ulang. Bukan kesalahan kode.
+- Keputusan di luar design.md:
+  - `colors.success` = `#7FD1A0` (hijau status) untuk teks/ikon "tersimpan/terkirim"; §3 tidak menyebut nilainya.
+  - Token baru: `overlay.scrim` (lapisan hitung mundur), `buttonHeight` 52, `chart.userFill`. Token `lip` dihapus (gambar bibir hanya garis).
+  - `InfoNote` netral tetap bergaris `border`; tanpa garis `infoBg` hampir tak terlihat di `background`.
+  - `HeroCard` saat sesi selesai berjudul "Latihan hari ini" (§6.2.1 hanya menulis "judul tetap").
+  - Teks "Sesi hari ini selesai. Terima kasih sudah berlatih!" menjadi "Sesi hari ini selesai." (§7: tanpa tanda seru, tanpa pujian).
+  - Kartu target di Hasil memakai gabungan `units[].target` sebagai kata; testID baru `result-target`.
+  - `testID` `mission` pindah ke kartu "Langkah hari ini". Ikon bar bawah: `barbell-outline`, `people-outline`, `information-circle-outline`.
+  - `BottomBar` tidak melayang: `Screen` punya prop `footer` di bawah area gulir (di dalam area aman), jadi konten tidak tertutup.
+  - Bobot `OptionGroup` tak terpilih 600 → 400 (UI-11, §4 hanya 400/700).
+- Temuan audit UI-11 yang tidak diperbaiki (butuh keputusan):
+  - Angka ukuran literal tersisa: hitung mundur 140/160 (dipertahankan §9), kata target 56 di layar dataset (layar pengembang),
+    padding 20 (`HeroCard`, kartu petunjuk) dan 12 (`StatTile` lewat `spacing.sm + spacing.xs`) karena skala jarak tidak punya 12/20,
+    ukuran teks SVG grafik (satuan viewBox).
+  - Simbol ✓/✕ di teks status izin (`PermissionGate`) dan "✓ Terkirim"; §5.3 menghindari tanda silang untuk status hasil, bukan izin.
+  - Kata "gagal"/"salah" muncul di pesan kesalahan teknis (PIN, simpan, perekaman), bukan di hasil latihan.
+  - `ProgressBar` tak tentu memakai opacity 0,4 (larangan opacity hanya untuk tombol).
+  - `TextFallback` di `ModelVideo` adalah `Card` di dalam `Card` saat video 404 (padding dobel).
 - UI-5: `__tests__/StatusBadge.test.tsx` diubah. Uji ikon Ionicons (`icon:checkmark-circle` dst.) diganti uji bentuk SVG
   (`status-shape-circle/triangle/square`); uji latar `background` diganti uji batang kiri `borderLeftColor`; uji "ikon berbeda"
   di `statusStyles` dihapus karena `statusStyles` kini hanya `{label, foreground}` (bentuk dibuktikan oleh uji bentuk).

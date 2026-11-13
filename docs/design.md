@@ -383,7 +383,8 @@ Source tidak boleh berubah setelah submission, jadi ini hanya rencana: Playfair 
 - Teks redup di layar gelap pada cahaya terang (di luar ruangan) belum diuji.
 - Ukuran yang lebih kecil dari kode lama (target 48 dp, teks isi 17) memenuhi pedoman umum, tetapi belum diuji dengan pengguna.
 - Bentuk ikon status, efek tekan, `HeroCard`, `ProgressRing`, `BottomBar`, tampilan Playfair (atau cadangan serif sistem), dan pola getar belum diuji di perangkat, termasuk pada skala teks 200%.
-- Kontras dihitung dengan rumus WCAG pada 13 Nov 2026; hitung ulang bila warna diubah. `results/charts.tsx` belum dibaca.
+- Kontras dihitung dengan rumus WCAG pada 13 Nov 2026; hitung ulang bila warna diubah. `results/charts.tsx` sudah dibaca dan diberi token (UI-2b); isi area grafik (segitiga vokal 1,10:1, isi bibir pengguna 1,74:1) dekoratif, informasi dibawa garis (≥ 4,10:1). Belum dilihat di perangkat.
+- Ikon status (UI-5): garis luar 3,5 dp, tanda dalam (centang, ≈, panah) 2 dp agar muat di 22 dp. Koordinat ditulis tanpa melihat hasil gambar.
 - Sketsa tata letak 6.2 disusun dari pembacaan `home.tsx`, `practice/[itemId].tsx`, `ResultView.tsx`, `RecordPanel.tsx`, `BigButton.tsx`, dan `StatusBadge.tsx` pada 13 Nov 2026; belum dijalankan di perangkat.
 - Arah gaya terinspirasi VibeMove (Dribbble) hanya pada struktur komponen dan suasana; itu bukan bukti kecocokan untuk teman Tuli.
 - Nama "Rekan Wicara" belum diperiksa terhadap produk lain.

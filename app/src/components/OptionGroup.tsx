@@ -66,6 +66,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   selected: { backgroundColor: colors.primary },
-  text: { fontSize: fontSize.large, fontWeight: '600', color: colors.text },
+  text: { fontSize: fontSize.large, fontWeight: '400', color: colors.text },
   textSelected: { color: colors.onPrimary, fontWeight: '700' },
 });
