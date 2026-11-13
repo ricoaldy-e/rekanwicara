@@ -6,7 +6,7 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { BigButton, Body, Card, CheckRow, InfoNote, Screen, StepHeader } from '../src/components';
 import { useUser } from '../src/state/user';
 import { isValidPin } from '../src/user/pure';
-import { colors, fontSize, radius, spacing, touchTarget } from '../src/theme';
+import { colors, fontSize, radius, spacing, stroke, touchTarget } from '../src/theme';
 
 const CYCLE = [
   { icon: 'eye', text: 'Lihat contoh bentuk bibir.' },
@@ -51,7 +51,7 @@ export default function Onboarding() {
           {CYCLE.map((c) => (
             <Card key={c.text}>
               <View style={styles.row}>
-                <Ionicons name={c.icon} size={32} color={colors.text} />
+                <Ionicons name={c.icon} size={24} color={colors.text} accessible={false} />
                 <Text style={styles.rowText}>{c.text}</Text>
               </View>
             </Card>
@@ -89,7 +89,11 @@ export default function Onboarding() {
 
       {step === 3 ? (
         <>
-          <Body>Pendamping membuat PIN 4 angka untuk membuka Mode Pendamping. PIN disimpan aman di HP ini.</Body>
+          <Body>
+            PIN 4 angka mengunci Mode Pendamping: membuka semua materi, mengubah lama sesi, dan Uji Dengar. Dengan PIN,
+            pengaturan latihan tidak berubah tanpa sengaja. Berlatih sendiri? Buat PIN yang mudah kamu ingat.
+          </Body>
+          <Body muted>PIN disimpan aman di HP ini dan tidak dikirim ke server.</Body>
           <TextInput
             value={pin}
             onChangeText={(t) => setPin(t.replace(/\D/g, '').slice(0, 4))}
@@ -126,12 +130,12 @@ export default function Onboarding() {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  rowText: { flex: 1, fontSize: fontSize.body, fontWeight: '700', color: colors.text },
+  rowText: { flex: 1, fontSize: fontSize.body, color: colors.text },
   input: {
     minHeight: touchTarget,
-    borderWidth: 3,
+    borderWidth: stroke.thick,
     borderColor: colors.border,
-    borderRadius: radius.card,
+    borderRadius: radius.tile,
     paddingHorizontal: spacing.md,
     fontSize: fontSize.large,
     color: colors.text,
