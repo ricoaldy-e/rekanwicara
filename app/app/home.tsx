@@ -13,7 +13,7 @@ import { useContent } from '../src/state/content';
 import { defaultLevel, fraction, homeStats, levelLocked } from '../src/state/homeStats';
 import { planSession, seededRng, selectCore, type Role } from '../src/state/progression';
 import { useUser } from '../src/state/user';
-import { colors, fontFamily, fontSize, radius, spacing, touchTarget } from '../src/theme';
+import { colors, displayFont, fontSize, radius, spacing, touchTarget } from '../src/theme';
 
 const ROLE_LABEL: Record<Role, string> = {
   pemanasan: 'Pemanasan',
@@ -112,7 +112,7 @@ export default function Home() {
 
       {items && items.length > 0 ? (
         <View style={styles.gap}>
-          <Text accessibilityRole="header" style={styles.sectionTitle}>
+          <Text accessibilityRole="header" style={[styles.sectionTitle, displayFont()]}>
             Kemajuanmu
           </Text>
           <View style={styles.tiles}>
@@ -187,7 +187,7 @@ export default function Home() {
         .filter((group) => group.level === shownLevel)
         .map((group) => (
           <View key={group.level} style={styles.gap}>
-            <Text accessibilityRole="header" style={styles.levelTitle}>
+            <Text accessibilityRole="header" style={[styles.levelTitle, displayFont()]}>
               Level {group.level}: {LEVEL_NAMES[group.level] ?? ''}
             </Text>
             {group.items.map((item) => {
@@ -232,8 +232,8 @@ export default function Home() {
 const styles = StyleSheet.create({
   kicker: { fontSize: fontSize.small, color: colors.textMuted, paddingVertical: spacing.sm },
   sectionLabel: { fontSize: fontSize.small, color: colors.textMuted },
-  sectionTitle: { fontFamily: fontFamily.display, fontSize: fontSize.large, fontWeight: '700', color: colors.text },
-  levelTitle: { fontFamily: fontFamily.display, fontSize: fontSize.large, fontWeight: '700', color: colors.text, marginTop: spacing.sm },
+  sectionTitle: { fontSize: fontSize.large, color: colors.text },
+  levelTitle: { fontSize: fontSize.large, color: colors.text, marginTop: spacing.sm },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm + spacing.xs },
   center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.lg },
   gap: { gap: spacing.sm },

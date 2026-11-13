@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View, type TextProps } from 'react-native';
 
-import { colors, fontFamily, fontSize, radius, spacing } from '../theme';
+import { colors, displayFont, fontSize, radius, spacing } from '../theme';
 
 export interface HeroCardProps {
   title: string;
@@ -17,7 +17,7 @@ export interface HeroCardProps {
 export function HeroCard({ title, body, children, testID, titleProps }: HeroCardProps) {
   return (
     <View testID={testID} style={styles.card}>
-      <Text accessibilityRole="header" maxFontSizeMultiplier={2} {...titleProps} style={styles.title}>
+      <Text accessibilityRole="header" maxFontSizeMultiplier={2} {...titleProps} style={[styles.title, displayFont()]}>
         {title}
       </Text>
       {body ? <Text style={styles.body}>{body}</Text> : null}
@@ -28,6 +28,6 @@ export function HeroCard({ title, body, children, testID, titleProps }: HeroCard
 
 const styles = StyleSheet.create({
   card: { backgroundColor: colors.hero, borderRadius: radius.card, padding: 20, gap: spacing.sm },
-  title: { fontFamily: fontFamily.display, fontSize: fontSize.title, fontWeight: '700', color: colors.onHero },
+  title: { fontSize: fontSize.title, color: colors.onHero },
   body: { fontSize: fontSize.body, color: colors.onHeroMuted },
 });

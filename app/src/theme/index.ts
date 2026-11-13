@@ -39,12 +39,27 @@ export const chart = { userFill: 'rgba(250,252,249,0.18)' } as const;
 
 export const stroke = { thin: 1.5, thick: 2 } as const;
 
+const SERIF = Platform.select({ ios: 'Georgia', android: 'serif' });
+const PLAYFAIR = 'PlayfairDisplay_700Bold';
+let playfairLoaded = false;
+
+/** Called by the root layout once Playfair Display 700 is loaded (design.md §0.2 A). */
+export const setPlayfairLoaded = (loaded: boolean) => {
+  playfairLoaded = loaded;
+};
+
 export const fontFamily = {
-  /** Serif for titles only (design.md §4); Playfair Display is optional step 0.2 A. */
-  display: Platform.select({ ios: 'Georgia', android: 'serif' }),
+  /** Titles only (design.md §4). Read at render time: Playfair Bold when loaded, else system serif. */
+  get display() {
+    return playfairLoaded ? PLAYFAIR : SERIF;
+  },
   /** undefined = system font. */
   text: undefined,
-} as const;
+};
+
+/** Title font style. The Playfair file is already Bold, so no fontWeight (avoids faux-bold); the serif fallback needs it. */
+export const displayFont = () =>
+  playfairLoaded ? ({ fontFamily: PLAYFAIR } as const) : ({ fontFamily: SERIF, fontWeight: '700' } as const);
 
 export const fontSize = {
   small: 15,

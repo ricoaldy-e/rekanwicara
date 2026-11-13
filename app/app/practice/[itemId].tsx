@@ -15,7 +15,7 @@ import { useContent } from '../../src/state/content';
 import { feedbackDetail, type Detail } from '../../src/state/progression';
 import { useSettings } from '../../src/state/settings';
 import { SESSION_ID, useUser } from '../../src/state/user';
-import { colors, fontFamily, fontSize, spacing } from '../../src/theme';
+import { colors, displayFont, fontSize, spacing } from '../../src/theme';
 import { attemptFromResponse } from '../../src/user/pure';
 
 /** SPEC §2 cycle: Lihat → Tiru → Bandingkan → Ulangi ("Ulangi" is the button that loops back to Tiru). */
@@ -125,7 +125,7 @@ export default function Practice() {
                 {item.emoji}
               </Text>
             ) : null}
-            <Text accessibilityLabel={`Ucapkan ${item.text}`} maxFontSizeMultiplier={1.5} style={styles.targetWord}>
+            <Text accessibilityLabel={`Ucapkan ${item.text}`} maxFontSizeMultiplier={1.5} style={[styles.targetWord, displayFont()]}>
               {item.text}
             </Text>
           </View>
@@ -198,5 +198,5 @@ const styles = StyleSheet.create({
   pairItem: { flex: 1 },
   target: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.md },
   targetEmoji: { fontSize: fontSize.display },
-  targetWord: { fontFamily: fontFamily.display, fontSize: fontSize.display, fontWeight: '700', color: colors.text },
+  targetWord: { fontSize: fontSize.display, color: colors.text },
 });

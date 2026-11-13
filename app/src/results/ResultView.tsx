@@ -4,7 +4,7 @@ import type { AnalyzeResponse } from '../api/types';
 import { Body, InfoNote, LipIllustration, StatusBadge } from '../components';
 import { getHint } from '../content/hints';
 import type { Detail } from '../state/progression';
-import { colors, fontFamily, fontSize, radius, spacing } from '../theme';
+import { colors, displayFont, fontSize, radius, spacing } from '../theme';
 import { LipMirror, LoudnessChart, VowelMap } from './charts';
 import { targetShape } from './lipShapes';
 
@@ -60,7 +60,7 @@ export function ResultView({ result, detail = 'full' }: { result: AnalyzeRespons
           <LipIllustration shape={shape} size={96} />
           <View style={styles.targetText}>
             <Text style={styles.targetLabel}>Bentuk bibir</Text>
-            <Text style={styles.targetWord}>{(result.units ?? []).map((u) => u.target).join('')}</Text>
+            <Text style={[styles.targetWord, displayFont()]}>{(result.units ?? []).map((u) => u.target).join('')}</Text>
           </View>
         </View>
       ) : null}
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   target: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.card, padding: spacing.md },
   targetText: { flex: 1, gap: spacing.xs },
   targetLabel: { fontSize: fontSize.small, color: colors.textMuted },
-  targetWord: { fontFamily: fontFamily.display, fontSize: fontSize.title, fontWeight: '700', color: colors.text },
+  targetWord: { fontSize: fontSize.title, color: colors.text },
   hintCard: { backgroundColor: colors.hero, borderRadius: radius.card, padding: 20, gap: spacing.xs },
   hintLabel: { fontSize: fontSize.small, color: colors.onHeroMuted },
   hint: { fontSize: fontSize.large, fontWeight: '700', color: colors.onHero },
