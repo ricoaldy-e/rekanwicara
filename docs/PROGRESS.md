@@ -466,10 +466,11 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
     lalu "Semua materi" dengan ubin level tepat di atas daftar materinya. Tidak ada isi yang dihapus.
   - Onboarding langkah PIN menjelaskan fungsi PIN (mengunci Mode Pendamping) dan bahwa PIN tidak dikirim ke server.
   - Typecheck kini lulus penuh setelah `npx expo start` membuat ulang tipe rute.
-- Fase UI (13 Nov 2026, cabang `design`): UI-1 sampai UI-10 selesai dan di-commit; UI-11 audit. Langkah opsional 0.2
-  (Playfair Display, cincin fokus) tidak dikerjakan: judul memakai serif sistem (`Georgia`/`serif`).
-- `npm run typecheck` masih gagal di `app/settings.tsx` (rute `/wav2vec2`, `/combined`, `/allosaurus`): `.expo/types/router.d.ts`
-  usang sejak commit 7b06448. Perbaikan: jalankan `npx expo start` sekali di `app/` agar tipe rute dibuat ulang. Bukan kesalahan kode.
+- Fase UI (13 Nov 2026, cabang `design`): UI-1 sampai UI-10 selesai dan di-commit; UI-11 audit. Langkah opsional 0.2 kemudian dikerjakan
+  (UI-12): Playfair Display Bold dimuat di `app/_layout.tsx` (cadangan serif sistem bila gagal) dan cincin fokus di `BigButton`/`Card`;
+  keduanya **belum diverifikasi di perangkat** (design.md §14). (Diperbarui FL-10; kalimat lama "tidak dikerjakan" usang.)
+- `npm run typecheck` lulus (FL-10, cabang `flow-v2`). Bila tipe rute usang setelah menambah layar, jalankan `npx expo start` sekali di `app/`
+  agar `.expo/types/router.d.ts` dibuat ulang. (Kalimat lama "typecheck masih gagal" usang.)
 - Keputusan di luar design.md:
   - `colors.success` = `#7FD1A0` (hijau status) untuk teks/ikon "tersimpan/terkirim"; §3 tidak menyebut nilainya.
   - Token baru: `overlay.scrim` (lapisan hitung mundur), `buttonHeight` 52, `chart.userFill`. Token `lip` dihapus (gambar bibir hanya garis).
@@ -632,6 +633,53 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   Keputusan: (1) kata dan suku kata **disimpan HURUF BESAR** (kontrak/katalog memakai TOLONG, MAMA; flow §7.7.3 menulis huruf kecil — duplikat tetap tanpa peka huruf). (2) `WordForm`, `VideoField`, `SyllableRow` **tidak diekspor lewat `components/index.ts`**
   karena menarik modul native (image-picker, video) ke setiap tes layar. (3) Picker tanpa `fileSize` → 0 (ukuran tak bisa dicek di app; server 413 jadi pengaman). (4) Jumlah galat yang diumumkan: tiap kolom salah dihitung, baris suku kata dihitung per kolom.
   Tes: `wordForm.test.tsx` (19), `wordScreens.test.tsx` (4). 43 suite / 549 tes. Belum teruji: di perangkat (galeri/kamera, izin, iOS, TalkBack, 200% teks), Supabase Storage sungguhan.
+- FL-10 (13 Nov 2026): pemeriksaan akhir alur v2 (tanpa fitur baru).
+  - **Tes:** 43 suite / 549 tes lulus; `npm run typecheck` lulus. Baseline cabang 296 → 549 (+253). Tes yang dihapus/diubah tercatat per langkah di atas
+    (FL-2 home, FL-3 home ×5, FL-4 ResultView/StatusBadge/haptics/ModelVideo, FL-6 onboarding/demo/companion, FL-7 pin, FL-8a `companion.test.tsx` dihapus).
+  - **Pindaian (app/app, app/src):** kata terlarang: hanya nama fungsi `normalize…` (kode, bukan teks UI); tidak ada "Cermin Wicara"/"RekanWicara"; tidak ada hex literal di
+    `app/app` dan `app/src/components`; tidak ada `fontStyle: 'italic'`, `shadow`, `elevation`.
+  - **Langkah dilewati / belum:** FL-8b (tombol AI) belum dikerjakan; "Lupa PIN?" (AUTH-7) disembunyikan; lupa sandi (Q15) tidak ada; wordmark splash (FL-1) menunggu aset;
+    ringkasan Level 2 di Pilih kata; kata Pendamping hanya tiruan (Supabase `custom_*` + bucket belum ada, K1); klien v2 belum menerima token dari layar
+    (`getToken`/`refreshSession` belum disambung) dan belum pernah memanggil server sungguhan; Keluar tidak menghapus cache akun (K12).
+  - **Teks klaim yang tidak benar lagi menurut kode — usulan, BELUM diubah** (perubahan langsung ditolak; menunggu keputusan Rico):
+    1. `app/app/about.tsx` "Materi mencakup vokal a, i, u dan konsonan m, p, b." → "Penilaian disetel untuk vokal a, i, u dan konsonan m, p, b. Bunyi O belum disetel,
+       jadi hasilnya belum dapat dipercaya. Kata dari Pendamping belum bisa dinilai di server demo." (K11; O kini bisa dilatih dari katalog).
+    2. `about.tsx` "Supabase menyimpan hasil dan progres, tanpa video atau audio." → tambah "Bila akun dipakai, Supabase menyimpan email, username, hasil dan progres,
+       tanpa video atau audio. PIN Pendamping disimpan di HP ini saja. Video contoh dari Pendamping tidak dikirim ke server pada versi ini." (K1; FL-7 menambah akun email).
+    3. `app/app/onboarding.tsx` "Angka hasil latihan juga disimpan online tanpa namamu" → "Bila terhubung ke akun, angka hasil latihan juga disimpan online supaya
+       kemajuanmu tidak hilang." (akun kini punya email dan username/display_name).
+    4. `README.md`: judul dan tim "Cermin Wicara" → "Rekan Wicara" (design.md §1); "teman Tuli/tunarungu" → "teman Tuli" (design.md §7); "autentikasi anonim" →
+       "akun email (Pendamping)"; "Aktifkan Anonymous Sign-Ins" → "Aktifkan login Email"; "Tekan lama Misi hari ini" → "tab Pengaturan (setelah PIN), bagian Untuk operator
+       demo"; Alur demo → "Masuk/Daftar → Buat PIN → onboarding → kalibrasi → Beranda; Level 1 A; Pilih kata → PAPA → PA → PAPA; Pendamping/Pengaturan dengan PIN; materi
+       tidak dikunci"; "pengaturan tersembunyi" → "tab Pengaturan"; tambah `EXPO_PUBLIC_USE_MOCK` dan `EXPO_PUBLIC_ANALYZE_API`; "MVP mencakup Level 0–3" → struktur L1–L3 (K11).
+    5. `app/README.md`: "aktifkan Anonymous Sign-Ins" → login Email; "Tekan lama judul Misi hari ini" → tab Pengaturan; "PIN yang dibuat saat onboarding" → layar Buat PIN
+       sebelum onboarding, per akun; "Buka semua materi" → materi tidak dikunci; "pengaturan tersembunyi" → tab Pengaturan.
+    6. `docs/MODEL_CARD.md` §cakupan menyebut Level 0–3, kemajuan/macet (SPEC §8.4) dan Mode Pendamping lama: perlu disesuaikan (K8, K11).
+    7. README "Batasan": tambahkan daftar langkah dilewati di atas (AI, Lupa PIN, lupa sandi, wordmark, kata Pendamping tiruan, v2).
+    Teks yang **masih benar**: "Rekaman latihan dihapus setelah diproses" (kode menghapus setelah hasil dan saat keluar layar); "tanpa video atau audio" untuk Supabase
+    (kata Pendamping tiruan menyimpan video di HP saja); "Mode demo tidak mengirim hasil ke Supabase".
+  - **Usulan perubahan dokumen (belum diubah):** design.md §0 dan §6.2.1 (tekan-lama "Misi hari ini" dihapus; Pengaturan kini tab), §5.9 (bar: Latihan/Pendamping/Pengaturan,
+    di semua layar tab, tersembunyi di sesi latihan), §6 tabel layar (Beranda dua kartu, Level 1, Pilih kata, Jalur kata, Pendamping CRUD, auth/*, change-pin), §6.2.1
+    (sketsa dua kartu + tautan Tentang), §6.2.3 (hasil per level: dua lencana, umpan balik ≤ 2 kalimat, grafik hanya L1; mode overall/hidden dihapus), §5.3 (L2–L3 dua status);
+    flow-srs-ui §10 ("tiga kartu" → dua kartu). Konflik c.2 yang belum diperbaiki di dokumen: kontrak FE "lima poin" (isinya tujuh); flow §7.1.1 Masuk "email atau username"
+    (kode: email saja); flow `source: 'companion'` (kode: `custom`); flow `belum` (kode: `belum_sesuai`); kontrak `EXPO_PUBLIC_API_BASE_URL` (kode: `EXPO_PUBLIC_API_URL`, K6);
+    kontrak §2 kunci `rw.companionPin:<uid>` (SecureStore menolak `:`; kode: `rw.companionPin.<uid>`); flow §7.7.3 kata "huruf kecil" (kode: HURUF BESAR seperti katalog).
+  - **Daftar periksa design.md §12** (layar diubah: Beranda, Level 1, Pilih kata, Jalur kata, Latihan/Hasil, Pendamping, formulir kata, Pengaturan, Ganti PIN, Buat PIN, Masuk, Daftar, Cek email):
+    terbukti lewat kode/tes: tidak ada hex literal di layar/komponen, tidak ada bayangan/miring, tombol `BigButton` dan item bar punya `accessibilityLabel`, status = ikon + label + warna
+    (tes StatusBadge), teks tanpa kata terlarang (tes ResultView/settings/messages). **Hanya bisa dicek di HP (belum):** hitam-putih, skala 200%, perangkat dibisukan + getar mati,
+    target sentuh ≥ 48 dp dan jarak 12 dp, Reduce Motion, efek tekan, keadaan "Merekam", cahaya terang, TalkBack.
+  - **Kriteria kontrak §10:** [ ] alur penuh `USE_MOCK=true` di HP (bagian-bagiannya dites: auth, PIN, Pilih kata, Jalur kata, latihan, hasil, retry; belum dicoba utuh di HP);
+    [x] hasil L1 tiga status + grafik, L2–L3 dua status tanpa grafik (`ResultView.test.tsx`); [ ] bar tampil di layar tab dan tersembunyi di sesi (struktur rute; belum dicek di HP);
+    [x] Pendamping tambah tanpa/dengan suku kata, ubah, hapus, kata bawaan tanpa jalur ubah/hapus (tiruan: `wordsData`, `wordScreens`, `companionList`); [ ] tombol AI (FL-8b belum);
+    [~] PIN: buat, masuk, salah, terkunci dites (`pin.test.tsx`); ganti PIN belum punya tes layar; [ ] `USE_MOCK=false` tidak mengubah layar (belum dibuktikan; v2 tidak ada di server lokal);
+    [x] tes jest validator, pemetaan DTO, status per level.
+  - **Keputusan Rico yang masih terbuka:** K1 (video wajah Pendamping di Supabase + teks Tentang/README), K2 (AI pihak ketiga; FL-8b), K3 (login anonim dihapus — usulan dipakai,
+    mohon konfirmasi; riwayat anonim lama tidak dipindah), K4 (catatan "v2 diatur kontrak FE" di SPEC §5), K6 (nama env API), K7 (sesi di AsyncStorage), K8 (README/MODEL_CARD
+    tanpa misi/Uji Dengar/laporan), K9 (Getar di balik PIN), K10 (kata Pendamping di v1: catatan "belum tersedia" — usulan dipakai), K11 (teks cakupan materi), K12 (Keluar:
+    hapus cache atau tidak; teks dialog), K13 (persetujuan privasi di Daftar — sudah dibuat), kata disimpan HURUF BESAR, flow-srs-ui rev. 9 (berkas yang ada rev. 7), semua usulan
+    teks di atas, usulan perubahan design.md/flow.
+  - **Belum teruji sama sekali di perangkat:** seluruh alur v2 (FL-2 … FL-8b'), Supabase sungguhan (akun email, sinkron tanpa login anonim, Keluar luring), server v2, iOS,
+    galeri/kamera untuk video Pendamping, pengumuman pembaca layar, Playfair dan cincin fokus.
 
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah
