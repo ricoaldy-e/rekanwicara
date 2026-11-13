@@ -1,4 +1,4 @@
-# Cermin Wicara — konteks proyek untuk Claude Code
+# Rekan Wicara — konteks proyek untuk Claude Code
 
 ## Ringkas
 Aplikasi latihan pelafalan untuk penyandang Tuli/tunarungu yang **memilih** berlatih bicara.
@@ -87,3 +87,5 @@ cermin-wicara/
 - Kunci Supabase: app di `app/.env` (`EXPO_PUBLIC_...`), server di `server/.env`.
 - Dataset rekaman (`data/raw`) hanya untuk pengembangan, dengan persetujuan tertulis penutur,
   dan tidak pernah diunggah ke layanan cloud publik.
+
+Sebelum mengubah UI apa pun di app/, baca @docs/design.md dan ikuti aturannya.
