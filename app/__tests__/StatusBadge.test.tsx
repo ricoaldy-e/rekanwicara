@@ -6,22 +6,23 @@ import { StatusBadge } from '../src/components/StatusBadge';
 import { statusStyles } from '../src/theme';
 
 const CASES: [Status, string, string][] = [
-  ['hijau', 'Sesuai', 'checkmark-circle'],
-  ['kuning', 'Mendekati', 'alert-circle'],
-  ['merah', 'Belum sesuai', 'close-circle'],
+  ['hijau', 'Sesuai', 'status-shape-circle'],
+  ['kuning', 'Mendekati', 'status-shape-triangle'],
+  ['merah', 'Belum sesuai', 'status-shape-square'],
 ];
 
 describe('StatusBadge', () => {
-  it.each(CASES)('%s shows text "%s", icon %s and its color', async (status, label, icon) => {
+  it.each(CASES)('%s shows text "%s" and its own icon shape', async (status, label, shape) => {
     await render(<StatusBadge status={status} testID="badge" />);
 
     expect(screen.getByText(label)).toBeTruthy();
     // The icon is decorative for screen readers (the label carries the meaning), hence hidden.
-    expect(screen.getByTestId('badge-icon', { includeHiddenElements: true })).toHaveTextContent(`icon:${icon}`);
+    expect(screen.getByTestId('badge-icon', { includeHiddenElements: true })).toBeTruthy();
+    expect(screen.getByTestId(shape, { includeHiddenElements: true })).toBeTruthy();
 
     const badge = screen.getByTestId('badge');
     expect(badge.props.accessibilityLabel).toBe(label);
-    expect(StyleSheet.flatten(badge.props.style).backgroundColor).toBe(statusStyles[status].background);
+    expect(StyleSheet.flatten(badge.props.style).borderLeftColor).toBe(statusStyles[status].foreground);
   });
 
   it('prefixes the indicator name when a label is given', async () => {
@@ -30,10 +31,8 @@ describe('StatusBadge', () => {
     expect(screen.getByTestId('badge').props.accessibilityLabel).toBe('Suara: Belum sesuai');
   });
 
-  it('uses a distinct icon and label per status (never color alone)', () => {
-    const icons = new Set(Object.values(statusStyles).map((s) => s.icon));
+  it('uses a distinct label per status (never color alone)', () => {
     const labels = new Set(Object.values(statusStyles).map((s) => s.label));
-    expect(icons.size).toBe(3);
     expect(labels.size).toBe(3);
   });
 

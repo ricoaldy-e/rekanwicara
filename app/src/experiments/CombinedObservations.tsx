@@ -1,9 +1,9 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 
 import type { CombinedResponse, Status } from '../api/types';
 import { Body, InfoNote, Title } from '../components';
+import { StatusIcon } from '../components/StatusIcon';
 import { colors, fontSize, radius, spacing, statusStyles } from '../theme';
 
 const OUTCOMES = {
@@ -30,8 +30,8 @@ export function CombinedObservations({ result }: { result: CombinedResponse }) {
     <>
       <Title>Hasil latihan</Title>
       {outcome && style ? (
-        <View accessible accessibilityLabel={`Hasil latihan: ${outcome.label}`} accessibilityLiveRegion="polite" style={{ backgroundColor: style.background, borderRadius: radius.tile, padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Ionicons name={style.icon} size={32} color={style.foreground} />
+        <View accessible accessibilityLabel={`Hasil latihan: ${outcome.label}`} accessibilityLiveRegion="polite" style={{ backgroundColor: colors.surface, borderLeftWidth: 4, borderLeftColor: style.foreground, borderRadius: radius.tile, padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <StatusIcon status={outcome.status} size={28} />
           <Text style={{ color: style.foreground, fontSize: fontSize.large, fontWeight: '700' }}>{outcome.label}</Text>
         </View>
       ) : <InfoNote tone="warning" text="Penilaian belum tersedia" />}

@@ -77,16 +77,14 @@ export const buttonHeight = 52;
 
 export interface StatusStyle {
   label: string;
-  icon: 'checkmark-circle' | 'alert-circle' | 'close-circle';
-  background: string;
   foreground: string;
 }
 
-/** Status is never conveyed by color alone: color + icon + text (CLAUDE.md). */
+/** Status is never conveyed by color alone: color + icon shape + text (design.md §3.1, §5.3). */
 export const statusStyles: Record<Status, StatusStyle> = {
-  hijau: { label: 'Sesuai', icon: 'checkmark-circle', background: colors.surface, foreground: '#7FD1A0' },
-  kuning: { label: 'Mendekati', icon: 'alert-circle', background: colors.surface, foreground: '#F2C14E' },
-  merah: { label: 'Belum sesuai', icon: 'close-circle', background: colors.surface, foreground: '#FF8FA3' },
+  hijau: { label: 'Sesuai', foreground: '#7FD1A0' },
+  kuning: { label: 'Mendekati', foreground: '#F2C14E' },
+  merah: { label: 'Belum sesuai', foreground: '#FF8FA3' },
 };
 
 export const theme = { colors, fontSize, spacing, radius, touchTarget, buttonHeight, statusStyles, overlay, chart, stroke, fontFamily } as const;

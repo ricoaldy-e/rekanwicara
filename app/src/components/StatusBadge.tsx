@@ -1,8 +1,8 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import type { Status } from '../api/types';
 import { colors, fontSize, radius, spacing, statusStyles } from '../theme';
+import { StatusIcon } from './StatusIcon';
 
 export interface StatusBadgeProps {
   status: Status;
@@ -23,10 +23,10 @@ export function StatusBadge({ status, label, size = 'md', testID }: StatusBadgeP
       accessible
       accessibilityRole="text"
       accessibilityLabel={text}
-      style={[styles.badge, { backgroundColor: s.background }, big && styles.badgeLg]}
+      style={[styles.badge, { borderLeftColor: s.foreground }, big && styles.badgeLg]}
     >
-      <Ionicons testID={testID ? `${testID}-icon` : undefined} name={s.icon} size={big ? 36 : 28} color={s.foreground} />
-      <Text style={[styles.text, { color: s.foreground }, big && styles.textLg]}>{text}</Text>
+      <StatusIcon testID={testID ? `${testID}-icon` : undefined} status={status} size={big ? 28 : 22} />
+      <Text maxFontSizeMultiplier={2} style={[styles.text, { color: s.foreground }, big && styles.textLg]}>{text}</Text>
     </View>
   );
 }
@@ -40,10 +40,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.tile,
-    borderWidth: 2,
-    borderColor: colors.text,
+    backgroundColor: colors.surface,
+    borderLeftWidth: 4,
   },
   badgeLg: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-  text: { fontSize: fontSize.body, fontWeight: '700' },
+  text: { fontSize: fontSize.label, fontWeight: '700' },
   textLg: { fontSize: fontSize.large },
 });

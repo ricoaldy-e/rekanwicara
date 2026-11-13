@@ -450,6 +450,12 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
 - Senin 9 Nov (A0): saat `status:"retry"`, `indicators` juga `null` (selain overall/score/units).
 - Senin 9 Nov (A0): format error `{"detail":{"code","message"}}`; daftar kode di `server/README.md`.
 
+## Perubahan UI (design v6)
+- UI-5: `__tests__/StatusBadge.test.tsx` diubah. Uji ikon Ionicons (`icon:checkmark-circle` dst.) diganti uji bentuk SVG
+  (`status-shape-circle/triangle/square`); uji latar `background` diganti uji batang kiri `borderLeftColor`; uji "ikon berbeda"
+  di `statusStyles` dihapus karena `statusStyles` kini hanya `{label, foreground}` (bentuk dibuktikan oleh uji bentuk).
+  Garis bagian dalam ikon (centang, ≈, panah) 2 dp, bukan 3,5 dp, agar muat di 22 dp. Belum diuji di perangkat.
+
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah
   encode AAC, sinyal yang di-clip keras hanya punya 0,04% sampel ≥ 0,99 (31% ≥ 0,9). Fixture tes memakai
