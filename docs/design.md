@@ -228,7 +228,7 @@ Kapsul `surface` di bawah layar (tinggi 64 + area aman). Tiga item, **ikon di at
 | `home` | Lihat 6.2.1. Terkunci = ikon gembok + teks "Terkunci", bukan hanya redup. Status materi (terkunci / berlatih / lulus / ulasan) selalu ikon + teks. |
 | `practice/[itemId]` | Lihat → Tiru → Bandingkan → Ulangi. Judul "Ucapkan “a”". Video model, atau teks besar + ilustrasi bila 404. |
 | `companion` | Spanduk tetap "Mode Pendamping" (latar `infoBg`). Ringkasan mingguan, Uji Dengar, durasi sesi, bagikan laporan. |
-| `settings` | Getar (toggle, status "Aktif"/"Mati" ditulis), ukuran teks mengikuti sistem (keterangan), opsi demo tersembunyi. |
+| `settings` | Dibuka dari tombol "Pengaturan" di layar Tentang (dan tekan-lama "Misi hari ini"). Getar (toggle, status "Aktif"/"Mati" ditulis) dan ukuran teks mengikuti sistem (keterangan) di atas; opsi operator demo di bawah. |
 | `about` | Nama, versi app dan mesin server, privasi, satu kalimat: alat bantu latihan, bukan pengganti terapis wicara. |
 | `dataset/*`, `allosaurus`, `wav2vec2`, `combined` | Layar pengembang/eksperimen. Tidak didesain; tetap memakai token. |
 

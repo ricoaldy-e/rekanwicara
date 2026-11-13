@@ -451,6 +451,21 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
 - Senin 9 Nov (A0): format error `{"detail":{"code","message"}}`; daftar kode di `server/README.md`.
 
 ## Perubahan UI (design v6)
+- Perbaikan setelah audit 13 Nov malam (di luar PROMPT_UI, atas permintaan pemilik proyek):
+  - Ikon app dan splash diwarnai ulang (garis krem, latar `#08110B`); latar ikon adaptif Android `#08110B`. Sebelumnya `icon.png`
+    berlatar putih penuh sehingga tampil sebagai kotak putih saat app dibuka.
+  - Skala teks dikecilkan: body/label 16 (baris 24, token `lineHeight.body`), large 20, title 24, display 34; small tetap 15.
+  - `practice`: judul header "Ucapkan “kata”"; StepHeader "dari 3" (Ulangi adalah tombol, bukan layar).
+  - Ikon barbel diganti `mic-outline` (bar bawah) dan `mic` (`StageBadge` Berlatih).
+  - Pengaturan bisa dibuka dari layar Tentang (tombol "Pengaturan"); tekan-lama "Misi hari ini" tetap ada. Isi Pengaturan:
+    Getar dan keterangan ukuran teks di atas, bagian "Untuk operator demo" (alamat server, profil demo, uji eksperimen) di bawah.
+    Alasan: sakelar Getar sebelumnya hanya ada di layar tersembunyi, bertentangan dengan §2 (getar bisa dimatikan).
+  - Getar hasil (§8) ditambahkan: Sesuai = notifikasi berhasil, Mendekati/Belum sesuai = impact ringan, berdasarkan `overall`;
+    tidak bergetar saat hasil disembunyikan (mode `hidden`). Tes di `__tests__/haptics.test.ts`.
+  - `home` diurutkan ulang: catatan (demo, kalibrasi, server), Misi hari ini + kartu utama, langkah hari ini, kemajuan,
+    lalu "Semua materi" dengan ubin level tepat di atas daftar materinya. Tidak ada isi yang dihapus.
+  - Onboarding langkah PIN menjelaskan fungsi PIN (mengunci Mode Pendamping) dan bahwa PIN tidak dikirim ke server.
+  - Typecheck kini lulus penuh setelah `npx expo start` membuat ulang tipe rute.
 - Fase UI (13 Nov 2026, cabang `design`): UI-1 sampai UI-10 selesai dan di-commit; UI-11 audit. Langkah opsional 0.2
   (Playfair Display, cincin fokus) tidak dikerjakan: judul memakai serif sistem (`Georgia`/`serif`).
 - `npm run typecheck` masih gagal di `app/settings.tsx` (rute `/wav2vec2`, `/combined`, `/allosaurus`): `.expo/types/router.d.ts`
