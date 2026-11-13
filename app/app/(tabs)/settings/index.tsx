@@ -4,8 +4,11 @@ import { useRouter } from 'expo-router';
 
 import { createApiClient, isValidBaseUrl } from '../../../src/api/client';
 import { errorMessage } from '../../../src/api/errors';
-import { BigButton, Body, Card, CheckRow, InfoNote, Screen, Snackbar, Title } from '../../../src/components';
+import { useAuth } from '../../../src/auth/AuthProvider';
+import { auth } from '../../../src/auth/session';
+import { BigButton, Body, Card, CheckRow, ConfirmDialog, InfoNote, Screen, Snackbar, Title } from '../../../src/components';
 import { useFlash } from '../../../src/forms/flash';
+import { usePinSession } from '../../../src/pin/PinSession';
 import { useUser } from '../../../src/state/user';
 import { DATASET_MODE } from '../../../src/config';
 import { useContent } from '../../../src/state/content';
@@ -66,6 +69,21 @@ export default function Settings() {
   }
 
   const [flash, clearFlash] = useFlash();
+  const { session } = useAuth();
+  const { lock } = usePinSession();
+  const [confirmExit, setConfirmExit] = useState(false);
+
+  /** Sign out: the session is removed even when the server cannot be reached; the PIN of the account stays. */
+  async function signOut() {
+    setConfirmExit(false);
+    try {
+      await auth.signOut();
+    } catch {
+      // offline: the local session is dropped by the SDK; nothing else to do
+    }
+    lock();
+    router.replace('/auth/sign-in');
+  }
 
   return (
     <Screen footer={<Snackbar message={flash} onDismiss={clearFlash} />}>
@@ -85,8 +103,30 @@ export default function Settings() {
           ios_backgroundColor={colors.surfaceRaised}
         />
       </View>
-      <Title>Ukuran teks</Title>
+      <Title>Ukuran teks dan gerak</Title>
       <Body muted>Ukuran teks mengikuti pengaturan HP (Pengaturan → Tampilan → Ukuran font).</Body>
+      <Body muted>Gerak mengikuti pengaturan HP.</Body>
+
+      <Title>Akun dan PIN</Title>
+      <Card onPress={() => router.push('/settings/change-pin')} accessibilityLabel="Ganti PIN" testID="change-pin-link">
+        <Text style={styles.switchLabel}>Ganti PIN</Text>
+      </Card>
+      <Card onPress={() => router.push('/about')} accessibilityLabel="Tentang aplikasi" testID="about-link">
+        <Text style={styles.switchLabel}>Tentang aplikasi</Text>
+      </Card>
+      {session ? (
+        <BigButton label="Keluar" icon="log-out-outline" variant="secondary" onPress={() => setConfirmExit(true)} testID="sign-out" />
+      ) : null}
+      <ConfirmDialog
+        visible={confirmExit}
+        title="Keluar dari akun?"
+        message="Riwayat latihan tetap tersimpan di akun. Untuk masuk lagi, butuh email dan kata sandi."
+        confirmLabel="Keluar"
+        cancelLabel="Batal"
+        danger
+        onCancel={() => setConfirmExit(false)}
+        onConfirm={signOut}
+      />
 
       <Text accessibilityRole="header" style={styles.section}>
         Untuk operator demo
@@ -127,8 +167,6 @@ export default function Settings() {
           <BigButton label="Uji Allosaurus" icon="flask" variant="secondary" onPress={() => router.push('/allosaurus')} />
         </>
       ) : null}
-      <Title>PIN Pendamping</Title>
-      <BigButton label="Ganti PIN" icon="key-outline" variant="secondary" onPress={() => router.push('/settings/change-pin')} />
       <Title>Mode demo</Title>
       <Body>Contoh progres: a dan ma sudah lulus. Latihan tetap dianalisis server. Progres demo tidak dikirim online dan hilang saat keluar dari mode demo atau app dimulai ulang.</Body>
       {ready && !sync.running ? (

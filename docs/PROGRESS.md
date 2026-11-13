@@ -606,6 +606,11 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   (4) Penyimpanan sesi tetap AsyncStorage (K7, usulan audit; bukan SecureStore karena sesi Supabase besar). (5) PIN lama di uid `'local'` tidak otomatis menjadi PIN akun: akun baru membuat PIN baru.
   Tes: sync/user tidak berubah (memakai Remote palsu; tidak pernah menguji login anonim); `pin.test.tsx` menambah mock `useAuth`. Baru: `auth.test.tsx` (35). 39 suite / 507 tes.
   Belum teruji: Supabase sungguhan (konfirmasi email aktif atau tidak), iOS, isi otomatis pengelola sandi, 200% teks, papan ketik menutupi tombol. Keluar (signOut) dikerjakan FL-9.
+- FL-9 (13 Nov 2026): Pengaturan disusun ulang: Getar, keterangan ukuran teks dan gerak ("Gerak mengikuti pengaturan HP.", tanpa sakelar baru), Ganti PIN, Tentang aplikasi (keduanya `Card` dengan `›`),
+  Keluar (hanya bila ada sesi akun), lalu "Untuk operator demo" (alamat server, tes koneksi, profil demo, uji eksperimen `__DEV__`; `testID` lama tetap). Keluar memakai `ConfirmDialog` ("Keluar dari akun? ..."),
+  lalu `auth.signOut()` (galat jaringan diabaikan; sesi lokal tetap dibuang), `lock()` sesi PIN, dan `/auth/sign-in`. PIN per akun tidak dihapus.
+  K12 (belum dijawab): **cache akun tidak dihapus** (progres lokal ikut tinggal di HP). Alasan: percobaan yang belum tersinkron akan hilang, dan katalog tidak di-cache. Teks dialog "tetap tersimpan di akun" hanya benar untuk
+  percobaan yang sudah tersinkron. Tes baru `settings.test.tsx` (9); tidak ada tes lama yang diubah. 40 suite / 516 tes. Belum teruji: Keluar luring dengan Supabase sungguhan, di perangkat.
 
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah
