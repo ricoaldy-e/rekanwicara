@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useFocusRing } from '../a11y/useFocusRing';
 import { useReduceMotion } from '../a11y/useReduceMotion';
 import { buttonHeight, colors, fontSize, radius, spacing, stroke } from '../theme';
 
@@ -27,6 +28,7 @@ export function BigButton({
   testID,
 }: BigButtonProps) {
   const reduceMotion = useReduceMotion();
+  const { focusProps, focusStyle } = useFocusRing();
   const fg = disabled ? colors.textMuted : variant === 'primary' ? colors.onPrimary : colors.text;
   return (
     <Pressable
@@ -37,12 +39,14 @@ export function BigButton({
       accessibilityLabel={label}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
+      {...focusProps}
       style={({ pressed }) => [
         styles.base,
         variant === 'primary' ? styles.primary : styles.secondary,
         pressed && !disabled && (variant === 'primary' ? styles.primaryPressed : styles.secondaryPressed),
         pressed && !disabled && !reduceMotion && styles.scaled,
         disabled && styles.disabled,
+        focusStyle,
       ]}
     >
       <View style={styles.row}>

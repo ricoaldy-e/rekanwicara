@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { useFocusRing } from '../a11y/useFocusRing';
 import { colors, radius, spacing, touchTarget } from '../theme';
 
 export interface CardProps {
@@ -15,6 +16,7 @@ export interface CardProps {
 }
 
 export function Card({ children, onPress, accessibilityLabel, accessibilityHint, style, testID }: CardProps) {
+  const { focusProps, focusStyle } = useFocusRing();
   if (!onPress) {
     return (
       <View testID={testID} style={[styles.card, style]}>
@@ -29,7 +31,8 @@ export function Card({ children, onPress, accessibilityLabel, accessibilityHint,
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
-      style={({ pressed }) => [styles.card, styles.pressable, pressed && styles.pressed, style]}
+      {...focusProps}
+      style={({ pressed }) => [styles.card, styles.pressable, pressed && styles.pressed, style, focusStyle]}
     >
       <View style={styles.row}>
         <View style={styles.content}>{children}</View>
