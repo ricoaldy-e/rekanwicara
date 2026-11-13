@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { errorMessage } from '../src/api/errors';
-import { BigButton, Body, Card, HeroCard, InfoNote, Screen, StageBadge, StatusBadge } from '../src/components';
+import { BigButton, Body, BottomBar, Card, HeroCard, InfoNote, Screen, StageBadge, StatusBadge } from '../src/components';
 import { LevelTile } from '../src/components/LevelTile';
 import { StatTile } from '../src/components/StatTile';
 import { DATASET_MODE } from '../src/config';
@@ -48,7 +48,17 @@ export default function Home() {
   const minutes = profile.settings.sessionMinutes;
 
   return (
-    <Screen>
+    <Screen
+      footer={
+        <BottomBar
+          items={[
+            { key: 'practice', label: 'Latihan', icon: 'barbell-outline', active: true, onPress: () => {} },
+            { key: 'companion', label: 'Pendamping', accessibilityLabel: 'Mode Pendamping', icon: 'people-outline', onPress: () => router.push('/companion') },
+            { key: 'about', label: 'Tentang', accessibilityLabel: 'Tentang aplikasi', icon: 'information-circle-outline', onPress: () => router.push('/about') },
+          ]}
+        />
+      }
+    >
       {/* Hidden Settings: long-press the title for 2 s (for demo setup). */}
       <Pressable
         onLongPress={() => router.push('/settings')}
@@ -210,18 +220,11 @@ export default function Home() {
           </View>
         ))}
 
-      <View style={styles.footer}>
-        <BigButton
-          label="Mode Pendamping"
-          icon="people"
-          variant="secondary"
-          onPress={() => router.push('/companion')}
-        />
-        <BigButton label="Tentang aplikasi" icon="information-circle" variant="secondary" onPress={() => router.push('/about')} />
-        {DATASET_MODE ? (
+      {DATASET_MODE ? (
+        <View style={styles.footer}>
           <BigButton label="Mode Dataset" icon="videocam" variant="secondary" onPress={() => router.push('/dataset')} />
-        ) : null}
-      </View>
+        </View>
+      ) : null}
     </Screen>
   );
 }

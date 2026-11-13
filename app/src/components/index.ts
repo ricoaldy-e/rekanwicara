@@ -1,4 +1,5 @@
 export { BigButton } from './BigButton';
+export { BottomBar } from './BottomBar';
 export { Card } from './Card';
 export { CheckRow } from './CheckRow';
 export { HeroCard } from './HeroCard';
