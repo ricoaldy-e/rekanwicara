@@ -31,9 +31,7 @@ const styles = StyleSheet.create({
   track: {
     width: '100%',
     borderRadius: radius.tile,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceRaised,
     overflow: 'hidden',
   },
   fill: { height: '100%' },

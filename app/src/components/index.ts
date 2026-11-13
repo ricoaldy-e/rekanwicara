@@ -1,6 +1,7 @@
 export { BigButton } from './BigButton';
 export { Card } from './Card';
 export { CheckRow } from './CheckRow';
+export { HeroCard } from './HeroCard';
 export { InfoNote } from './InfoNote';
 export { FaceGuide, LipIllustration } from './LipIllustration';
 export { Screen } from './Screen';

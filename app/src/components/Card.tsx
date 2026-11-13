@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
@@ -30,7 +31,10 @@ export function Card({ children, onPress, accessibilityLabel, accessibilityHint,
       accessibilityHint={accessibilityHint}
       style={({ pressed }) => [styles.card, styles.pressable, pressed && styles.pressed, style]}
     >
-      {children}
+      <View style={styles.row}>
+        <View style={styles.content}>{children}</View>
+        <Ionicons name="chevron-forward" size={22} color={colors.textMuted} accessible={false} />
+      </View>
     </Pressable>
   );
 }
@@ -38,11 +42,11 @@ export function Card({ children, onPress, accessibilityLabel, accessibilityHint,
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderWidth: 2,
     borderRadius: radius.card,
     padding: spacing.md,
   },
   pressable: { minHeight: touchTarget, justifyContent: 'center' },
   pressed: { backgroundColor: colors.surfaceRaised },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  content: { flex: 1 },
 });
