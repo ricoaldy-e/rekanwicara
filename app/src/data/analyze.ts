@@ -2,7 +2,8 @@
 import type { ApiClient } from '../api/client';
 import type { UploadFile } from '../api/types';
 import type { UploadCallOptions } from '../api/upload';
-import { createV2Client, type GetToken } from '../api/v2';
+import { createV2Client, type V2Options } from '../api/v2';
+import { withAccount } from '../auth/v2Auth';
 import { ANALYZE_API, type AnalyzeApi } from '../config';
 import { mockAnalyzeResponse } from '../mock';
 import { cleanV2, fromV1 } from './mappers';
@@ -31,7 +32,9 @@ export interface AnalyzeInput {
 export interface AnalyzeOptions extends UploadCallOptions {
   /** The v1 client the app already uses (also gives the base URL for v2). */
   api: ApiClient;
-  getToken?: GetToken;
+  getToken?: V2Options['getToken'];
+  refreshSession?: V2Options['refreshSession'];
+  onSessionLost?: V2Options['onSessionLost'];
   /** Defaults to ANALYZE_API; tests pass it explicitly. */
   source?: AnalyzeApi;
 }
@@ -39,13 +42,13 @@ export interface AnalyzeOptions extends UploadCallOptions {
 let mockTurn = 0;
 
 export async function analyze(input: AnalyzeInput, opts: AnalyzeOptions): Promise<AnalyzeResult> {
-  const { api, getToken, source = ANALYZE_API, ...callOpts } = opts;
+  const { api, getToken, refreshSession, onSessionLost, source = ANALYZE_API, ...callOpts } = opts;
   const { file, item, sessionId, userId } = input;
   if (source === 'mock') {
     return cleanV2({ ...mockAnalyzeResponse(item.itemId, item.level, mockTurn++), sample: true });
   }
   if (source === 'v2') {
-    const res = await createV2Client({ baseUrl: api.baseUrl, getToken }).analyze(
+    const res = await createV2Client(withAccount({ baseUrl: api.baseUrl, getToken, refreshSession, onSessionLost })).analyze(
       { file, item_id: item.itemId, session_id: sessionId },
       callOpts,
     );

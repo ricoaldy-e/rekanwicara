@@ -32,11 +32,13 @@ jest.mock('expo-router', () => {
       const { Text: T } = require('react-native');
       return <T testID="redirect">{href}</T>;
     },
-    useRouter: () => ({ replace: mockReplace }),
+    useRouter: () => ({ replace: mockReplace, push: mockPush }),
     useSegments: () => mockSegments,
   };
 });
-jest.mock('../src/auth/AuthProvider', () => ({ useAuth: () => ({ uid: 'local' }) }));
+let mockSession: { email: string } | null = null;
+const mockPush = jest.fn();
+jest.mock('../src/auth/AuthProvider', () => ({ useAuth: () => ({ uid: 'local', session: mockSession }) }));
 jest.mock('../src/state/user', () => ({ useUser: () => ({ profile: mockProfile }) }));
 jest.mock('../src/a11y/haptics', () => ({ buzzLight: () => mockBuzz() }));
 
@@ -45,6 +47,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockProfile = { onboarded: false };
   mockSegments = ['(tabs)', 'companion'];
+  mockSession = null;
 });
 
 describe('lockState (pure)', () => {
@@ -201,6 +204,17 @@ describe('PinGate', () => {
     await open();
     await waitFor(() => expect(screen.getByLabelText(/^Terlalu banyak percobaan/)).toBeTruthy());
     expect(screen.getByRole('button', { name: 'Angka 5' }).props.accessibilityState).toMatchObject({ disabled: true });
+  });
+
+  it('offers "Lupa PIN?" only with an account, and opens the reset screen', async () => {
+    await savePin(LOCAL_UID, '2580');
+    await open();
+    expect(screen.queryByTestId('forgot-pin')).toBeNull(); // no account: nothing to prove
+    await screen.unmount();
+    mockSession = { email: 'a@b.co' };
+    await open();
+    await fireEvent.press(screen.getByRole('link', { name: 'Lupa PIN?' }));
+    expect(mockPush).toHaveBeenCalledWith('/auth/forgot-pin');
   });
 
   it('sends the user to make a PIN when none exists', async () => {

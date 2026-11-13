@@ -35,18 +35,21 @@ export function useLoad<T>(load: () => Promise<T>): Loaded<T> {
 
 /** Level 1 items and the word list (Pilih kata). */
 export function useCatalog(opts: SourceOptions): Loaded<{ level1: PracticeItem[]; words: WordSummary[] }> {
-  const { baseUrl, getToken, mock } = opts;
+  const { baseUrl, getToken, refreshSession, onSessionLost, mock } = opts;
   const load = useCallback(
-    () => getCatalog({ baseUrl, getToken, mock }).then((dto) => ({ level1: catalogToL1(dto), words: catalogToWords(dto) })),
-    [baseUrl, getToken, mock],
+    () => getCatalog({ baseUrl, getToken, refreshSession, onSessionLost, mock }).then((dto) => ({ level1: catalogToL1(dto), words: catalogToWords(dto) })),
+    [baseUrl, getToken, refreshSession, onSessionLost, mock],
   );
   return useLoad(load);
 }
 
 /** One word with its Level 2 steps and the whole word (Jalur kata). */
 export function useWordPath(id: string, opts: SourceOptions): Loaded<WordPath> {
-  const { baseUrl, getToken, mock } = opts;
-  const load = useCallback(() => getWord(id, { baseUrl, getToken, mock }).then(wordToPath), [id, baseUrl, getToken, mock]);
+  const { baseUrl, getToken, refreshSession, onSessionLost, mock } = opts;
+  const load = useCallback(
+    () => getWord(id, { baseUrl, getToken, refreshSession, onSessionLost, mock }).then(wordToPath),
+    [id, baseUrl, getToken, refreshSession, onSessionLost, mock],
+  );
   return useLoad(load);
 }
 
@@ -60,13 +63,13 @@ export function usePracticeItem(
   position: number | undefined,
   opts: SourceOptions,
 ): Loaded<PracticeItem | null> {
-  const { baseUrl, getToken, mock } = opts;
+  const { baseUrl, getToken, refreshSession, onSessionLost, mock } = opts;
   const load = useCallback(async (): Promise<PracticeItem | null> => {
-    const src = { baseUrl, getToken, mock };
+    const src = { baseUrl, getToken, refreshSession, onSessionLost, mock };
     if (!wordId) return catalogToL1(await getCatalog(src)).find((i) => i.itemId === itemId) ?? null;
     const path = wordToPath(await getWord(wordId, src));
     if (position === undefined) return path.whole.itemId === itemId ? path.whole : null;
     return path.syllables.find((s) => s.itemId === itemId && s.position === position) ?? null;
-  }, [itemId, wordId, position, baseUrl, getToken, mock]);
+  }, [itemId, wordId, position, baseUrl, getToken, refreshSession, onSessionLost, mock]);
   return useLoad(load);
 }

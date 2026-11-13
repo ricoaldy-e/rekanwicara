@@ -1,15 +1,15 @@
 /** Catalog and word detail: mock (USE_MOCK) or FastAPI v2. Screens import only from here. */
 import { ApiError } from '../api/apiError';
 import type { CatalogDTO, WordDTO } from '../api/types';
-import { createV2Client, type GetToken } from '../api/v2';
+import { createV2Client, type V2Options } from '../api/v2';
+import { withAccount } from '../auth/v2Auth';
 import { USE_MOCK } from '../config';
 import { MOCK_CATALOG, MOCK_WORDS } from '../mock';
 import { mockWordStore } from '../mock/words';
 import { completeWordDTOs } from './words';
 
-export interface SourceOptions {
+export interface SourceOptions extends Pick<V2Options, 'getToken' | 'refreshSession' | 'onSessionLost'> {
   baseUrl: string;
-  getToken?: GetToken;
   /** Defaults to USE_MOCK; tests pass it explicitly. */
   mock?: boolean;
 }
@@ -22,7 +22,7 @@ const pause = () => new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS))
  * are "Belum lengkap" (a save stopped half-way) are left out, so the Tuli user never sees them (kontrak §6).
  */
 export async function getCatalog(opts: SourceOptions): Promise<CatalogDTO> {
-  if (!(opts.mock ?? USE_MOCK)) return createV2Client(opts).getCatalog();
+  if (!(opts.mock ?? USE_MOCK)) return createV2Client(withAccount(opts)).getCatalog();
   await pause();
   const custom = await completeWordDTOs(mockWordStore);
   return {
@@ -35,7 +35,7 @@ export async function getCatalog(opts: SourceOptions): Promise<CatalogDTO> {
 }
 
 export async function getWord(id: string, opts: SourceOptions): Promise<WordDTO> {
-  if (!(opts.mock ?? USE_MOCK)) return createV2Client(opts).getWord(id);
+  if (!(opts.mock ?? USE_MOCK)) return createV2Client(withAccount(opts)).getWord(id);
   await pause();
   const builtIn = MOCK_WORDS[id];
   const word = builtIn?.source === 'default' ? builtIn : (await completeWordDTOs(mockWordStore)).find((w) => w.id === id);

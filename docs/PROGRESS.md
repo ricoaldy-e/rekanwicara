@@ -680,6 +680,12 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
     teks di atas, usulan perubahan design.md/flow.
   - **Belum teruji sama sekali di perangkat:** seluruh alur v2 (FL-2 … FL-8b'), Supabase sungguhan (akun email, sinkron tanpa login anonim, Keluar luring), server v2, iOS,
     galeri/kamera untuk video Pendamping, pengumuman pembaca layar, Playfair dan cincin fokus.
+- Tambahan setelah FL-10 (13 Nov 2026): tiga celah ditutup (yang lain tetap seperti daftar FL-10).
+  (1) **Token v2:** `src/auth/v2Auth.ts` (`getToken`, `refreshSession`, `onSessionLost`) dan `withAccount()` mengisi bawaan akun di `getCatalog`/`getWord`/`analyze` (v2); 401 → refresh sekali → ulang sekali → gagal = `signOut`.
+  `SignedOutRedirect` (root layout) mengantar ke Masuk saat sesi hilang di dalam app. Belum pernah memanggil `/v2` sungguhan. (2) **Lupa PIN:** tautan di gerbang PIN (hanya bila ada akun), layar `auth/forgot-pin`
+  (verifikasi kata sandi akun lewat `signIn`, lalu `create-pin`; PIN lama diganti saat PIN baru disimpan). Di mode tiruan sandi apa pun diterima kecuali `salah@contoh.id`. Lupa sandi (Q15) tetap tidak ada.
+  (3) **Ringkasan Level 2** di kartu Pilih kata ("Level 2: x dari N sesuai · Level 3: …"), diambil per kartu lewat `useWordPath` (di v2 = satu permintaan per kata; saat memuat/gagal hanya Level 3 yang disebut).
+  Catatan: kartu "Level 2 dan 3" di Beranda masih menghitung kata (Level 3) saja. Panduan: `docs/PANDUAN_JALANKAN_DAN_CEK.md`. Tes baru: `forgotPin.test.tsx` (5), `v2Auth.test.tsx` (9), tambahan di `words.test.tsx` dan `pin.test.tsx`. 45 suite / 566 tes.
 
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah

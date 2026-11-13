@@ -52,6 +52,20 @@ describe('Pilih kata', () => {
   });
 });
 
+describe('Pilih kata: Level 2 summary', () => {
+  it('counts the syllables per unique itemId and Level 3 separately', async () => {
+    mockProfile.attempts = [attempt('l2_pa', 'hijau'), attempt('l2_ma', 'merah')];
+    await render(<Words />);
+    expect(screen.getByRole('button', { name: /^PAPA, bawaan, Level 2: 1 dari 1 sesuai · Level 3: belum$/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /^MAMA, bawaan, Level 2: 0 dari 1 sesuai · Level 3: belum$/ })).toBeTruthy();
+  });
+
+  it('leaves Level 2 out for a word without syllables', async () => {
+    await render(<Words />);
+    expect(screen.getByRole('button', { name: /^MINUM, dari Pendamping, Level 3: belum$/ })).toBeTruthy();
+  });
+});
+
 describe('Jalur kata', () => {
   it('shows two PA cards and one PAPA card, with "Berikutnya" on the first', async () => {
     await render(<WordPath />);

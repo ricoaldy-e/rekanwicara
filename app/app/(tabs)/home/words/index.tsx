@@ -3,10 +3,12 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { errorMessage } from '../../../../src/api/errors';
 import { BigButton, Body, Card, InfoNote, Screen, SourceChip, Title } from '../../../../src/components';
-import { bestStatus } from '../../../../src/data/progress';
-import { useCatalog } from '../../../../src/data/useCatalog';
+import { bestStatus, summary } from '../../../../src/data/progress';
+import type { WordSummary } from '../../../../src/data/types';
+import { useCatalog, useWordPath } from '../../../../src/data/useCatalog';
 import { useSettings } from '../../../../src/state/settings';
 import { useUser } from '../../../../src/state/user';
+import type { Attempt } from '../../../../src/user/pure';
 import { colors, fontSize, spacing } from '../../../../src/theme';
 
 export default function Words() {
@@ -35,25 +37,32 @@ export default function Words() {
 
       {data && data.words.length === 0 ? <InfoNote text="Belum ada kata." testID="words-empty" /> : null}
 
-      {data?.words.map((w) => {
-        // shortcut: the Level 2 count needs getWord per word (N requests on v2), so only Level 3 is summarised here.
-        const l3 = bestStatus(profile.attempts, w.id) === 'sesuai' ? 'sesuai' : 'belum';
-        return (
-          <Card
-            key={w.id}
-            testID={`word-${w.id}`}
-            onPress={() => router.push({ pathname: '/home/words/[wordId]', params: { wordId: w.id } })}
-            accessibilityLabel={`${w.text}, ${w.source === 'default' ? 'bawaan' : 'dari Pendamping'}, Level 3: ${l3}`}
-          >
-            <View style={styles.gap}>
-              <Text maxFontSizeMultiplier={2} style={styles.word}>{w.text}</Text>
-              <SourceChip source={w.source} />
-              <Text maxFontSizeMultiplier={2} style={styles.summary}>Level 3: {l3}</Text>
-            </View>
-          </Card>
-        );
-      })}
+      {data?.words.map((w) => (
+        <WordCard key={w.id} word={w} apiUrl={apiUrl} attempts={profile.attempts} onPress={() => router.push({ pathname: '/home/words/[wordId]', params: { wordId: w.id } })} />
+      ))}
     </Screen>
+  );
+}
+
+/** One word: name, source and progress. The Level 2 count needs the word's syllables, loaded for this card only. */
+function WordCard({ word: w, apiUrl, attempts, onPress }: { word: WordSummary; apiUrl: string; attempts: readonly Attempt[]; onPress: () => void }) {
+  const path = useWordPath(w.id, { baseUrl: apiUrl });
+  const l3 = bestStatus(attempts, w.id) === 'sesuai' ? 'sesuai' : 'belum';
+  // While the syllables load, or when they cannot be loaded, only Level 3 is told (never a wrong Level 2 number).
+  const l2 = w.hasLevel2 && path.data ? summary(attempts, path.data.syllables.map((s) => s.itemId)) : null;
+  const text = `${l2 ? `Level 2: ${l2.done} dari ${l2.total} sesuai · ` : ''}Level 3: ${l3}`;
+  return (
+    <Card
+      testID={`word-${w.id}`}
+      onPress={onPress}
+      accessibilityLabel={`${w.text}, ${w.source === 'default' ? 'bawaan' : 'dari Pendamping'}, ${text}`}
+    >
+      <View style={styles.gap}>
+        <Text maxFontSizeMultiplier={2} style={styles.word}>{w.text}</Text>
+        <SourceChip source={w.source} />
+        <Text maxFontSizeMultiplier={2} style={styles.summary}>{text}</Text>
+      </View>
+    </Card>
   );
 }
 
