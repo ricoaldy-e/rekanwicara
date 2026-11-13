@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Share, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { BigButton, Body, Card, CheckRow, InfoNote, Screen, StageBadge, Title } from '../src/components';
-import { OptionGroup } from '../src/components/OptionGroup';
-import { useContent } from '../src/state/content';
-import { useUser } from '../src/state/user';
-import { colors, fontSize, radius, spacing, touchTarget } from '../src/theme';
-import { SESSION_MINUTES, isValidPin, type SessionMinutes } from '../src/user/pure';
-import { CONSULT_ADVICE, reportText, weeklySummary } from '../src/user/report';
-import { verifyPin } from '../src/user/storage';
+import { BigButton, Body, Card, CheckRow, InfoNote, Screen, StageBadge, Title } from '../../../src/components';
+import { OptionGroup } from '../../../src/components/OptionGroup';
+import { useContent } from '../../../src/state/content';
+import { useUser } from '../../../src/state/user';
+import { colors, fontSize, radius, spacing, touchTarget } from '../../../src/theme';
+import { SESSION_MINUTES, isValidPin, type SessionMinutes } from '../../../src/user/pure';
+import { CONSULT_ADVICE, reportText, weeklySummary } from '../../../src/user/report';
+import { verifyPin } from '../../../src/user/storage';
 
 type Stage = 'pin' | 'home' | 'pick' | 'listen';
 

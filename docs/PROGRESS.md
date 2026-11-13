@@ -519,6 +519,13 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   `icon.png` dan `android-icon-background.png`: PNG RGB tanpa alfa (latar penuh `#08110B`, piksel pertama (8,17,11), bukan putih). `splash-wordmark.png` belum ada:
   splash tetap memakai ikon; wordmark menunggu aset dari Rico. Belum diuji: splash di build sungguhan (Expo Go memakai splash sendiri).
   Pengingat FL-2: setiap layout baru (`(tabs)/_layout`, Stack bersarang) wajib memakai `contentStyle`/`sceneStyle` berlatar `colors.background`.
+- FL-2 (13 Nov 2026): tiga tab tetap. `app/(tabs)/_layout.tsx` (Tabs, `tabBar` = `BottomBar`, `sceneStyle` berlatar `background`, area aman dari `insets` milik `tabBar`),
+  masing-masing tab punya Stack sendiri. `home.tsx`, `companion.tsx`, `settings.tsx` dipindah (git mv) ke `app/(tabs)/<nama>/index.tsx`; isinya tetap, hanya path impor
+  dan footer `BottomBar` di Beranda dibuang. URL `/home`, `/companion`, `/settings` tidak berubah. `practice/[itemId]` tetap di Stack akar, jadi menutupi tab dan bar tersembunyi.
+  Opsi header gelap dipindah ke `src/navigation/stackOptions.tsx` (dipakai Stack akar dan Stack tiap tab; `DemoIndicator` ikut pindah).
+  Karena bar Beranda hilang, ditambah tombol sekunder "Tentang aplikasi" di kaki Beranda (tautan ke About; sebelumnya item bar).
+  Tes diubah: `home.test.tsx` (impor path baru; langkah menekan tombol "Mode Pendamping" dibuang karena bar bukan lagi bagian Beranda);
+  tes baru `BottomBar.test.tsx` menggantikannya. Belum teruji di perangkat: tombol kembali Android/iOS dari tab, label bar pada skala teks 200%.
 
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah

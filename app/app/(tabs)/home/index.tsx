@@ -3,17 +3,17 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { errorMessage } from '../src/api/errors';
-import { BigButton, Body, BottomBar, Card, HeroCard, InfoNote, Screen, StageBadge, StatusBadge } from '../src/components';
-import { LevelTile } from '../src/components/LevelTile';
-import { StatTile } from '../src/components/StatTile';
-import { DATASET_MODE } from '../src/config';
-import { groupByLevel, LEVEL_NAMES } from '../src/content/levels';
-import { useContent } from '../src/state/content';
-import { defaultLevel, fraction, homeStats, levelLocked } from '../src/state/homeStats';
-import { planSession, seededRng, selectCore, type Role } from '../src/state/progression';
-import { useUser } from '../src/state/user';
-import { colors, displayFont, fontSize, radius, spacing, touchTarget } from '../src/theme';
+import { errorMessage } from '../../../src/api/errors';
+import { BigButton, Body, Card, HeroCard, InfoNote, Screen, StageBadge, StatusBadge } from '../../../src/components';
+import { LevelTile } from '../../../src/components/LevelTile';
+import { StatTile } from '../../../src/components/StatTile';
+import { DATASET_MODE } from '../../../src/config';
+import { groupByLevel, LEVEL_NAMES } from '../../../src/content/levels';
+import { useContent } from '../../../src/state/content';
+import { defaultLevel, fraction, homeStats, levelLocked } from '../../../src/state/homeStats';
+import { planSession, seededRng, selectCore, type Role } from '../../../src/state/progression';
+import { useUser } from '../../../src/state/user';
+import { colors, displayFont, fontSize, radius, spacing, touchTarget } from '../../../src/theme';
 
 const ROLE_LABEL: Record<Role, string> = {
   pemanasan: 'Pemanasan',
@@ -48,17 +48,7 @@ export default function Home() {
   const minutes = profile.settings.sessionMinutes;
 
   return (
-    <Screen
-      footer={
-        <BottomBar
-          items={[
-            { key: 'practice', label: 'Latihan', icon: 'mic-outline', active: true, onPress: () => {} },
-            { key: 'companion', label: 'Pendamping', accessibilityLabel: 'Mode Pendamping', icon: 'people-outline', onPress: () => router.push('/companion') },
-            { key: 'about', label: 'Tentang', accessibilityLabel: 'Tentang aplikasi', icon: 'information-circle-outline', onPress: () => router.push('/about') },
-          ]}
-        />
-      }
-    >
+    <Screen>
       {demo ? <InfoNote text="Mode demo: progres contoh. Hasil latihan di mode ini tidak disimpan online." /> : null}
 
       {!profile.calibrated ? (
@@ -222,11 +212,10 @@ export default function Home() {
           </View>
         ))}
 
-      {DATASET_MODE ? (
-        <View style={styles.footer}>
-          <BigButton label="Mode Dataset" icon="videocam" variant="secondary" onPress={() => router.push('/dataset')} />
-        </View>
-      ) : null}
+      <View style={styles.footer}>
+        {DATASET_MODE ? <BigButton label="Mode Dataset" icon="videocam" variant="secondary" onPress={() => router.push('/dataset')} /> : null}
+        <BigButton label="Tentang aplikasi" icon="information-circle-outline" variant="secondary" onPress={() => router.push('/about')} />
+      </View>
     </Screen>
   );
 }

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
-import Home from '../app/home';
+import Home from '../app/(tabs)/home';
 import type { Item, Status } from '../src/api/types';
 import { buildProgress, type ItemProgress } from '../src/state/progression';
 import { newProfile, type Attempt } from '../src/user/pure';
@@ -62,8 +62,6 @@ it.each([false, true])('directs the user to Companion when no replacement exists
   expect(screen.queryByText(/Sesi hari ini selesai/)).toBeNull();
   expect(screen.queryByText('Pilih satu materi untuk mulai berlatih.')).toBeNull();
   expect(screen.queryByTestId('mission-start')).toBeNull();
-  await fireEvent.press(screen.getByRole('button', { name: 'Mode Pendamping' }));
-  expect(mockPush).toHaveBeenCalledWith('/companion');
 });
 
 it('does not report missing alternatives when due reviews fill a short session', async () => {

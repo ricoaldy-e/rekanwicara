@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import { Share } from 'react-native';
 
 import type { Item } from '../src/api/types';
-import Companion from '../app/companion';
+import Companion from '../app/(tabs)/companion';
 import { addAttempt, makeUuid, newProfile, type Attempt, type Profile } from '../src/user/pure';
 
 const item = (item_id: string, level: number, text: string): Item => ({

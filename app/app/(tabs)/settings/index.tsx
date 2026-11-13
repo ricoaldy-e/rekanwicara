@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { createApiClient, isValidBaseUrl } from '../src/api/client';
-import { errorMessage } from '../src/api/errors';
-import { BigButton, Body, Card, CheckRow, InfoNote, Screen, Title } from '../src/components';
-import { useUser } from '../src/state/user';
-import { DATASET_MODE } from '../src/config';
-import { useContent } from '../src/state/content';
-import { useSettings } from '../src/state/settings';
-import { colors, fontSize, radius, spacing, stroke, touchTarget } from '../src/theme';
+import { createApiClient, isValidBaseUrl } from '../../../src/api/client';
+import { errorMessage } from '../../../src/api/errors';
+import { BigButton, Body, Card, CheckRow, InfoNote, Screen, Title } from '../../../src/components';
+import { useUser } from '../../../src/state/user';
+import { DATASET_MODE } from '../../../src/config';
+import { useContent } from '../../../src/state/content';
+import { useSettings } from '../../../src/state/settings';
+import { colors, fontSize, radius, spacing, stroke, touchTarget } from '../../../src/theme';
 
 type TestResult = { ok: true; text: string } | { ok: false; text: string } | null;
 
