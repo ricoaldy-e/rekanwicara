@@ -526,6 +526,21 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   Karena bar Beranda hilang, ditambah tombol sekunder "Tentang aplikasi" di kaki Beranda (tautan ke About; sebelumnya item bar).
   Tes diubah: `home.test.tsx` (impor path baru; langkah menekan tombol "Mode Pendamping" dibuang karena bar bukan lagi bagian Beranda);
   tes baru `BottomBar.test.tsx` menggantikannya. Belum teruji di perangkat: tombol kembali Android/iOS dari tab, label bar pada skala teks 200%.
+- FL-3 (13 Nov 2026): Beranda dua kartu tanpa misi. `app/(tabs)/home/index.tsx` ditulis ulang: catatan demo, kalibrasi (`calibration-banner`), server mock,
+  galat kesehatan tetap; kartu "Level 1, Bunyi vokal" dan "Level 2 dan 3, Pilih kata" (`Card` dengan `onPress`, ringkasan "x dari N sesuai"), tautan
+  "Tentang aplikasi", "Mode Dataset" bila `DATASET_MODE`. Katalog dari `useCatalog` (alamat server dari `useSettings`); galat katalog = `home-error` + "Coba lagi".
+  Baru: `src/data/progress.ts` (`bestStatus`, `lastStatus`, `summary` per `itemId` unik), `app/(tabs)/home/level-1.tsx` (daftar bunyi L1, `item-<itemId>`,
+  ke `practice/[itemId]`, tanpa kunci), `app/(tabs)/home/words.tsx` (sementara: "Segera hadir"; diganti FL-5).
+  Dihapus dari UI (NAV-3/NAV-4, Q6): tekan-lama "Misi hari ini", `HeroCard` misi, "Langkah hari ini", `StatTile`, ubin Level 0–4, `StageBadge`, kalimat kunci.
+  Berkas logika (`progression.ts`, `homeStats.ts`, `levels.ts`) dibiarkan.
+  Keputusan: badge di daftar L1 memakai status **terakhir** berlabel "Terakhir" (LAT-1), sedangkan ringkasan kartu memakai status **terbaik** (kontrak §8);
+  menampilkan status terbaik dengan label "Terakhir" tidak jujur. Ringkasan kartu L2–3 sementara hanya menghitung kata (Level 3); suku kata ditambah di FL-5.
+  Tes dihapus dari `home.test.tsx` beserta alasannya: "directs the user to Companion when no replacement exists" (×2) dan "does not report missing alternatives"
+  (misi/`needsHelp` dibuang, NAV-3); "opens the hidden Settings with a long press" (Pengaturan kini tab, NAV-4); "lists only the chosen level" (ubin level dibuang);
+  "offers recovery for an empty list" diganti tes galat katalog. Tes baru: `home.test.tsx` (4), `level1.test.tsx` (2), `progress.test.ts` (3).
+  **Penting untuk demo:** server lokal belum punya `/v2/catalog`, jadi `app/.env` harus berisi `EXPO_PUBLIC_USE_MOCK=true`; tanpa itu Beranda menampilkan `home-error`.
+  Risiko: `l1_o` di `server/app/content/items.json` `active: false`, sehingga `practice/[itemId]` (masih membaca `/v1/items`) menampilkan "Materi tidak ditemukan"
+  untuk O sampai FL-4. Progres lama dari Level 0–4 ikut terhitung bila id-nya sama dengan katalog. Belum teruji di perangkat (skala teks 200%, TalkBack).
 
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah

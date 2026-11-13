@@ -1,51 +1,46 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import type { ComponentProps } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { errorMessage } from '../../../src/api/errors';
-import { BigButton, Body, Card, HeroCard, InfoNote, Screen, StageBadge, StatusBadge } from '../../../src/components';
-import { LevelTile } from '../../../src/components/LevelTile';
-import { StatTile } from '../../../src/components/StatTile';
+import { BigButton, Body, Card, InfoNote, Screen } from '../../../src/components';
 import { DATASET_MODE } from '../../../src/config';
-import { groupByLevel, LEVEL_NAMES } from '../../../src/content/levels';
+import { summary } from '../../../src/data/progress';
+import { useCatalog } from '../../../src/data/useCatalog';
 import { useContent } from '../../../src/state/content';
-import { defaultLevel, fraction, homeStats, levelLocked } from '../../../src/state/homeStats';
-import { planSession, seededRng, selectCore, type Role } from '../../../src/state/progression';
+import { useSettings } from '../../../src/state/settings';
 import { useUser } from '../../../src/state/user';
-import { colors, displayFont, fontSize, radius, spacing, touchTarget } from '../../../src/theme';
+import { colors, fontSize, spacing } from '../../../src/theme';
 
-const ROLE_LABEL: Record<Role, string> = {
-  pemanasan: 'Pemanasan',
-  ulasan: 'Ulasan',
-  inti: 'Latihan inti',
-  tantangan: 'Tantangan',
-};
+type IconName = ComponentProps<typeof Ionicons>['name'];
+
+function LevelCard(props: { level: string; name: string; icon: IconName; done: number; total: number; testID: string; onPress: () => void }) {
+  const progress = `${props.done} dari ${props.total} sesuai`;
+  return (
+    <Card testID={props.testID} onPress={props.onPress} accessibilityLabel={`${props.level}, ${props.name}, ${progress}`}>
+      <View style={styles.cardRow}>
+        <Ionicons name={props.icon} size={28} color={colors.text} accessible={false} />
+        <View style={styles.cardText}>
+          <Text maxFontSizeMultiplier={2} style={styles.cardLevel}>{props.level}</Text>
+          <Text maxFontSizeMultiplier={2} style={styles.cardName}>{props.name}</Text>
+          <Text maxFontSizeMultiplier={2} style={styles.cardProgress}>{progress}</Text>
+        </View>
+      </View>
+    </Card>
+  );
+}
 
 export default function Home() {
   const router = useRouter();
-  const { health, healthError, items, loading, error, reload } = useContent();
-  const { profile, progress, demo } = useUser();
-  const open = (itemId: string) => router.push({ pathname: '/practice/[itemId]', params: { itemId } });
+  const { health, healthError } = useContent();
+  const { apiUrl } = useSettings();
+  const { profile, demo } = useUser();
+  const { data, loading, error, reload } = useCatalog({ baseUrl: apiUrl });
 
-  // Today's session (SPEC §8.4): warm-up, reviews, core material, challenge. The day seeds the random
-  // challenge, so the plan does not change every time the screen is drawn.
-  const plan = useMemo(() => {
-    if (!items) return [];
-    const now = new Date();
-    const day = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
-    return planSession(items, progress, profile.attempts, profile.settings.sessionMinutes, now, seededRng(day));
-  }, [items, progress, profile.attempts, profile.settings.sessionMinutes]);
-  const itemOf = (id: string) => items?.find((it) => it.item_id === id);
-  const next = plan.find((s) => !s.done);
-  const needsHelp = items?.some((i) => progress.get(i.item_id)?.stage === 'macet') && !selectCore(items, progress);
-
-  const groups = useMemo(() => (items ? groupByLevel(items) : []), [items]);
-  const [chosenLevel, setChosenLevel] = useState<number | null>(null); // display state only
-  const nextItem = next ? itemOf(next.itemId) : undefined;
-  const shownLevel = chosenLevel ?? defaultLevel(groups, nextItem?.level, progress);
-  const stats = homeStats(plan, items, progress);
-  const minutes = profile.settings.sessionMinutes;
+  const l1 = data ? summary(profile.attempts, data.level1.map((i) => i.itemId)) : null;
+  // shortcut: counts whole words (Level 3) only; Level 2 syllables need every word's detail, add with FL-5.
+  const words = data ? summary(profile.attempts, data.words.map((w) => w.id)) : null;
 
   return (
     <Screen>
@@ -59,9 +54,9 @@ export default function Home() {
       ) : null}
 
       {health?.mock_mode ? <InfoNote text="Server dalam mode contoh (mock). Hasil bukan analisis sebenarnya." /> : null}
-      {healthError && !error ? <InfoNote tone="warning" text={errorMessage(healthError)} /> : null}
+      {healthError ? <InfoNote tone="warning" text={errorMessage(healthError)} /> : null}
 
-      {loading && !items ? (
+      {loading && !data ? (
         <View style={styles.center} accessible accessibilityLabel="Memuat materi">
           <ActivityIndicator size="large" color={colors.text} />
           <Body>Memuat materi…</Body>
@@ -74,166 +69,48 @@ export default function Home() {
           <BigButton label="Coba lagi" icon="refresh" onPress={reload} disabled={loading} />
         </View>
       ) : null}
-      {!loading && !error && items?.length === 0 ? (
+
+      {l1 && words ? (
         <View style={styles.gap}>
-          <InfoNote text="Materi belum tersedia. Coba muat ulang atau periksa koneksi server di pengaturan." />
-          <BigButton label="Muat ulang materi" icon="refresh" onPress={reload} />
+          <LevelCard
+            testID="card-level-1"
+            level="Level 1"
+            name="Bunyi vokal"
+            icon="volume-medium-outline"
+            done={l1.done}
+            total={l1.total}
+            onPress={() => router.push('/home/level-1')}
+          />
+          <LevelCard
+            testID="card-words"
+            level="Level 2 dan 3"
+            name="Pilih kata"
+            icon="chatbubble-outline"
+            done={words.done}
+            total={words.total}
+            onPress={() => router.push('/home/words')}
+          />
         </View>
       ) : null}
 
-      {/* Hidden Settings: long-press the title for 2 s (for demo setup). */}
-      <Pressable
-        onLongPress={() => router.push('/settings')}
-        delayLongPress={2000}
-        accessibilityRole="header"
-        accessibilityLabel="Misi hari ini"
-      >
-        <Text style={styles.kicker}>Misi hari ini</Text>
-      </Pressable>
-      {plan.length > 0 ? (
-        <HeroCard
-          title={nextItem ? `Siap latihan “${nextItem.text}”?` : 'Latihan hari ini'}
-          body={next ? `Langkah ${stats.stepsDone + 1} dari ${stats.stepsTotal}.` : needsHelp ? undefined : 'Sesi hari ini selesai.'}
-        >
-          {next ? <BigButton label="Mulai latihan" icon="play" onPress={() => open(next.itemId)} testID="mission-start" /> : null}
-        </HeroCard>
-      ) : needsHelp ? null : (
-        <HeroCard title="Pilih satu materi untuk mulai berlatih." />
-      )}
+      <Card onPress={() => router.push('/about')} accessibilityLabel="Tentang aplikasi">
+        <Text maxFontSizeMultiplier={2} style={styles.link}>Tentang aplikasi</Text>
+      </Card>
 
-      {needsHelp ? (
-        <InfoNote testID="mission-needs-help" text="Belum ada materi pengganti untuk latihan inti. Buka Mode Pendamping untuk memilih langkah berikutnya." />
+      {DATASET_MODE ? (
+        <BigButton label="Mode Dataset" icon="videocam" variant="secondary" onPress={() => router.push('/dataset')} />
       ) : null}
-
-      {plan.length > 0 ? (
-        <Card testID="mission">
-          <Text accessibilityRole="header" style={styles.missionLabel}>
-            Langkah hari ini · ±{minutes} menit
-          </Text>
-          {plan.map((step, k) => {
-            const it = itemOf(step.itemId);
-            if (!it) return null;
-            return (
-              <Pressable
-                key={`${step.itemId}-${k}`}
-                onPress={() => open(step.itemId)}
-                accessibilityRole="button"
-                accessibilityLabel={`${ROLE_LABEL[step.role]}: ${it.text}${step.done ? ', sudah dilatih hari ini' : ''}`}
-                style={({ pressed }) => [styles.step, pressed && styles.stepPressed]}
-              >
-                <Ionicons name={step.done ? 'checkmark-circle' : 'ellipse-outline'} size={22} color={colors.text} />
-                <Text style={styles.stepText}>
-                  {ROLE_LABEL[step.role]}: {it.emoji ? `${it.emoji} ` : ''}
-                  {it.text}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </Card>
-      ) : null}
-
-      {items && items.length > 0 ? (
-        <View style={styles.gap}>
-          <Text accessibilityRole="header" style={[styles.sectionTitle, displayFont()]}>
-            Kemajuanmu
-          </Text>
-          <View style={styles.tiles}>
-            <StatTile
-              value={`${stats.stepsDone} / ${stats.stepsTotal}`}
-              caption="langkah"
-              ring={fraction(stats.stepsDone, stats.stepsTotal)}
-              accessibilityLabel={`${stats.stepsDone} dari ${stats.stepsTotal} langkah hari ini selesai`}
-            />
-            <StatTile
-              value={`${stats.greenCount}`}
-              caption="sesuai"
-              ring={fraction(stats.greenCount, stats.itemCount)}
-              accessibilityLabel={`${stats.greenCount} dari ${stats.itemCount} materi terakhir sesuai`}
-            />
-            <StatTile value={`${minutes}`} caption="menit sesi" accessibilityLabel={`Sesi ${minutes} menit`} />
-          </View>
-        </View>
-      ) : null}
-
-      {groups.length > 0 ? (
-        <View style={styles.gap}>
-          <Text accessibilityRole="header" style={[styles.sectionTitle, displayFont()]}>
-            Semua materi
-          </Text>
-          <View style={styles.tiles}>
-            {groups.map((g) => (
-              <LevelTile
-                key={g.level}
-                level={g.level}
-                name={LEVEL_NAMES[g.level] ?? ''}
-                locked={levelLocked(g.items, progress)}
-                selected={g.level === shownLevel}
-                onPress={() => setChosenLevel(g.level)}
-              />
-            ))}
-          </View>
-        </View>
-      ) : null}
-
-      {groups
-        .filter((group) => group.level === shownLevel)
-        .map((group) => (
-          <View key={group.level} style={styles.gap}>
-            <Text accessibilityRole="header" style={styles.levelTitle}>
-              Level {group.level}: {LEVEL_NAMES[group.level] ?? ''}
-            </Text>
-            {group.items.map((item) => {
-              const p = progress.get(item.item_id);
-              const locked = p?.locked ?? false;
-              return (
-                <Card
-                  key={item.item_id}
-                  onPress={locked ? undefined : () => open(item.item_id)}
-                  accessibilityLabel={`Latihan ${item.text}`}
-                  accessibilityHint={locked ? undefined : 'Buka latihan'}
-                  testID={`item-${item.item_id}`}
-                >
-                  <View style={styles.itemRow}>
-                    {item.emoji ? (
-                      <Text accessible={false} style={styles.emoji}>
-                        {item.emoji}
-                      </Text>
-                    ) : null}
-                    <Text style={styles.itemText}>{item.text}</Text>
-                  </View>
-                  <View style={styles.badges}>
-                    {p ? <StageBadge stage={p.stage} testID={`stage-${item.item_id}`} /> : null}
-                    {locked ? null : p?.last ? <StatusBadge status={p.last} label="Terakhir" /> : <Body muted>Belum dicoba</Body>}
-                  </View>
-                  {locked ? <Body muted>Lulus satu materi Level {item.level - 1} dulu untuk membuka ini.</Body> : null}
-                </Card>
-              );
-            })}
-          </View>
-        ))}
-
-      <View style={styles.footer}>
-        {DATASET_MODE ? <BigButton label="Mode Dataset" icon="videocam" variant="secondary" onPress={() => router.push('/dataset')} /> : null}
-        <BigButton label="Tentang aplikasi" icon="information-circle-outline" variant="secondary" onPress={() => router.push('/about')} />
-      </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  kicker: { fontSize: fontSize.small, color: colors.textMuted, paddingVertical: spacing.sm },
-  sectionTitle: { fontSize: fontSize.large, color: colors.text },
-  levelTitle: { fontSize: fontSize.label, fontWeight: '700', color: colors.textMuted },
-  tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm + spacing.xs },
-  center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.lg },
   gap: { gap: spacing.sm },
-  missionLabel: { fontSize: fontSize.label, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
-  step: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: touchTarget, paddingVertical: spacing.xs, borderRadius: radius.tile },
-  stepPressed: { backgroundColor: colors.surfaceRaised },
-  stepText: { flex: 1, fontSize: fontSize.body, color: colors.text },
-  itemRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  badges: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.sm, marginTop: spacing.sm },
-  emoji: { fontSize: fontSize.title },
-  itemText: { fontSize: fontSize.large, fontWeight: '700', color: colors.text },
-  footer: { gap: spacing.md, marginTop: spacing.lg },
+  center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.lg },
+  cardRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  cardText: { flex: 1, gap: spacing.xs },
+  cardLevel: { fontSize: fontSize.small, color: colors.textMuted },
+  cardName: { fontSize: fontSize.large, fontWeight: '700', color: colors.text },
+  cardProgress: { fontSize: fontSize.body, color: colors.text },
+  link: { fontSize: fontSize.label, fontWeight: '700', color: colors.text },
 });
