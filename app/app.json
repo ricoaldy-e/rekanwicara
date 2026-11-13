@@ -41,6 +41,14 @@
           "recordAudioAndroid": true
         }
       ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Rekan Wicara membuka galeri agar Pendamping bisa memilih video contoh pelafalan.",
+          "cameraPermission": "Rekan Wicara memakai kamera untuk merekam video contoh pelafalan.",
+          "microphonePermission": "Rekan Wicara memakai mikrofon untuk merekam suara pada video contoh."
+        }
+      ],
       "expo-secure-store",
       "expo-font",
       "expo-status-bar"

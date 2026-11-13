@@ -19,3 +19,4 @@ export { PinDots } from './form/PinDots';
 export { PinPad } from './form/PinPad';
 export { Snackbar } from './form/Snackbar';
 export { TextField } from './form/TextField';
+// Not exported here: WordForm, VideoField and SyllableRow need native modules (expo-image-picker, expo-video); import them by path.

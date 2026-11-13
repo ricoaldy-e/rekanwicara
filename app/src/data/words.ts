@@ -126,6 +126,7 @@ async function uploadNew(
   materials: Array<{ id: string; video: VideoInput | null }>,
   uploaded: string[],
   onProgress?: SaveProgress,
+  signal?: AbortSignal,
 ): Promise<Map<string, string>> {
   const paths = new Map<string, string>();
   const fresh = materials.filter((m) => m.video?.kind === 'new');
@@ -137,6 +138,7 @@ async function uploadNew(
       paths.set(m.id, m.video.path);
       continue;
     }
+    if (signal?.aborted) throw new Error('cancelled');
     const path = videoPath(store.uid, wordId, m.id);
     await store.upload(path, m.video.file);
     uploaded.push(path);
@@ -175,7 +177,7 @@ export async function getRows(store: WordStore, id: string): Promise<WordRows | 
  * New word: upload videos → word row → syllable rows → video rows (kontrak §6). On any failure the rows and files
  * made in this attempt are removed and `SaveFailed` is thrown; the caller keeps the form as it is.
  */
-export async function createWord(store: WordStore, form: WordFormData, onProgress?: SaveProgress): Promise<string> {
+export async function createWord(store: WordStore, form: WordFormData, onProgress?: SaveProgress, signal?: AbortSignal): Promise<string> {
   if (form.syllables.length > MAX_SYLLABLES) throw new Error('too many syllables');
   const wordId = newWordId();
   const syllableIds = form.syllables.map(() => newSyllableId());
@@ -183,7 +185,7 @@ export async function createWord(store: WordStore, form: WordFormData, onProgres
   let wordInserted = false;
   let stage: SaveStage = 'upload';
   try {
-    const paths = await uploadNew(store, wordId, [{ id: wordId, video: form.video }, ...form.syllables.map((s, i) => ({ id: syllableIds[i], video: s.video }))], uploaded, onProgress);
+    const paths = await uploadNew(store, wordId, [{ id: wordId, video: form.video }, ...form.syllables.map((s, i) => ({ id: syllableIds[i], video: s.video }))], uploaded, onProgress, signal);
     const rows = buildRows(wordId, form, syllableIds, paths);
     stage = 'word';
     await store.insertWord(rows.word);
@@ -205,7 +207,7 @@ export async function createWord(store: WordStore, form: WordFormData, onProgres
  * Edit: upload the new videos → replace the rows → only after that, remove the files nothing points to any more.
  * When replacing fails, the new uploads are removed and the stored word is untouched.
  */
-export async function updateWord(store: WordStore, id: string, form: WordFormData, onProgress?: SaveProgress): Promise<void> {
+export async function updateWord(store: WordStore, id: string, form: WordFormData, onProgress?: SaveProgress, signal?: AbortSignal): Promise<void> {
   if (form.syllables.length > MAX_SYLLABLES) throw new Error('too many syllables');
   const before = await getRows(store, id);
   if (!before) throw new SaveFailed('word', new Error('not found'));
@@ -213,7 +215,7 @@ export async function updateWord(store: WordStore, id: string, form: WordFormDat
   const uploaded: string[] = [];
   let stage: SaveStage = 'upload';
   try {
-    const paths = await uploadNew(store, id, [{ id, video: form.video }, ...form.syllables.map((s, i) => ({ id: syllableIds[i], video: s.video }))], uploaded, onProgress);
+    const paths = await uploadNew(store, id, [{ id, video: form.video }, ...form.syllables.map((s, i) => ({ id: syllableIds[i], video: s.video }))], uploaded, onProgress, signal);
     const rows = buildRows(id, form, syllableIds, paths);
     stage = 'word';
     await store.replace(rows);
@@ -223,6 +225,22 @@ export async function updateWord(store: WordStore, id: string, form: WordFormDat
     await removeOrQueue(store, uploaded);
     throw new SaveFailed(stage, cause);
   }
+}
+
+/** The stored word as form values; stored videos are kept unless the user replaces them. */
+export function formDataOf(rows: WordRows): WordFormData {
+  const kept = (id: string) => {
+    const v = rows.videos.find((x) => x.material_id === id);
+    return v ? ({ kind: 'kept', path: v.storage_path } as const) : null;
+  };
+  return {
+    text: rows.word.text,
+    instruction: rows.word.instruction,
+    video: kept(rows.word.id),
+    syllables: [...rows.syllables]
+      .sort((a, b) => a.position - b.position)
+      .map((s) => ({ id: s.id, text: s.text, instruction: s.instruction, video: kept(s.id) })),
+  };
 }
 
 /** Delete: read the file paths first, delete the rows (cascade), then the files; files that fail are queued. */

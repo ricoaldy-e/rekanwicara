@@ -622,6 +622,16 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   Dibuang dari UI (Q11): ringkasan mingguan, Uji Dengar, lama sesi, laporan teks, status sinkron di layar Pendamping (berkas logikanya dibiarkan). `__tests__/companion.test.tsx` dihapus karena layarnya diganti.
   Tes baru: `wordsData.test.ts` (12), `companionList.test.tsx` (7). 41 suite / 526 tes.
   **K1 untuk FL-10:** `about.tsx` masih menulis Supabase menyimpan "tanpa video atau audio"; dengan kata Pendamping sungguhan (bukan tiruan) kalimat itu tidak benar lagi. Tidak diubah di sini.
+- FL-8b' (13 Nov 2026): formulir kata Pendamping. Dependensi baru atas izin Rico: `expo-image-picker ~58.0.10` (`npx expo install`; plugin di `app.json` dengan teks izin Indonesia untuk galeri, kamera, mikrofon).
+  Baru: `src/data/pickVideo.ts` (`launchImageLibraryAsync`/`launchCameraAsync`; `duration` dalam **milidetik**, `fileSize` byte, dicek di tipe SDK 58; kamera dibatasi `videoMaxDuration` 30 dtk),
+  `src/components/form/{VideoField,SyllableRow,WordForm}.tsx`, `src/forms/keys.ts`, layar `companion/words/new.tsx` dan `words/[wordId]/edit.tsx`; `createWord`/`updateWord` menerima `AbortSignal` (Batalkan memutus di antara unggahan; file yang sudah naik dibersihkan).
+  `VideoField`: pilih galeri/rekam, pratinjau **dibisukan tanpa autoplay**, ganti, hapus; video salah (format, ukuran, durasi) ditolak dengan alasan dan nilai lama tetap; izin kamera ditolak → kalimat + "Buka pengaturan" (`Linking.openSettings`).
+  `SyllableRow`: Naik/Turun/Hapus berlabel (bukan seret), hapus baris berisi minta konfirmasi. `WordForm`: blok Kata + 0–6 suku kata, peringatan kecocokan (bukan penghalang), duplikat (termasuk kata bawaan), persetujuan video wajib tiap simpan,
+  validasi semua saat kirim + fokus ke kolom teks/instruksi pertama yang salah + umumkan jumlah, progres unggah (teks + bar + Batalkan), galat → `FormBanner` + "Coba lagi" dengan isian utuh, "Buang perubahan?" lewat `usePreventRemove`
+  (tombol Batal, header, tombol kembali Android), sukses → snackbar "Kata “…” disimpan.". Instruksi diketik manual (tombol AI = FL-8b).
+  Keputusan: (1) kata dan suku kata **disimpan HURUF BESAR** (kontrak/katalog memakai TOLONG, MAMA; flow §7.7.3 menulis huruf kecil — duplikat tetap tanpa peka huruf). (2) `WordForm`, `VideoField`, `SyllableRow` **tidak diekspor lewat `components/index.ts`**
+  karena menarik modul native (image-picker, video) ke setiap tes layar. (3) Picker tanpa `fileSize` → 0 (ukuran tak bisa dicek di app; server 413 jadi pengaman). (4) Jumlah galat yang diumumkan: tiap kolom salah dihitung, baris suku kata dihitung per kolom.
+  Tes: `wordForm.test.tsx` (19), `wordScreens.test.tsx` (4). 43 suite / 549 tes. Belum teruji: di perangkat (galeri/kamera, izin, iOS, TalkBack, 200% teks), Supabase Storage sungguhan.
 
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah
