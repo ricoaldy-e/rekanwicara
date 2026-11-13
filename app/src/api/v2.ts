@@ -13,6 +13,10 @@ export type GetToken = () => Promise<string | null> | string | null;
 export interface V2Options {
   baseUrl: string;
   getToken?: GetToken;
+  /** Called once after a 401: refresh the session and return true when it worked (kontrak §9). */
+  refreshSession?: () => Promise<boolean>;
+  /** The session could not be refreshed: the app signs out and goes to the sign-in screen. */
+  onSessionLost?: () => void;
   timeoutMs?: number;
   fetchFn?: typeof fetch;
   xhrFactory?: XhrFactory;
@@ -36,6 +40,8 @@ export function withV2Code(err: unknown): unknown {
   if (!(err instanceof ApiError) || err.kind !== 'http' || err.code || err.status === null) return err;
   return new ApiError('http', err.message, err.status, CODE_BY_STATUS[err.status] ?? null);
 }
+
+const isUnauthenticated = (err: unknown) => err instanceof ApiError && err.code === 'UNAUTHENTICATED';
 
 async function authHeader(getToken?: GetToken): Promise<Record<string, string>> {
   const token = getToken ? await getToken() : null;
@@ -77,23 +83,43 @@ export function createV2Client(opts: V2Options) {
     return body as T;
   }
 
+  /** 401 UNAUTHENTICATED: refresh the session and try once more; if that fails, tell the app the session is lost. */
+  async function authed<T>(call: () => Promise<T>): Promise<T> {
+    try {
+      return await call();
+    } catch (err) {
+      if (!isUnauthenticated(err) || !opts.refreshSession) throw err;
+      if (await opts.refreshSession().catch(() => false)) {
+        try {
+          return await call();
+        } catch (again) {
+          if (!isUnauthenticated(again)) throw again;
+        }
+      }
+      opts.onSessionLost?.();
+      throw err;
+    }
+  }
+
   return {
-    getCatalog: () => get<CatalogDTO>('/v2/catalog'),
-    getWord: (id: string) => get<WordDTO>(`/v2/words/${encodeURIComponent(id)}`),
+    getCatalog: () => authed(() => get<CatalogDTO>('/v2/catalog')),
+    getWord: (id: string) => authed(() => get<WordDTO>(`/v2/words/${encodeURIComponent(id)}`)),
     async analyze(
       req: { file: UploadFile; item_id: string; session_id: string },
       callOpts?: UploadCallOptions,
     ): Promise<AnalyzeResponseV2> {
       const { file, ...fields } = req;
-      try {
-        return await uploadMultipart<AnalyzeResponseV2>(
-          { url: `${base}/v2/analyze`, fields, file, headers: await authHeader(opts.getToken) },
-          callOpts,
-          opts.xhrFactory,
-        );
-      } catch (err) {
-        throw withV2Code(err);
-      }
+      return authed(async () => {
+        try {
+          return await uploadMultipart<AnalyzeResponseV2>(
+            { url: `${base}/v2/analyze`, fields, file, headers: await authHeader(opts.getToken) },
+            callOpts,
+            opts.xhrFactory,
+          );
+        } catch (err) {
+          throw withV2Code(err);
+        }
+      });
     },
   };
 }

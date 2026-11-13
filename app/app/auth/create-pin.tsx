@@ -4,7 +4,8 @@ import { useRef, useState } from 'react';
 import { InfoNote } from '../../src/components';
 import { MESSAGES, messageOf, type Problem } from '../../src/forms/messages';
 import { isWeakPin } from '../../src/forms/validators/pin';
-import { LOCAL_UID, savePin } from '../../src/pin/pinStore';
+import { useAuth } from '../../src/auth/AuthProvider';
+import { savePin } from '../../src/pin/pinStore';
 import { PinScreenBody, usePinInput } from '../../src/pin/PinScreenBody';
 import { useUser } from '../../src/state/user';
 
@@ -12,6 +13,7 @@ import { useUser } from '../../src/state/user';
 export default function CreatePin() {
   const router = useRouter();
   const { profile } = useUser();
+  const { uid } = useAuth();
   const [step, setStep] = useState<1 | 2>(1);
   const [problem, setProblem] = useState<Problem | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
@@ -37,7 +39,7 @@ export default function CreatePin() {
       return;
     }
     try {
-      await savePin(LOCAL_UID, pin);
+      await savePin(uid, pin);
       router.replace(profile.onboarded ? '/home' : '/onboarding');
     } catch {
       setSaveFailed(true);

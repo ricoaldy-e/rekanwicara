@@ -3,7 +3,8 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 
 import { buzzLight } from '../a11y/haptics';
 import { fill, MESSAGES } from '../forms/messages';
-import { attemptPin, getLock, hasPin, LOCAL_UID } from './pinStore';
+import { useAuth } from '../auth/AuthProvider';
+import { attemptPin, getLock, hasPin } from './pinStore';
 import { PinScreenBody, usePinInput } from './PinScreenBody';
 import { usePinSession } from './PinSession';
 import type { LockState } from './lock';
@@ -11,7 +12,8 @@ import type { LockState } from './lock';
 const FREE: LockState = { locked: false, secondsLeft: 0, triesLeft: 0 };
 
 /** Shows `children` once the companion PIN has been entered; until then only the PIN pad (flow §7.7.2). */
-export function PinGate({ children, uid = LOCAL_UID }: { children: ReactNode; uid?: string }) {
+export function PinGate({ children }: { children: ReactNode }) {
+  const { uid } = useAuth();
   const { unlocked, unlock } = usePinSession();
   const [pinSet, setPinSet] = useState<boolean | null>(null);
   const [lock, setLock] = useState<LockState>(FREE);

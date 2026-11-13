@@ -36,6 +36,7 @@ jest.mock('expo-router', () => {
     useSegments: () => mockSegments,
   };
 });
+jest.mock('../src/auth/AuthProvider', () => ({ useAuth: () => ({ uid: 'local' }) }));
 jest.mock('../src/state/user', () => ({ useUser: () => ({ profile: mockProfile }) }));
 jest.mock('../src/a11y/haptics', () => ({ buzzLight: () => mockBuzz() }));
 

@@ -24,6 +24,10 @@ export const MESSAGES = {
   passwordMismatch: 'Kata sandi tidak sama.',
   signInFailed: 'Email atau kata sandi salah.',
   privacyConsent: 'Centang persetujuan untuk melanjutkan.',
+  emailTaken: 'Email ini sudah terdaftar. Coba masuk.',
+  emailNotConfirmed: 'Email belum dikonfirmasi. Buka email untuk konfirmasi, lalu masuk.',
+  authNetwork: 'Tidak ada koneksi. Periksa jaringan, lalu coba lagi.',
+  authServer: 'Server sedang bermasalah. Coba lagi sebentar.',
   // PIN
   pinWeak: 'PIN terlalu mudah ditebak. Pilih angka lain.',
   pinMismatch: 'PIN tidak sama. Ulangi dari awal.',
@@ -73,6 +77,11 @@ export const UI = {
   pinDots: '{n} dari {total} angka terisi',
   counter: '{n} / {max}',
   dismiss: 'Tutup pesan',
+  pwRule8: '8 karakter atau lebih',
+  pwRuleLetter: 'Ada huruf',
+  pwRuleDigit: 'Ada angka',
+  ruleMet: 'terpenuhi',
+  ruleNotMet: 'belum',
 } as const;
 
 export type MessageKey = keyof typeof MESSAGES;

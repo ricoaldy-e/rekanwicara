@@ -13,7 +13,7 @@ import type { Attempt, ListenCheck, Profile } from '../user/pure';
 export type Table = 'profiles' | 'attempts' | 'listen_checks' | 'progress';
 
 export interface Remote {
-  /** The Supabase user id (auth.uid()); signs in anonymously when there is no session. Throws when unreachable. */
+  /** The Supabase user id (auth.uid()) of the signed-in account. Throws when there is no session or it is unreachable. */
   ensureUser(): Promise<string>;
   /** Upsert rows; throws when the server refuses or is unreachable. */
   upsert(table: Table, rows: Record<string, unknown>[]): Promise<void>;

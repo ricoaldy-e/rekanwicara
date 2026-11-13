@@ -593,6 +593,19 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   Tes diubah: `onboarding.test.tsx` (langkah PIN dan tes keystore dibuang; kini tes dua langkah), `demo.test.tsx` (`completeOnboarding()` tanpa PIN; asersi `savePin` dibuang karena fungsinya pindah),
   `companion.test.tsx` (tes layar PIN diganti tes "tidak meminta PIN sendiri + Kunci kembali memanggil `lock`"; pembantu `unlock` hanya merender). Baru: `pin.test.tsx` (17). 38 suite / 472 tes.
   Belum teruji: di perangkat (iOS, TalkBack), `isValidPin` di `user/pure.ts` kini tak dipakai UI (dibiarkan).
+- FL-7 (13 Nov 2026): Masuk, Daftar, Cek email, sesi tersimpan. Baru: `src/auth/{supabase,errors,session,AuthProvider,authForm}`, `src/mock/auth.ts`, layar `auth/{sign-in,sign-up,check-email}`.
+  Klien Supabase dipindah ke `src/auth/supabase.ts` (satu klien; `data/supabase.ts` mengimpornya). `auth` di `session.ts` memilih Supabase atau tiruan lewat `USE_MOCK` di satu tempat;
+  sesi yang sampai ke UI hanya `{uid, email, displayName}` (tanpa token, tanpa sandi). Peta galat (`mapAuthError`) memakai `code` supabase-js v2 (`invalid_credentials`, `email_exists`/`user_already_exists`,
+  `email_not_confirmed`, `AuthRetryableFetchError`), bukan teks pesan. Masuk = email + sandi (kontrak #4); Daftar = username (display_name), email, sandi + daftar periksa + ulangi + persetujuan privasi (tautan ke `/about`).
+  Gerbang awal `index.tsx`: belum ada sesi → `/auth/sign-in`; tanpa PIN → `/auth/create-pin`; belum onboarding → `/onboarding`; selain itu `/home`. PIN kini per akun (`useAuth().uid`).
+  K3: `signInAnonymously()` dihapus; `ensureUser()` kini melempar "Belum masuk" tanpa sesi akun. Baris `profiles` (display_name) dibuat best-effort saat sesi muncul (`ensureProfile`).
+  Tiruan: `salah@contoh.id` → INVALID_CREDENTIALS, `dipakai@contoh.id` → EMAIL_TAKEN (daftar), `cek@contoh.id` → tanpa sesi (layar Cek email), `mati@contoh.id` → NETWORK; uid `mock-user`.
+  `src/api/v2.ts`: 401 `UNAUTHENTICATED` → `refreshSession` sekali, ulang sekali, gagal → `onSessionLost` (belum disambung ke layar: klien v2 belum dipakai layar; tes saja).
+  Keputusan di luar prompt: (1) **Tanpa akun** (tidak ada URL/kunci Supabase dan `USE_MOCK` mati) gerbang melewati Masuk, uid `'local'`; kalau tidak, app tak bisa dibuka di demo server-lokal tanpa Supabase.
+  (2) **`createRemote()` null saat `USE_MOCK=true`**: pengguna tiruan bukan pengguna Supabase, jadi sinkron online mati selama mode tiruan. (3) Sinkron kini hanya jalan bila ada sesi akun; riwayat anonim lama tidak dipindah (K3).
+  (4) Penyimpanan sesi tetap AsyncStorage (K7, usulan audit; bukan SecureStore karena sesi Supabase besar). (5) PIN lama di uid `'local'` tidak otomatis menjadi PIN akun: akun baru membuat PIN baru.
+  Tes: sync/user tidak berubah (memakai Remote palsu; tidak pernah menguji login anonim); `pin.test.tsx` menambah mock `useAuth`. Baru: `auth.test.tsx` (35). 39 suite / 507 tes.
+  Belum teruji: Supabase sungguhan (konfirmasi email aktif atau tidak), iOS, isi otomatis pengelola sandi, 200% teks, papan ketik menutupi tombol. Keluar (signOut) dikerjakan FL-9.
 
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah
