@@ -1,10 +1,10 @@
 import * as Haptics from 'expo-haptics';
 
-import { buzz, buzzDone, setHapticsEnabled } from '../src/a11y/haptics';
+import { buzz, buzzDone, buzzResult, setHapticsEnabled } from '../src/a11y/haptics';
 import { parseProfile } from '../src/user/pure';
 
 jest.mock('expo-haptics', () => ({
-  ImpactFeedbackStyle: { Medium: 'Medium' },
+  ImpactFeedbackStyle: { Medium: 'Medium', Light: 'Light' },
   NotificationFeedbackType: { Success: 'Success' },
   impactAsync: jest.fn().mockResolvedValue(undefined),
   notificationAsync: jest.fn().mockResolvedValue(undefined),
@@ -29,6 +29,15 @@ describe('haptics', () => {
     buzzDone();
     expect(Haptics.impactAsync).not.toHaveBeenCalled();
     expect(Haptics.notificationAsync).not.toHaveBeenCalled();
+  });
+
+  it('uses success for Sesuai and a light tap for the other results', () => {
+    buzzResult('hijau');
+    expect(Haptics.notificationAsync).toHaveBeenCalledWith('Success');
+    buzzResult('kuning');
+    buzzResult('merah');
+    expect(Haptics.impactAsync).toHaveBeenCalledTimes(2);
+    expect(Haptics.impactAsync).toHaveBeenCalledWith('Light');
   });
 
   it('never throws when the haptic call fails', () => {

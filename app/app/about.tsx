@@ -1,15 +1,18 @@
 import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
 
-import { Body, InfoNote, Screen, Title } from '../src/components';
+import { BigButton, Body, InfoNote, Screen, Title } from '../src/components';
 import { useContent } from '../src/state/content';
 
 export default function About() {
+  const router = useRouter();
   const { health } = useContent();
   return (
     <Screen>
       <Title>Tentang Rekan Wicara</Title>
       <Body>Alat bantu latihan pelafalan bagi penyandang Tuli yang memilih berlatih bicara, untuk LOGICODIX 2026.</Body>
       <InfoNote text="Hasil adalah perkiraan sistem untuk latihan. Bukan pengganti guru atau terapis, dan bukan penilaian klinis." />
+      <BigButton label="Pengaturan" icon="settings-outline" variant="secondary" onPress={() => router.push('/settings')} />
       <Title>Batas penggunaan</Title>
       <Body>Materi mencakup vokal a, i, u dan konsonan m, p, b. Bunyi yang mirip masih dapat mendapat hasil sama. Evaluasi awal berasal dari tiga anggota tim; belum diuji pada pengguna Tuli dan anak.</Body>
       <Body>Deteksi kata belum andal pada semua ucapan. Kalibrasi dan pendamping membantu penggunaan; hasil bukan ukuran kemampuan seseorang.</Body>

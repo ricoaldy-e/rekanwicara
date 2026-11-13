@@ -9,11 +9,11 @@ import { useUser } from '../src/state/user';
 import { DATASET_MODE } from '../src/config';
 import { useContent } from '../src/state/content';
 import { useSettings } from '../src/state/settings';
-import { colors, fontSize, radius, spacing, touchTarget } from '../src/theme';
+import { colors, fontSize, radius, spacing, stroke, touchTarget } from '../src/theme';
 
 type TestResult = { ok: true; text: string } | { ok: false; text: string } | null;
 
-/** Hidden settings (long-press the Home title). Lets the demo operator change the server URL. */
+/** Settings: user options first (vibration), then the demo operator's server URL and demo profile. */
 export default function Settings() {
   const router = useRouter();
   const { apiUrl, envApiUrl, isOverridden, setApiUrl, resetApiUrl } = useSettings();
@@ -66,6 +66,28 @@ export default function Settings() {
 
   return (
     <Screen>
+      <Title>Getar</Title>
+      <View style={styles.switchRow}>
+        <Text style={styles.switchLabel}>Getar saat merekam dan saat hasil muncul</Text>
+        <Text style={styles.switchState} testID="vibration-state">
+          {profile.settings.vibration ? 'Aktif' : 'Mati'}
+        </Text>
+        <Switch
+          accessibilityLabel="Getar"
+          testID="vibration-toggle"
+          value={profile.settings.vibration}
+          onValueChange={(vibration) => updateSettings({ vibration })}
+          trackColor={{ false: colors.surfaceRaised, true: colors.hero }}
+          thumbColor={profile.settings.vibration ? colors.onHero : colors.textMuted}
+          ios_backgroundColor={colors.surfaceRaised}
+        />
+      </View>
+      <Title>Ukuran teks</Title>
+      <Body muted>Ukuran teks mengikuti pengaturan HP (Pengaturan → Tampilan → Ukuran font).</Body>
+
+      <Text accessibilityRole="header" style={styles.section}>
+        Untuk operator demo
+      </Text>
       <Title>Alamat server</Title>
       <Body muted>Contoh: http://192.168.1.10:8000</Body>
       <TextInput
@@ -102,22 +124,6 @@ export default function Settings() {
           <BigButton label="Uji Allosaurus" icon="flask" variant="secondary" onPress={() => router.push('/allosaurus')} />
         </>
       ) : null}
-      <Title>Getar</Title>
-      <View style={styles.switchRow}>
-        <Text style={styles.switchLabel}>Getar saat merekam</Text>
-        <Text style={styles.switchState} testID="vibration-state">
-          {profile.settings.vibration ? 'Aktif' : 'Mati'}
-        </Text>
-        <Switch
-          accessibilityLabel="Getar"
-          testID="vibration-toggle"
-          value={profile.settings.vibration}
-          onValueChange={(vibration) => updateSettings({ vibration })}
-          trackColor={{ false: colors.surfaceRaised, true: colors.hero }}
-          thumbColor={profile.settings.vibration ? colors.onHero : colors.textMuted}
-          ios_backgroundColor={colors.surfaceRaised}
-        />
-      </View>
       <Title>Mode demo</Title>
       <Body>Contoh progres: a dan ma sudah lulus. Latihan tetap dianalisis server. Progres demo tidak dikirim online dan hilang saat keluar dari mode demo atau app dimulai ulang.</Body>
       {ready && !sync.running ? (
@@ -131,7 +137,7 @@ export default function Settings() {
 const styles = StyleSheet.create({
   input: {
     minHeight: touchTarget,
-    borderWidth: 3,
+    borderWidth: stroke.thick,
     borderColor: colors.border,
     borderRadius: radius.tile,
     paddingHorizontal: spacing.md,
@@ -139,6 +145,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     backgroundColor: colors.background,
   },
+  section: { fontSize: fontSize.small, color: colors.textMuted, marginTop: spacing.lg, paddingTop: spacing.md, borderTopWidth: stroke.thin, borderTopColor: colors.border },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: touchTarget },
   switchLabel: { flex: 1, fontSize: fontSize.body, color: colors.text },
   switchState: { fontSize: fontSize.label, fontWeight: '700', color: colors.text },

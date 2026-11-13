@@ -6,6 +6,7 @@ import type { AnalyzeResponse } from '../../src/api/types';
 import { BigButton, Body, Card, InfoNote, Screen, StepHeader } from '../../src/components';
 import { UploadStatus } from '../../src/components/UploadStatus';
 import { ModelVideo } from '../../src/practice/ModelVideo';
+import { buzzResult } from '../../src/a11y/haptics';
 import { deleteLocalFile, videoUpload } from '../../src/recording/localFile';
 import { DEFAULT_DURATION_MS } from '../../src/recording/recorder';
 import { RecordPanel } from '../../src/recording/RecordPanel';
@@ -75,8 +76,10 @@ export default function Practice() {
       if (attempt) {
         // The machine scored it; how much the user sees follows the progression rules (SPEC §8.4).
         const inSession = profile.attempts.filter((a) => a.itemId === item.item_id && a.sessionId === SESSION_ID).length + 1;
-        setDetail(feedbackDetail(item.level, progress.get(item.item_id)?.pattern ?? 'berblok', inSession));
+        const shown = feedbackDetail(item.level, progress.get(item.item_id)?.pattern ?? 'berblok', inSession);
+        setDetail(shown);
         addAttempt(attempt);
+        if (shown !== 'hidden' && res.overall) buzzResult(res.overall); // only when a badge is on screen
       } else {
         setDetail('full');
       }
