@@ -559,6 +559,12 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
     `ModelVideo.test.tsx` (`PracticeItem`, video dibisukan, instruksi, tanpa v1 = teks saja, label AI). Baru: `practice.test.tsx` (6). 34 suite / 328 tes.
   - Risiko: `l1_o` tidak aktif di server tetapi diterima `/v1/analyze` (`items_by_id`); aturan e/o belum disetel, jadi hasil O belum dapat dipercaya.
     Belum teruji: alur di HP, dialog keluar + tombol kembali Android, v2 sungguhan, signed URL.
+- FL-5 (13 Nov 2026): Pilih kata dan Jalur kata. Baru: `src/components/SourceChip.tsx` (ikon + "Bawaan"/"Dari Pendamping", `radius.tile`),
+  `app/(tabs)/home/words/index.tsx` (daftar semua kata, `word-<id>`, kosong = `InfoNote`), `words/[wordId].tsx` (bagian "Level 2 · Suku kata" bila ada, "Level 3 · Kata", penanda "Berikutnya"
+  pada langkah pertama yang status terbaiknya belum sesuai, urut L2 lalu L3; tanpa kunci; ketuk → `practice/[itemId]` dengan `wordId` + `position`; 404 → "Materi tidak ditemukan." + Kembali).
+  Placeholder `words.tsx` FL-3 dihapus. Kata `custom` dengan `ANALYZE_API=v1`: kartu tetap tampil, catatan "Penilaian belum tersedia di server demo." (K10).
+  Keputusan: ringkasan di daftar hanya "Level 3: sesuai/belum" (ringkasan Level 2 butuh `getWord` per kata = N permintaan di v2; ditunda). Status di Jalur kata berlabel "Terbaik" (status terbaik per `itemId` unik).
+  Tes: `words.test.tsx` (7). 35 suite / 335 tes. Belum teruji: di HP, katalog v2 sungguhan, kata Pendamping sungguhan.
 
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah

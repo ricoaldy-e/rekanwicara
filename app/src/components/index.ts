@@ -6,6 +6,7 @@ export { HeroCard } from './HeroCard';
 export { InfoNote } from './InfoNote';
 export { FaceGuide, LipIllustration } from './LipIllustration';
 export { Screen } from './Screen';
+export { SourceChip } from './SourceChip';
 export { StageBadge, stageLabel } from './StageBadge';
 export { StatusBadge } from './StatusBadge';
 export { StepHeader } from './StepHeader';
