@@ -157,7 +157,7 @@ describe('stored profile with attempts', () => {
     const p = addListenCheck(addAttempt(newProfile(), attempt()), {
       id: makeUuid(), itemId: 'l3_mama', result: 'belum_jelas', at: '2026-11-11T09:00:00.000Z', synced: true,
     }); // fmt: skip
-    p.settings = { sessionMinutes: 15, listenCheckRequired: true, unlockAll: true };
+    p.settings = { sessionMinutes: 15, listenCheckRequired: true, unlockAll: true, vibration: false };
     expect(parseProfile(JSON.stringify(p))).toEqual(p);
   });
 
@@ -174,7 +174,7 @@ describe('stored profile with attempts', () => {
 
   it('falls back to default settings for unknown values', () => {
     const raw = JSON.stringify({ ...newProfile(), settings: { sessionMinutes: 7, unlockAll: 'yes' } });
-    expect(parseProfile(raw).settings).toEqual({ sessionMinutes: 10, listenCheckRequired: false, unlockAll: false });
+    expect(parseProfile(raw).settings).toEqual({ sessionMinutes: 10, listenCheckRequired: false, unlockAll: false, vibration: true });
   });
 
   it('makeUuid has the uuid v4 shape', () => {

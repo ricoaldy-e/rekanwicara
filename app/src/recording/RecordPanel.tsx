@@ -3,6 +3,7 @@ import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { buzz, buzzDone } from '../a11y/haptics';
 import { BigButton } from '../components/BigButton';
 import { ProgressBar } from '../components/ProgressBar';
 import { colors, fontSize, overlay, radius, spacing, stroke } from '../theme';
@@ -29,14 +30,6 @@ export interface RecordPanelProps {
 }
 
 const PROGRESS_INTERVAL_MS = 100;
-
-// Haptics are a visual-only UI's "beep" (CLAUDE.md: no sound cues). Never let them throw.
-const buzz = (style: Haptics.ImpactFeedbackStyle) => {
-  Haptics.impactAsync(style).catch(() => undefined);
-};
-const buzzDone = () => {
-  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);
-};
 
 /** Front camera, video + audio, oval guide, 3-2-1 countdown with vibration, clear REC indicator. */
 export function RecordPanel(props: RecordPanelProps) {
@@ -99,7 +92,7 @@ function RecorderCamera({
       dispatch({ type: 'failed', message: 'Kamera belum siap.' });
       return;
     }
-    buzz(Haptics.ImpactFeedbackStyle.Heavy);
+    buzz(Haptics.ImpactFeedbackStyle.Medium);
     const started = Date.now();
     const progress = setInterval(() => {
       dispatch({ type: 'progress', elapsedMs: Math.min(Date.now() - started, durationMs) });

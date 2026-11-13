@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AppState } from 'react-native';
 
+import { setHapticsEnabled } from '../a11y/haptics';
 import { createRemote } from '../data/supabase';
 import { syncPending } from '../data/sync';
 import {
@@ -177,6 +178,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       ),
     [items, profile.attempts, profile.listenChecks, profile.settings.listenCheckRequired, profile.settings.unlockAll],
   );
+
+  useEffect(() => setHapticsEnabled(profile.settings.vibration), [profile.settings.vibration]);
 
   const value = useMemo<UserValue>(
     () => ({

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { createApiClient, isValidBaseUrl } from '../src/api/client';
@@ -18,7 +18,7 @@ export default function Settings() {
   const router = useRouter();
   const { apiUrl, envApiUrl, isOverridden, setApiUrl, resetApiUrl } = useSettings();
   const { health } = useContent();
-  const { demo, setDemo, sync, ready } = useUser();
+  const { demo, setDemo, sync, ready, profile, updateSettings } = useUser();
   const [draft, setDraft] = useState(apiUrl);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<TestResult>(null);
@@ -102,6 +102,22 @@ export default function Settings() {
           <BigButton label="Uji Allosaurus" icon="flask" variant="secondary" onPress={() => router.push('/allosaurus')} />
         </>
       ) : null}
+      <Title>Getar</Title>
+      <View style={styles.switchRow}>
+        <Text style={styles.switchLabel}>Getar saat merekam</Text>
+        <Text style={styles.switchState} testID="vibration-state">
+          {profile.settings.vibration ? 'Aktif' : 'Mati'}
+        </Text>
+        <Switch
+          accessibilityLabel="Getar"
+          testID="vibration-toggle"
+          value={profile.settings.vibration}
+          onValueChange={(vibration) => updateSettings({ vibration })}
+          trackColor={{ false: colors.surfaceRaised, true: colors.hero }}
+          thumbColor={profile.settings.vibration ? colors.onHero : colors.textMuted}
+          ios_backgroundColor={colors.surfaceRaised}
+        />
+      </View>
       <Title>Mode demo</Title>
       <Body>Contoh progres: a dan ma sudah lulus. Latihan tetap dianalisis server. Progres demo tidak dikirim online dan hilang saat keluar dari mode demo atau app dimulai ulang.</Body>
       {ready && !sync.running ? (
@@ -123,6 +139,9 @@ const styles = StyleSheet.create({
     color: colors.text,
     backgroundColor: colors.background,
   },
+  switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: touchTarget },
+  switchLabel: { flex: 1, fontSize: fontSize.body, color: colors.text },
+  switchState: { fontSize: fontSize.label, fontWeight: '700', color: colors.text },
   inputInvalid: { borderColor: colors.danger },
   invalid: { fontSize: fontSize.body, color: colors.danger, fontWeight: '700' },
 });

@@ -456,6 +456,10 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   di `statusStyles` dihapus karena `statusStyles` kini hanya `{label, foreground}` (bentuk dibuktikan oleh uji bentuk).
   Garis bagian dalam ikon (centang, ≈, panah) 2 dp, bukan 3,5 dp, agar muat di 22 dp. Belum diuji di perangkat.
 
+- UI-10: `settings.vibration` (default true; profil lama tanpa field terbaca true). `__tests__/sync.test.ts` diubah:
+  nilai pengaturan di uji round-trip dan uji default kini memuat `vibration`. Getar rekam dimulai kini impact Medium (sebelumnya Heavy), sesuai §8.
+  Reduce Motion: satu-satunya animasi app adalah skala tombol (sudah mengikuti `useReduceMotion`); cincin kemajuan dan hitung mundur tidak beranimasi.
+
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah
   encode AAC, sinyal yang di-clip keras hanya punya 0,04% sampel ≥ 0,99 (31% ≥ 0,9). Fixture tes memakai

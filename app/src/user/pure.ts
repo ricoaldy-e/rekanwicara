@@ -15,9 +15,11 @@ export interface Settings {
   /** SPEC §8.4: Level 3 also needs one "jelas" Uji Dengar to pass. */
   listenCheckRequired: boolean;
   unlockAll: boolean;
+  /** Haptic feedback (design.md §8). Profiles saved before this field existed read as true. */
+  vibration: boolean;
 }
 
-export const DEFAULT_SETTINGS: Settings = { sessionMinutes: 10, listenCheckRequired: false, unlockAll: false };
+export const DEFAULT_SETTINGS: Settings = { sessionMinutes: 10, listenCheckRequired: false, unlockAll: false, vibration: true };
 
 /** One scored attempt (SPEC §9 `attempts`). Retry results are never stored. */
 export interface Attempt {
@@ -140,6 +142,7 @@ function parseSettings(raw: unknown): Settings {
       : DEFAULT_SETTINGS.sessionMinutes,
     listenCheckRequired: s.listenCheckRequired === true,
     unlockAll: s.unlockAll === true,
+    vibration: s.vibration !== false,
   };
 }
 
