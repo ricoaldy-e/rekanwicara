@@ -116,7 +116,7 @@ describe('Mode Pendamping', () => {
     await fireEvent.press(screen.getByTestId('share-report'));
     expect(share).toHaveBeenCalledTimes(1);
     const message = String(share.mock.calls[0][0].message);
-    expect(message).toContain('Laporan latihan Cermin Wicara');
+    expect(message).toContain('Laporan latihan Rekan Wicara');
     expect(message).toContain('bukan penilaian klinis');
     share.mockRestore();
   });

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Cermin Wicara",
+    "name": "Rekan Wicara",
     "slug": "cermin-wicara",
     "version": "0.1.0",
     "orientation": "portrait",
@@ -35,8 +35,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Cermin Wicara memakai kamera depan untuk melihat bentuk bibir saat berlatih.",
-          "microphonePermission": "Cermin Wicara memakai mikrofon untuk merekam suara saat berlatih.",
+          "cameraPermission": "Rekan Wicara memakai kamera depan untuk melihat bentuk bibir saat berlatih.",
+          "microphonePermission": "Rekan Wicara memakai mikrofon untuk merekam suara saat berlatih.",
           "recordAudioAndroid": true
         }
       ],

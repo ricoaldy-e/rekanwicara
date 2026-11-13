@@ -7,7 +7,7 @@ export default function About() {
   const { health } = useContent();
   return (
     <Screen>
-      <Title>Tentang Cermin Wicara</Title>
+      <Title>Tentang Rekan Wicara</Title>
       <Body>Alat bantu latihan pelafalan bagi penyandang Tuli yang memilih berlatih bicara, untuk LOGICODIX 2026.</Body>
       <InfoNote text="Hasil adalah perkiraan sistem untuk latihan. Bukan pengganti guru atau terapis, dan bukan penilaian klinis." />
       <Title>Batas penggunaan</Title>

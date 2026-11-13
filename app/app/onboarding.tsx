@@ -43,11 +43,11 @@ export default function Onboarding() {
 
   return (
     <Screen>
-      <StepHeader step={step} total={3} title={['Kenali Cermin Wicara', 'Persetujuan', 'PIN pendamping'][step - 1]} />
+      <StepHeader step={step} total={3} title={['Kenali Rekan Wicara', 'Persetujuan', 'PIN pendamping'][step - 1]} />
 
       {step === 1 ? (
         <>
-          <Body>Cermin Wicara membantu kamu berlatih mengucapkan bunyi dengan melihat bentuk bibir dan merasakan suara.</Body>
+          <Body>Rekan Wicara membantu kamu berlatih mengucapkan bunyi dengan melihat bentuk bibir dan merasakan suara.</Body>
           {CYCLE.map((c) => (
             <Card key={c.text}>
               <View style={styles.row}>
