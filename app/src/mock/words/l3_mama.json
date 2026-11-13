@@ -1,0 +1,10 @@
+{
+  "id": "l3_mama",
+  "text": "MAMA",
+  "source": "default",
+  "level_2": [
+    { "id": "l2_ma", "text": "MA", "position": 1, "instruction": "Rapatkan bibir, lalu buka dan ucapkan MA.", "videos": [] },
+    { "id": "l2_ma", "text": "MA", "position": 2, "instruction": "Rapatkan bibir lagi, lalu ucapkan MA.", "videos": [] }
+  ],
+  "level_3": { "instruction": "Ucapkan MAMA perlahan.", "videos": [] }
+}

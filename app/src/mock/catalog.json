@@ -1,0 +1,16 @@
+{
+  "level_1": [
+    { "id": "l1_a", "text": "A", "instruction": "Buka mulut lebar dan ucapkan A.", "videos": [] },
+    { "id": "l1_i", "text": "I", "instruction": "Lebarkan bibir dan ucapkan I.", "videos": [] },
+    { "id": "l1_u", "text": "U", "instruction": "Bulatkan bibir dan ucapkan U.", "videos": [] },
+    { "id": "l1_o", "text": "O", "instruction": "Bulatkan bibir agak terbuka dan ucapkan O.", "videos": [] },
+    { "id": "l0_hold_a", "text": "A panjang", "instruction": "Tahan bunyi A beberapa detik.", "videos": [] },
+    { "id": "l0_soft_loud", "text": "Pelan ke keras", "instruction": "Mulai pelan, lalu makin keras.", "videos": [] }
+  ],
+  "words": [
+    { "id": "l3_mama", "text": "MAMA", "source": "default", "has_level_2": true },
+    { "id": "l3_papa", "text": "PAPA", "source": "default", "has_level_2": true },
+    { "id": "custom_word:11111111-1111-1111-1111-111111111111", "text": "TOLONG", "source": "custom", "has_level_2": true },
+    { "id": "custom_word:22222222-2222-2222-2222-222222222222", "text": "MINUM", "source": "custom", "has_level_2": false }
+  ]
+}

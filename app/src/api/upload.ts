@@ -48,6 +48,8 @@ export interface MultipartRequest {
   url: string;
   fields: Record<string, string | number | undefined>;
   file: UploadFile;
+  /** Extra request headers (e.g. Authorization for /v2). */
+  headers?: Record<string, string>;
 }
 
 const defaultXhr: XhrFactory = () => new XMLHttpRequest() as unknown as XhrLike;
@@ -85,6 +87,7 @@ function attempt<T>(req: MultipartRequest, opts: UploadCallOptions, xhrFactory: 
     xhr.open('POST', req.url);
     xhr.timeout = opts.timeoutMs ?? UPLOAD_TIMEOUT_MS;
     xhr.setRequestHeader('Accept', 'application/json');
+    for (const [name, value] of Object.entries(req.headers ?? {})) xhr.setRequestHeader(name, value);
     xhr.upload.onprogress = (ev) => {
       opts.onProgress?.({
         loaded: ev.loaded,

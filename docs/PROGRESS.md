@@ -497,6 +497,23 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   nilai pengaturan di uji round-trip dan uji default kini memuat `vibration`. Getar rekam dimulai kini impact Medium (sebelumnya Heavy), sesuai §8.
   Reduce Motion: satu-satunya animasi app adalah skala tombol (sudah mengikuti `useReduceMotion`); cincin kemajuan dan hitung mundur tidak beranimasi.
 
+## Alur v2
+- FL-D (13 Nov 2026, cabang `flow-v2`): lapisan data v2 tanpa mengubah layar. Berkas baru: `src/api/v2.ts`, `src/data/{types,mappers,catalog,analyze,useCatalog}.ts`,
+  `src/mock/` (`catalog.json`, `words/*.json`, `index.ts`). Diubah: `src/config.ts` (`USE_MOCK`, `ANALYZE_API`), `.env.example`,
+  `src/api/types.ts` (bagian v2 di bawah; v1 tidak berubah), `src/api/upload.ts` (field `headers` opsional untuk Bearer; v1 tidak mengirimnya).
+  Tes: `__tests__/mappers.test.ts`, `__tests__/analyzeSource.test.ts`; 30 suite / 316 tes lulus, typecheck lulus.
+- Penyimpangan dari kontrak FE §4–§5 (disetujui Rico):
+  - Id suku kata bawaan di tiruan = id v1 (`l2_ma`, `l2_pa`) agar `ANALYZE_API=v1` bisa menilainya.
+  - Berkas tiruan kata Pendamping bernama `custom_1111.json`/`custom_2222.json` (Windows melarang `:`); id di dalamnya tetap id kontrak.
+    Id suku kata TO/LONG (`custom_syllable:…`) dikarang; kontrak tidak menyebutnya.
+  - `visuals` memakai tipe `Visuals` v1 (anchor boleh `null`, `loudness` bertipe) alih-alih bentuk dalam kontrak (`loudness: unknown`).
+  - `fromV1`: petunjuk tunggal v1 masuk `lip_feedback` bila Bibir belum sesuai, selain itu `voice_feedback` bila Suara belum sesuai;
+    keduanya `null` bila keduanya Sesuai (kontrak §5 aturan 5). `feedback` = `{ code: hint_id, message: teks hint }`; `engine` = `engine_version`.
+  - Galat v2 tanpa kode di body diberi kode dari status (§9: 401 `UNAUTHENTICATED`, 404 `ITEM_NOT_FOUND`, dst.).
+  - Kata `source: 'custom'` dengan `ANALYZE_API=v1` melempar `NotSupportedError` (`code: 'NOT_SUPPORTED_V1'`); pesan diputuskan di FL-4 (K10).
+- Belum teruji: klien v2 belum pernah memanggil server sungguhan (server lokal hanya punya `/v1`). Hasil `ANALYZE_API=mock` ditandai `sample: true`;
+  layar wajib memberi label "Hasil contoh" (K10).
+
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah
   encode AAC, sinyal yang di-clip keras hanya punya 0,04% sampel ≥ 0,99 (31% ≥ 0,9). Fixture tes memakai

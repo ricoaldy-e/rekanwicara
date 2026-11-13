@@ -1,0 +1,10 @@
+{
+  "id": "l3_papa",
+  "text": "PAPA",
+  "source": "default",
+  "level_2": [
+    { "id": "l2_pa", "text": "PA", "position": 1, "instruction": "Rapatkan bibir, lalu lepaskan udara dan ucapkan PA.", "videos": [] },
+    { "id": "l2_pa", "text": "PA", "position": 2, "instruction": "Rapatkan bibir lagi, lalu ucapkan PA.", "videos": [] }
+  ],
+  "level_3": { "instruction": "Ucapkan PAPA perlahan.", "videos": [] }
+}

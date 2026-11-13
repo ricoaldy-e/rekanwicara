@@ -1,0 +1,10 @@
+{
+  "id": "custom_word:11111111-1111-1111-1111-111111111111",
+  "text": "TOLONG",
+  "source": "custom",
+  "level_2": [
+    { "id": "custom_syllable:11111111-1111-1111-1111-1111111111a1", "text": "TO", "position": 1, "instruction": "Sentuhkan ujung lidah ke gigi atas, lalu ucapkan TO.", "videos": [] },
+    { "id": "custom_syllable:11111111-1111-1111-1111-1111111111a2", "text": "LONG", "position": 2, "instruction": "Bulatkan bibir dan ucapkan LONG.", "videos": [] }
+  ],
+  "level_3": { "instruction": "Ucapkan TOLONG perlahan.", "videos": [] }
+}
