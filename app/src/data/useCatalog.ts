@@ -11,7 +11,7 @@ interface Loaded<T> {
   reload: () => void;
 }
 
-function useLoad<T>(load: () => Promise<T>): Loaded<T> {
+export function useLoad<T>(load: () => Promise<T>): Loaded<T> {
   const [state, setState] = useState<{ data: T | null; loading: boolean; error: unknown }>({
     data: null,
     loading: true,
@@ -47,5 +47,26 @@ export function useCatalog(opts: SourceOptions): Loaded<{ level1: PracticeItem[]
 export function useWordPath(id: string, opts: SourceOptions): Loaded<WordPath> {
   const { baseUrl, getToken, mock } = opts;
   const load = useCallback(() => getWord(id, { baseUrl, getToken, mock }).then(wordToPath), [id, baseUrl, getToken, mock]);
+  return useLoad(load);
+}
+
+/**
+ * The material of one practice step: a Level 1 item (no wordId), a syllable of a word (wordId + position),
+ * or the whole word (wordId only). Resolves to null when it does not exist.
+ */
+export function usePracticeItem(
+  itemId: string,
+  wordId: string | undefined,
+  position: number | undefined,
+  opts: SourceOptions,
+): Loaded<PracticeItem | null> {
+  const { baseUrl, getToken, mock } = opts;
+  const load = useCallback(async (): Promise<PracticeItem | null> => {
+    const src = { baseUrl, getToken, mock };
+    if (!wordId) return catalogToL1(await getCatalog(src)).find((i) => i.itemId === itemId) ?? null;
+    const path = wordToPath(await getWord(wordId, src));
+    if (position === undefined) return path.whole.itemId === itemId ? path.whole : null;
+    return path.syllables.find((s) => s.itemId === itemId && s.position === position) ?? null;
+  }, [itemId, wordId, position, baseUrl, getToken, mock]);
   return useLoad(load);
 }

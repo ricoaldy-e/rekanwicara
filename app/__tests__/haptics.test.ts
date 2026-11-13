@@ -32,10 +32,10 @@ describe('haptics', () => {
   });
 
   it('uses success for Sesuai and a light tap for the other results', () => {
-    buzzResult('hijau');
+    buzzResult('sesuai');
     expect(Haptics.notificationAsync).toHaveBeenCalledWith('Success');
-    buzzResult('kuning');
-    buzzResult('merah');
+    buzzResult('mendekati');
+    buzzResult('belum_sesuai');
     expect(Haptics.impactAsync).toHaveBeenCalledTimes(2);
     expect(Haptics.impactAsync).toHaveBeenCalledWith('Light');
   });

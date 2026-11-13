@@ -1,9 +1,7 @@
 import { PixelRatio, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
-import type { AnalyzeResponse } from '../api/types';
 import { Body, InfoNote, LipIllustration, StatusBadge } from '../components';
-import { getHint } from '../content/hints';
-import type { Detail } from '../state/progression';
+import type { AnalyzeResult, PracticeItem } from '../data/types';
 import { colors, displayFont, fontSize, radius, spacing } from '../theme';
 import { LipMirror, LoudnessChart, VowelMap } from './charts';
 import { targetShape } from './lipShapes';
@@ -11,71 +9,59 @@ import { targetShape } from './lipShapes';
 export const DISCLAIMER = 'Hasil ini perkiraan sistem untuk latihan, bukan penilaian klinis.';
 
 /**
- * "Bandingkan" step (SPEC §8.3): two indicators, one hint, the charts that apply, and the disclaimer.
- * `detail` is the reduced feedback of SPEC §8.4 (the machine scored the attempt either way):
- * 'overall' shows only the overall status, 'hidden' only says the attempt was recorded.
+ * "Bandingkan" step (flow §6, kontrak §5): Bibir and Suara badges, at most two feedback sentences
+ * (Bibir first), charts only at Level 1, and the disclaimer. A retry shows its reason and no badge.
  */
-export function ResultView({ result, detail = 'full' }: { result: AnalyzeResponse; detail?: Detail }) {
-  const hint = getHint(result.hint_id);
+export function ResultView({ result, item }: { result: AnalyzeResult; item: PracticeItem }) {
   const { width } = useWindowDimensions();
   const stacked = width < 360 || PixelRatio.getFontScale() > 1.3;
-
-  if (result.status === 'ok' && detail === 'hidden') {
-    return (
-      <View style={styles.wrap} testID="result-hidden">
-        <InfoNote text="Percobaan tercatat. Ucapkan sekali lagi, hasilnya ditampilkan setiap dua percobaan." />
-        <Disclaimer />
-      </View>
-    );
-  }
-
-  if (result.status === 'ok' && detail === 'overall' && result.overall) {
-    return (
-      <View style={styles.wrap} testID="result-overall">
-        <StatusBadge status={result.overall} label="Hasil" size="lg" testID="result-overall-badge" />
-        <Disclaimer />
-      </View>
-    );
-  }
+  const sample = result.sample ? (
+    <InfoNote tone="warning" text="Hasil contoh, bukan analisis rekaman." testID="result-sample" />
+  ) : null;
 
   if (result.status === 'retry') {
     return (
       <View style={styles.wrap} testID="result-retry">
-        <InfoNote tone="warning" text={hint ?? 'Rekaman belum bisa dinilai. Coba rekam lagi.'} testID="result-hint" />
+        {sample}
+        <InfoNote tone="warning" text={result.feedback.message || 'Rekaman belum bisa dinilai. Coba rekam lagi.'} testID="result-retry-reason" />
         <Body muted>Rekaman ini tidak dihitung sebagai percobaan.</Body>
         <Disclaimer />
       </View>
     );
   }
 
-  const { indicators, visuals } = result;
-  const shape = targetShape((result.units ?? []).map((u) => u.target));
-  const anchors = visuals.vowel_anchors;
-  const showMap = visuals.vowel_point && anchors?.a && anchors.i && anchors.u;
+  const levelOne = result.level === 1;
+  // Level 1 sounds are single vowels ("A", "I", "U"); words have no single lip shape.
+  const shape = levelOne ? targetShape([item.text.toLowerCase()]) : null;
+  const visuals = levelOne ? result.visuals : null;
+  const anchors = visuals?.vowel_anchors;
+  const showMap = visuals?.vowel_point && anchors?.a && anchors.i && anchors.u;
+  const feedback = [result.lip_feedback, result.voice_feedback].filter((s): s is string => !!s).slice(0, 2);
 
   return (
     <View style={styles.wrap} testID="result-ok">
-      {shape ? (
-        <View style={styles.target} testID="result-target">
-          <LipIllustration shape={shape} size={96} />
-          <View style={styles.targetText}>
-            <Text style={styles.targetLabel}>Bentuk bibir</Text>
-            <Text style={[styles.targetWord, displayFont()]}>{(result.units ?? []).map((u) => u.target).join('')}</Text>
-          </View>
+      {sample}
+      <View style={styles.target} testID="result-target">
+        {shape ? <LipIllustration shape={shape} size={96} /> : null}
+        <View style={styles.targetText}>
+          <Text style={styles.targetLabel}>{shape ? 'Bentuk bibir' : 'Target'}</Text>
+          <Text style={[styles.targetWord, displayFont()]}>{item.text}</Text>
         </View>
-      ) : null}
-
-      <View style={stacked ? styles.badgesStacked : styles.badgesRow}>
-        {indicators?.bibir ? <StatusBadge status={indicators.bibir} label="Bibir" size="lg" testID="result-bibir" /> : null}
-        {indicators ? <StatusBadge status={indicators.suara} label="Suara" size="lg" testID="result-suara" /> : null}
       </View>
 
-      {hint ? (
-        <View style={styles.hintCard}>
+      <View style={stacked ? styles.badgesStacked : styles.badgesRow}>
+        {result.lip_result ? <StatusBadge status={result.lip_result} label="Bibir" size="lg" testID="result-bibir" /> : null}
+        {result.voice_result ? <StatusBadge status={result.voice_result} label="Suara" size="lg" testID="result-suara" /> : null}
+      </View>
+
+      {feedback.length > 0 ? (
+        <View style={styles.hintCard} testID="result-hint">
           <Text style={styles.hintLabel}>Petunjuk</Text>
-          <Text style={styles.hint} testID="result-hint">
-            {hint}
-          </Text>
+          {feedback.map((line) => (
+            <Text key={line} style={styles.hint}>
+              {line}
+            </Text>
+          ))}
         </View>
       ) : null}
 
@@ -83,7 +69,7 @@ export function ResultView({ result, detail = 'full' }: { result: AnalyzeRespons
         <InfoNote text="Hasil lebih tepat setelah kalibrasi. Kalibrasi bisa dilakukan dari beranda." testID="result-uncalibrated" />
       ) : null}
 
-      {result.level === 0 && visuals.loudness ? (
+      {visuals?.loudness ? (
         <Section title="Kekerasan suara">
           <LoudnessChart loudness={visuals.loudness} testID="loudness-chart" />
         </Section>
@@ -95,7 +81,7 @@ export function ResultView({ result, detail = 'full' }: { result: AnalyzeRespons
         </Section>
       ) : null}
 
-      {visuals.lip_contour && shape ? (
+      {visuals?.lip_contour && shape ? (
         <Section title="Cermin bibir">
           <LipMirror user={visuals.lip_contour} target={shape} testID="lip-mirror" />
           <Body muted>Garis putus-putus: bentuk target. Garis tebal: bibirmu.</Body>

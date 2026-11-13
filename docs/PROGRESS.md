@@ -541,6 +541,24 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   **Penting untuk demo:** server lokal belum punya `/v2/catalog`, jadi `app/.env` harus berisi `EXPO_PUBLIC_USE_MOCK=true`; tanpa itu Beranda menampilkan `home-error`.
   Risiko: `l1_o` di `server/app/content/items.json` `active: false`, sehingga `practice/[itemId]` (masih membaca `/v1/items`) menampilkan "Materi tidak ditemukan"
   untuk O sampai FL-4. Progres lama dari Level 0–4 ikut terhitung bila id-nya sama dengan katalog. Belum teruji di perangkat (skala teks 200%, TalkBack).
+- FL-4 (13 Nov 2026): sesi latihan memakai `PracticeItem` dan hasil per level.
+  - `practice/[itemId]` menerima `itemId` + opsional `wordId`, `position`; materi dicari lewat `usePracticeItem` (katalog L1, atau `getWord` → langkah/kata utuh).
+    Tidak ditemukan → "Materi tidak ditemukan." + "Kembali". Kirim lewat `src/data/analyze.ts` (bawaan `/v1/analyze` + `fromV1`). 503/504 → "Penilaian belum bisa dilakukan. Coba lagi."
+  - Kata `source: 'custom'` dengan `ANALYZE_API=v1`: tombol rekam disembunyikan, catatan "Penilaian kata ini belum tersedia di server demo." (usulan K10; menunggu keputusan Rico).
+  - Progres: `attemptFromResult` (baru, `src/user/pure.ts`) menyimpan hanya `evaluated`; `retry` dan **hasil tiruan (`sample`) tidak disimpan** (hasil contoh bukan analisis rekaman).
+    `score` disimpan sebagai cermin status (1 / 0,5 / 0) karena v2 tidak punya skor; bukan skor terukur. `feedbackDetail` (mode `hidden`/`overall`) tidak dipanggil lagi.
+  - `ResultView(result: AnalyzeResult, item: PracticeItem)`: lencana Bibir/Suara hanya bila tidak `null`; kartu umpan balik `result-hint` (maks 2 kalimat, Bibir dulu, tidak dirender bila tidak ada kalimat);
+    grafik hanya `level === 1`; `result-sample` "Hasil contoh, bukan analisis rekaman."; retry: alasan (`result-retry-reason`) + "Rekaman ini tidak dihitung sebagai percobaan." dan tombol "Rekam ulang".
+    Kartu target selalu tampil (L1 dengan gambar bibir bila bunyinya a/i/u).
+  - `statusStyles`, `StatusIcon`, `StatusBadge`, `buzzResult` kini berkunci `sesuai`/`mendekati`/`belum_sesuai` (warna dan bentuk tetap); `CombinedObservations` dan `level-1.tsx` disesuaikan.
+  - Keluar latihan (NAV-6): `headerLeft` "Keluar latihan" (≥ 48 dp); `usePreventRemove` (`@react-navigation/native` 7.5.1, tanda tangan dicek di `.d.ts` terpasang) + `Alert.alert` saat `record`/`send`.
+  - `ModelVideo(item: PracticeItem)`: instruksi selalu tampil; video tim `/v1/model-video/{itemId}` hanya bila `ANALYZE_API=v1`; video dibisukan; label "Instruksi dibuat dengan bantuan AI" bila `instructionSource === 'ai'`.
+    `item.video` (signed URL) belum disambung (FL-8). Gambar bibir per unit dibuang dari fallback (PracticeItem tidak punya `units`); hanya vokal L1 yang bergambar.
+  - Tes diubah: `ResultView.test.tsx` ditulis ulang (HAS-1..4, kontrak §5: L1 tiga status + grafik, L2 dua status tanpa grafik, `mendekati` L2 tidak tampil, umpan balik ≤ 2 urut Bibir-Suara,
+    tanpa kartu bila sesuai, retry, label hasil contoh; tes mode `overall`/`hidden` dihapus karena fiturnya dihapus, kontrak §8); `StatusBadge.test.tsx` dan `haptics.test.ts` (kunci status v2);
+    `ModelVideo.test.tsx` (`PracticeItem`, video dibisukan, instruksi, tanpa v1 = teks saja, label AI). Baru: `practice.test.tsx` (6). 34 suite / 328 tes.
+  - Risiko: `l1_o` tidak aktif di server tetapi diterima `/v1/analyze` (`items_by_id`); aturan e/o belum disetel, jadi hasil O belum dapat dipercaya.
+    Belum teruji: alur di HP, dialog keluar + tombol kembali Android, v2 sungguhan, signed URL.
 
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah

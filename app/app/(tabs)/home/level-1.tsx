@@ -3,7 +3,6 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { errorMessage } from '../../../src/api/errors';
 import { BigButton, Body, Card, InfoNote, Screen, StatusBadge, Title } from '../../../src/components';
-import { toStored } from '../../../src/data/mappers';
 import { lastStatus } from '../../../src/data/progress';
 import { useCatalog } from '../../../src/data/useCatalog';
 import { useSettings } from '../../../src/state/settings';
@@ -41,12 +40,12 @@ export default function LevelOne() {
             key={item.key}
             testID={`item-${item.itemId}`}
             onPress={() => router.push({ pathname: '/practice/[itemId]', params: { itemId: item.itemId } })}
-            accessibilityLabel={`${item.text}, ${status ? `terakhir ${statusStyles[toStored(status)].label}` : 'belum dicoba'}`}
+            accessibilityLabel={`${item.text}, ${status ? `terakhir ${statusStyles[status].label}` : 'belum dicoba'}`}
           >
             <View style={styles.gap}>
               <Text maxFontSizeMultiplier={2} style={styles.word}>{item.text}</Text>
               {status ? (
-                <StatusBadge status={toStored(status)} label="Terakhir" />
+                <StatusBadge status={status} label="Terakhir" />
               ) : (
                 <Text maxFontSizeMultiplier={2} style={styles.untried}>Belum dicoba</Text>
               )}

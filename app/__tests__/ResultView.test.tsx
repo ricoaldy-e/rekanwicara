@@ -1,146 +1,74 @@
 import { render, screen } from '@testing-library/react-native';
 
-import type { AnalyzeResponse, Status, UnitResult, Visuals } from '../src/api/types';
+import type { AnalyzeResponse, Status, Visuals } from '../src/api/types';
+import { fromV1 } from '../src/data/mappers';
+import type { AnalyzeResult, PracticeItem } from '../src/data/types';
 import { DISCLAIMER, ResultView } from '../src/results/ResultView';
 
-// Shaped like the server's mock responses (server/app/api/mock.py), SPEC §5.
-const ANCHORS = {
-  a: { f1: 780, f2: 1350 },
-  i: { f1: 320, f2: 2300 },
-  u: { f1: 350, f2: 900 },
-};
+// Shaped like the server's /v1 mock responses (server/app/api/mock.py), then mapped like the app does.
+const ANCHORS = { a: { f1: 780, f2: 1350 }, i: { f1: 320, f2: 2300 }, u: { f1: 350, f2: 900 } };
 const RING: [number, number][] = Array.from({ length: 20 }, (_, k) => [
   0.5 + 0.45 * Math.cos((2 * Math.PI * k) / 20),
   0.5 + 0.3 * Math.sin((2 * Math.PI * k) / 20),
 ]);
+const VISUALS: Visuals = { vowel_point: { f1: 760, f2: 1330 }, vowel_anchors: ANCHORS, lip_contour: { points: RING }, loudness: null };
 
-function unit(index: number, target: string, bibir: Status | null, suara: Status, reason: UnitResult['reason_code']): UnitResult {
-  const status = [bibir, suara].filter((s): s is Status => s !== null).sort().includes('merah')
-    ? 'merah'
-    : [bibir, suara].includes('kuning')
-      ? 'kuning'
-      : 'hijau';
-  return { index, target, start_ms: 120 + index * 400, end_ms: 520 + index * 400, bibir, suara, status, reason_code: reason };
-}
+const A: PracticeItem = { key: 'l1_a', itemId: 'l1_a', level: 1, text: 'A', instruction: '', source: 'default' };
+const HOLD: PracticeItem = { key: 'l0_hold_a', itemId: 'l0_hold_a', level: 1, text: 'A panjang', instruction: '', source: 'default' };
+const MA: PracticeItem = { key: 'l2_ma#1', itemId: 'l2_ma', level: 2, text: 'MA', instruction: '', source: 'default', position: 1 };
 
-function ok(over: Omit<Partial<AnalyzeResponse>, 'visuals'> & { visuals?: Partial<Visuals> }): AnalyzeResponse {
-  const { visuals, ...rest } = over;
+function v1(overall: Status, bibir: Status | null, suara: Status, extra: Partial<AnalyzeResponse> = {}): AnalyzeResponse {
   return {
-    status: 'ok',
-    quality_flags: [],
-    item_id: 'l3_mama',
-    level: 3,
-    overall: 'hijau',
-    score: 1,
-    indicators: { bibir: 'hijau', suara: 'hijau' },
-    units: [unit(0, 'ma', 'hijau', 'hijau', null), unit(1, 'ma', 'hijau', 'hijau', null)],
-    hint_id: 'ok_good',
-    visuals: {
-      vowel_point: { f1: 760, f2: 1330 },
-      vowel_anchors: ANCHORS,
-      lip_contour: { points: RING },
-      loudness: null,
-      ...visuals,
-    },
-    scorer: 'rules',
-    engine_version: '0.1.0',
-    processing_ms: 800,
-    ...rest,
+    status: 'ok', quality_flags: [], item_id: 'l1_a', level: 1, overall, score: 1,
+    indicators: { bibir, suara }, units: null, hint_id: 'a_open', visuals: VISUALS,
+    scorer: 'rules', engine_version: '0.1.0', processing_ms: 800, ...extra,
   };
 }
 
-const HIJAU = ok({});
-const KUNING = ok({
-  overall: 'kuning',
-  score: 0.5,
-  indicators: { bibir: 'hijau', suara: 'kuning' },
-  units: [unit(0, 'ma', 'hijau', 'hijau', null), unit(1, 'ma', 'hijau', 'kuning', 'closure_voicing_expected')],
-  hint_id: 'm_voicing',
-});
-const MERAH = ok({
-  overall: 'merah',
-  score: 0.5,
-  indicators: { bibir: 'hijau', suara: 'merah' },
-  units: [unit(0, 'ma', 'hijau', 'hijau', null), unit(1, 'ma', 'hijau', 'merah', 'closure_voicing_expected')],
-  hint_id: 'm_voicing',
-});
-const RETRY = ok({
-  status: 'retry',
-  quality_flags: ['too_quiet'],
-  overall: null,
-  score: null,
-  indicators: null,
-  units: null,
-  hint_id: 'retry_quiet',
-  visuals: { vowel_point: null, vowel_anchors: null, lip_contour: null, loudness: null },
-});
-const LEVEL0 = ok({
-  item_id: 'l0_hold_a',
-  level: 0,
-  indicators: { bibir: null, suara: 'hijau' },
-  units: [unit(0, 'a', null, 'hijau', null)],
-  visuals: {
-    vowel_point: null,
-    vowel_anchors: null,
-    lip_contour: null,
-    loudness: {
-      t_ms: Array.from({ length: 300 }, (_, k) => k * 10),
-      db: Array.from({ length: 300 }, (_, k) => 40 + 20 * Math.sin(k / 30)),
-    },
-  },
+function v2(over: Partial<AnalyzeResult>): AnalyzeResult {
+  return {
+    status: 'evaluated', item_id: 'l2_ma', level: 2, result: 'sesuai', lip_result: 'sesuai', voice_result: 'sesuai',
+    lip_feedback: null, voice_feedback: null, feedback: { code: 'ok', message: '' }, quality_flags: [],
+    visuals: null, engine: 'test', processing_ms: 1, sample: false, ...over,
+  };
+}
+
+const RETRY: AnalyzeResult = v2({
+  status: 'retry', level: 1, result: null, lip_result: null, voice_result: null, quality_flags: ['too_quiet'],
+  feedback: { code: 'retry_quiet', message: 'Suara belum terdeteksi. Coba bersuara lebih jelas.' },
 });
 
-describe('ResultView', () => {
+let warn: jest.SpyInstance;
+beforeEach(() => {
+  warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+});
+afterEach(() => warn.mockRestore());
+
+describe('ResultView Level 1', () => {
   it.each([
-    ['hijau', HIJAU, 'Bibir: Sesuai', 'Suara: Sesuai', 'Bagus! Coba sekali lagi tanpa melihat layar.'],
-    [
-      'kuning',
-      KUNING,
-      'Bibir: Sesuai',
-      'Suara: Mendekati',
-      'Saat bibir rapat, biarkan suara keluar lewat hidung. Rasakan getaran di hidung.',
-    ],
-    [
-      'merah',
-      MERAH,
-      'Bibir: Sesuai',
-      'Suara: Belum sesuai',
-      'Saat bibir rapat, biarkan suara keluar lewat hidung. Rasakan getaran di hidung.',
-    ],
-  ])('%s shows both indicators with text, the hint and the disclaimer', async (_name, result, bibir, suara, hint) => {
-    await render(<ResultView result={result} />);
-    expect(screen.getByTestId('result-bibir')).toHaveAccessibleName(bibir);
-    expect(screen.getByTestId('result-suara')).toHaveAccessibleName(suara);
-    expect(screen.getByText(bibir)).toBeTruthy(); // status is text too, not colour alone
-    expect(screen.getByTestId('result-hint')).toHaveTextContent(hint);
-    expect(screen.getByTestId('result-disclaimer')).toHaveTextContent(DISCLAIMER);
+    ['hijau', 'Sesuai'],
+    ['kuning', 'Mendekati'],
+    ['merah', 'Belum sesuai'],
+  ] as const)('%s shows the three-status badges with text, the charts and the disclaimer', async (status, label) => {
+    await render(<ResultView result={fromV1(v1(status, status, status), 1)} item={A} />);
+    expect(screen.getByTestId('result-bibir')).toHaveAccessibleName(`Bibir: ${label}`);
+    expect(screen.getByTestId('result-suara')).toHaveAccessibleName(`Suara: ${label}`);
+    expect(screen.getByText(`Bibir: ${label}`)).toBeTruthy(); // text too, not colour alone
     expect(screen.getByTestId('vowel-map')).toBeTruthy();
     expect(screen.getByTestId('lip-mirror')).toBeTruthy();
-    expect(screen.queryByTestId('loudness-chart')).toBeNull();
+    expect(screen.getByTestId('result-disclaimer')).toHaveTextContent(DISCLAIMER);
   });
 
-  it('shows the uncalibrated note only when the server says so', async () => {
-    await render(<ResultView result={ok({ quality_flags: ['uncalibrated'] })} />);
-    expect(screen.getByTestId('result-uncalibrated')).toBeTruthy();
+  it('gives each chart a text alternative', async () => {
+    await render(<ResultView result={fromV1(v1('hijau', 'hijau', 'hijau'), 1)} item={A} />);
+    expect(screen.getByTestId('vowel-map')).toHaveAccessibleName(/paling dekat dengan bunyi a/);
+    expect(screen.getByTestId('lip-mirror')).toHaveAccessibleName(/Garis putus-putus/);
   });
 
-  it('does not show the uncalibrated note after calibration', async () => {
-    await render(<ResultView result={HIJAU} />);
-    expect(screen.queryByTestId('result-uncalibrated')).toBeNull();
-  });
-
-  it('retry shows the retry sentence and no indicators or charts', async () => {
-    await render(<ResultView result={RETRY} />);
-    expect(screen.getByTestId('result-hint')).toHaveAccessibleName('Suara belum terdeteksi. Coba bersuara lebih jelas.');
-    expect(screen.queryByTestId('result-bibir')).toBeNull();
-    expect(screen.queryByTestId('result-suara')).toBeNull();
-    expect(screen.queryByTestId('vowel-map')).toBeNull();
-    expect(screen.queryByTestId('lip-mirror')).toBeNull();
-    expect(screen.getByTestId('result-disclaimer')).toBeTruthy();
-  });
-
-  it('Level 0 shows only the Suara indicator and the loudness chart', async () => {
-    await render(<ResultView result={LEVEL0} />);
+  it('a held sound shows only Suara and the loudness chart', async () => {
+    const loud = { t_ms: Array.from({ length: 300 }, (_, k) => k * 10), db: Array.from({ length: 300 }, (_, k) => 40 + 20 * Math.sin(k / 30)) };
+    const res = v1('hijau', null, 'hijau', { item_id: 'l0_hold_a', level: 0, visuals: { vowel_point: null, vowel_anchors: null, lip_contour: null, loudness: loud } });
+    await render(<ResultView result={fromV1(res, 1)} item={HOLD} />);
     expect(screen.queryByTestId('result-bibir')).toBeNull();
     expect(screen.getByTestId('result-suara')).toBeTruthy();
     expect(screen.getByTestId('loudness-chart')).toBeTruthy();
@@ -148,46 +76,56 @@ describe('ResultView', () => {
     expect(screen.queryByTestId('lip-mirror')).toBeNull();
   });
 
-  it('skips the vowel map when an anchor is missing and the mirror for the "mmm" hum', async () => {
-    const hum = ok({
-      units: [unit(0, 'm_hum', 'hijau', 'hijau', null)],
-      visuals: { vowel_anchors: { a: null, i: null, u: null } },
-    });
-    await render(<ResultView result={hum} />);
-    expect(screen.queryByTestId('vowel-map')).toBeNull();
-    expect(screen.queryByTestId('lip-mirror')).toBeNull();
+  it('shows the uncalibrated note only when the server says so', async () => {
+    await render(<ResultView result={fromV1(v1('hijau', 'hijau', 'hijau', { quality_flags: ['uncalibrated'] }), 1)} item={A} />);
+    expect(screen.getByTestId('result-uncalibrated')).toBeTruthy();
+  });
+});
+
+describe('ResultView Level 2–3', () => {
+  it('shows two statuses and no chart, even when visuals arrive', async () => {
+    await render(<ResultView result={v2({ result: 'belum_sesuai', voice_result: 'belum_sesuai', visuals: VISUALS })} item={MA} />);
+    expect(screen.getByTestId('result-bibir')).toHaveAccessibleName('Bibir: Sesuai');
+    expect(screen.getByTestId('result-suara')).toHaveAccessibleName('Suara: Belum sesuai');
+    for (const id of ['vowel-map', 'lip-mirror', 'loudness-chart']) expect(screen.queryByTestId(id)).toBeNull();
+    expect(screen.getByTestId('result-target')).toHaveTextContent(/MA/);
   });
 
-  it('reduced feedback "overall" shows one badge and nothing else of the result', async () => {
-    await render(<ResultView result={MERAH} detail="overall" />);
-    expect(screen.getByTestId('result-overall-badge')).toHaveAccessibleName('Hasil: Belum sesuai');
-    for (const id of ['result-bibir', 'result-suara', 'result-hint', 'vowel-map', 'lip-mirror']) {
-      expect(screen.queryByTestId(id)).toBeNull();
-    }
+  it('never shows Mendekati at Level 2, even from a v1 kuning', async () => {
+    await render(<ResultView result={fromV1(v1('kuning', 'kuning', 'kuning', { item_id: 'l2_ma', level: 2 }), 2)} item={MA} />);
+    expect(screen.queryByText(/Mendekati/)).toBeNull();
+    expect(screen.getByTestId('result-bibir')).toHaveAccessibleName('Bibir: Belum sesuai');
+  });
+});
+
+describe('ResultView feedback', () => {
+  it('shows at most two sentences, Bibir first', async () => {
+    await render(<ResultView result={v2({ lip_result: 'belum_sesuai', voice_result: 'belum_sesuai', lip_feedback: 'Rapatkan bibir.', voice_feedback: 'Ucapkan lebih keras.' })} item={MA} />);
+    const card = screen.getByTestId('result-hint');
+    expect(card).toHaveTextContent(/Rapatkan bibir\..*Ucapkan lebih keras\./);
+  });
+
+  it('renders no feedback card when both indicators fit', async () => {
+    await render(<ResultView result={v2({})} item={MA} />);
+    expect(screen.queryByTestId('result-hint')).toBeNull();
+  });
+
+  it('a retry shows its reason and no badge or chart', async () => {
+    await render(<ResultView result={RETRY} item={A} />);
+    expect(screen.getByTestId('result-retry')).toBeTruthy();
+    expect(screen.getByTestId('result-retry-reason')).toHaveAccessibleName('Suara belum terdeteksi. Coba bersuara lebih jelas.');
+    expect(screen.getByText('Rekaman ini tidak dihitung sebagai percobaan.')).toBeTruthy();
+    for (const id of ['result-bibir', 'result-suara', 'vowel-map', 'lip-mirror']) expect(screen.queryByTestId(id)).toBeNull();
     expect(screen.getByTestId('result-disclaimer')).toBeTruthy();
   });
 
-  it('reduced feedback "hidden" only says the attempt was recorded', async () => {
-    await render(<ResultView result={MERAH} detail="hidden" />);
-    expect(screen.getByTestId('result-hidden')).toBeTruthy();
-    for (const id of ['result-overall-badge', 'result-bibir', 'result-suara', 'result-hint']) {
-      expect(screen.queryByTestId(id)).toBeNull();
-    }
-  });
-
-  it('a retry is always explained, whatever the detail', async () => {
-    await render(<ResultView result={RETRY} detail="hidden" />);
-    expect(screen.getByTestId('result-hint')).toBeTruthy();
+  it('labels a mock sample', async () => {
+    await render(<ResultView result={v2({ sample: true })} item={MA} />);
+    expect(screen.getByTestId('result-sample')).toHaveAccessibleName('Hasil contoh, bukan analisis rekaman.');
   });
 
   it('never uses clinical wording', async () => {
-    await render(<ResultView result={MERAH} />);
-    expect(JSON.stringify(screen.toJSON())).not.toMatch(/\b(normal|abnormal|gangguan|diagnosis)\b/i);
-  });
-
-  it('gives each chart a text alternative', async () => {
-    await render(<ResultView result={HIJAU} />);
-    expect(screen.getByTestId('vowel-map')).toHaveAccessibleName(/paling dekat dengan bunyi a/);
-    expect(screen.getByTestId('lip-mirror')).toHaveAccessibleName(/Garis putus-putus/);
+    await render(<ResultView result={fromV1(v1('merah', 'merah', 'merah'), 1)} item={A} />);
+    expect(JSON.stringify(screen.toJSON())).not.toMatch(/\b(normal|abnormal|gangguan|diagnosis|terapi)\b/i);
   });
 });

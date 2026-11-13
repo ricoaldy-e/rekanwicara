@@ -17,6 +17,10 @@ export class NotSupportedError extends Error {
   }
 }
 
+/** False when the chosen scorer cannot judge this material (custom words need /v2). */
+export const canAnalyze = (item: PracticeItem, source: AnalyzeApi = ANALYZE_API) =>
+  !(source === 'v1' && item.source === 'custom');
+
 export interface AnalyzeInput {
   file: UploadFile;
   item: PracticeItem;
@@ -47,7 +51,7 @@ export async function analyze(input: AnalyzeInput, opts: AnalyzeOptions): Promis
     );
     return cleanV2({ ...res, sample: false });
   }
-  if (item.source === 'custom') throw new NotSupportedError();
+  if (!canAnalyze(item, source)) throw new NotSupportedError();
   const res = await api.analyze({ file, user_id: userId, item_id: item.itemId, session_id: sessionId }, callOpts);
   return fromV1(res, item.level);
 }

@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import type { Status } from '../api/types';
+import type { ResultStatus } from '../api/types';
 import { colors, fontSize, radius, spacing, statusStyles } from '../theme';
 import { StatusIcon } from './StatusIcon';
 
 export interface StatusBadgeProps {
-  status: Status;
+  status: ResultStatus;
   /** Optional indicator name shown before the status, e.g. "Bibir" or "Suara". */
   label?: string;
   size?: 'md' | 'lg';

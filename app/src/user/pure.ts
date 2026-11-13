@@ -1,6 +1,8 @@
 /** Local user state without any storage or UI: ids, PIN rule, attempts, settings, sync bookkeeping. */
 
-import type { AnalyzeResponse, Status } from '../api/types';
+import type { AnalyzeResponse, ResultStatus, Status } from '../api/types';
+import { toStored } from '../data/mappers';
+import type { AnalyzeResult } from '../data/types';
 
 /** Oldest attempts are dropped beyond this; AsyncStorage holds one JSON string (small, not a database). */
 export const MAX_ATTEMPTS = 2000;
@@ -190,6 +192,34 @@ export function attemptFromResponse(res: AnalyzeResponse, sessionId: string, now
     hintId: res.hint_id,
     scorer: res.scorer,
     engineVersion: res.engine_version,
+    synced: false,
+  };
+}
+
+/** Not a measured score: v2 results have none, so the stored 0–1 value only mirrors the status. */
+const SCORE_OF: Record<ResultStatus, number> = { sesuai: 1, mendekati: 0.5, belum_sesuai: 0 };
+
+/**
+ * The attempt to store for a v2 result (kontrak §8), or null when nothing may be stored:
+ * a retry, or a mock sample (a sample is not an analysis of the user's recording).
+ */
+export function attemptFromResult(res: AnalyzeResult, sessionId: string, now = new Date()): Attempt | null {
+  if (res.status !== 'evaluated' || res.sample || !res.result) return null;
+  return {
+    id: makeUuid(),
+    itemId: res.item_id,
+    level: res.level,
+    sessionId,
+    at: now.toISOString(),
+    overall: toStored(res.result),
+    score: SCORE_OF[res.result],
+    indicators: {
+      bibir: res.lip_result ? toStored(res.lip_result) : null,
+      suara: toStored(res.voice_result ?? res.result),
+    },
+    hintId: res.feedback.code,
+    scorer: res.engine,
+    engineVersion: res.engine,
     synced: false,
   };
 }

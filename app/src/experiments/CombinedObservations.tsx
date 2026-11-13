@@ -1,16 +1,16 @@
 import { Text, View } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 
-import type { CombinedResponse, Status } from '../api/types';
+import type { CombinedResponse, ResultStatus } from '../api/types';
 import { Body, InfoNote, Title } from '../components';
 import { StatusIcon } from '../components/StatusIcon';
 import { colors, fontSize, radius, spacing, statusStyles } from '../theme';
 
 const OUTCOMES = {
-  berhasil: { label: 'Berhasil', status: 'hijau' },
-  mendekati: { label: 'Mendekati', status: 'kuning' },
-  coba_lagi: { label: 'Coba lagi', status: 'merah' },
-} satisfies Record<string, { label: string; status: Status }>;
+  berhasil: { label: 'Berhasil', status: 'sesuai' },
+  mendekati: { label: 'Mendekati', status: 'mendekati' },
+  coba_lagi: { label: 'Coba lagi', status: 'belum_sesuai' },
+} satisfies Record<string, { label: string; status: ResultStatus }>;
 const REASONS = {
   matched: 'Teks cocok dengan target dan indikasi berbicara terdeteksi.',
   near_match: 'Teks yang terbaca mendekati target. Coba ulangi kata atau frasa ini.',

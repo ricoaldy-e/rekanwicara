@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 
-import type { Status } from '../api/types';
+import type { ResultStatus } from '../api/types';
 
 /**
  * "Hutan Malam" dark theme (docs/design.md v6 §3). Contrast ratios are listed in design.md §3.2.
@@ -99,10 +99,10 @@ export interface StatusStyle {
 }
 
 /** Status is never conveyed by color alone: color + icon shape + text (design.md §3.1, §5.3). */
-export const statusStyles: Record<Status, StatusStyle> = {
-  hijau: { label: 'Sesuai', foreground: '#7FD1A0' },
-  kuning: { label: 'Mendekati', foreground: '#F2C14E' },
-  merah: { label: 'Belum sesuai', foreground: '#FF8FA3' },
+export const statusStyles: Record<ResultStatus, StatusStyle> = {
+  sesuai: { label: 'Sesuai', foreground: '#7FD1A0' },
+  mendekati: { label: 'Mendekati', foreground: '#F2C14E' },
+  belum_sesuai: { label: 'Belum sesuai', foreground: '#FF8FA3' },
 };
 
 export const theme = { colors, fontSize, spacing, radius, touchTarget, buttonHeight, statusStyles, overlay, chart, stroke, fontFamily } as const;

@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 
-import type { Status } from '../src/api/types';
+import type { ResultStatus } from '../src/api/types';
 import { StatusBadge } from '../src/components/StatusBadge';
 import { statusStyles } from '../src/theme';
 
-const CASES: [Status, string, string][] = [
-  ['hijau', 'Sesuai', 'status-shape-circle'],
-  ['kuning', 'Mendekati', 'status-shape-triangle'],
-  ['merah', 'Belum sesuai', 'status-shape-square'],
+const CASES: [ResultStatus, string, string][] = [
+  ['sesuai', 'Sesuai', 'status-shape-circle'],
+  ['mendekati', 'Mendekati', 'status-shape-triangle'],
+  ['belum_sesuai', 'Belum sesuai', 'status-shape-square'],
 ];
 
 describe('StatusBadge', () => {
@@ -26,7 +26,7 @@ describe('StatusBadge', () => {
   });
 
   it('prefixes the indicator name when a label is given', async () => {
-    await render(<StatusBadge status="merah" label="Suara" testID="badge" />);
+    await render(<StatusBadge status="belum_sesuai" label="Suara" testID="badge" />);
     expect(screen.getByText('Suara: Belum sesuai')).toBeTruthy();
     expect(screen.getByTestId('badge').props.accessibilityLabel).toBe('Suara: Belum sesuai');
   });
