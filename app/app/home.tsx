@@ -59,15 +59,6 @@ export default function Home() {
         />
       }
     >
-      {/* Hidden Settings: long-press the title for 2 s (for demo setup). */}
-      <Pressable
-        onLongPress={() => router.push('/settings')}
-        delayLongPress={2000}
-        accessibilityRole="header"
-        accessibilityLabel="Misi hari ini"
-      >
-        <Text style={styles.kicker}>Misi hari ini</Text>
-      </Pressable>
       {demo ? <InfoNote text="Mode demo: progres contoh. Hasil latihan di mode ini tidak disimpan online." /> : null}
 
       {!profile.calibrated ? (
@@ -77,6 +68,38 @@ export default function Home() {
         </View>
       ) : null}
 
+      {health?.mock_mode ? <InfoNote text="Server dalam mode contoh (mock). Hasil bukan analisis sebenarnya." /> : null}
+      {healthError && !error ? <InfoNote tone="warning" text={errorMessage(healthError)} /> : null}
+
+      {loading && !items ? (
+        <View style={styles.center} accessible accessibilityLabel="Memuat materi">
+          <ActivityIndicator size="large" color={colors.text} />
+          <Body>Memuat materi…</Body>
+        </View>
+      ) : null}
+
+      {error ? (
+        <View style={styles.gap}>
+          <InfoNote tone="warning" text={errorMessage(error)} testID="home-error" />
+          <BigButton label="Coba lagi" icon="refresh" onPress={reload} disabled={loading} />
+        </View>
+      ) : null}
+      {!loading && !error && items?.length === 0 ? (
+        <View style={styles.gap}>
+          <InfoNote text="Materi belum tersedia. Coba muat ulang atau periksa koneksi server di pengaturan." />
+          <BigButton label="Muat ulang materi" icon="refresh" onPress={reload} />
+        </View>
+      ) : null}
+
+      {/* Hidden Settings: long-press the title for 2 s (for demo setup). */}
+      <Pressable
+        onLongPress={() => router.push('/settings')}
+        delayLongPress={2000}
+        accessibilityRole="header"
+        accessibilityLabel="Misi hari ini"
+      >
+        <Text style={styles.kicker}>Misi hari ini</Text>
+      </Pressable>
       {plan.length > 0 ? (
         <HeroCard
           title={nextItem ? `Siap latihan “${nextItem.text}”?` : 'Latihan hari ini'}
@@ -90,47 +113,6 @@ export default function Home() {
 
       {needsHelp ? (
         <InfoNote testID="mission-needs-help" text="Belum ada materi pengganti untuk latihan inti. Buka Mode Pendamping untuk memilih langkah berikutnya." />
-      ) : null}
-
-      {groups.length > 0 ? (
-        <View style={styles.gap}>
-          <Text style={styles.sectionLabel}>Level</Text>
-          <View style={styles.tiles}>
-            {groups.map((g) => (
-              <LevelTile
-                key={g.level}
-                level={g.level}
-                name={LEVEL_NAMES[g.level] ?? ''}
-                locked={levelLocked(g.items, progress)}
-                selected={g.level === shownLevel}
-                onPress={() => setChosenLevel(g.level)}
-              />
-            ))}
-          </View>
-        </View>
-      ) : null}
-
-      {items && items.length > 0 ? (
-        <View style={styles.gap}>
-          <Text accessibilityRole="header" style={[styles.sectionTitle, displayFont()]}>
-            Kemajuanmu
-          </Text>
-          <View style={styles.tiles}>
-            <StatTile
-              value={`${stats.stepsDone} / ${stats.stepsTotal}`}
-              caption="langkah"
-              ring={fraction(stats.stepsDone, stats.stepsTotal)}
-              accessibilityLabel={`${stats.stepsDone} dari ${stats.stepsTotal} langkah hari ini selesai`}
-            />
-            <StatTile
-              value={`${stats.greenCount}`}
-              caption="sesuai"
-              ring={fraction(stats.greenCount, stats.itemCount)}
-              accessibilityLabel={`${stats.greenCount} dari ${stats.itemCount} materi terakhir sesuai`}
-            />
-            <StatTile value={`${minutes}`} caption="menit sesi" accessibilityLabel={`Sesi ${minutes} menit`} />
-          </View>
-        </View>
       ) : null}
 
       {plan.length > 0 ? (
@@ -160,26 +142,46 @@ export default function Home() {
         </Card>
       ) : null}
 
-      {health?.mock_mode ? <InfoNote text="Server dalam mode contoh (mock). Hasil bukan analisis sebenarnya." /> : null}
-      {healthError && !error ? <InfoNote tone="warning" text={errorMessage(healthError)} /> : null}
-
-      {loading && !items ? (
-        <View style={styles.center} accessible accessibilityLabel="Memuat materi">
-          <ActivityIndicator size="large" color={colors.text} />
-          <Body>Memuat materi…</Body>
+      {items && items.length > 0 ? (
+        <View style={styles.gap}>
+          <Text accessibilityRole="header" style={[styles.sectionTitle, displayFont()]}>
+            Kemajuanmu
+          </Text>
+          <View style={styles.tiles}>
+            <StatTile
+              value={`${stats.stepsDone} / ${stats.stepsTotal}`}
+              caption="langkah"
+              ring={fraction(stats.stepsDone, stats.stepsTotal)}
+              accessibilityLabel={`${stats.stepsDone} dari ${stats.stepsTotal} langkah hari ini selesai`}
+            />
+            <StatTile
+              value={`${stats.greenCount}`}
+              caption="sesuai"
+              ring={fraction(stats.greenCount, stats.itemCount)}
+              accessibilityLabel={`${stats.greenCount} dari ${stats.itemCount} materi terakhir sesuai`}
+            />
+            <StatTile value={`${minutes}`} caption="menit sesi" accessibilityLabel={`Sesi ${minutes} menit`} />
+          </View>
         </View>
       ) : null}
 
-      {error ? (
+      {groups.length > 0 ? (
         <View style={styles.gap}>
-          <InfoNote tone="warning" text={errorMessage(error)} testID="home-error" />
-          <BigButton label="Coba lagi" icon="refresh" onPress={reload} disabled={loading} />
-        </View>
-      ) : null}
-      {!loading && !error && items?.length === 0 ? (
-        <View style={styles.gap}>
-          <InfoNote text="Materi belum tersedia. Coba muat ulang atau periksa koneksi server di pengaturan." />
-          <BigButton label="Muat ulang materi" icon="refresh" onPress={reload} />
+          <Text accessibilityRole="header" style={[styles.sectionTitle, displayFont()]}>
+            Semua materi
+          </Text>
+          <View style={styles.tiles}>
+            {groups.map((g) => (
+              <LevelTile
+                key={g.level}
+                level={g.level}
+                name={LEVEL_NAMES[g.level] ?? ''}
+                locked={levelLocked(g.items, progress)}
+                selected={g.level === shownLevel}
+                onPress={() => setChosenLevel(g.level)}
+              />
+            ))}
+          </View>
         </View>
       ) : null}
 
@@ -187,7 +189,7 @@ export default function Home() {
         .filter((group) => group.level === shownLevel)
         .map((group) => (
           <View key={group.level} style={styles.gap}>
-            <Text accessibilityRole="header" style={[styles.levelTitle, displayFont()]}>
+            <Text accessibilityRole="header" style={styles.levelTitle}>
               Level {group.level}: {LEVEL_NAMES[group.level] ?? ''}
             </Text>
             {group.items.map((item) => {
@@ -231,9 +233,8 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   kicker: { fontSize: fontSize.small, color: colors.textMuted, paddingVertical: spacing.sm },
-  sectionLabel: { fontSize: fontSize.small, color: colors.textMuted },
   sectionTitle: { fontSize: fontSize.large, color: colors.text },
-  levelTitle: { fontSize: fontSize.large, color: colors.text, marginTop: spacing.sm },
+  levelTitle: { fontSize: fontSize.label, fontWeight: '700', color: colors.textMuted },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm + spacing.xs },
   center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.lg },
   gap: { gap: spacing.sm },
