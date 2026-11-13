@@ -63,12 +63,15 @@ export const displayFont = () =>
 
 export const fontSize = {
   small: 15,
-  body: 17,
-  label: 17,
-  large: 22,
-  title: 28,
-  display: 40,
+  body: 16,
+  label: 16,
+  large: 20,
+  title: 24,
+  display: 34,
 } as const;
+
+/** Line height for body text (1.5 × body). */
+export const lineHeight = { body: 24 } as const;
 
 export const spacing = {
   xs: 4,

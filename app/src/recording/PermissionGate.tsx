@@ -5,7 +5,7 @@ import { ActivityIndicator, Linking, StyleSheet, Text, View } from 'react-native
 
 import { BigButton } from '../components/BigButton';
 import { Card } from '../components/Card';
-import { colors, fontSize, spacing } from '../theme';
+import { colors, fontSize, lineHeight, spacing } from '../theme';
 
 export interface PermissionGateProps {
   children: ReactNode;
@@ -89,6 +89,6 @@ const styles = StyleSheet.create({
   },
   iconGranted: { backgroundColor: colors.success, borderColor: colors.success },
   title: { fontSize: fontSize.large, fontWeight: '700', color: colors.text, marginBottom: spacing.sm },
-  body: { fontSize: fontSize.body, color: colors.text, lineHeight: 28, marginBottom: spacing.sm },
+  body: { fontSize: fontSize.body, color: colors.text, lineHeight: lineHeight.body, marginBottom: spacing.sm },
   status: { marginVertical: spacing.sm },
 });

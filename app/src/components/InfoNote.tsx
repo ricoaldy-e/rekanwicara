@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSize, radius, spacing } from '../theme';
+import { colors, fontSize, lineHeight, radius, spacing } from '../theme';
 
 export interface InfoNoteProps {
   text: string;
@@ -41,5 +41,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.infoBg,
   },
   warning: { borderColor: colors.danger, backgroundColor: colors.warningBg },
-  text: { flex: 1, fontSize: fontSize.body, color: colors.text, lineHeight: 28 },
+  text: { flex: 1, fontSize: fontSize.body, color: colors.text, lineHeight: lineHeight.body },
 });

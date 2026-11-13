@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, Text } from 'react-native';
 
-import { colors, displayFont, fontSize } from '../theme';
+import { colors, displayFont, fontSize, lineHeight } from '../theme';
 
 export function Title({ children }: { children: ReactNode }) {
   return (
@@ -17,6 +17,6 @@ export function Body({ children, muted = false }: { children: ReactNode; muted?:
 
 const styles = StyleSheet.create({
   title: { fontSize: fontSize.title, color: colors.text },
-  body: { fontSize: fontSize.body, color: colors.text, lineHeight: 28 },
+  body: { fontSize: fontSize.body, color: colors.text, lineHeight: lineHeight.body },
   muted: { color: colors.textMuted },
 });

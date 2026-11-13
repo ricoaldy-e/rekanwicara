@@ -98,7 +98,7 @@ Nama token tetap: `colors`, `fontSize`, `spacing`, `radius`, `touchTarget`, `sta
 | Aksen | `accent` `#E8693F` · `onAccent` `#08110B` (hanya cincin kemajuan dan penanda tab aktif) |
 | Catatan | `infoBg` `#16261C` · `warningBg` `#2B1A1E` · `danger` `#FF8FA3` |
 | Fokus | `focus` `#FFB300` |
-| Teks | `small` 15 · `body` 17 · `large` 22 · `title` 28 · `display` 40 |
+| Teks | `small` 15 · `body` 16 (baris 24) · `label` 16 · `large` 20 · `title` 24 · `display` 34 |
 | Jarak | 4 / 8 / 16 / 24 / 32 |
 | Radius | `tile` 14 (ubin, badge, chip) · `card` 20 (kartu, kartu utama) · `pill` 999 (hanya tombol dan bar bawah) |
 | Sentuh | `touchTarget` 48 · tombol utama tinggi 52 |
@@ -140,17 +140,17 @@ Badge berlatar `surface`; ikon, label, dan batang kiri 4 dp berwarna status. Tek
 ## 4. Tipografi
 
 Dua peran, **tanpa miring sama sekali**:
-- **Judul** (`title`, judul `HeroCard`, nama aplikasi di header, judul bagian): **Playfair Display Bold 700** lewat `fontFamily.display`; hanya pada ukuran 22 ke atas karena garis tipisnya sangat halus.
+- **Judul** (`title`, judul `HeroCard`, nama aplikasi di header, judul bagian): **Playfair Display Bold 700** lewat `fontFamily.display`; hanya pada ukuran 20 ke atas karena garis tipisnya sangat halus.
 - **Semua teks lain** (isi, tombol, label, status, angka, keterangan): font sistem (Roboto di Android, San Francisco di iOS) lewat `fontFamily.text`.
 - Default tanpa dependensi: bila Playfair belum dipasang atau gagal dimuat, judul memakai serif sistem. Memasang Playfair adalah langkah opsional 0.2 A; bila tidak dikerjakan, tulis di README bahwa Playfair Display direncanakan setelah submission. **[BELUM DIVERIFIKASI di perangkat]**
 
 | Gaya | Ukuran | Bobot | Dipakai untuk |
 |---|---|---|---|
-| display | 40 | 700 (serif) | Kata target besar saat merekam, angka besar |
-| title | 28 | 700 (serif) | Judul layar, judul `HeroCard` |
-| large | 22 | 700 | Judul bagian, nama materi, teks petunjuk |
-| body | 17 (baris 25) | 400 | Instruksi, penjelasan |
-| label | 17 | 700 | Teks tombol, label status |
+| display | 34 | 700 (serif) | Kata target besar saat merekam, angka besar |
+| title | 24 | 700 (serif) | Judul layar, judul `HeroCard` |
+| large | 20 | 700 | Judul bagian, nama materi, teks petunjuk |
+| body | 16 (baris 24) | 400 | Instruksi, penjelasan |
+| label | 16 | 700 | Teks tombol, label status |
 | small | 15 | 400 | Keterangan, disclaimer, label ubin dan tab |
 
 - **Tidak ada teks di bawah 15.** Tanpa huruf kapital semua. **Tanpa miring di mana pun**, termasuk judul.
