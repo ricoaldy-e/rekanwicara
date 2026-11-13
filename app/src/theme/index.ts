@@ -37,7 +37,7 @@ export const overlay = {
 
 export const chart = { userFill: 'rgba(250,252,249,0.18)' } as const;
 
-export const stroke = { thin: 1.5, thick: 2 } as const;
+export const stroke = { thin: 1.5, thick: 2, focus: 3 } as const;
 
 const SERIF = Platform.select({ ios: 'Georgia', android: 'serif' });
 const PLAYFAIR = 'PlayfairDisplay_700Bold';
@@ -92,6 +92,9 @@ export const touchTarget = 48;
 
 /** Height of the main button (design.md §5.1). */
 export const buttonHeight = 52;
+
+/** Size of one PIN pad key (flow §7.7.2: at least 64 dp). */
+export const pinKey = 64;
 
 export interface StatusStyle {
   label: string;

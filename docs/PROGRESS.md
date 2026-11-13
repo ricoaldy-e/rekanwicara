@@ -565,6 +565,21 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   Placeholder `words.tsx` FL-3 dihapus. Kata `custom` dengan `ANALYZE_API=v1`: kartu tetap tampil, catatan "Penilaian belum tersedia di server demo." (K10).
   Keputusan: ringkasan di daftar hanya "Level 3: sesuai/belum" (ringkasan Level 2 butuh `getWord` per kata = N permintaan di v2; ditunda). Status di Jalur kata berlabel "Terbaik" (status terbaik per `itemId` unik).
   Tes: `words.test.tsx` (7). 35 suite / 335 tes. Belum teruji: di HP, katalog v2 sungguhan, kata Pendamping sungguhan.
+- FL-5b (13 Nov 2026): komponen formulir bersama, belum dipakai layar mana pun. Baru: `src/forms/{limits,messages,useFormState}.ts` (semua teks pesan di `messages.ts`;
+  `Problem` = kunci atau kunci + nilai untuk `{placeholder}`), `src/forms/validators/{auth,pin,word,video}.ts` (fungsi murni), `src/components/form/`
+  (`TextField`, `PasswordField`, `Checkbox` (membungkus `CheckRow`), `FormBanner`, `Snackbar`, `ConfirmDialog`, `PinDots`, `PinPad`, `FieldError`, `announce`),
+  token `pinKey` (64) dan `stroke.focus` (3). Tes: `validators.test.ts` (105), `formComponents.test.tsx` (17). 37 suite / 457 tes.
+  Keputusan aturan yang ambigu:
+  - Sandi tidak pernah dipangkas atau diubah (boleh ditempel). Spasi di awal/akhir **ditolak** (pesan baru `passwordEdgeSpace`, tidak ada di flow §7.1.1); spasi (juga ganda) di tengah boleh.
+  - "Huruf" di sandi = huruf Unicode apa pun; angka hanya 0–9. Username/kata/suku kata hanya ASCII A–Z (sesuai flow). Emoji dihitung satu karakter.
+  - Spasi ganda: kata → satu spasi; instruksi → spasi/tab dirapatkan, baris baru tetap; suku kata dan sandi tidak dinormalisasi selain pangkas (sandi tidak dipangkas).
+  - `isWeakPin`: semua sama atau urutan naik/turun tepat 4 digit (0123, 9876 ikut); tidak melingkar (8901 lolos).
+  - Ukuran video pada pesan dibulatkan ke atas ("51 MB" untuk 50 MiB + 1 byte) agar tidak terbaca sama dengan batas.
+  - `syllablesMatch` hanya peringatan (`Problem` dengan nilai), `maxSyllables(count)` mengembalikan `syllablesFull` saat penuh.
+  - Pesan Masuk: "Isi email." dan galat umum "Email atau kata sandi salah." (kontrak #4); pesan ketersediaan username dibuang.
+  - `Snackbar` absolut di dasar scene (di dalam tab ia berada di atas bar bawah), minimal 5 detik, ketuk untuk menutup, tanpa animasi.
+  - `ConfirmDialog`: fokus pembaca layar awal ke Batal (`setAccessibilityFocus`, belum teruji di perangkat); latar memakai `overlay.scrim`.
+  Belum dikerjakan (bukan bagian prompt): `VideoField`, `SyllableRow` (FL-8). Belum teruji: pengumuman pembaca layar (iOS `announceForAccessibility`, Android live region), fokus garis 3 dp, skala teks 200%.
 
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah
