@@ -13,12 +13,20 @@ secara terpisah atau akurasi penilaian. Ambang belum dievaluasi terhadap pendeng
 
 ## Mencoba di HP
 
+Tambahan 13 November: **PA** dan **MA** tersedia sebagai suku kata pada kedua layar
+eksperimen. Kontrak menerima nilai `pa`/`ma`; model tetap mengenali audio secara bebas.
+521 pytest, 285 Jest, TypeScript dan Ruff lolos; lint 0 error/8 warning lama.
+Pilihan suku kata telah diuji otomatis dan tercakup dalam bundle iOS; ucapan manusia
+dan tampilan native untuk kedua pilihan baru masih perlu diuji melalui Reload di HP.
+Endpoint HTTP aktif juga diuji dengan model asli pada video/nada sintetis untuk pa/ma:
+keduanya 200, teks kosong dan Coba lagi/visual_gate; bukan pengujian pengenalan suku kata.
+
 1. Buka Expo Go `exp://192.168.101.22:8081`, lalu Reload.
 2. Tekan lama **Misi hari ini** dua detik → Pengaturan.
 3. Server tetap `http://192.168.101.22:8000` → **Uji Gabungan**.
-4. Pilih Tolong / Saya Tuli / Hai / Makan → **Latih kata ini** → **Rekam ucapan**.
+4. Pilih Tolong / Saya Tuli / Hai / Makan / PA / MA → **Latih target ini** → **Rekam ucapan**.
 5. Ucapkan setelah indikator MEREKAM muncul. Lihat teks asli, **Hasil latihan**, dan
-   **Pemeriksaan berbicara**. **Rekam lagi** mempertahankan target; **Pilih kata lain**
+   **Pemeriksaan berbicara**. **Rekam lagi** mempertahankan target; **Pilih target lain**
    kembali ke daftar target.
 
 Alamat khusus jaringan saat ini. Durasi perekaman bawaan tetap 2,5 detik, batas audio
@@ -64,7 +72,11 @@ Kategori tabel hanya berlaku setelah pemeriksaan rekaman lulus. Nilai awal di
 - Target sampai 3 karakter: paling banyak **1 edit** untuk Mendekati.
 - Teks kosong sesudah perapian selalu Coba lagi, tanpa memaksakan menjadi target.
 
-Semua kata memakai algoritma yang sama. Empat target yang diizinkan adalah konten latihan,
+Untuk suku kata baru, PA yang terbaca MA berjarak satu edit sehingga tetap Mendekati
+jika gerbang rekaman lulus, bukan Berhasil. Ini mengikuti aturan target pendek yang
+sudah ada; jangan menganggapnya bukti model membedakan kedua bunyi dengan andal.
+
+Semua kata memakai algoritma yang sama. Enam target yang diizinkan adalah konten latihan,
 bukan kamus kemungkinan kesalahan. Kemiripan tulisan tidak mempertimbangkan kedekatan
 fonetik atau makna; contoh makan/makam menunjukkan batas ini.
 
@@ -97,7 +109,7 @@ cuplikan hanya ilustrasi hasil deteksi; keputusan gerak memakai rangkaian frame.
 - Pengukuran/flag wajah dipindah dari quality.py ke face.py dan diekspor ulang agar
   pemanggil lama tetap bekerja. Jalur eksperimen tidak mengimpor atau memanggil Parselmouth.
 - `POST /v1/experiments/combined`, hanya DEBUG=true, multipart `file` + `target` wajib
-  dengan empat nilai kanonis. Target tidak diteruskan ke model. Kontrak terbaru SPEC §5,
+  dengan enam nilai kanonis. Target tidak diteruskan ke model. Kontrak terbaru SPEC §5,
   schemas.py dan types.ts diubah bersama; app menolak respons untuk target berbeda.
 - `feedback.outcome` tiga kategori atau null untuk kegagalan proses. `status` complete/
   partial tetap menggambarkan eksekusi, bukan kelulusan. Teks yang tersedia tetap tampil.

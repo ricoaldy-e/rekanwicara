@@ -66,6 +66,10 @@ def moving(monkeypatch: pytest.MonkeyPatch) -> None:
         ("saya tuli", "saya", "coba_lagi"),
         ("tolong", "tolong makan", "coba_lagi"),
         ("tolong", "", "coba_lagi"),
+        ("pa", " PA ", "berhasil"),
+        ("ma", "ma", "berhasil"),
+        ("pa", "ma", "mendekati"),
+        ("ma", "", "coba_lagi"),
     ],
 )
 def test_generic_text_categories(target: str, text: str, outcome: str) -> None:
@@ -332,6 +336,34 @@ def test_input_error_cleanup(
     assert response.status_code == (415 if kind == "type" else 500 if kind == "unexpected" else 422)
     assert "private" not in response.text
     assert not temporary.exists() or list(temporary.iterdir()) == []
+
+
+@pytest.mark.parametrize("target", ["pa", "ma"])
+def test_endpoint_accepts_syllables_without_prompting_asr(
+    make_client: Callable[..., TestClient],
+    sample_video: bytes,
+    tmp_path: Path,
+    moving: None,
+    monkeypatch: pytest.MonkeyPatch,
+    target: str,
+) -> None:
+    calls = []
+
+    def recognize(path: Path, timeout_s: float) -> Wav2Vec2Response:
+        assert path.is_file() and timeout_s == T.experiments.combined_asr_timeout_s
+        calls.append(path)
+        return Wav2Vec2Response(transcription=target, inference_ms=1)
+
+    monkeypatch.setattr(endpoint, "_recognize", recognize)
+    temporary = tmp_path / "temporary"
+    response = make_client(debug=True, tmp_dir=temporary).post(
+        URL, files=video_file(sample_video), data={"target": target}
+    )
+    assert response.status_code == 200
+    result = CombinedResponse.model_validate(response.json())
+    assert result.target == target and result.asr.transcription == target
+    assert result.feedback.outcome == "berhasil"
+    assert len(calls) == 1 and list(temporary.iterdir()) == []
 
 
 def test_upload_closed_and_shared_contract() -> None:

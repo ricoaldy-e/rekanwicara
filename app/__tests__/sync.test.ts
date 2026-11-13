@@ -48,12 +48,20 @@ class FakeRemote implements Remote {
 }
 
 function withAttempts(n: number): Profile {
-  let p = newProfile();
+  let p = newProfile('11111111-1111-4111-8111-111111111111');
   for (let k = 0; k < n; k++) p = addAttempt(p, attempt());
   return p;
 }
 
 describe('syncPending', () => {
+  it('never relabels an old account queue with the current account id', async () => {
+    const remote = new FakeRemote();
+    const p = { ...withAttempts(1), userId: '22222222-2222-4222-8222-222222222222' };
+    const result = await syncPending(p, ITEMS, remote);
+    expect(result.error).toMatch(/berbeda/);
+    expect(result.attemptIds).toEqual([]);
+    expect(remote.calls).toEqual([]);
+  });
   it('sends pending attempts, listen checks and the progress summary', async () => {
     const remote = new FakeRemote();
     let p = withAttempts(2);
@@ -64,7 +72,7 @@ describe('syncPending', () => {
     expect(res.listenIds).toHaveLength(1);
     expect(remote.rows.attempts.size).toBe(2);
     expect(remote.rows.listen_checks.size).toBe(1);
-    expect(remote.rows.profiles.size).toBe(1);
+    expect(remote.rows.profiles.size).toBe(0);
     expect([...remote.rows.progress.values()][0]).toMatchObject({ item_id: 'l1_a', stage: 'berlatih', sessions_count: 1 });
   });
 

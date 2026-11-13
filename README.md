@@ -15,7 +15,7 @@ subtema Inclusive Health. Versi submission: tag `v1.0-submission`.
 - `server/`: FastAPI, Python 3.11. FFmpeg menyiapkan audio/frame, MediaPipe mengukur
   geometri mulut, Parselmouth/Praat mengukur suara, lalu aturan berambang menilai hasil.
   Tidak ada pengenalan identitas wajah atau training model.
-- Supabase opsional: autentikasi anonim, profil/hasil/progres numerik, antrean sinkronisasi
+- Supabase: autentikasi email/password pendamping, profil/hasil/progres numerik, antrean sinkronisasi
   dan RLS berdasarkan `auth.uid()`. Video tidak dikirim ke Supabase.
 - `ml/`: alat dataset, label, penyetelan ambang dan evaluasi, memakai ulang pipeline server.
 - `docs/`: kontrak, evaluasi, model card, bukti uji dan panduan submission.
@@ -95,10 +95,11 @@ Isi `app/.env`:
 - `EXPO_PUBLIC_API_URL=http://<IP-laptop>:8000`
 - `EXPO_PUBLIC_DATASET_MODE=false`
 - Opsional: `EXPO_PUBLIC_SUPABASE_URL` dan `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
-  Aktifkan **Anonymous Sign-Ins**, simpan pengaturan dan jalankan seluruh
-  [schema.sql](docs/supabase/schema.sql) di SQL Editor Supabase. Jangan gunakan
-  service-role key di app. Tanpa konfigurasi ini, latihan tetap berjalan dengan
-  penyimpanan lokal dan sinkronisasi tidak aktif.
+  Aktifkan provider **Email/password** dan gunakan [schema.sql](docs/supabase/schema.sql)
+  yang sudah ada. Jangan gunakan service-role key di app. Login anonim otomatis sudah
+  dihentikan. Logic autentikasi siap, UI login belum dibuat; onboarding PIN akun
+  memerlukan sesi pendamping terlebih dahulu. Data lama tidak dihapus/ditautkan otomatis.
+  Rincian setup dan batas integrasi: [AUTH.md](docs/supabase/AUTH.md).
 
 ```powershell
 npx.cmd expo login --no-browser

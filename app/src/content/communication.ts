@@ -3,6 +3,8 @@ export const COMMUNICATION_TARGETS = [
   { value: 'saya tuli', label: 'Saya Tuli' },
   { value: 'hai', label: 'Hai' },
   { value: 'makan', label: 'Makan' },
+  { value: 'pa', label: 'PA' },
+  { value: 'ma', label: 'MA' },
 ] as const;
 
 export type CommunicationTarget = typeof COMMUNICATION_TARGETS[number]['value'];

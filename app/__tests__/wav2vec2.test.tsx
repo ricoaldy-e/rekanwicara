@@ -32,11 +32,11 @@ beforeEach(() => {
 async function record() {
   await render(<Wav2Vec2 />);
   await fireEvent.press(screen.getByRole('radio', { name: 'Saya Tuli' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'Latih kata ini' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Latih target ini' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Rekam sintetis' }));
 }
 
-it('offers four targets, locks the target during recording and uploads without a target prompt', async () => {
+it('offers six targets, locks the target during recording and uploads without a target prompt', async () => {
   await record();
   await waitFor(() => expect(screen.getByText(prediction.transcription)).toBeTruthy());
   expect(screen.getByLabelText('Target latihan: Saya Tuli')).toBeTruthy();
@@ -44,9 +44,26 @@ it('offers four targets, locks the target during recording and uploads without a
   expect(mockAnalyze.mock.calls[0][0]).toEqual({ uri: mockUri, name: 'clip.mp4', type: 'video/mp4' });
   expect(mockDelete).toHaveBeenCalledWith(mockUri);
   expect(screen.getByText('Teks cocok dengan target.')).toBeTruthy();
-  await fireEvent.press(screen.getByRole('button', { name: 'Pilih kata lain' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Pilih target lain' }));
   expect(screen.queryByText('Teks yang terbaca')).toBeNull();
-  expect(screen.getAllByRole('radio').map((node) => node.props.accessibilityLabel)).toEqual(['Tolong', 'Saya Tuli', 'Hai', 'Makan']);
+  expect(screen.getAllByRole('radio').map((node) => node.props.accessibilityLabel)).toEqual(['Tolong', 'Saya Tuli', 'Hai', 'Makan', 'PA', 'MA']);
+});
+
+it.each([
+  ['PA', 'pa', true],
+  ['MA', 'ma', true],
+  ['PA', 'ma', false],
+] as const)('records syllable %s without supplying a target prompt', async (label, text, matches) => {
+  mockAnalyze.mockResolvedValueOnce({ ...prediction, transcription: text });
+  await render(<Wav2Vec2 />);
+  await fireEvent.press(screen.getByRole('radio', { name: label }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Latih target ini' }));
+  expect(screen.getByLabelText(`Target latihan: ${label}`)).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Rekam sintetis' }));
+  await waitFor(() => expect(screen.getByText(text)).toBeTruthy());
+  expect(Boolean(screen.queryByText('Teks cocok dengan target.'))).toBe(matches);
+  expect(mockAnalyze.mock.calls[0]).toHaveLength(2);
+  expect(mockAnalyze.mock.calls[0][1]).toEqual(expect.objectContaining({ signal: expect.anything() }));
 });
 
 it.each([
@@ -69,7 +86,7 @@ it('prevents new recording and target changes while processing', async () => {
   await record();
   expect(screen.getByLabelText('Membaca ucapan')).toBeTruthy();
   expect(screen.queryByRole('button', { name: 'Rekam sintetis' })).toBeNull();
-  expect(screen.queryByRole('button', { name: 'Pilih kata lain' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Pilih target lain' })).toBeNull();
   expect(mockDelete).not.toHaveBeenCalled();
   await act(async () => finish(prediction));
   await waitFor(() => expect(mockDelete).toHaveBeenCalledWith(mockUri));
@@ -91,7 +108,7 @@ it('aborts on exit, deletes the file and ignores a late response', async () => {
   let finish!: (value: Wav2Vec2Response) => void;
   mockAnalyze.mockReturnValueOnce(new Promise<Wav2Vec2Response>((resolve) => { finish = resolve; }));
   const view = await render(<Wav2Vec2 />);
-  await fireEvent.press(screen.getByRole('button', { name: 'Latih kata ini' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Latih target ini' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Rekam sintetis' }));
   const signal = mockAnalyze.mock.calls[0][1].signal as AbortSignal;
   await view.unmount();

@@ -13,7 +13,7 @@ import type { Attempt, ListenCheck, Profile } from '../user/pure';
 export type Table = 'profiles' | 'attempts' | 'listen_checks' | 'progress';
 
 export interface Remote {
-  /** The Supabase user id (auth.uid()); signs in anonymously when there is no session. Throws when unreachable. */
+  /** Verified companion auth.uid(); never creates an anonymous account. Throws without a valid login. */
   ensureUser(): Promise<string>;
   /** Upsert rows; throws when the server refuses or is unreachable. */
   upsert(table: Table, rows: Record<string, unknown>[]): Promise<void>;
@@ -83,7 +83,7 @@ export async function syncPending(
 
   try {
     const uid = await remote.ensureUser();
-    await remote.upsert('profiles', [{ user_id: uid }]);
+    if (uid !== profile.userId) throw new Error('Akun profil berbeda; sinkronisasi dibatalkan.');
     for (const batch of chunks(attempts, BATCH_SIZE)) {
       await remote.upsert('attempts', batch.map((a) => attemptRow(a, uid)));
       result.attemptIds.push(...batch.map((a) => a.id)); // recorded per batch: a later failure keeps these

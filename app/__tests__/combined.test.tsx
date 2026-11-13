@@ -34,7 +34,7 @@ beforeEach(() => {
 
 async function record() {
   await render(<Combined />);
-  await fireEvent.press(screen.getByRole('button', { name: 'Latih kata ini' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Latih target ini' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Rekam sintetis' }));
 }
 
@@ -50,9 +50,25 @@ it('sends the selected target separately from audio and displays a successful ga
   expect(screen.queryByText(/Pengukuran Parselmouth/)).toBeNull();
   expect(screen.getByLabelText(/Kontur bibir dari satu cuplikan rekaman/)).toBeTruthy();
   expect(mockDelete).toHaveBeenCalledWith(mockUri);
-  await fireEvent.press(screen.getByRole('button', { name: 'Pilih kata lain' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Pilih target lain' }));
   expect(screen.queryByText('Hasil latihan')).toBeNull();
-  expect(screen.getAllByRole('radio')).toHaveLength(4);
+  expect(screen.getAllByRole('radio')).toHaveLength(6);
+});
+
+it.each(['pa', 'ma'] as const)('accepts and records syllable %s in the combined experiment', async (target) => {
+  const value = prediction();
+  value.target = target;
+  value.asr = { ...example.asr, status: 'success', model: 'Wikidepia/wav2vec2-xls-r-300m-indonesian', transcription: target };
+  expect(isCombinedResponse(value)).toBe(true);
+  mockAnalyze.mockResolvedValueOnce(value);
+  await render(<Combined />);
+  await fireEvent.press(screen.getByRole('radio', { name: target.toUpperCase() }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Latih target ini' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Rekam sintetis' }));
+  await waitFor(() => expect(screen.getByLabelText('Hasil latihan: Berhasil')).toBeTruthy());
+  expect(mockAnalyze.mock.calls[0][1]).toBe(target);
+  expect(screen.getByLabelText(`Target latihan: ${target.toUpperCase()}`)).toBeTruthy();
+  expect(screen.getByText(target)).toBeTruthy();
 });
 
 it.each([
@@ -102,10 +118,10 @@ it('locks the target while uploading and aborts on exit', async () => {
   mockAnalyze.mockReturnValueOnce(new Promise<CombinedResponse>((resolve) => { finish = resolve; }));
   const view = await render(<Combined />);
   await fireEvent.press(screen.getByRole('radio', { name: 'Saya Tuli' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'Latih kata ini' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Latih target ini' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Rekam sintetis' }));
   expect(mockAnalyze.mock.calls[0][1]).toBe('saya tuli');
-  expect(screen.queryByRole('button', { name: 'Pilih kata lain' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Pilih target lain' })).toBeNull();
   const signal = mockAnalyze.mock.calls[0][2].signal as AbortSignal;
   await view.unmount();
   expect(signal.aborted).toBe(true);

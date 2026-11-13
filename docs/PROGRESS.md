@@ -4,6 +4,10 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 
 | Fase | Track | Isi | Target hari | Status | Catatan |
 |---|---|---|---|---|---|
+| Auth live + nama register | Backend/logic | Register/login Supabase asli dan display_name | Jumat 13 Nov | register/login/profil/sesi nyata lulus; native dan recovery belum | Backend terbaru port 8000 aktif. Akun uji dibuat atas instruksi pengguna, konfirmasi email manual lalu login non-anonim berhasil. display_name dari metadata register dibuat di public.profiles saat sesi tersedia/login setelah konfirmasi, tanpa schema/trigger/RLS baru; profil existing dipertahankan. Refresh, restore storage Node terisolasi, logout, dan penolakan read anonim akun uji lulus. 318 Jest, tsc, lint 0 error/8 warning lama; backend terakhir 536 pytest/Ruff lolos. Password/token tidak disimpan dalam kode/log; akun uji dipertahankan. Redirect localhost:3000 tidak berjalan, tetapi konfirmasi terbukti berhasil. Rincian docs/supabase/AUTH.md. |
+| Auth pendamping | Backend/logic | Supabase email/password, profil, sesi dan PIN per akun | Jumat 13 Nov | implementasi/tes lokal siap; Supabase nyata belum diuji | Instruksi terbaru meminta langsung implementasi tanpa UI/navigasi. Branch phase-companion-auth, memakai client/dependency dan schema existing. Login anonim otomatis dihentikan; profil/antrean/PIN diisolasi auth.uid(), data lama tidak dihapus/ditautkan. DELETE /v1/auth/account memverifikasi bearer ke Supabase lalu Admin Auth delete pemilik, service role hanya server. 536 pytest (15 baru), 315 Jest (30 baru), tsc/Ruff lolos; lint 0 error/8 warning lama. Mock-only, tanpa akun/email/delete nyata. UI login dan konfigurasi service role/SMTP live belum tersedia/diverifikasi. Rincian docs/supabase/AUTH.md; tanpa commit/push/merge/deploy. |
+| Suku kata eksperimen | Riset | Tambahan PA dan MA di kedua layar eksperimen | Jumat 13 Nov | kode/tes siap; ucapan manusia belum diuji | Pengguna menyetujui penambahan dua target, teks UI serta perluasan enum kontrak. Target bersama/validator app, schemas/types/SPEC diselaraskan; inferensi bebas dan algoritma kecocokan tetap. 521 pytest (6 tambahan), 285 Jest (5 tambahan), tsc/Ruff lolos; lint 0 error/8 warning lama. Dua tes endpoint dan lima tes UI baru gagal sebelum implementasi lalu lulus. Backend direstart, health/LAN dan bundle iOS 200; bundle memuat PA/MA. Tanpa dependency/training/perubahan ambang/progres/Supabase, commit/push/tag. |
+| Wav2Vec2 dinamis | Riset | CLI single/batch target bebas dan ground truth terpisah | Jumat 13 Nov | alat/tes siap; akurasi ucapan belum diukur | Branch phase-wav2vec2-eval, reuse checkpoint/venv dan loader PoC, greedy CTC CPU offline, satu load per evaluasi. Target hanya setelah inferensi, CSV tanpa path, input read-only, error/kosong terpisah. 515 pytest (22 baru), Ruff check/format 93 berkas lolos; satu warning lama. Model asli diuji dua nada sintetis dengan socket diblokir: satu load, teks kosong keduanya, input identik. Bukan bukti pembeda PA/BA. Tanpa dependency/API/frontend/scoring/Supabase baru atau akses data/. Tanpa commit/merge/push/tag/deploy. Panduan: docs/WAV2VEC2_POC.md. |
 | P0 | Bersama | Inisialisasi repo | Selasa 10 Nov pagi | selesai | Python 3.11.9, ffmpeg 9.0.2, Node 22.13.0, git 2.49.0 |
 | A0 | Server | Kerangka FastAPI, mock, upload dataset | Selasa 10 Nov | selesai | A0-fix: disesuaikan dengan spec tim 3 orang (lihat Keputusan). 188 tes hijau. Akses dari HP: menunggu cek tim |
 | B0 | App | Kerangka Expo, navigasi, komponen dasar | Selasa 10 Nov | selesai | Expo SDK 54 (RN 0.81.5, React 19.1.0, expo-router 6). 30 tes jest hijau, tsc + lint + expo-doctor bersih. Uji di HP: menunggu cek tim |
@@ -56,6 +60,100 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
 | 6 | Submission | Sabtu 14 Nov | belum |
 
 ## Keputusan penting
+
+- Jumat 13 Nov (publikasi be/auth): pengguna meminta membuat branch be/auth dan push,
+  menggantikan larangan commit/push sebelumnya untuk publikasi ini. Cakupan: logic Auth,
+  tes/dokumentasi, serta eksperimen Wav2Vec2 dan PA/MA yang sudah diuji pada working tree.
+  Tiga draf/catatan root tetap lokal. Tidak menyertakan .env, rekaman, model atau venv;
+  pemeriksaan pola credential pada calon berkas tidak menemukan kecocokan. Tidak merge
+  ke main atau mengubah tag submission. Verifikasi terakhir: 536 pytest, 318 Jest,
+  TypeScript dan Ruff lolos; lint Expo 0 error/8 warning lama.
+
+- Jumat 13 Nov (Auth live + display_name): pengguna meminta backend dijalankan dan tes
+  Supabase asli memakai akun yang diberikan, lalu meminta payload register berisi nama.
+  Register kini mengirim options.data.display_name; profile upsert memakai UID sesi dan
+  ignoreDuplicates. Jika konfirmasi email diwajibkan, nama masuk metadata dahulu dan
+  public.profiles dibuat pada login sesudah konfirmasi. Jika sesi langsung diberikan,
+  profil dibuat saat register. Sinkronisasi antrean tidak lagi membuat placeholder
+  profiles, sehingga tidak mendahului nama register; profil existing tidak ditimpa.
+  Tanpa schema/trigger/policy/dependency baru. Tiga tes tambahan: metadata register,
+  profil register langsung, dan error profil sesudah login; total 318 Jest, tsc dan lint
+  lolos (8 warning lama). Pytest/Ruff backend terakhir 536/95 berkas lulus; backend tidak
+  diubah pada tambahan nama. Backend terbaru direstart, health/OpenAPI 200, Auth route aktif.
+  Tes live mengeksekusi source TS companion.ts dengan SDK Supabase terpasang, hanya batas
+  native/UI diganti adapter. Password dimasukkan lewat console non-echo; sesi uji hanya
+  di memori terisolasi, tanpa mencetak email/password/token atau menyimpan credential ke
+  kode/log/Git. Register asli sukses dan identity baru tersedia; login sebelum konfirmasi
+  ditolak email_not_confirmed. Pengguna membuka tautan; redirect localhost:3000 gagal
+  karena server tujuan tidak ada, tetapi login setelahnya berhasil. Profile sesuai UID
+  dan nama register, refresh session, restore client dari storage terisolasi, logout,
+  serta tidak terbukanya profil akun uji ke client anonim terverifikasi. Backend menolak
+  token tidak valid 401/auth_invalid melalui Supabase asli tanpa menghapus akun. Tidak
+  menguji delete akun/reset password/PIN native secara live. Akun uji tetap disimpan;
+  proses uji dihentikan setelah logout. Tidak mengubah konfigurasi redirect proyek,
+  membaca akun lain, menghapus data lama, commit/push/merge/deploy atau membuat UI baru.
+
+- Jumat 13 Nov (Auth pendamping): instruksi eksplisit terbaru meminta langsung implementasi
+  menggantikan kebutuhan berhenti pada rencana untuk fase ini, dengan larangan perubahan
+  UI/halaman/navigasi/schema/RLS/dependency. Memakai Supabase client existing untuk
+  email/password, sesi persisten AsyncStorage/processLock/foreground refresh, profile
+  create/read/update, email recovery + verifyOtp TokenHash, perubahan password/nonce.
+  PIN tepat empat digit tersimpan SecureStore per UID, menolak overwrite serta PIN lama
+  salah; operasi credential dan tulis PIN yang berbarengan ditolak. Provider mengikuti
+  INITIAL_SESSION dan pergantian akun; callback/load/sync lama diabaikan, state anak
+  direset hanya pada pergantian pemilik untuk melepas otorisasi PIN akun sebelumnya.
+  Auto signInAnonymously dihapus; sinkronisasi memeriksa UID profil/tiap batch dan
+  pembuatan profil tidak menimpa display_name. Tidak mengubah logika latihan/progres.
+  Data legacy cw.profile/cw.companionPin dan akun anonim lama dibiarkan utuh, tidak
+  dimigrasikan/ditautkan otomatis. Logout mempertahankan penyimpanan per akun.
+  Penghapusan profil saja tidak disediakan karena RLS existing tidak punya DELETE;
+  client meminta reauthentication password lalu DELETE /v1/auth/account. Endpoint
+  memverifikasi JWT dengan Supabase /user, memakai ID terverifikasi untuk Admin Auth
+  hard delete dan ON DELETE CASCADE existing; service role hanya server, response/error
+  aman tanpa token/credential. SPEC/schema/types/client diselaraskan. Field server URL/
+  service role sudah ada sebelumnya; contoh env diperjelas tanpa membaca/menulis .env.
+  536 pytest, 315 Jest (27 suite), TypeScript/Ruff check/format 95 berkas lolos; lint 0
+  error/8 warning lama, satu warning pytest Starlette/HTTPX lama. Semua auth diuji
+  dengan mock dan data sintetis; tidak membuat akun nyata, mengirim email, menjalankan
+  SQL, menghapus user nyata, atau deploy. SMTP/confirmation/redirect/RLS live belum
+  diuji. Tanpa UI login, onboarding PIN baru perlu sesi yang disediakan pemanggil;
+  rincian fungsi dan setup ada di docs/supabase/AUTH.md. Tidak commit/merge/push/tag.
+
+- Jumat 13 Nov (suku kata di HP): setelah rencana disetujui, PA dan MA ditambahkan ke
+  daftar bersama Uji Wav2Vec2/Uji Gabungan tanpa mengganti empat materi lama. UI memakai
+  judul Latihan suku kata dan kata serta tombol Latih target ini/Pilih target lain.
+  Nilai API lowercase pa/ma, label UI uppercase PA/MA; schema backend, tipe/validator
+  app dan SPEC diselaraskan. Validator respons memakai daftar target app yang sama.
+  Tidak mengubah decoder, checkpoint, bobot, durasi, gerbang MediaPipe, ambang atau
+  algoritma Levenshtein. Karena aturan target pendek tetap berlaku, target PA yang
+  terbaca MA mendapat Mendekati bila gerbang lulus, bukan Berhasil; ini bukan bukti
+  pembeda bunyi atau skor ketepatan pelafalan. 521 pytest, 285 Jest, tsc/Ruff lolos;
+  lint 0 error/8 warning lama, detektor TSX tidak menemukan pola yang diperiksa.
+  Backend direstart pada 8000; OpenAPI aktif menerima pa/ma dan bundle iOS 8081
+  merespons 200 dengan kedua pilihan baru. Tampilan/native dan ucapan PA/MA di HP
+  tetap menunggu pengguna. HTTP model asli menerima kedua target pada video/nada
+  sintetis: 200, teks kosong, Coba lagi/visual_gate; bukan bukti pengenalan PA/MA.
+  Tidak menambah dependency, membaca data/, mengganti
+  latihan utama/Level 3/progres/Supabase/Allosaurus atau commit/merge/push/tag/deploy.
+
+- Jumat 13 Nov (Wav2Vec2 target dinamis): pengguna menyetujui implementasi setelah audit
+  dan rencana. Ekstrak loader lokal dari PoC sambil mempertahankan infer(path), CLI JSON,
+  endpoint dan seluruh perilaku aplikasi. CLI evaluasi terpisah memakai manifest CSV
+  (trial_id,file,target; ground_truth/speaker_id opsional), tanpa menebak label dari nama
+  berkas. Target/ground truth hanya dibandingkan setelah greedy CTC bebas; normalisasi
+  hanya kapitalisasi dan spasi. Kecocokan teks bukan skor pelafalan. Ringkasan pengenalan
+  memakai ground truth manusia; hasil error/kosong tetap masuk penyebut baris berlabel.
+  Model dimuat sekali per evaluasi, tidak diulang saat gagal dimuat. Tidak menambah
+  dependency, training atau mengubah API/ambang/frontend/Supabase/Allosaurus. Folder lokal
+  eksperimen diabaikan Git, path tidak diekspor, data/ ditolak, CSV lama tidak ditimpa.
+  515 pytest lolos, satu warning Starlette/HTTPX lama, Ruff check/format 93 berkas lolos.
+  Uji asli offline/sintetis: dua WAV nada identik 2,5 detik dengan target PA/BA, load satu
+  kali 25165,2 ms (termasuk impor), forward+decode 2668,206 dan 438,650 ms, teks kosong,
+  input tidak berubah. Berjalan bersamaan dengan pytest, bukan benchmark latensi.
+  CLI single asli juga sukses pada nada sintetis (765,103 ms); CLI PoC lama sukses
+  dengan bentuk JSON kompatibel (755,284 ms). Kedua hasil tetap teks kosong.
+  Belum ada ground truth ucapan manusia; belum dapat menyimpulkan kemampuan PA/BA/MA,
+  perbandingan suku kata/kata atau kelayakan Level 2. Tidak commit/merge/push/tag/deploy.
 
 - Jumat 13 Nov (publikasi Git): pengguna secara eksplisit meminta push ke main, menggantikan
   batas sebelumnya tanpa commit/merge/push untuk eksperimen. Cakupan publikasi adalah kode,

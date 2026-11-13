@@ -1,5 +1,14 @@
 # CONTEXT — Cermin Wicara (serah terima ke agen AI lain / laptop lain)
 
+Pembaruan Auth 13 Nov: logic pendamping kini memakai email/password Supabase, tanpa
+login anonim otomatis. Profil/antrean/PIN baru diisolasi per auth.uid(); data lama tetap
+utuh dan tidak dimigrasikan otomatis. UI login belum dibuat; onboarding PIN memerlukan
+sesi akun yang disediakan pemanggil. Panduan dan batas fase: `docs/supabase/AUTH.md`.
+536 pytest, 318 Jest, tsc/Ruff lolos; lint 8 warning lama. Register/login, profil nama,
+refresh/restore sesi terisolasi dan logout telah diuji ke Supabase asli pada akun uji
+yang disetujui pengguna. Native/PIN, reset password dan delete akun nyata belum diuji.
+Bagian autentikasi anonim pada ringkasan lama di bawah adalah catatan historis.
+
 Status: **Kamis 12 November 2026, setelah F-fix4**. Dokumen ini ditulis untuk agen AI (mis. Codex) yang melanjutkan
 pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks penting ada di berkas repo:
 

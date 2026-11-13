@@ -13,7 +13,10 @@ npx.cmd expo start -c --lan --go
 ```
 
 Isi `EXPO_PUBLIC_API_URL` dengan `http://<IP-laptop>:8000`. Untuk Supabase, isi URL dan
-anon key di `.env`, aktifkan Anonymous Sign-Ins, dan jalankan `../docs/supabase/schema.sql`.
+anon/publishable key di `.env`, aktifkan Email/password, dan gunakan schema existing
+`../docs/supabase/schema.sql`. Logic sesi/PIN/sinkronisasi kini mengikuti akun pendamping;
+login anonim otomatis dihentikan. UI login belum ditambahkan, sehingga sesi akun perlu
+disediakan melalui logic sebelum onboarding PIN. Lihat [panduan Auth](../docs/supabase/AUTH.md).
 `.env` tidak di-commit. Jangan menaruh service-role key pada app.
 
 Di iPhone, login Expo Go dengan akun yang sama dengan CLI. Buka alamat

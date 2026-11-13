@@ -5,6 +5,10 @@
 
 // ---------- Shared enums ----------
 
+export interface AccountDeletionResponse {
+  status: 'deleted';
+}
+
 export type Status = 'hijau' | 'kuning' | 'merah';
 export type ResponseStatus = 'ok' | 'retry';
 /** SPEC §4/§7: the MVP always scores with rules. */
@@ -214,7 +218,7 @@ export interface CombinedVisual {
 
 export interface CombinedResponse {
   status: 'complete' | 'partial';
-  target: 'tolong' | 'saya tuli' | 'hai' | 'makan';
+  target: 'tolong' | 'saya tuli' | 'hai' | 'makan' | 'pa' | 'ma';
   feedback: {
     outcome: 'berhasil' | 'mendekati' | 'coba_lagi' | null;
     reason: 'matched' | 'near_match' | 'different_text' | 'empty_text' | 'visual_gate' |

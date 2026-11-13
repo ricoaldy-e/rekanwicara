@@ -43,6 +43,18 @@ const items: Item[] = [
 ];
 
 describe('createApiClient', () => {
+  it('deletes only the bearer owner without sending a target user id', async () => {
+    const fetchFn = jest.fn().mockResolvedValue(jsonResponse({ status: 'deleted' }));
+    await expect(createApiClient(BASE, { fetchFn }).deleteAccount('fixture-token')).resolves.toEqual({ status: 'deleted' });
+    expect(fetchFn.mock.calls[0][0]).toBe(`${BASE}/v1/auth/account`);
+    expect(fetchFn.mock.calls[0][1]).toMatchObject({ method: 'DELETE', headers: { Authorization: 'Bearer fixture-token' } });
+    expect(fetchFn.mock.calls[0][1].body).toBeUndefined();
+  });
+
+  it('does not accept an unrelated response as successful account deletion', async () => {
+    const fetchFn = jest.fn().mockResolvedValue(jsonResponse({ status: 'ok' }));
+    await expect(createApiClient(BASE, { fetchFn }).deleteAccount('fixture-token')).rejects.toMatchObject({ kind: 'parse' });
+  });
   it('GET /v1/health returns the parsed body and calls the right URL', async () => {
     const fetchFn = jest.fn().mockResolvedValue(jsonResponse(health));
     const api = createApiClient(BASE, { fetchFn });

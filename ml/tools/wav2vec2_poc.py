@@ -7,6 +7,7 @@ import os
 import sys
 import time
 import wave
+from collections.abc import Callable
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from typing import Literal
@@ -32,7 +33,7 @@ class Prediction(BaseModel):
     inference_ms: float = Field(ge=0, allow_inf_nan=False)
 
 
-def infer(path: Path) -> Prediction:
+def load_recognizer() -> Callable[[Path], Prediction]:
     required = ("config.json", "preprocessor_config.json", "vocab.json", "pytorch_model.bin")
     if not all((MODEL_DIR / name).is_file() for name in required):
         raise PocError("model_missing", "Model Wav2Vec2 belum siap. Ikuti docs/WAV2VEC2_POC.md.")
@@ -52,23 +53,33 @@ def infer(path: Path) -> Prediction:
         )
     except Exception as exc:  # noqa: BLE001 - third-party errors may contain paths
         raise PocError("model_error", "Model Wav2Vec2 gagal dimuat.") from exc
-    try:
-        with wave.open(str(path), "rb") as audio:
-            samples = np.frombuffer(audio.readframes(audio.getnframes()), dtype="<i2")
-            inputs = extractor(
-                samples.astype(np.float32) / 32768,
-                sampling_rate=audio.getframerate(),
-                return_tensors="pt",
-            )
-        with torch.inference_mode():
-            start = time.perf_counter()
-            logits = model(**inputs).logits
-            # Free greedy CTC decoding: the target never influences recognition.
-            text = tokenizer.batch_decode(torch.argmax(logits, dim=-1))[0]
-            elapsed = (time.perf_counter() - start) * 1000
-        return Prediction(transcription=text, inference_ms=round(elapsed, 3))
-    except Exception as exc:  # noqa: BLE001 - third-party errors may contain paths
-        raise PocError("inference_error", "Transkripsi gagal dijalankan. Coba rekam lagi.") from exc
+
+    def recognize(path: Path) -> Prediction:
+        try:
+            with wave.open(str(path), "rb") as audio:
+                samples = np.frombuffer(audio.readframes(audio.getnframes()), dtype="<i2")
+                inputs = extractor(
+                    samples.astype(np.float32) / 32768,
+                    sampling_rate=audio.getframerate(),
+                    return_tensors="pt",
+                )
+            with torch.inference_mode():
+                start = time.perf_counter()
+                logits = model(**inputs).logits
+                # Free greedy CTC decoding: the target never influences recognition.
+                text = tokenizer.batch_decode(torch.argmax(logits, dim=-1))[0]
+                elapsed = (time.perf_counter() - start) * 1000
+            return Prediction(transcription=text, inference_ms=round(elapsed, 3))
+        except Exception as exc:  # noqa: BLE001 - third-party errors may contain paths
+            raise PocError(
+                "inference_error", "Transkripsi gagal dijalankan. Coba rekam lagi."
+            ) from exc
+
+    return recognize
+
+
+def infer(path: Path) -> Prediction:
+    return load_recognizer()(path)
 
 
 def main(argv: list[str] | None = None) -> int:

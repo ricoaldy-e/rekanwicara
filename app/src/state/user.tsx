@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AppState } from 'react-native';
+import type { Session } from '@supabase/supabase-js';
 
+import { onCompanionAuthChange } from '../auth/companion';
 import { createRemote } from '../data/supabase';
 import { syncPending } from '../data/sync';
 import {
@@ -16,7 +18,7 @@ import {
   type Profile,
   type Settings,
 } from '../user/pure';
-import { loadProfile, savePin, saveProfile } from '../user/storage';
+import { loadProfile, savePin, saveProfile, verifyPin } from '../user/storage';
 import { createDemoProfile } from '../user/demo';
 import { useContent } from './content';
 import { buildProgress, type ItemProgress } from './progression';
@@ -36,6 +38,7 @@ export interface SyncStatus {
 }
 
 interface UserValue {
+  session: Session | null;
   demo: boolean;
   setDemo(enabled: boolean): void;
   /** False until the saved profile has been read. */
@@ -60,6 +63,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const { items } = useContent();
   const [profile, setProfile] = useState<Profile>(newProfile);
   const [ready, setReady] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [account, setAccount] = useState<{ uid: string | null; version: number }>({ uid: null, version: 0 });
+  const owner = useRef<string | null | undefined>(undefined);
+  const generation = useRef(0);
+  const mounted = useRef(false);
   const [demo, setDemoState] = useState(false);
   const demoRef = useRef(false);
   const personal = useRef<Profile | null>(null);
@@ -69,7 +77,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     itemsRef.current = items; // the sync reads the newest list without being recreated when it loads
   }, [items]);
-  const running = useRef(false);
+  const running = useRef<number | null>(null);
   const [status, setStatus] = useState<Pick<SyncStatus, 'running' | 'lastError' | 'lastSyncedAt'>>({
     running: false,
     lastError: null,
@@ -77,32 +85,57 @@ export function UserProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
+    mounted.current = true;
     let cancelled = false;
-    loadProfile().then((p) => {
+    const unsubscribe = onCompanionAuthChange((nextSession) => {
       if (cancelled) return;
-      latest.current = p;
-      setProfile(p);
-      setReady(true);
+      setSession(nextSession);
+      const uid = nextSession?.user.id ?? null;
+      if (owner.current === uid) return;
+      owner.current = uid;
+      const version = ++generation.current;
+      running.current = null;
+      demoRef.current = false;
+      personal.current = null;
+      latest.current = newProfile(uid ?? undefined);
+      setProfile(latest.current);
+      setDemoState(false);
+      setReady(false);
+      setAccount({ uid, version });
+      setStatus({ running: false, lastError: null, lastSyncedAt: null });
+      void loadProfile(uid).then((p) => {
+        if (cancelled || generation.current !== version) return;
+        latest.current = p;
+        setProfile(p);
+        setReady(true);
+      });
     });
     return () => {
       cancelled = true;
+      mounted.current = false;
+      owner.current = undefined;
+      unsubscribe();
     };
   }, []);
 
   /** Applies `change` to the latest profile (not a stale render), keeps it in state and saves it. */
   const update = useCallback((change: (p: Profile) => Profile) => {
+    if (!mounted.current || !ready || generation.current !== account.version) return;
     const next = change(latest.current);
     latest.current = next;
     setProfile(next);
     if (!demoRef.current) void saveProfile(next);
-  }, []);
+  }, [ready, account.version]);
 
   const syncNow = useCallback(async () => {
-    if (demoRef.current || !ready || !remote || running.current || !itemsRef.current) return;
-    running.current = true;
+    if (!mounted.current || demoRef.current || !ready || !remote || running.current === account.version || !itemsRef.current ||
+        !account.uid || latest.current.userId !== account.uid || generation.current !== account.version) return;
+    const version = account.version;
+    running.current = version;
     setStatus((s) => ({ ...s, running: true }));
     try {
       const result = await syncPending(latest.current, itemsRef.current, remote);
+      if (!mounted.current || generation.current !== version) return;
       // Mark exactly what was sent, on the latest profile: attempts added meanwhile stay pending.
       update((p) => markSynced(p, new Set(result.attemptIds), new Set(result.listenIds)));
       setStatus({
@@ -111,12 +144,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
         lastSyncedAt: result.error ? null : new Date().toISOString(),
       });
     } finally {
-      running.current = false;
+      if (running.current === version) running.current = null;
     }
-  }, [ready, remote, update]);
+  }, [ready, remote, update, account]);
 
   const setDemo = useCallback((enabled: boolean) => {
-    if (!ready || running.current || enabled === demoRef.current) return;
+    if (!mounted.current || !ready || generation.current !== account.version || running.current !== null || enabled === demoRef.current) return;
     if (enabled) personal.current = latest.current;
     const next = enabled ? createDemoProfile() : personal.current!;
     demoRef.current = enabled;
@@ -124,11 +157,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setProfile(next);
     setDemoState(enabled);
     setStatus({ running: false, lastError: null, lastSyncedAt: null });
-  }, [ready]);
+  }, [ready, account.version]);
 
   // Sync when the profile is read, when the app comes back to the foreground, and every 30 s while open.
   useEffect(() => {
-    if (!ready || demo || !remote) return;
+    if (!ready || demo || !remote || !account.uid) return;
     void syncNow();
     const sub = AppState.addEventListener('change', (s) => s === 'active' && void syncNow());
     const timer = setInterval(() => void syncNow(), SYNC_INTERVAL_MS);
@@ -136,15 +169,18 @@ export function UserProvider({ children }: { children: ReactNode }) {
       sub.remove();
       clearInterval(timer);
     };
-  }, [ready, demo, remote, syncNow, items]);
+  }, [ready, demo, remote, syncNow, items, account.uid]);
 
   const completeOnboarding = useCallback(
     async (pin: string) => {
-      if (demoRef.current) return;
-      await savePin(pin);
+      if (!mounted.current || demoRef.current || !ready || generation.current !== account.version) return;
+      if (!await verifyPin(pin)) {
+        if (!mounted.current || generation.current !== account.version) return;
+        await savePin(pin);
+      }
       update((p) => ({ ...p, onboarded: true, consentUser: true, consentCompanion: true }));
     },
-    [update],
+    [update, ready, account.version],
   );
   const markCalibrated = useCallback(() => update((p) => ({ ...p, calibrated: true })), [update]);
   const addAttempt = useCallback(
@@ -180,12 +216,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<UserValue>(
     () => ({
+      session,
       demo,
       setDemo,
       ready,
       profile,
       progress,
-      sync: { configured: !demo && remote !== null, pending: demo ? 0 : pendingCount(profile), ...status },
+      sync: { configured: !demo && remote !== null && session !== null, pending: demo ? 0 : pendingCount(profile), ...status },
       completeOnboarding,
       markCalibrated,
       addAttempt,
@@ -193,9 +230,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
       updateSettings,
       syncNow,
     }),
-    [demo, setDemo, ready, profile, progress, remote, status, completeOnboarding, markCalibrated, addAttempt, addCheck, updateSettings, syncNow],
+    [session, demo, setDemo, ready, profile, progress, remote, status, completeOnboarding, markCalibrated, addAttempt, addCheck, updateSettings, syncNow],
   );
-  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+  return <UserContext.Provider key={account.uid ?? 'guest'} value={value}>{children}</UserContext.Provider>;
 }
 
 export function useUser(): UserValue {

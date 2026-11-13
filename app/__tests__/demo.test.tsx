@@ -11,7 +11,7 @@ const mockSave = jest.fn();
 const mockSavePin = jest.fn();
 const mockEnsureUser = jest.fn().mockResolvedValue('11111111-1111-4111-8111-111111111111');
 const mockUpsert = jest.fn().mockResolvedValue(undefined);
-const mockPersonal = { ...newProfile(), onboarded: true, calibrated: true };
+const mockPersonal = { ...newProfile('11111111-1111-4111-8111-111111111111'), onboarded: true, calibrated: true };
 let mockLoadedProfile = mockPersonal;
 const mockItems: Item[] = [
   { item_id: 'l1_a', level: 1, text: 'a', units: ['a'], priority: 'required', emoji: null, active: true },
@@ -19,10 +19,17 @@ const mockItems: Item[] = [
   { item_id: 'l3_mama', level: 3, text: 'mama', units: ['ma', 'ma'], priority: 'required', emoji: null, active: true },
 ];
 jest.mock('../src/state/content', () => ({ useContent: () => ({ items: mockItems }) }));
+jest.mock('../src/auth/companion', () => ({
+  onCompanionAuthChange: (listener: (session: unknown) => void) => {
+    listener({ user: { id: mockPersonal.userId } });
+    return () => {};
+  },
+}));
 jest.mock('../src/user/storage', () => ({
   loadProfile: async () => mockLoadedProfile,
   saveProfile: (...args: unknown[]) => mockSave(...args),
   savePin: (...args: unknown[]) => mockSavePin(...args),
+  verifyPin: async () => false,
 }));
 jest.mock('../src/data/supabase', () => ({ createRemote: () => ({
   ensureUser: () => mockEnsureUser(), upsert: (...args: unknown[]) => mockUpsert(...args),

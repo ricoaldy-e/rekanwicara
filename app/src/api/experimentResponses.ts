@@ -1,3 +1,4 @@
+import { COMMUNICATION_TARGETS } from '../content/communication';
 import type { CombinedResponse, Wav2Vec2Response } from './types';
 
 const object = (value: unknown): value is Record<string, unknown> =>
@@ -32,7 +33,7 @@ export function isCombinedResponse(value: unknown): value is CombinedResponse {
         visual.lip_contour.points.length >= 3 && visual.lip_contour.points.every((point: unknown) =>
           Array.isArray(point) && point.length === 2 && point.every((coordinate: unknown) => number(coordinate) && coordinate <= 1)))));
   const partial = [asr, audio, visual].some((component) => object(component) && component.status === 'unavailable');
-  if (!object(feedback) || !['tolong', 'saya tuli', 'hai', 'makan'].includes(String(value.target))) return false;
+  if (!object(feedback) || !COMMUNICATION_TARGETS.some((item) => item.value === value.target)) return false;
   const validFeedback = partial ? feedback.outcome === null && feedback.reason === 'component_unavailable' :
     feedback.outcome === 'berhasil' && feedback.reason === 'matched' ||
     feedback.outcome === 'mendekati' && feedback.reason === 'near_match' ||

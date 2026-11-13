@@ -1,5 +1,6 @@
 # ---------- Data and model artifacts (never committed) ----------
 /data/
+/ml/wav2vec2/local/
 server/models/*.task
 *.joblib
 *.pt

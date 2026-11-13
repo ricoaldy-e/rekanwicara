@@ -21,7 +21,7 @@ function describeError(error: unknown): string {
     if (error.status === 404) return 'Eksperimen belum aktif di laptop. Jalankan server dengan DEBUG=true.';
     if (error.code === 'wav2vec2_unavailable') return 'Wav2Vec2 belum siap di laptop. Periksa setup model eksperimen.';
     if (error.code === 'audio_missing') return 'Rekaman tidak memiliki suara. Periksa izin mikrofon, lalu rekam lagi.';
-    if (error.code === 'audio_too_long') return 'Rekaman terlalu panjang. Coba rekam kata atau frasa sekali lagi.';
+    if (error.code === 'audio_too_long') return 'Rekaman terlalu panjang. Coba rekam target sekali lagi.';
   }
   return errorMessage(error);
 }
@@ -84,13 +84,13 @@ export function SpeechExperiment({ combined = false }: { combined?: boolean }) {
   return (
     <Screen>
       <Stack.Screen options={{ title: combined ? 'Uji Gabungan' : 'Uji Wav2Vec2' }} />
-      <Title>Latihan kata sehari-hari</Title>
-      <Body>Pilih kata atau frasa, lalu rekam ucapanmu dan lihat teks yang terbaca.</Body>
+      <Title>Latihan suku kata dan kata</Title>
+      <Body>Pilih suku kata, kata, atau frasa, lalu rekam ucapanmu dan lihat teks yang terbaca.</Body>
       <InfoNote text={combined ? 'Video dan suara dikirim ke laptop. MediaPipe memeriksa indikasi berbicara; Wav2Vec2 membaca ucapan. Berhasil memerlukan keduanya lulus. Mendekati berarti teks yang terbaca mirip target, bukan nilai pelafalan. Hasil tidak disimpan sebagai progres latihan.' : 'Eksperimen ini membandingkan teks, belum menilai ketepatan tiap bunyi. Video dan suara dikirim ke laptop; hanya suara yang dianalisis. Hasil tidak disimpan sebagai progres latihan.'} />
       {mode === 'choose' ? (
         <>
           <OptionGroup label="Pilih target latihan" options={COMMUNICATION_TARGETS} value={target} onChange={setTarget} />
-          <BigButton label="Latih kata ini" icon="arrow-forward" onPress={() => setMode('record')} />
+          <BigButton label="Latih target ini" icon="arrow-forward" onPress={() => setMode('record')} />
         </>
       ) : (
         <>
@@ -134,7 +134,7 @@ export function SpeechExperiment({ combined = false }: { combined?: boolean }) {
       {mode !== 'choose' && upload.status !== 'uploading' ? (
         <>
           {mode === 'result' ? <BigButton label="Rekam lagi" icon="refresh" onPress={() => restart('record')} /> : null}
-          <BigButton label="Pilih kata lain" icon="list" variant="secondary" onPress={() => restart('choose')} />
+          <BigButton label="Pilih target lain" icon="list" variant="secondary" onPress={() => restart('choose')} />
         </>
       ) : null}
     </Screen>

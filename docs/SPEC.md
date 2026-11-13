@@ -93,6 +93,24 @@ Semua endpoint di bawah prefix `/v1`. Upload memakai `multipart/form-data`.
 ### GET /v1/health
 `{"status":"ok","engine_version":"0.1.0","scorer_mode":"rules","mock_mode":false}`
 
+### DELETE /v1/auth/account
+
+Header wajib `Authorization: Bearer <access_token>` dari sesi Supabase Auth pendamping.
+Tidak menerima ID akun sebagai parameter. Server memverifikasi token melalui Supabase
+`GET /auth/v1/user`, menolak akun anonim, lalu memakai service role key **khusus server**
+untuk `DELETE /auth/v1/admin/users/{verified_user_id}` (hard delete). Foreign key schema
+yang sudah ada menghapus profil/attempt/progress/listen_checks milik akun itu melalui
+ON DELETE CASCADE; tidak ada perubahan tabel/RLS/policy. Penghapusan hanya atas permintaan
+eksplisit pengguna, bukan saat logout atau pergantian akun. Respons 200:
+`{"status":"deleted"}`. Client meminta password untuk reauthentication sebelum memanggil
+endpoint, lalu membersihkan sesi dan penyimpanan lokal akun yang dihapus.
+
+Error berformat standar §5: 401 `auth_required`/`auth_invalid`, 403 `companion_required`,
+502 `account_delete_failed`, 503 `auth_not_configured`/`auth_unavailable`. Tidak meneruskan
+pesan upstream, token, password atau kunci. `SUPABASE_URL` HTTPS dan
+`SUPABASE_SERVICE_ROLE_KEY` disimpan di server/.env; jika kosong endpoint gagal tertutup.
+Tidak mengubah autentikasi atau kontrak endpoint latihan yang sudah ada.
+
 ### GET /v1/items
 Daftar materi aktif dari `items.json`.
 
@@ -210,7 +228,7 @@ sesuai atau konversi timeout; 503 alat media/temp tidak tersedia, model/venv bel
 504 inferensi timeout (`wav2vec2_timeout`). Tidak meneruskan stderr, path, atau traceback.
 Endpoint tidak didaftarkan saat `DEBUG=false` dan tidak bergantung pada `MOCK_MODE`.
 
-Layar pengembangan menawarkan Tolong / Saya Tuli / Hai / Makan. Target dipilih dan dikunci
+Layar pengembangan menawarkan Tolong / Saya Tuli / Hai / Makan / PA / MA. Target dipilih dan dikunci
 sebelum merekam, tidak dikirim sebagai prompt ke model. App hanya membandingkan teks
 setelah mengabaikan kapitalisasi, tanda baca, dan spasi berulang; tidak melakukan fuzzy
 matching atau koreksi kata. Hasil mentah tetap ditampilkan. Kecocokan teks bukan skor
@@ -224,7 +242,7 @@ transkripsi untuk kategori teks. Parselmouth tidak dijalankan pada endpoint ini.
 Pipeline utama `/analyze` untuk materi lama tetap terpisah.
 
 Multipart: `file` (MP4/MOV dengan audio, batas upload yang sama) dan `target`, salah satu
-`tolong`, `saya tuli`, `hai`, `makan`. Target dikunci sebelum merekam dan hanya dipakai
+`tolong`, `saya tuli`, `hai`, `makan`, `pa`, `ma`. Target dikunci sebelum merekam dan hanya dipakai
 untuk pembandingan sesudah inferensi; tidak diberikan kepada decoder Wav2Vec2.
 
 | Field respons | Kontrak |
@@ -436,12 +454,29 @@ Kalimat petunjuk ada di `server/app/content/hints.json` (salinan juga di app). L
 Tanpa isyarat suara; teks besar; kontras tinggi; ikon + teks; tombol besar; animasi seperlunya; semua instruksi bergambar.
 
 ## §9 Supabase
-Tabel (RLS aktif, autentikasi anonim; `user_id = auth.uid()`):
+Tabel (RLS aktif, sesi email/password pendamping; `user_id = auth.uid()`):
 - `profiles(user_id uuid pk, display_name text, created_at)`
 - `attempts(id uuid pk, user_id, session_id, item_id, level int, status text, overall text, score real, indicators jsonb, hint_id text, scorer text, engine_version text, created_at)`
 - `progress(user_id, item_id, stage text, last_10 jsonb, sessions_count int, passed_at timestamptz, next_review_at timestamptz, pk(user_id,item_id))`
 - `listen_checks(id, user_id, item_id, result text, created_at)`
 Tidak ada video/audio di Supabase. App punya antrean lokal (AsyncStorage) bila offline, sinkron saat online.
+
+Autentikasi pendamping: register/login/logout email/password melalui client Supabase yang
+sudah ada. Sesi persisten di AsyncStorage, refresh di foreground, listener INITIAL_SESSION/
+SIGNED_IN/SIGNED_OUT/TOKEN_REFRESHED memperbarui state akun tanpa menambah UI/navigasi.
+Login anonim otomatis dihentikan. Akun/profil/PIN lama tidak dihapus atau diimpor otomatis.
+Profil/antrean baru disimpan per auth.uid(); signed-out memakai ruang lokal terpisah yang
+tidak disinkronkan ke akun berikutnya. PIN empat angka disimpan per akun di SecureStore;
+pembuatan menolak penimpaan PIN yang sudah ada, perubahan wajib memverifikasi PIN saat ini.
+CRUD profil memakai kolom existing `user_id, display_name, created_at`; penghapusan adalah
+penghapusan akun Auth di atas, karena policy existing tidak mengizinkan DELETE profil.
+Register menerima nama melalui options.data.display_name Supabase Auth. Public profiles
+dibuat saat register jika sesi tersedia, atau pada login pertama setelah konfirmasi
+email; tanpa sesi, RLS tetap menolak penulisan profil. Nama existing tidak ditimpa saat
+login, dan sinkronisasi antrean tidak membuat profil placeholder. Tidak menambah trigger.
+Reset password melalui email/token recovery lalu updateUser; secure password change
+mendukung reauthentication nonce. Rincian fungsi, setup dan batas UI di
+`docs/supabase/AUTH.md`.
 
 ## §10 Dataset (versi tim 3 orang, maksimal 100 video)
 

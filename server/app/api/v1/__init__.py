@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.api.v1 import (
     allosaurus,
     analysis,
+    auth,
     combined,
     dataset,
     debug,
@@ -16,6 +17,7 @@ from app.api.v1 import (
 def build_v1_router(dataset_mode: bool, debug_mode: bool = False) -> APIRouter:
     router = APIRouter()
     router.include_router(health.router)
+    router.include_router(auth.router)
     router.include_router(items.router)
     router.include_router(analysis.router)
     router.include_router(model_video.router)

@@ -49,7 +49,7 @@ export interface ListenCheck {
 }
 
 export interface Profile {
-  /** Sent as `user_id` to the server (calibration key). Supabase rows use auth.uid() instead. */
+  /** auth.uid() for signed-in accounts; an isolated local id for signed-out practice. */
   userId: string;
   onboarded: boolean;
   consentUser: boolean;
@@ -76,9 +76,9 @@ export function makeUuid(): string {
   });
 }
 
-export function newProfile(): Profile {
+export function newProfile(userId = makeId('u')): Profile {
   return {
-    userId: makeId('u'),
+    userId,
     onboarded: false,
     consentUser: false,
     consentCompanion: false,

@@ -50,6 +50,10 @@ class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class AccountDeletionResponse(_Strict):
+    status: Literal["deleted"] = "deleted"
+
+
 # ---------- GET /v1/health ----------
 
 
@@ -220,7 +224,7 @@ class ExperimentFailure(_Strict):
     ]
 
 
-CommunicationTarget = Literal["tolong", "saya tuli", "hai", "makan"]
+CommunicationTarget = Literal["tolong", "saya tuli", "hai", "makan", "pa", "ma"]
 SpeechOutcome = Literal["berhasil", "mendekati", "coba_lagi"]
 
 

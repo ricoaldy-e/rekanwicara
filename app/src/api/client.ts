@@ -1,4 +1,5 @@
 import type {
+  AccountDeletionResponse,
   AllosaurusResponse,
   Wav2Vec2Response,
   CombinedResponse,
@@ -41,6 +42,7 @@ export interface ApiClient {
   readonly baseUrl: string;
   getHealth(): Promise<HealthResponse>;
   getItems(): Promise<ItemsResponse>;
+  deleteAccount(accessToken: string): Promise<AccountDeletionResponse>;
   analyze(req: AnalyzeRequest, options?: AnalysisCallOptions): Promise<AnalyzeResponse>;
   calibrate(req: CalibrateRequest, options?: AnalysisCallOptions): Promise<CalibrateResponse>;
   datasetUpload(req: DatasetUploadRequest, options?: UploadCallOptions): Promise<DatasetUploadResponse>;
@@ -112,6 +114,13 @@ export function createApiClient(baseUrl: string, options: ApiClientOptions = {})
     baseUrl: base,
     getHealth: () => request<HealthResponse>('/v1/health'),
     getItems: () => request<ItemsResponse>('/v1/items'),
+    async deleteAccount(accessToken) {
+      const body = await request<AccountDeletionResponse>('/v1/auth/account', {
+        method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (body?.status !== 'deleted') throw new ApiError('parse', 'Invalid account deletion result');
+      return body;
+    },
 
     analyze: ({ file, ...fields }, opts) =>
       upload<AnalyzeResponse>(`/v1/analyze${mockQuery(opts?.mock)}`, fields, file, opts),
