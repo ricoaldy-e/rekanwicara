@@ -1,5 +1,4 @@
-import { useNavigation } from 'expo-router';
-import { usePreventRemove } from '@react-navigation/native';
+import { useNavigation, usePreventRemove } from 'expo-router'; // not from @react-navigation/native (separate context)
 import { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 

@@ -13,8 +13,8 @@ const mockCamera = jest.fn<Promise<PickResult>, []>();
 const mockOpenSettings = jest.fn();
 let mockPrevent: { prevent: boolean; cb: (o: { data: { action: unknown } }) => void } = { prevent: false, cb: () => {} };
 
-jest.mock('expo-router', () => ({ useNavigation: () => ({ goBack: mockGoBack, dispatch: mockDispatch }) }));
-jest.mock('@react-navigation/native', () => ({
+jest.mock('expo-router', () => ({
+  useNavigation: () => ({ goBack: mockGoBack, dispatch: mockDispatch }),
   usePreventRemove: (prevent: boolean, cb: (o: { data: { action: unknown } }) => void) => {
     mockPrevent = { prevent, cb };
   },

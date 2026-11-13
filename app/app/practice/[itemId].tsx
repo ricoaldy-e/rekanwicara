@@ -1,5 +1,6 @@
-import { usePreventRemove } from '@react-navigation/native';
-import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+// usePreventRemove comes from expo-router: it has its own copy of react-navigation, and the standalone
+// @react-navigation/native would not find expo-router's navigation context ("Couldn't find a navigation object").
+import { Stack, useLocalSearchParams, useNavigation, usePreventRemove, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, PixelRatio, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 

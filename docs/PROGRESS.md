@@ -686,6 +686,11 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   (verifikasi kata sandi akun lewat `signIn`, lalu `create-pin`; PIN lama diganti saat PIN baru disimpan). Di mode tiruan sandi apa pun diterima kecuali `salah@contoh.id`. Lupa sandi (Q15) tetap tidak ada.
   (3) **Ringkasan Level 2** di kartu Pilih kata ("Level 2: x dari N sesuai · Level 3: …"), diambil per kartu lewat `useWordPath` (di v2 = satu permintaan per kata; saat memuat/gagal hanya Level 3 yang disebut).
   Catatan: kartu "Level 2 dan 3" di Beranda masih menghitung kata (Level 3) saja. Panduan: `docs/PANDUAN_JALANKAN_DAN_CEK.md`. Tes baru: `forgotPin.test.tsx` (5), `v2Auth.test.tsx` (9), tambahan di `words.test.tsx` dan `pin.test.tsx`. 45 suite / 566 tes.
+- Perbaikan 14 Nov 2026 (temuan di HP, iOS): layar latihan (`practice/[itemId]`) jatuh dengan "Couldn't find a navigation object" saat dibuka (dari Level 1 maupun Jalur kata). Sebabnya
+  `usePreventRemove` diimpor dari `@react-navigation/native`, paket terpisah dari salinan react-navigation milik expo-router, sehingga tidak menemukan konteks navigasinya. Berlaku sejak FL-4;
+  `WordForm` (FL-8b') punya kesalahan yang sama. Diperbaiki: keduanya memakai `usePreventRemove` dari `expo-router`. Tes tidak menangkapnya karena modulnya di-mock; ditambah
+  `navigationImports.test.ts` yang menggagalkan impor `@react-navigation/*` langsung. **Pelajaran:** alur rekam → hasil FL-4 belum pernah benar-benar jalan di HP sebelum ini; semua klaim
+  "alur v2" tetap belum teruji di perangkat sampai daftar periksa `docs/PANDUAN_JALANKAN_DAN_CEK.md` dijalankan. 46 suite / 567 tes.
 
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah

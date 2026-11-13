@@ -17,8 +17,8 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ back: mockBack }),
   useLocalSearchParams: () => ({ wordId: mockWordId }),
   useNavigation: () => ({ goBack: mockBack, dispatch: jest.fn() }),
+  usePreventRemove: () => {},
 }));
-jest.mock('@react-navigation/native', () => ({ usePreventRemove: () => {} }));
 jest.mock('expo-video', () => {
   const { View } = require('react-native');
   return { useVideoPlayer: () => ({}), VideoView: () => <View /> };

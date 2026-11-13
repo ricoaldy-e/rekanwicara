@@ -17,10 +17,10 @@ jest.mock('expo-router', () => {
     Stack: { Screen: () => <View /> },
     useLocalSearchParams: () => mockParams,
     useNavigation: () => ({ dispatch: jest.fn() }),
+    usePreventRemove: (...args: unknown[]) => mockPreventRemove(...args),
     useRouter: () => ({ back: jest.fn() }),
   };
 });
-jest.mock('@react-navigation/native', () => ({ usePreventRemove: (...args: unknown[]) => mockPreventRemove(...args) }));
 jest.mock('../src/data/useCatalog', () => ({
   usePracticeItem: () => ({ data: mockItem, loading: false, error: null, reload: jest.fn() }),
 }));
