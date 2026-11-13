@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, PixelRatio, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
@@ -18,7 +18,7 @@ import { SESSION_ID, useUser } from '../../src/state/user';
 import { colors, displayFont, fontSize, spacing } from '../../src/theme';
 import { attemptFromResponse } from '../../src/user/pure';
 
-/** SPEC §2 cycle: Lihat → Tiru → Bandingkan → Ulangi ("Ulangi" is the button that loops back to Tiru). */
+/** SPEC §2 cycle: Lihat → Tiru → Bandingkan → Ulangi. "Ulangi" is the button that loops back to Tiru, so 3 visible steps. */
 type Stage = 'look' | 'record' | 'send' | 'result';
 const STAGE_STEP: Record<Stage, { step: number; title: string }> = {
   look: { step: 1, title: 'Lihat' },
@@ -101,7 +101,8 @@ export default function Practice() {
   const { step, title } = STAGE_STEP[stage];
   return (
     <Screen>
-      <StepHeader step={step} total={4} title={title} />
+      <Stack.Screen options={{ title: `Ucapkan “${item.text}”` }} />
+      <StepHeader step={step} total={3} title={title} />
 
       {stage === 'look' ? (
         <>

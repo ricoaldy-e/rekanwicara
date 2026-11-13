@@ -7,7 +7,7 @@ import { colors, fontSize, radius, spacing } from '../theme';
 
 const STAGES: Record<Stage, { label: string; icon: ComponentProps<typeof Ionicons>['name'] }> = {
   terkunci: { label: 'Terkunci', icon: 'lock-closed' },
-  berlatih: { label: 'Berlatih', icon: 'barbell' },
+  berlatih: { label: 'Berlatih', icon: 'mic' },
   lulus: { label: 'Lulus', icon: 'trophy' },
   ulasan: { label: 'Waktunya ulasan', icon: 'refresh-circle' },
   macet: { label: 'Butuh bantuan', icon: 'help-circle' },

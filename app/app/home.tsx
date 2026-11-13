@@ -52,7 +52,7 @@ export default function Home() {
       footer={
         <BottomBar
           items={[
-            { key: 'practice', label: 'Latihan', icon: 'barbell-outline', active: true, onPress: () => {} },
+            { key: 'practice', label: 'Latihan', icon: 'mic-outline', active: true, onPress: () => {} },
             { key: 'companion', label: 'Pendamping', accessibilityLabel: 'Mode Pendamping', icon: 'people-outline', onPress: () => router.push('/companion') },
             { key: 'about', label: 'Tentang', accessibilityLabel: 'Tentang aplikasi', icon: 'information-circle-outline', onPress: () => router.push('/about') },
           ]}
