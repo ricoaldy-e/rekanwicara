@@ -35,11 +35,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: spacing.sm,
     padding: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: radius.tile,
     borderWidth: 2,
     borderColor: colors.infoBorder,
     backgroundColor: colors.infoBg,
   },
-  warning: { borderColor: colors.danger, backgroundColor: '#FDECEA' },
+  warning: { borderColor: colors.danger, backgroundColor: colors.warningBg },
   text: { flex: 1, fontSize: fontSize.body, color: colors.text, lineHeight: 28 },
 });

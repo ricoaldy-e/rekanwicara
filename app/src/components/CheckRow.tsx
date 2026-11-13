@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderWidth: 2,
     borderColor: colors.border,
-    borderRadius: radius.lg,
+    borderRadius: radius.card,
   },
   on: { backgroundColor: colors.infoBg, borderColor: colors.primary },
   text: { flex: 1, fontSize: fontSize.body, color: colors.text },

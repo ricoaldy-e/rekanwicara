@@ -7,7 +7,7 @@ import type { Item } from '../api/types';
 import { BigButton, Body, Card, InfoNote, LipIllustration } from '../components';
 import { unitShapes } from '../results/lipShapes';
 import { useSettings } from '../state/settings';
-import { colors, fontSize, radius, spacing } from '../theme';
+import { colors, fontSize, overlay, radius, spacing } from '../theme';
 
 /** "Lihat": play the model video, with text and lip drawings when it is missing or fails. */
 export function ModelVideo({ item }: { item: Item }) {
@@ -106,16 +106,16 @@ const styles = StyleSheet.create({
   frame: {
     width: '100%',
     aspectRatio: 3 / 4,
-    borderRadius: radius.lg,
+    borderRadius: radius.card,
     overflow: 'hidden',
-    backgroundColor: '#000000',
+    backgroundColor: overlay.background,
     borderWidth: 3,
     borderColor: colors.border,
   },
   video: { width: '100%', height: '100%' },
   fallback: { alignItems: 'center', gap: spacing.md },
   emoji: { fontSize: fontSize.display },
-  word: { fontSize: fontSize.display, fontWeight: '800', color: colors.text },
+  word: { fontSize: fontSize.display, fontWeight: '700', color: colors.text },
   units: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: spacing.md },
   unit: { alignItems: 'center', gap: spacing.xs },
   shapes: { flexDirection: 'row', gap: spacing.xs },

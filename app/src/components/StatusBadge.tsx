@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import type { Status } from '../api/types';
-import { fontSize, radius, spacing, statusStyles } from '../theme';
+import { colors, fontSize, radius, spacing, statusStyles } from '../theme';
 
 export interface StatusBadgeProps {
   status: Status;
@@ -39,9 +39,9 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: radius.md,
+    borderRadius: radius.tile,
     borderWidth: 2,
-    borderColor: '#111111',
+    borderColor: colors.text,
   },
   badgeLg: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
   text: { fontSize: fontSize.body, fontWeight: '700' },

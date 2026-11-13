@@ -69,7 +69,7 @@ export function PermissionGate({ children, purpose = DEFAULT_PURPOSE }: Permissi
 function PermissionIcon({ name, granted }: { name: 'camera' | 'mic'; granted: boolean }) {
   return (
     <View style={[styles.iconBox, granted && styles.iconGranted]}>
-      <Ionicons name={name} size={48} color={granted ? '#FFFFFF' : colors.primary} />
+      <Ionicons name={name} size={48} color={granted ? colors.onPrimary : colors.primary} />
     </View>
   );
 }
@@ -87,8 +87,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.background,
   },
-  iconGranted: { backgroundColor: '#1B5E20', borderColor: '#1B5E20' },
-  title: { fontSize: fontSize.large, fontWeight: '800', color: colors.text, marginBottom: spacing.sm },
+  iconGranted: { backgroundColor: colors.success, borderColor: colors.success },
+  title: { fontSize: fontSize.large, fontWeight: '700', color: colors.text, marginBottom: spacing.sm },
   body: { fontSize: fontSize.body, color: colors.text, lineHeight: 28, marginBottom: spacing.sm },
   status: { marginVertical: spacing.sm },
 });

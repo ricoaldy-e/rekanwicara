@@ -169,11 +169,11 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: fontSize.title, fontWeight: '800', color: colors.text },
-  levelTitle: { fontSize: fontSize.large, fontWeight: '800', color: colors.primary, marginTop: spacing.sm },
+  title: { fontSize: fontSize.title, fontWeight: '700', color: colors.text },
+  levelTitle: { fontSize: fontSize.large, fontWeight: '700', color: colors.primary, marginTop: spacing.sm },
   center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.lg },
   gap: { gap: spacing.sm },
-  missionLabel: { fontSize: fontSize.body, fontWeight: '800', color: colors.primary, marginBottom: spacing.xs },
+  missionLabel: { fontSize: fontSize.body, fontWeight: '700', color: colors.primary, marginBottom: spacing.xs },
   step: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 48, paddingVertical: spacing.xs },
   stepText: { flex: 1, fontSize: fontSize.body, color: colors.text },
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },

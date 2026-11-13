@@ -1,7 +1,7 @@
 import Svg, { Circle, Line, Polygon, Polyline, Rect, Text as SvgText } from 'react-native-svg';
 
 import type { FormantPoint, LipContour, Loudness, VowelAnchors } from '../api/types';
-import { colors } from '../theme';
+import { chart, colors } from '../theme';
 import { toSvgPoints, lipRing, type LipShape, type Point } from './lipShapes';
 import { downsample, loudnessXY, nearestAnchor, vowelMapXY } from './scale';
 
@@ -100,7 +100,7 @@ export function LipMirror({ user, target, testID }: LipMirrorProps) {
       />
       <Polygon
         points={toSvgPoints(mirrorPoints(user.points))}
-        fill="rgba(17,17,17,0.18)"
+        fill={chart.userFill}
         stroke={colors.text}
         strokeWidth={4}
         strokeLinejoin="round"

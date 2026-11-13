@@ -1,10 +1,8 @@
 import Svg, { Ellipse, Line, Path, Polygon, Circle } from 'react-native-svg';
 
 import { lipOpening, lipPolygon, LIP_LABELS, toSvgPoints, type LipShape } from '../results/lipShapes';
-import { colors } from '../theme';
+import { colors, lip } from '../theme';
 
-const LIP_FILL = '#B04A5A';
-const MOUTH_DARK = '#2B0A10';
 
 function Lips({ shape, cx, cy, scale = 1 }: { shape: LipShape; cx: number; cy: number; scale?: number }) {
   const opening = lipOpening(shape, cx, cy, scale);
@@ -12,14 +10,14 @@ function Lips({ shape, cx, cy, scale = 1 }: { shape: LipShape; cx: number; cy: n
     <>
       <Polygon
         points={toSvgPoints(lipPolygon(shape, cx, cy, scale))}
-        fill={LIP_FILL}
+        fill={lip.fill}
         stroke={colors.text}
         strokeWidth={2}
         strokeLinejoin="round"
       />
-      {opening ? <Polygon points={toSvgPoints(opening)} fill={MOUTH_DARK} /> : null}
+      {opening ? <Polygon points={toSvgPoints(opening)} fill={lip.mouthDark} /> : null}
       {shape === 'closed' ? (
-        <Line x1={cx - 36 * scale} y1={cy} x2={cx + 36 * scale} y2={cy} stroke={MOUTH_DARK} strokeWidth={2.5} />
+        <Line x1={cx - 36 * scale} y1={cy} x2={cx + 36 * scale} y2={cy} stroke={lip.mouthDark} strokeWidth={2.5} />
       ) : null}
     </>
   );

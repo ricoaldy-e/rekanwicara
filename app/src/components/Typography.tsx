@@ -16,7 +16,7 @@ export function Body({ children, muted = false }: { children: ReactNode; muted?:
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: fontSize.title, fontWeight: '800', color: colors.text },
+  title: { fontSize: fontSize.title, fontWeight: '700', color: colors.text },
   body: { fontSize: fontSize.body, color: colors.text, lineHeight: 28 },
   muted: { color: colors.textMuted },
 });

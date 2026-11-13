@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { BigButton } from '../components/BigButton';
 import { ProgressBar } from '../components/ProgressBar';
-import { colors, fontSize, radius, spacing } from '../theme';
+import { colors, fontSize, overlay, radius, spacing } from '../theme';
 import { deleteLocalFile } from './localFile';
 import { PermissionGate } from './PermissionGate';
 import {
@@ -28,7 +28,6 @@ export interface RecordPanelProps {
   permissionPurpose?: string;
 }
 
-const REC_RED = '#C62828';
 const PROGRESS_INTERVAL_MS = 100;
 
 // Haptics are a visual-only UI's "beep" (CLAUDE.md: no sound cues). Never let them throw.
@@ -182,7 +181,7 @@ function RecorderCamera({
       </View>
 
       {state.phase === 'recording' || state.phase === 'finishing' ? (
-        <ProgressBar value={state.elapsedMs / durationMs} color={REC_RED} height={18} accessibilityLabel="Waktu rekam" />
+        <ProgressBar value={state.elapsedMs / durationMs} color={overlay.record} height={18} accessibilityLabel="Waktu rekam" />
       ) : null}
 
       <Text style={styles.hint}>{mountError ?? state.error ?? hint}</Text>
@@ -205,9 +204,9 @@ const styles = StyleSheet.create({
   frame: {
     width: '100%',
     aspectRatio: 3 / 4,
-    borderRadius: radius.lg,
+    borderRadius: radius.card,
     overflow: 'hidden',
-    backgroundColor: '#000000',
+    backgroundColor: overlay.background,
     borderWidth: 3,
     borderColor: colors.border,
   },
@@ -219,19 +218,19 @@ const styles = StyleSheet.create({
     height: '74%',
     borderRadius: 1000,
     borderWidth: 2,
-    borderColor: '#000000',
+    borderColor: overlay.background,
     padding: 0,
   },
-  ovalInner: { flex: 1, borderRadius: 1000, borderWidth: 5, borderColor: '#FFFFFF' },
-  ovalRecording: { borderColor: REC_RED },
+  ovalInner: { flex: 1, borderRadius: 1000, borderWidth: 5, borderColor: overlay.text },
+  ovalRecording: { borderColor: overlay.record },
   countOverlay: {
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: overlay.scrim,
   },
-  countText: { fontSize: 140, fontWeight: '900', color: '#FFFFFF', lineHeight: 160 },
-  countHint: { fontSize: fontSize.large, fontWeight: '700', color: '#FFFFFF' },
+  countText: { fontSize: 140, fontWeight: '700', color: overlay.text, lineHeight: 160 },
+  countHint: { fontSize: fontSize.large, fontWeight: '700', color: overlay.text },
   recBadge: {
     position: 'absolute',
     top: spacing.md,
@@ -239,14 +238,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: REC_RED,
+    backgroundColor: overlay.record,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: radius.md,
+    borderRadius: radius.tile,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: overlay.text,
   },
-  recDot: { width: 18, height: 18, borderRadius: 9, backgroundColor: '#FFFFFF' },
-  recText: { fontSize: fontSize.large, fontWeight: '900', color: '#FFFFFF', letterSpacing: 1 },
+  recDot: { width: 18, height: 18, borderRadius: 9, backgroundColor: overlay.text },
+  recText: { fontSize: fontSize.large, fontWeight: '700', color: overlay.text, letterSpacing: 1 },
   hint: { fontSize: fontSize.body, color: colors.text, textAlign: 'center' },
 });

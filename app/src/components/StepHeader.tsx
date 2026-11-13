@@ -27,10 +27,10 @@ export function StepHeader({ step, total, title }: StepHeaderProps) {
 const styles = StyleSheet.create({
   wrap: { gap: spacing.sm, marginBottom: spacing.md },
   step: { fontSize: fontSize.body, fontWeight: '700', color: colors.primary },
-  title: { fontSize: fontSize.title, fontWeight: '800', color: colors.text },
+  title: { fontSize: fontSize.title, fontWeight: '700', color: colors.text },
   track: {
     height: 12,
-    borderRadius: radius.md,
+    borderRadius: radius.tile,
     backgroundColor: colors.surface,
     borderWidth: 2,
     borderColor: colors.border,

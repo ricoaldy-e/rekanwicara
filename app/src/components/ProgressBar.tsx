@@ -30,7 +30,7 @@ export function ProgressBar({ value, color = colors.primary, height = 14, access
 const styles = StyleSheet.create({
   track: {
     width: '100%',
-    borderRadius: radius.md,
+    borderRadius: radius.tile,
     borderWidth: 2,
     borderColor: colors.border,
     backgroundColor: colors.surface,

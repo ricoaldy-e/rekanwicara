@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderWidth: 2,
-    borderRadius: radius.lg,
+    borderRadius: radius.card,
     padding: spacing.md,
   },
   pressable: { minHeight: touchTarget, justifyContent: 'center' },

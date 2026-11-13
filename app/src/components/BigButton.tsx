@@ -53,7 +53,7 @@ export function BigButton({
 const styles = StyleSheet.create({
   base: {
     minHeight: touchTarget,
-    borderRadius: radius.lg,
+    borderRadius: radius.card,
     borderWidth: 3,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,

@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     minHeight: touchTarget,
     borderWidth: 3,
     borderColor: colors.border,
-    borderRadius: radius.lg,
+    borderRadius: radius.card,
     paddingHorizontal: spacing.md,
     fontSize: fontSize.large,
     color: colors.text,

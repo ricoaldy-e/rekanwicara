@@ -2,7 +2,7 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 import { StyleSheet, View } from 'react-native';
 
 import { BigButton } from '../components/BigButton';
-import { colors, radius, spacing } from '../theme';
+import { overlay, colors, radius, spacing } from '../theme';
 
 export interface ClipPreviewProps {
   uri: string;
@@ -38,9 +38,9 @@ const styles = StyleSheet.create({
   frame: {
     width: '100%',
     aspectRatio: 3 / 4,
-    borderRadius: radius.lg,
+    borderRadius: radius.card,
     overflow: 'hidden',
-    backgroundColor: '#000000',
+    backgroundColor: overlay.background,
     borderWidth: 3,
     borderColor: colors.border,
   },

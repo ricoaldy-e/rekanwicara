@@ -30,7 +30,7 @@ export function CombinedObservations({ result }: { result: CombinedResponse }) {
     <>
       <Title>Hasil latihan</Title>
       {outcome && style ? (
-        <View accessible accessibilityLabel={`Hasil latihan: ${outcome.label}`} accessibilityLiveRegion="polite" style={{ backgroundColor: style.background, borderRadius: radius.md, padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+        <View accessible accessibilityLabel={`Hasil latihan: ${outcome.label}`} accessibilityLiveRegion="polite" style={{ backgroundColor: style.background, borderRadius: radius.tile, padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <Ionicons name={style.icon} size={32} color={style.foreground} />
           <Text style={{ color: style.foreground, fontSize: fontSize.large, fontWeight: '700' }}>{outcome.label}</Text>
         </View>
