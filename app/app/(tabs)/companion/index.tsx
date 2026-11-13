@@ -1,193 +1,140 @@
-import { useState } from 'react';
-import { Share, StyleSheet, Text, View } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-import { BigButton, Body, Card, CheckRow, InfoNote, Screen, StageBadge, Title } from '../../../src/components';
-import { OptionGroup } from '../../../src/components/OptionGroup';
+import { BigButton, Body, Card, ConfirmDialog, InfoNote, Screen, Snackbar, SourceChip, Title } from '../../../src/components';
+import { getWordStore } from '../../../src/data/media';
+import { useCatalog } from '../../../src/data/useCatalog';
+import { listMine, removeWord, type MyWord } from '../../../src/data/words';
+import { showFlash, useFlash } from '../../../src/forms/flash';
+import { fill, MESSAGES } from '../../../src/forms/messages';
 import { usePinSession } from '../../../src/pin/PinSession';
-import { useContent } from '../../../src/state/content';
-import { useUser } from '../../../src/state/user';
-import { colors, fontSize, radius, spacing, touchTarget } from '../../../src/theme';
-import { SESSION_MINUTES, type SessionMinutes } from '../../../src/user/pure';
-import { CONSULT_ADVICE, reportText, weeklySummary } from '../../../src/user/report';
+import { useSettings } from '../../../src/state/settings';
+import { colors, fontSize, spacing } from '../../../src/theme';
 
-type Stage = 'home' | 'pick' | 'listen';
-
-const MINUTE_OPTIONS = SESSION_MINUTES.map((m) => ({ value: String(m), label: `${m} menit` }));
-
-/** Mode Pendamping (SPEC §8.1): weekly summary, Uji Dengar, session length, text report. */
+/** Mode Pendamping (PEN-1): the companion's own words (add, edit, delete) and the read-only built-in words. */
 export default function Companion() {
-  const { items } = useContent();
-  const { profile, progress, sync, demo, addListenCheck, updateSettings, syncNow } = useUser();
+  const router = useRouter();
   const { lock } = usePinSession(); // the PIN gate lives in this tab's layout
-  const [stage, setStage] = useState<Stage>('home');
-  const [checkId, setCheckId] = useState<string | null>(null);
-  const [saved, setSaved] = useState<string | null>(null);
-  const [shareError, setShareError] = useState(false);
+  const { apiUrl } = useSettings();
+  const catalog = useCatalog({ baseUrl: apiUrl });
+  const store = getWordStore();
+  const [mine, setMine] = useState<MyWord[] | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [toDelete, setToDelete] = useState<MyWord | null>(null);
+  const [deleteFailed, setDeleteFailed] = useState(false);
+  const [flash, clearFlash] = useFlash();
 
-  const nameOf = (id: string) => items?.find((it) => it.item_id === id)?.text ?? id;
-  const summary = weeklySummary(progress, profile.attempts, new Date());
+  const load = useCallback(() => {
+    if (!store) return;
+    setLoadFailed(false);
+    listMine(store).then(setMine, () => setLoadFailed(true));
+  }, [store]);
+  useFocusEffect(load); // back from the form: show the saved word
 
-  const share = async () => {
-    setShareError(false);
+  const confirmDelete = async () => {
+    const word = toDelete;
+    setToDelete(null);
+    if (!word || !store) return;
+    setDeleteFailed(false);
     try {
-      await Share.share({ message: `${demo ? 'MODE DEMO — data contoh\n\n' : ''}${reportText(summary, nameOf)}` });
+      await removeWord(store, word.id);
+      showFlash(fill(MESSAGES.wordDeleted, { word: word.text.toLowerCase() }));
+      load();
+      catalog.reload();
     } catch {
-      setShareError(true); // the share sheet could not open; nothing is lost
+      setDeleteFailed(true);
     }
   };
 
-  if (stage === 'pick') {
-    const practised = (items ?? []).filter((it) => (progress.get(it.item_id)?.attempts ?? 0) > 0).sort((a, b) => b.level - a.level);
-    return (
-      <Screen>
-        <Title>Uji Dengar</Title>
-        <Body>Pilih kata yang akan diucapkan. Pendamping mendengarkan tanpa melihat layar hasil latihan.</Body>
-        {practised.length === 0 ? <InfoNote text="Belum ada materi yang dilatih." /> : null}
-        {practised.map((it) => (
-          <Card
-            key={it.item_id}
-            onPress={() => {
-              setCheckId(it.item_id);
-              setSaved(null);
-              setStage('listen');
-            }}
-            accessibilityLabel={`Uji Dengar ${it.text}`}
-            testID={`listen-pick-${it.item_id}`}
-          >
-            <Text style={styles.pickText}>
-              {it.emoji ? `${it.emoji} ` : ''}
-              {it.text}
-            </Text>
-          </Card>
-        ))}
-        <BigButton label="Kembali" variant="secondary" onPress={() => setStage('home')} />
-      </Screen>
-    );
-  }
-
-  if (stage === 'listen' && checkId) {
-    const item = items?.find((it) => it.item_id === checkId);
-    const record = (result: 'jelas' | 'belum_jelas') => {
-      addListenCheck(checkId, result);
-      setSaved(result === 'jelas' ? 'Tercatat: jelas.' : 'Tercatat: belum jelas.');
-    };
-    return (
-      <Screen>
-        <Title>Uji Dengar</Title>
-        <Card>
-          <View style={styles.center}>
-            <Text style={styles.big}>
-              {item?.emoji ? `${item.emoji} ` : ''}
-              {item?.text ?? checkId}
-            </Text>
-          </View>
-        </Card>
-        <Body>Minta pengguna mengucapkan kata ini dengan suara. Dengarkan, lalu pilih penilaianmu.</Body>
-        {saved ? (
-          <>
-            <InfoNote text={saved} testID="listen-saved" />
-            <BigButton label="Uji kata lain" icon="list" onPress={() => setStage('pick')} />
-            <BigButton label="Selesai" variant="secondary" onPress={() => setStage('home')} />
-          </>
-        ) : (
-          <>
-            <BigButton label="Jelas" icon="checkmark-circle" onPress={() => record('jelas')} testID="listen-clear" />
-            <BigButton label="Belum jelas" icon="close-circle" variant="secondary" onPress={() => record('belum_jelas')} testID="listen-unclear" />
-          </>
-        )}
-      </Screen>
-    );
-  }
+  const builtIn = catalog.data?.words.filter((w) => w.source === 'default') ?? [];
 
   return (
-    <Screen>
-      <Title>Mode Pendamping</Title>
-
-      <Card testID="weekly-summary">
-        <Text style={styles.heading}>Ringkasan 7 hari terakhir</Text>
-        <Body>Sesi latihan: {summary.sessions}</Body>
-        <Body>
-          Percobaan: {summary.attempts}
-          {summary.attempts > 0 ? `, ${summary.green} sesuai` : ''}
-        </Body>
-        <Body>Materi lulus: {summary.passed.length > 0 ? summary.passed.map(nameOf).join(', ') : '-'}</Body>
-        <Body>Perlu diulas: {summary.reviews.length > 0 ? summary.reviews.map(nameOf).join(', ') : '-'}</Body>
-        <Body>Macet: {summary.stuck.length > 0 ? summary.stuck.map(nameOf).join(', ') : '-'}</Body>
-      </Card>
-
-      {summary.stuck.length > 0 ? (
-        <InfoNote
-          tone="warning"
-          testID="consult-advice"
-          text={`${summary.stuck.map(nameOf).join(', ')}: ${CONSULT_ADVICE}`}
-        />
-      ) : null}
-
-      <Card>
-        <Text style={styles.heading}>Tahap tiap materi</Text>
-        {(items ?? []).map((it) => {
-          const p = progress.get(it.item_id);
-          return p && p.attempts > 0 ? (
-            <View key={it.item_id} style={styles.stageRow}>
-              <Text style={styles.stageName}>{it.text}</Text>
-              <StageBadge stage={p.stage} />
-            </View>
-          ) : null;
-        })}
-        {!(items ?? []).some((it) => (progress.get(it.item_id)?.attempts ?? 0) > 0) ? <Body muted>Belum ada latihan.</Body> : null}
-      </Card>
-
-      <BigButton label="Uji Dengar" icon="ear" onPress={() => setStage('pick')} testID="open-listen" />
-      <BigButton label="Bagikan laporan teks" icon="share-social" variant="secondary" onPress={share} testID="share-report" />
-      {shareError ? <InfoNote tone="warning" text="Laporan belum bisa dibagikan. Coba lagi." /> : null}
-
-      <Text style={styles.heading}>Pengaturan</Text>
-      <OptionGroup
-        label="Lama sesi latihan"
-        options={MINUTE_OPTIONS}
-        value={String(profile.settings.sessionMinutes)}
-        onChange={(v) => updateSettings({ sessionMinutes: Number(v) as SessionMinutes })}
-        testID="session-minutes"
-      />
-      <CheckRow
-        checked={profile.settings.listenCheckRequired}
-        onToggle={() => updateSettings({ listenCheckRequired: !profile.settings.listenCheckRequired })}
-        text="Level 3 baru lulus setelah satu Uji Dengar yang jelas"
-        testID="setting-listen"
-      />
-      <CheckRow
-        checked={profile.settings.unlockAll}
-        onToggle={() => updateSettings({ unlockAll: !profile.settings.unlockAll })}
-        text="Buka semua materi"
-        testID="setting-unlock"
-      />
-
-      <Text style={styles.heading}>Penyimpanan online</Text>
-      {demo ? (
-        <InfoNote text="Mode demo: hasil hanya ada selama sesi ini dan tidak dikirim ke penyimpanan online." testID="sync-demo" />
-      ) : !sync.configured ? (
-        <InfoNote text="Penyimpanan online belum disambungkan. Hasil latihan tersimpan di HP ini." testID="sync-off" />
+    <Screen footer={<Snackbar message={flash} onDismiss={clearFlash} />}>
+      <Title>Kata saya</Title>
+      {!store ? (
+        <InfoNote text={MESSAGES.companionWordsUnavailable} testID="companion-unavailable" />
       ) : (
         <>
-          <View testID="sync-status" accessibilityLiveRegion="polite">
-            <Body>{sync.running ? 'Sedang menyinkronkan catatan…' : sync.pending > 0 ? `${sync.pending} catatan menunggu dikirim.` : profile.attempts.length + profile.listenChecks.length > 0 ? 'Semua catatan sudah tersimpan online.' : 'Belum ada catatan untuk dikirim.'}</Body>
-            {sync.lastSyncedAt ? <Body muted>Terakhir disinkronkan: {new Date(sync.lastSyncedAt).toLocaleString('id-ID')}</Body> : null}
-          </View>
-          {sync.lastError ? <InfoNote tone="warning" text={`Belum terkirim: ${sync.lastError}`} testID="sync-error" /> : null}
-          <BigButton label={sync.running ? 'Menyinkronkan…' : 'Sinkronkan sekarang'} icon="cloud-upload" variant="secondary" disabled={sync.running} onPress={syncNow} />
+          <BigButton label="Tambah kata" icon="add" onPress={() => router.push('/companion/words/new')} testID="add-word" />
+          {deleteFailed ? <InfoNote tone="warning" text={MESSAGES.deleteFailed} testID="delete-failed" /> : null}
+          {loadFailed ? (
+            <>
+              <InfoNote tone="warning" text="Daftar kata belum bisa dimuat." />
+              <BigButton label="Coba lagi" icon="refresh" variant="secondary" onPress={load} />
+            </>
+          ) : !mine ? (
+            <ActivityIndicator size="large" color={colors.text} accessibilityLabel="Memuat kata" />
+          ) : mine.length === 0 ? (
+            <Body muted>{MESSAGES.companionEmpty}</Body>
+          ) : (
+            mine.map((w) => (
+              <Card key={w.id} testID={`mine-${w.id}`}>
+                <View style={styles.gap}>
+                  <Text maxFontSizeMultiplier={2} style={styles.word}>{w.text}</Text>
+                  <Text maxFontSizeMultiplier={2} style={styles.meta}>
+                    {w.syllableCount > 0 ? `${w.syllableCount} suku kata` : 'Tanpa suku kata'}
+                  </Text>
+                  {!w.complete ? (
+                    <View style={styles.incomplete} accessible accessibilityLabel={`${w.text}: ${MESSAGES.wordIncomplete}`}>
+                      <Ionicons name="warning-outline" size={20} color={colors.danger} />
+                      <Text style={styles.incompleteText}>{MESSAGES.wordIncomplete}</Text>
+                    </View>
+                  ) : null}
+                  <View style={styles.actions}>
+                    <BigButton
+                      label="Ubah"
+                      icon="create-outline"
+                      variant="secondary"
+                      accessibilityLabel={`Ubah ${w.text}`}
+                      onPress={() => router.push({ pathname: '/companion/words/[wordId]/edit', params: { wordId: w.id } })}
+                    />
+                    <BigButton label="Hapus" icon="trash-outline" variant="secondary" accessibilityLabel={`Hapus ${w.text}`} onPress={() => setToDelete(w)} />
+                  </View>
+                </View>
+              </Card>
+            ))
+          )}
         </>
       )}
 
+      <Title>Kata bawaan</Title>
+      <Body muted>Kata dari tim. Tidak bisa diubah atau dihapus.</Body>
+      {builtIn.map((w) => (
+        <Card key={w.id} testID={`builtin-${w.id}`}>
+          <View style={styles.gap}>
+            <Text maxFontSizeMultiplier={2} style={styles.word}>{w.text}</Text>
+            <SourceChip source="default" />
+          </View>
+        </Card>
+      ))}
+
       <BigButton label="Kunci kembali" icon="lock-closed" variant="secondary" onPress={lock} />
+
+      <ConfirmDialog
+        visible={toDelete !== null}
+        title={
+          toDelete
+            ? toDelete.syllableCount > 0
+              ? fill(MESSAGES.deleteWord, { word: toDelete.text.toLowerCase(), n: toDelete.syllableCount })
+              : fill(MESSAGES.deleteWordNoSyllables, { word: toDelete.text.toLowerCase() })
+            : ''
+        }
+        confirmLabel="Hapus"
+        danger
+        onCancel={() => setToDelete(null)}
+        onConfirm={confirmDelete}
+      />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  heading: { fontSize: fontSize.large, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
-  center: { alignItems: 'center', paddingVertical: spacing.md },
-  big: { fontSize: fontSize.display, fontWeight: '700', color: colors.text },
-  pickText: { fontSize: fontSize.large, fontWeight: '700', color: colors.text },
-  stageRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, paddingVertical: spacing.xs },
-  stageName: { fontSize: fontSize.body, fontWeight: '700', color: colors.text },
+  gap: { gap: spacing.sm },
+  word: { fontSize: fontSize.large, fontWeight: '700', color: colors.text },
+  meta: { fontSize: fontSize.small, color: colors.textMuted },
+  incomplete: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  incompleteText: { fontSize: fontSize.small, fontWeight: '700', color: colors.danger },
+  actions: { gap: spacing.sm },
 });

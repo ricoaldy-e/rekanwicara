@@ -13,6 +13,8 @@ export default function Layout() {
       <View style={{ flex: 1 }} onTouchStart={touch}>
         <Stack screenOptions={darkStackOptions}>
           <Stack.Screen name="index" options={{ title: 'Mode Pendamping' }} />
+          <Stack.Screen name="words/new" options={{ title: 'Tambah kata' }} />
+          <Stack.Screen name="words/[wordId]/edit" options={{ title: 'Ubah kata' }} />
         </Stack>
       </View>
     </PinGate>

@@ -15,6 +15,8 @@ export interface BigButtonProps {
   icon?: ComponentProps<typeof Ionicons>['name'];
   disabled?: boolean;
   accessibilityHint?: string;
+  /** Spoken name when the visible label is not enough on its own (e.g. "Hapus TOLONG"); defaults to the label. */
+  accessibilityLabel?: string;
   testID?: string;
 }
 
@@ -25,6 +27,7 @@ export function BigButton({
   icon,
   disabled = false,
   accessibilityHint,
+  accessibilityLabel,
   testID,
 }: BigButtonProps) {
   const reduceMotion = useReduceMotion();
@@ -36,7 +39,7 @@ export function BigButton({
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
       {...focusProps}

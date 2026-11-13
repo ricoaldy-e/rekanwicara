@@ -611,6 +611,17 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   lalu `auth.signOut()` (galat jaringan diabaikan; sesi lokal tetap dibuang), `lock()` sesi PIN, dan `/auth/sign-in`. PIN per akun tidak dihapus.
   K12 (belum dijawab): **cache akun tidak dihapus** (progres lokal ikut tinggal di HP). Alasan: percobaan yang belum tersinkron akan hilang, dan katalog tidak di-cache. Teks dialog "tetap tersimpan di akun" hanya benar untuk
   percobaan yang sudah tersinkron. Tes baru `settings.test.tsx` (9); tidak ada tes lama yang diubah. 40 suite / 516 tes. Belum teruji: Keluar luring dengan Supabase sungguhan, di perangkat.
+- FL-8a (13 Nov 2026): data kata Pendamping + daftar + hapus (dipecah atas izin Rico; formulir = FL-8b'). Keputusan Rico: `expo-image-picker` boleh dipasang (di FL-8b'), Supabase **tiruan saja** (K1).
+  Baru: `src/data/words.ts` (tipe baris seperti tabel kontrak, `WordStore`, `createWord`/`updateWord`/`removeWord`/`listMine` dengan kompensasi kontrak §6: unggah → baris kata → suku kata → video;
+  gagal di tahap mana pun menghapus baris dan berkas percobaan itu; ubah = unggah baru → ganti baris → baru hapus berkas lama; hapus = ambil path → hapus baris → hapus berkas, gagal → antrean),
+  `src/mock/words.ts` (AsyncStorage, diisi TOLONG dan MINUM dari `src/mock/words/*.json` dengan path video contoh; injeksi galat untuk tes), `src/data/media.ts` (`getWordStore()` = tiruan bila `USE_MOCK`,
+  selain itu `null`; `videoUrl()`), `src/data/supabaseWords.ts` (**belum dites, belum dinyalakan**: tabel `custom_*` dan bucket tidak ada di `schema.sql`; nama kolom mengikuti `words.ts`).
+  Katalog tiruan kini = kata bawaan JSON + kata dari store yang **lengkap** saja ("Belum lengkap" tidak sampai ke Pilih kata). Q7: riwayat kata terhapus otomatis hilang dari ringkasan karena ringkasan dihitung dari katalog.
+  `app/(tabs)/companion/index.tsx` diganti: "Kata saya" (jumlah suku kata, "Belum lengkap" ikon + teks, tombol "Ubah …"/"Hapus …"), "Tambah kata", "Kata bawaan" (chip Bawaan, tanpa tombol), "Kunci kembali";
+  hapus lewat `ConfirmDialog` dengan nama + jumlah suku kata, lalu snackbar. `BigButton` mendapat prop opsional `accessibilityLabel`. Rute sementara `companion/words/new` dan `words/[wordId]/edit` (diganti FL-8b').
+  Dibuang dari UI (Q11): ringkasan mingguan, Uji Dengar, lama sesi, laporan teks, status sinkron di layar Pendamping (berkas logikanya dibiarkan). `__tests__/companion.test.tsx` dihapus karena layarnya diganti.
+  Tes baru: `wordsData.test.ts` (12), `companionList.test.tsx` (7). 41 suite / 526 tes.
+  **K1 untuk FL-10:** `about.tsx` masih menulis Supabase menyimpan "tanpa video atau audio"; dengan kata Pendamping sungguhan (bukan tiruan) kalimat itu tidak benar lagi. Tidak diubah di sini.
 
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah
