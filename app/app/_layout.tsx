@@ -6,7 +6,7 @@ import { Text } from 'react-native';
 import { ContentProvider } from '../src/state/content';
 import { SettingsProvider } from '../src/state/settings';
 import { UserProvider, useUser } from '../src/state/user';
-import { colors, fontSize } from '../src/theme';
+import { colors, fontFamily, fontSize } from '../src/theme';
 
 function DemoIndicator() {
   const { demo } = useUser();
@@ -33,7 +33,11 @@ export default function RootLayout() {
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="onboarding" options={{ title: 'Selamat datang' }} />
             <Stack.Screen name="calibration" options={{ title: 'Kalibrasi' }} />
-            <Stack.Screen name="home" options={{ title: 'Rekan Wicara', headerBackVisible: false }} />
+            <Stack.Screen name="home" options={{
+                title: 'Rekan Wicara',
+                headerBackVisible: false,
+                headerTitleStyle: { fontFamily: fontFamily.display, fontSize: fontSize.large, fontWeight: '700', color: colors.text },
+              }} />
             <Stack.Screen name="practice/[itemId]" options={{ title: 'Latihan' }} />
             <Stack.Screen name="companion" options={{ title: 'Mode Pendamping' }} />
             <Stack.Screen name="dataset/index" options={{ title: 'Mode Dataset' }} />

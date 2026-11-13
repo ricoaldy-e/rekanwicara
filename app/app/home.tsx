@@ -1,16 +1,19 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { errorMessage } from '../src/api/errors';
-import { BigButton, Body, Card, InfoNote, Screen, StageBadge, StatusBadge } from '../src/components';
+import { BigButton, Body, Card, HeroCard, InfoNote, Screen, StageBadge, StatusBadge } from '../src/components';
+import { LevelTile } from '../src/components/LevelTile';
+import { StatTile } from '../src/components/StatTile';
 import { DATASET_MODE } from '../src/config';
 import { groupByLevel, LEVEL_NAMES } from '../src/content/levels';
 import { useContent } from '../src/state/content';
+import { defaultLevel, fraction, homeStats, levelLocked } from '../src/state/homeStats';
 import { planSession, seededRng, selectCore, type Role } from '../src/state/progression';
 import { useUser } from '../src/state/user';
-import { colors, fontSize, spacing } from '../src/theme';
+import { colors, fontFamily, fontSize, radius, spacing, touchTarget } from '../src/theme';
 
 const ROLE_LABEL: Record<Role, string> = {
   pemanasan: 'Pemanasan',
@@ -37,6 +40,13 @@ export default function Home() {
   const next = plan.find((s) => !s.done);
   const needsHelp = items?.some((i) => progress.get(i.item_id)?.stage === 'macet') && !selectCore(items, progress);
 
+  const groups = useMemo(() => (items ? groupByLevel(items) : []), [items]);
+  const [chosenLevel, setChosenLevel] = useState<number | null>(null); // display state only
+  const nextItem = next ? itemOf(next.itemId) : undefined;
+  const shownLevel = chosenLevel ?? defaultLevel(groups, nextItem?.level, progress);
+  const stats = homeStats(plan, items, progress);
+  const minutes = profile.settings.sessionMinutes;
+
   return (
     <Screen>
       {/* Hidden Settings: long-press the title for 2 s (for demo setup). */}
@@ -46,24 +56,78 @@ export default function Home() {
         accessibilityRole="header"
         accessibilityLabel="Misi hari ini"
       >
-        <Text style={styles.title}>Misi hari ini</Text>
+        <Text style={styles.kicker}>Misi hari ini</Text>
       </Pressable>
       {demo ? <InfoNote text="Mode demo: progres contoh. Hasil latihan di mode ini tidak disimpan online." /> : null}
 
       {!profile.calibrated ? (
         <View style={styles.gap}>
           <InfoNote text="Kalibrasi belum dilakukan. Dengan kalibrasi, hasil latihan lebih tepat untukmu." testID="calibration-banner" />
-          <BigButton label="Kalibrasi sekarang" icon="options" onPress={() => router.push('/calibration')} />
+          <BigButton label="Kalibrasi sekarang" icon="options" variant="secondary" onPress={() => router.push('/calibration')} />
         </View>
       ) : null}
+
+      {plan.length > 0 ? (
+        <HeroCard
+          title={nextItem ? `Siap latihan “${nextItem.text}”?` : 'Latihan hari ini'}
+          body={next ? `Langkah ${stats.stepsDone + 1} dari ${stats.stepsTotal}.` : needsHelp ? undefined : 'Sesi hari ini selesai.'}
+        >
+          {next ? <BigButton label="Mulai latihan" icon="play" onPress={() => open(next.itemId)} testID="mission-start" /> : null}
+        </HeroCard>
+      ) : needsHelp ? null : (
+        <HeroCard title="Pilih satu materi untuk mulai berlatih." />
+      )}
 
       {needsHelp ? (
         <InfoNote testID="mission-needs-help" text="Belum ada materi pengganti untuk latihan inti. Buka Mode Pendamping untuk memilih langkah berikutnya." />
       ) : null}
 
+      {groups.length > 0 ? (
+        <View style={styles.gap}>
+          <Text style={styles.sectionLabel}>Level</Text>
+          <View style={styles.tiles}>
+            {groups.map((g) => (
+              <LevelTile
+                key={g.level}
+                level={g.level}
+                name={LEVEL_NAMES[g.level] ?? ''}
+                locked={levelLocked(g.items, progress)}
+                selected={g.level === shownLevel}
+                onPress={() => setChosenLevel(g.level)}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
+
+      {items && items.length > 0 ? (
+        <View style={styles.gap}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>
+            Kemajuanmu
+          </Text>
+          <View style={styles.tiles}>
+            <StatTile
+              value={`${stats.stepsDone} / ${stats.stepsTotal}`}
+              caption="langkah"
+              ring={fraction(stats.stepsDone, stats.stepsTotal)}
+              accessibilityLabel={`${stats.stepsDone} dari ${stats.stepsTotal} langkah hari ini selesai`}
+            />
+            <StatTile
+              value={`${stats.greenCount}`}
+              caption="sesuai"
+              ring={fraction(stats.greenCount, stats.itemCount)}
+              accessibilityLabel={`${stats.greenCount} dari ${stats.itemCount} materi terakhir sesuai`}
+            />
+            <StatTile value={`${minutes}`} caption="menit sesi" accessibilityLabel={`Sesi ${minutes} menit`} />
+          </View>
+        </View>
+      ) : null}
+
       {plan.length > 0 ? (
         <Card testID="mission">
-          <Text style={styles.missionLabel}>Sesi hari ini · ±{profile.settings.sessionMinutes} menit</Text>
+          <Text accessibilityRole="header" style={styles.missionLabel}>
+            Langkah hari ini · ±{minutes} menit
+          </Text>
           {plan.map((step, k) => {
             const it = itemOf(step.itemId);
             if (!it) return null;
@@ -73,9 +137,9 @@ export default function Home() {
                 onPress={() => open(step.itemId)}
                 accessibilityRole="button"
                 accessibilityLabel={`${ROLE_LABEL[step.role]}: ${it.text}${step.done ? ', sudah dilatih hari ini' : ''}`}
-                style={styles.step}
+                style={({ pressed }) => [styles.step, pressed && styles.stepPressed]}
               >
-                <Ionicons name={step.done ? 'checkmark-circle' : 'ellipse-outline'} size={28} color={colors.text} />
+                <Ionicons name={step.done ? 'checkmark-circle' : 'ellipse-outline'} size={22} color={colors.text} />
                 <Text style={styles.stepText}>
                   {ROLE_LABEL[step.role]}: {it.emoji ? `${it.emoji} ` : ''}
                   {it.text}
@@ -83,15 +147,8 @@ export default function Home() {
               </Pressable>
             );
           })}
-          {next ? (
-            <BigButton label="Mulai" icon="play" onPress={() => open(next.itemId)} testID="mission-start" />
-          ) : needsHelp ? null : (
-            <Body>Sesi hari ini selesai. Terima kasih sudah berlatih!</Body>
-          )}
         </Card>
-      ) : needsHelp ? null : (
-        <Body muted>Pilih satu materi untuk mulai berlatih.</Body>
-      )}
+      ) : null}
 
       {health?.mock_mode ? <InfoNote text="Server dalam mode contoh (mock). Hasil bukan analisis sebenarnya." /> : null}
       {healthError && !error ? <InfoNote tone="warning" text={errorMessage(healthError)} /> : null}
@@ -116,41 +173,42 @@ export default function Home() {
         </View>
       ) : null}
 
-      {items
-        ? groupByLevel(items).map((group) => (
-            <View key={group.level} style={styles.gap}>
-              <Text accessibilityRole="header" style={styles.levelTitle}>
-                Level {group.level}: {LEVEL_NAMES[group.level] ?? ''}
-              </Text>
-              {group.items.map((item) => {
-                const p = progress.get(item.item_id);
-                const locked = p?.locked ?? false;
-                return (
-                  <Card
-                    key={item.item_id}
-                    onPress={locked ? undefined : () => open(item.item_id)}
-                    accessibilityLabel={`Latihan ${item.text}`}
-                    accessibilityHint={locked ? undefined : 'Buka latihan'}
-                    testID={`item-${item.item_id}`}
-                  >
-                    <View style={styles.itemRow}>
-                      {item.emoji ? <Text style={styles.emoji}>{item.emoji}</Text> : null}
-                      <Text style={styles.itemText}>{item.text}</Text>
-                    </View>
+      {groups
+        .filter((group) => group.level === shownLevel)
+        .map((group) => (
+          <View key={group.level} style={styles.gap}>
+            <Text accessibilityRole="header" style={styles.levelTitle}>
+              Level {group.level}: {LEVEL_NAMES[group.level] ?? ''}
+            </Text>
+            {group.items.map((item) => {
+              const p = progress.get(item.item_id);
+              const locked = p?.locked ?? false;
+              return (
+                <Card
+                  key={item.item_id}
+                  onPress={locked ? undefined : () => open(item.item_id)}
+                  accessibilityLabel={`Latihan ${item.text}`}
+                  accessibilityHint={locked ? undefined : 'Buka latihan'}
+                  testID={`item-${item.item_id}`}
+                >
+                  <View style={styles.itemRow}>
+                    {item.emoji ? (
+                      <Text accessible={false} style={styles.emoji}>
+                        {item.emoji}
+                      </Text>
+                    ) : null}
+                    <Text style={styles.itemText}>{item.text}</Text>
+                  </View>
+                  <View style={styles.badges}>
                     {p ? <StageBadge stage={p.stage} testID={`stage-${item.item_id}`} /> : null}
-                    {locked ? (
-                      <Body muted>Lulus satu materi Level {item.level - 1} dulu untuk membuka ini.</Body>
-                    ) : p?.last ? (
-                      <StatusBadge status={p.last} label="Terakhir" />
-                    ) : (
-                      <Body muted>Belum dicoba</Body>
-                    )}
-                  </Card>
-                );
-              })}
-            </View>
-          ))
-        : null}
+                    {locked ? null : p?.last ? <StatusBadge status={p.last} label="Terakhir" /> : <Body muted>Belum dicoba</Body>}
+                  </View>
+                  {locked ? <Body muted>Lulus satu materi Level {item.level - 1} dulu untuk membuka ini.</Body> : null}
+                </Card>
+              );
+            })}
+          </View>
+        ))}
 
       <View style={styles.footer}>
         <BigButton
@@ -169,15 +227,20 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: fontSize.title, fontWeight: '700', color: colors.text },
-  levelTitle: { fontSize: fontSize.large, fontWeight: '700', color: colors.text, marginTop: spacing.sm },
+  kicker: { fontSize: fontSize.small, color: colors.textMuted, paddingVertical: spacing.sm },
+  sectionLabel: { fontSize: fontSize.small, color: colors.textMuted },
+  sectionTitle: { fontFamily: fontFamily.display, fontSize: fontSize.large, fontWeight: '700', color: colors.text },
+  levelTitle: { fontFamily: fontFamily.display, fontSize: fontSize.large, fontWeight: '700', color: colors.text, marginTop: spacing.sm },
+  tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm + spacing.xs },
   center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.lg },
   gap: { gap: spacing.sm },
-  missionLabel: { fontSize: fontSize.body, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
-  step: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 48, paddingVertical: spacing.xs },
+  missionLabel: { fontSize: fontSize.label, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
+  step: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: touchTarget, paddingVertical: spacing.xs, borderRadius: radius.tile },
+  stepPressed: { backgroundColor: colors.surfaceRaised },
   stepText: { flex: 1, fontSize: fontSize.body, color: colors.text },
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  badges: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.sm, marginTop: spacing.sm },
   emoji: { fontSize: fontSize.title },
   itemText: { fontSize: fontSize.large, fontWeight: '700', color: colors.text },
-  footer: { gap: spacing.sm, marginTop: spacing.lg },
+  footer: { gap: spacing.md, marginTop: spacing.lg },
 });

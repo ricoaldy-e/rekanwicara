@@ -80,3 +80,21 @@ it('does not report missing alternatives when due reviews fill a short session',
   expect(screen.getByRole('button', { name: 'Ulasan: mi' })).toBeTruthy();
   expect(screen.queryByTestId('mission-needs-help')).toBeNull();
 });
+
+it('opens the hidden Settings with a long press on "Misi hari ini"', async () => {
+  await render(<Home />);
+  await fireEvent(screen.getByLabelText('Misi hari ini'), 'longPress');
+  expect(mockPush).toHaveBeenCalledWith('/settings');
+});
+
+it('lists only the chosen level', async () => {
+  mockItems = [material('l0_hold_a', 0), material('l2_ma', 2)];
+  mockProgress = buildProgress(mockItems, [], [], mockProfile.settings, new Date());
+  await render(<Home />);
+  await fireEvent.press(screen.getByRole('button', { name: /^Level 2: Suku kata/ }));
+  expect(screen.getByTestId('item-l2_ma')).toBeTruthy();
+  expect(screen.queryByTestId('item-l0_hold_a')).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: /^Level 0: Suara/ }));
+  expect(screen.getByTestId('item-l0_hold_a')).toBeTruthy();
+  expect(screen.queryByTestId('item-l2_ma')).toBeNull();
+});
