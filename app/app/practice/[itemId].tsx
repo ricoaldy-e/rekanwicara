@@ -1,9 +1,9 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, PixelRatio, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import type { AnalyzeResponse } from '../../src/api/types';
-import { BigButton, Body, InfoNote, Screen, StepHeader } from '../../src/components';
+import { BigButton, Body, Card, InfoNote, Screen, StepHeader } from '../../src/components';
 import { UploadStatus } from '../../src/components/UploadStatus';
 import { ModelVideo } from '../../src/practice/ModelVideo';
 import { deleteLocalFile, videoUpload } from '../../src/recording/localFile';
@@ -15,7 +15,7 @@ import { useContent } from '../../src/state/content';
 import { feedbackDetail, type Detail } from '../../src/state/progression';
 import { useSettings } from '../../src/state/settings';
 import { SESSION_ID, useUser } from '../../src/state/user';
-import { colors } from '../../src/theme';
+import { colors, fontFamily, fontSize, spacing } from '../../src/theme';
 import { attemptFromResponse } from '../../src/user/pure';
 
 /** SPEC §2 cycle: Lihat → Tiru → Bandingkan → Ulangi ("Ulangi" is the button that loops back to Tiru). */
@@ -34,6 +34,8 @@ export default function Practice() {
   const { items, loading } = useContent();
   const { api } = useSettings();
   const { profile, progress, addAttempt } = useUser();
+  const { width } = useWindowDimensions();
+  const sideBySide = width >= 360 && PixelRatio.getFontScale() <= 1.3;
   const item = items?.find((it) => it.item_id === itemId);
 
   const [stage, setStage] = useState<Stage>('look');
@@ -103,17 +105,30 @@ export default function Practice() {
 
       {stage === 'look' ? (
         <>
-          <ModelVideo item={item} />
+          <Card>
+            <ModelVideo item={item} />
+          </Card>
           {!profile.calibrated ? (
             <InfoNote text="Hasil lebih tepat setelah kalibrasi. Kalibrasi bisa dilakukan dari beranda." />
           ) : null}
-          <BigButton label="Mulai rekam" icon="videocam" onPress={() => setStage('record')} />
+          <View style={styles.actions}>
+            <BigButton label="Mulai rekam" icon="videocam" onPress={() => setStage('record')} />
+          </View>
         </>
       ) : null}
 
       {stage === 'record' ? (
         <>
-          <Body>Ucapkan: {item.text}</Body>
+          <View style={styles.target}>
+            {item.emoji ? (
+              <Text accessible={false} style={styles.targetEmoji}>
+                {item.emoji}
+              </Text>
+            ) : null}
+            <Text accessibilityLabel={`Ucapkan ${item.text}`} maxFontSizeMultiplier={1.5} style={styles.targetWord}>
+              {item.text}
+            </Text>
+          </View>
           <RecordPanel
             durationMs={item.level === 0 ? LEVEL0_DURATION_MS : DEFAULT_DURATION_MS}
             onRecorded={(file) => {
@@ -122,7 +137,9 @@ export default function Practice() {
             }}
             hint="Wajah di dalam oval. Mulai bicara setelah tulisan MEREKAM muncul."
           />
-          <BigButton label="Lihat contoh lagi" variant="secondary" onPress={() => setStage('look')} />
+          <View style={styles.actions}>
+            <BigButton label="Lihat contoh lagi" variant="secondary" onPress={() => setStage('look')} />
+          </View>
         </>
       ) : null}
 
@@ -130,14 +147,16 @@ export default function Practice() {
         <>
           <UploadStatus state={upload} onRetry={() => uri && send(uri)} />
           {upload.status === 'error' ? (
-            <BigButton
-              label="Rekam ulang"
-              variant="secondary"
-              onPress={() => {
-                discard();
-                setStage('record');
-              }}
-            />
+            <View style={styles.actions}>
+              <BigButton
+                label="Rekam ulang"
+                variant="secondary"
+                onPress={() => {
+                  discard();
+                  setStage('record');
+                }}
+              />
+            </View>
           ) : (
             <Body muted>Menilai rekamanmu…</Body>
           )}
@@ -147,18 +166,37 @@ export default function Practice() {
       {stage === 'result' && result ? (
         <>
           <ResultView result={result} detail={detail} />
-          <BigButton
-            label="Ulangi"
-            icon="refresh"
-            onPress={() => {
-              setResult(null);
-              setStage('record');
-            }}
-          />
-          <BigButton label="Lihat contoh lagi" variant="secondary" onPress={() => setStage('look')} />
-          <BigButton label="Selesai" variant="secondary" onPress={() => router.back()} />
+          <View style={styles.actions}>
+            <BigButton
+              label="Ulangi"
+              icon="refresh"
+              onPress={() => {
+                setResult(null);
+                setStage('record');
+              }}
+            />
+            <View style={sideBySide ? styles.pair : styles.stack}>
+              <View style={sideBySide ? styles.pairItem : undefined}>
+                <BigButton label="Lihat contoh lagi" variant="secondary" onPress={() => setStage('look')} />
+              </View>
+              <View style={sideBySide ? styles.pairItem : undefined}>
+                <BigButton label="Selesai" variant="secondary" onPress={() => router.back()} />
+              </View>
+            </View>
+          </View>
         </>
       ) : null}
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  // Screen already adds spacing.md between children; the extra spacing.sm makes 24 (spacing.lg) before actions.
+  actions: { marginTop: spacing.sm, gap: spacing.md },
+  stack: { gap: spacing.md },
+  pair: { flexDirection: 'row', gap: spacing.md },
+  pairItem: { flex: 1 },
+  target: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.md },
+  targetEmoji: { fontSize: fontSize.display },
+  targetWord: { fontFamily: fontFamily.display, fontSize: fontSize.display, fontWeight: '700', color: colors.text },
+});
