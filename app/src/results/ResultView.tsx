@@ -1,10 +1,10 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { PixelRatio, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import type { AnalyzeResponse } from '../api/types';
-import { Body, Card, InfoNote, StatusBadge } from '../components';
+import { Body, InfoNote, LipIllustration, StatusBadge } from '../components';
 import { getHint } from '../content/hints';
 import type { Detail } from '../state/progression';
-import { colors, fontSize, spacing } from '../theme';
+import { colors, fontFamily, fontSize, radius, spacing } from '../theme';
 import { LipMirror, LoudnessChart, VowelMap } from './charts';
 import { targetShape } from './lipShapes';
 
@@ -17,6 +17,8 @@ export const DISCLAIMER = 'Hasil ini perkiraan sistem untuk latihan, bukan penil
  */
 export function ResultView({ result, detail = 'full' }: { result: AnalyzeResponse; detail?: Detail }) {
   const hint = getHint(result.hint_id);
+  const { width } = useWindowDimensions();
+  const stacked = width < 360 || PixelRatio.getFontScale() > 1.3;
 
   if (result.status === 'ok' && detail === 'hidden') {
     return (
@@ -53,17 +55,28 @@ export function ResultView({ result, detail = 'full' }: { result: AnalyzeRespons
 
   return (
     <View style={styles.wrap} testID="result-ok">
-      <View style={styles.badges}>
+      {shape ? (
+        <View style={styles.target} testID="result-target">
+          <LipIllustration shape={shape} size={96} />
+          <View style={styles.targetText}>
+            <Text style={styles.targetLabel}>Bentuk bibir</Text>
+            <Text style={styles.targetWord}>{(result.units ?? []).map((u) => u.target).join('')}</Text>
+          </View>
+        </View>
+      ) : null}
+
+      <View style={stacked ? styles.badgesStacked : styles.badgesRow}>
         {indicators?.bibir ? <StatusBadge status={indicators.bibir} label="Bibir" size="lg" testID="result-bibir" /> : null}
         {indicators ? <StatusBadge status={indicators.suara} label="Suara" size="lg" testID="result-suara" /> : null}
       </View>
 
       {hint ? (
-        <Card>
+        <View style={styles.hintCard}>
+          <Text style={styles.hintLabel}>Petunjuk</Text>
           <Text style={styles.hint} testID="result-hint">
             {hint}
           </Text>
-        </Card>
+        </View>
       ) : null}
 
       {result.quality_flags.includes('uncalibrated') ? (
@@ -115,8 +128,15 @@ function Disclaimer() {
 
 const styles = StyleSheet.create({
   wrap: { gap: spacing.md },
-  badges: { gap: spacing.sm },
-  hint: { fontSize: fontSize.large, fontWeight: '700', color: colors.text, lineHeight: 32 },
+  badgesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  badgesStacked: { gap: spacing.sm },
+  target: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.card, padding: spacing.md },
+  targetText: { flex: 1, gap: spacing.xs },
+  targetLabel: { fontSize: fontSize.small, color: colors.textMuted },
+  targetWord: { fontFamily: fontFamily.display, fontSize: fontSize.title, fontWeight: '700', color: colors.text },
+  hintCard: { backgroundColor: colors.hero, borderRadius: radius.card, padding: 20, gap: spacing.xs },
+  hintLabel: { fontSize: fontSize.small, color: colors.onHeroMuted },
+  hint: { fontSize: fontSize.large, fontWeight: '700', color: colors.onHero },
   section: { gap: spacing.sm },
   sectionTitle: { fontSize: fontSize.large, fontWeight: '700', color: colors.text },
   disclaimer: { fontSize: fontSize.small, color: colors.textMuted },
