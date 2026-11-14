@@ -1,6 +1,6 @@
 /** Lip shapes drawn by the app itself (SPEC §8.1: no image files). Pure geometry, no UI. */
 
-export type LipShape = 'relaxed' | 'a' | 'i' | 'u' | 'closed';
+export type LipShape = 'relaxed' | 'a' | 'i' | 'u' | 'o' | 'closed';
 export type Point = [number, number];
 
 export const LIP_LABELS: Record<LipShape, string> = {
@@ -8,6 +8,7 @@ export const LIP_LABELS: Record<LipShape, string> = {
   a: 'Mulut terbuka lebar untuk bunyi a',
   i: 'Bibir melebar ke samping untuk bunyi i',
   u: 'Bibir membulat dan maju untuk bunyi u',
+  o: 'Bibir bulat setengah terbuka untuk bunyi o',
   closed: 'Bibir rapat',
 };
 
@@ -27,6 +28,7 @@ const SPECS: Record<LipShape, Spec> = {
   a: { width: 70, aspect: 1.6, power: 2, gap: 0.7 },
   i: { width: 100, aspect: 5, power: 1.6, gap: 0.3 },
   u: { width: 44, aspect: 1.1, power: 2.4, gap: 0.55 },
+  o: { width: 54, aspect: 1.3, power: 2.2, gap: 0.62 },
   closed: { width: 84, aspect: 9, power: 1.8, gap: 0 },
 };
 
@@ -69,7 +71,7 @@ export function toSvgPoints(points: readonly Point[]): string {
 export function unitShapes(unit: string): LipShape[] {
   if (unit === 'm_hum') return ['closed'];
   const v = unit[unit.length - 1];
-  const vowel: LipShape = v === 'a' || v === 'i' || v === 'u' ? v : 'relaxed';
+  const vowel: LipShape = v === 'a' || v === 'i' || v === 'u' || v === 'o' ? v : 'relaxed';
   return unit.length === 2 ? ['closed', vowel] : [vowel];
 }
 
@@ -77,5 +79,12 @@ export function unitShapes(unit: string): LipShape[] {
 export function targetShape(unitTargets: readonly string[]): LipShape | null {
   const last = unitTargets[unitTargets.length - 1];
   const v = last?.[last.length - 1];
-  return v === 'a' || v === 'i' || v === 'u' ? v : null;
+  return v === 'a' || v === 'i' || v === 'u' || v === 'o' ? v : null;
+}
+
+/** The shape of a Level 1 sound by its name: "A", "o", or a held vowel such as "A panjang". Null for "Pelan ke keras". */
+export function soundShape(text: string): LipShape | null {
+  const t = text.trim().toLowerCase();
+  const held = /^([aiueo]) panjang$/.exec(t);
+  return targetShape([held ? held[1] : t.length === 1 ? t : '']);
 }

@@ -5,7 +5,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { ApiError } from '../../../../src/api/apiError';
 import { errorMessage } from '../../../../src/api/errors';
 import { useFocusRing } from '../../../../src/a11y/useFocusRing';
-import { BigButton, InfoNote, Screen, SourceChip, StatusBadge, UntriedBadge } from '../../../../src/components';
+import { BigButton, InfoNote, LoadingView, Screen, SourceChip, StatusBadge, UntriedBadge } from '../../../../src/components';
 import { canAnalyze } from '../../../../src/data/analyze';
 import { bestStatus } from '../../../../src/data/progress';
 import type { PracticeItem } from '../../../../src/data/types';
@@ -27,7 +27,7 @@ export default function WordPath() {
     return (
       <Screen>
         {loading ? (
-          <ActivityIndicator size="large" color={colors.text} accessibilityLabel="Memuat kata" />
+          <LoadingView label="Memuat kata" />
         ) : error && !missing ? (
           <>
             <InfoNote tone="warning" text={errorMessage(error)} testID="word-error" />

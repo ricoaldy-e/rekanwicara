@@ -1,10 +1,10 @@
 import { useRouter } from 'expo-router';
 import type { ComponentProps } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import type Ionicons from '@expo/vector-icons/Ionicons';
 
 import { errorMessage } from '../../../src/api/errors';
-import { BigButton, Body, InfoNote, LetterTile, ListGroup, ListRow, ProgressRing, Screen, StatusBadge, UntriedBadge } from '../../../src/components';
+import { LoadingView, BigButton, Body, InfoNote, LetterTile, ListGroup, ListRow, ProgressRing, Screen, StatusBadge, UntriedBadge } from '../../../src/components';
 import { describeItem, lastStatus, summary } from '../../../src/data/progress';
 import { useCatalog } from '../../../src/data/useCatalog';
 import { fraction } from '../../../src/state/homeStats';
@@ -33,12 +33,7 @@ export default function LevelOne() {
     <Screen contentStyle={styles.content}>
       <Text accessibilityRole="header" maxFontSizeMultiplier={2} style={[styles.title, displayFont()]}>Level 1 · Bunyi vokal</Text>
 
-      {loading && !data ? (
-        <View style={styles.center} accessible accessibilityLabel="Memuat materi">
-          <ActivityIndicator size="large" color={colors.text} />
-          <Body>Memuat materi…</Body>
-        </View>
-      ) : null}
+      {loading && !data ? <LoadingView label="Memuat materi" text="Memuat materi…" /> : null}
 
       {error ? (
         <View style={styles.gap}>

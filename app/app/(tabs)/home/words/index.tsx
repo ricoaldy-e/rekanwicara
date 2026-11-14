@@ -1,12 +1,12 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useFocusRing } from '../../../../src/a11y/useFocusRing';
 import type { Source } from '../../../../src/api/types';
 import { errorMessage } from '../../../../src/api/errors';
-import { BigButton, Body, InfoNote, LetterTile, ListGroup, Screen, SegmentedControl, SourceChip, StatusBadge, UntriedBadge } from '../../../../src/components';
+import { LoadingView, BigButton, Body, InfoNote, LetterTile, ListGroup, Screen, SegmentedControl, SourceChip, StatusBadge, UntriedBadge } from '../../../../src/components';
 import { bestStatus, summary } from '../../../../src/data/progress';
 import type { WordSummary } from '../../../../src/data/types';
 import { useCatalog, useWordPath } from '../../../../src/data/useCatalog';
@@ -39,12 +39,7 @@ export default function Words() {
 
       <SegmentedControl testID="words-filter" accessibilityLabel="Filter kata" options={FILTERS} value={filter} onChange={setFilter} />
 
-      {loading && !data ? (
-        <View style={styles.center} accessible accessibilityLabel="Memuat kata">
-          <ActivityIndicator size="large" color={colors.text} />
-          <Body>Memuat kata…</Body>
-        </View>
-      ) : null}
+      {loading && !data ? <LoadingView label="Memuat kata" text="Memuat kata…" /> : null}
 
       {error ? (
         <View style={styles.gap}>

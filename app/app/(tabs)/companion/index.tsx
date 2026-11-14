@@ -3,7 +3,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-import { BigButton, Body, InfoNote, LetterTile, ListGroup, ListRow, Screen, Snackbar } from '../../../src/components';
+import { BigButton, Body, InfoNote, LetterTile, ListGroup, ListRow, LoadingView, Screen, Snackbar } from '../../../src/components';
 import { getWordStore } from '../../../src/data/media';
 import { useCatalog } from '../../../src/data/useCatalog';
 import { listMine, type MyWord } from '../../../src/data/words';
@@ -60,7 +60,7 @@ export default function Companion() {
               <BigButton label="Coba lagi" icon="refresh" variant="secondary" onPress={load} />
             </>
           ) : !mine ? (
-            <ActivityIndicator size="large" color={colors.text} accessibilityLabel="Memuat kata" />
+            <LoadingView label="Memuat kata" />
           ) : mine.length === 0 ? (
             <View style={styles.section}>
               <Text accessibilityRole="header" style={[styles.sectionTitle, textFont(true)]}>Kata saya</Text>

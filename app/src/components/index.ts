@@ -10,6 +10,7 @@ export { InfoNote } from './InfoNote';
 export { FaceGuide, LipIllustration } from './LipIllustration';
 export { LetterTile } from './LetterTile';
 export { LevelTile } from './LevelTile';
+export { LoadingView } from './LoadingView';
 export { LogoMark } from './LogoMark';
 export { ListGroup, ListRow } from './ListGroup';
 export { ProgressRing } from './ProgressRing';

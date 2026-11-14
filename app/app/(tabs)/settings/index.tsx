@@ -95,18 +95,20 @@ export default function Settings() {
               <Text maxFontSizeMultiplier={2} style={[styles.rowTitle, textFont(true)]}>Getar</Text>
               <Text maxFontSizeMultiplier={2} style={[styles.muted, textFont()]}>Saat merekam dan saat hasil muncul.</Text>
             </View>
-            <Text maxFontSizeMultiplier={2} style={[styles.switchState, textFont(true)]} testID="vibration-state">
-              {profile.settings.vibration ? 'Aktif' : 'Mati'}
-            </Text>
-            <Switch
-              accessibilityLabel="Getar"
-              testID="vibration-toggle"
-              value={profile.settings.vibration}
-              onValueChange={(vibration) => updateSettings({ vibration })}
-              trackColor={{ false: colors.surfaceRaised, true: colors.success }}
-              thumbColor={colors.primary}
-              ios_backgroundColor={colors.surfaceRaised}
-            />
+            <View style={styles.switchGroup}>
+              <Text maxFontSizeMultiplier={2} style={[styles.switchState, textFont(true)]} testID="vibration-state">
+                {profile.settings.vibration ? 'Aktif' : 'Mati'}
+              </Text>
+              <Switch
+                accessibilityLabel="Getar"
+                testID="vibration-toggle"
+                value={profile.settings.vibration}
+                onValueChange={(vibration) => updateSettings({ vibration })}
+                trackColor={{ false: colors.surfaceRaised, true: colors.success }}
+                thumbColor={colors.primary}
+                ios_backgroundColor={colors.surfaceRaised}
+              />
+            </View>
           </View>
         </ListGroup>
         <Text maxFontSizeMultiplier={2} style={[styles.muted, textFont()]}>Ukuran teks dan gerak mengikuti pengaturan HP.</Text>
@@ -225,7 +227,8 @@ const styles = StyleSheet.create({
   section: { fontSize: fontSize.small, color: colors.textMuted, marginTop: spacing.lg, paddingTop: spacing.md, borderTopWidth: stroke.thin, borderTopColor: colors.border },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: layout.sectionGap, minHeight: touchTarget, paddingVertical: companion.rowPadding },
   switchLabel: { flex: 1, fontSize: fontSize.body, color: colors.text },
-  switchState: { fontSize: fontSize.small, lineHeight: 20, color: colors.text },
+  switchGroup: { flexDirection: 'row', alignItems: 'center', alignSelf: 'center', gap: spacing.sm + spacing.xs / 2 },
+  switchState: { fontSize: fontSize.small, lineHeight: 20, color: colors.text, includeFontPadding: false, textAlignVertical: 'center' },
   inputInvalid: { borderColor: colors.danger },
   invalid: { fontSize: fontSize.body, color: colors.danger, fontWeight: '700' },
 });

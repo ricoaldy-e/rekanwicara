@@ -6,7 +6,7 @@ import { ActivityIndicator, StyleSheet, Text, View, useWindowDimensions } from '
 import { BigButton, Body, InfoNote, LipIllustration } from '../components';
 import { ANALYZE_API, type AnalyzeApi } from '../config';
 import type { PracticeItem } from '../data/types';
-import { targetShape } from '../results/lipShapes';
+import { soundShape } from '../results/lipShapes';
 import { useSettings } from '../state/settings';
 import { colors, displayFont, fontSize, lineHeight, radius, session, spacing, stroke, textFont } from '../theme';
 
@@ -125,7 +125,7 @@ function VideoCard({ children }: { children: ReactNode }) {
 
 function TextFallback({ item }: { item: PracticeItem }) {
   // A lip drawing only for a single Level 1 vowel; words and syllables show the text.
-  const shape = item.level === 1 ? targetShape([item.text.toLowerCase()]) : null;
+  const shape = item.level === 1 ? soundShape(item.text) : null;
   return (
     <VideoCard>
       <View style={styles.media} testID="model-fallback" accessibilityLabel={`Ucapkan ${item.text}`}>

@@ -7,7 +7,7 @@ import type { AnalyzeResult, PracticeItem } from '../data/types';
 import { colors, displayFont, fontSize, lineHeight, radius, result as metrics, spacing, statusStyles, stroke, textFont } from '../theme';
 import type { ResultStatus } from '../api/types';
 import { LipMirror, LoudnessChart, VowelMap } from './charts';
-import { targetShape } from './lipShapes';
+import { soundShape } from './lipShapes';
 
 export const DISCLAIMER = 'Hasil ini perkiraan sistem untuk latihan, bukan penilaian klinis.';
 
@@ -39,7 +39,7 @@ export function ResultView({ result, item }: { result: AnalyzeResult; item: Prac
 
   const levelOne = result.level === 1;
   // Level 1 sounds are single vowels ("A", "I", "U"); words have no single lip shape.
-  const shape = levelOne ? targetShape([item.text.toLowerCase()]) : null;
+  const shape = levelOne ? soundShape(item.text) : null;
   const visuals = levelOne ? result.visuals : null;
   const anchors = visuals?.vowel_anchors;
   const showMap = visuals?.vowel_point && anchors?.a && anchors.i && anchors.u;

@@ -12,7 +12,7 @@ export default function Layout() {
     <PinGate headerless>
       <View style={{ flex: 1 }} onTouchStart={touch}>
         <Stack screenOptions={darkStackOptions}>
-          <Stack.Screen name="index" options={{ title: 'Mode Pendamping', headerShown: false }} />
+          <Stack.Screen name="index" options={{ title: 'Pendamping', headerShown: false }} />
           <Stack.Screen name="words/new" options={{ title: 'Tambah kata' }} />
           <Stack.Screen name="words/[wordId]/edit" options={{ title: 'Ubah kata' }} />
         </Stack>

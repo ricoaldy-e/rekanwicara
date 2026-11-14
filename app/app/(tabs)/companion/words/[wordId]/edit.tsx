@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 
 import { useFocusRing } from '../../../../../src/a11y/useFocusRing';
-import { BigButton, ConfirmDialog, InfoNote, Screen } from '../../../../../src/components';
+import { BigButton, ConfirmDialog, InfoNote, LoadingView, Screen } from '../../../../../src/components';
 import { WordForm } from '../../../../../src/components/form/WordForm';
 import { getWordStore } from '../../../../../src/data/media';
 import { useCatalog } from '../../../../../src/data/useCatalog';
@@ -47,7 +47,7 @@ export default function EditWord() {
   if (!state || !catalog.data) {
     return (
       <Screen>
-        <ActivityIndicator size="large" color={colors.text} accessibilityLabel="Memuat" />
+        <LoadingView label="Memuat" />
       </Screen>
     );
   }

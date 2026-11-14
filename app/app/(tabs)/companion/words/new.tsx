@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { ActivityIndicator } from 'react-native';
 
-import { InfoNote, Screen } from '../../../../src/components';
+import { InfoNote, LoadingView, Screen } from '../../../../src/components';
 import { WordForm } from '../../../../src/components/form/WordForm';
 import { getWordStore } from '../../../../src/data/media';
 import { useCatalog } from '../../../../src/data/useCatalog';
@@ -37,7 +37,7 @@ export default function NewWord() {
   if (!mine || !catalog.data) {
     return (
       <Screen>
-        <ActivityIndicator size="large" color={colors.text} accessibilityLabel="Memuat" />
+        <LoadingView label="Memuat" />
       </Screen>
     );
   }

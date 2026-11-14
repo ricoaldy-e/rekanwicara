@@ -7,7 +7,7 @@ import { ActivityIndicator, Alert, PixelRatio, StyleSheet, View, useWindowDimens
 import { buzzResult } from '../../src/a11y/haptics';
 import { ApiError } from '../../src/api/apiError';
 import { errorMessage } from '../../src/api/errors';
-import { ActionBar, AnalyzingView, BackButton, BigButton, InfoNote, Screen, SessionHeader } from '../../src/components';
+import { ActionBar, AnalyzingView, BackButton, BigButton, InfoNote, LoadingView, Screen, SessionHeader } from '../../src/components';
 import { UploadStatus } from '../../src/components/UploadStatus';
 import { analyze, canAnalyze } from '../../src/data/analyze';
 import type { AnalyzeResult } from '../../src/data/types';
@@ -107,7 +107,7 @@ export default function Practice() {
           <BackButton label="Keluar latihan" onPress={exit} testID="session-back" />
         </View>
         {loading ? (
-          <ActivityIndicator size="large" color={colors.text} accessibilityLabel="Memuat materi" />
+          <LoadingView label="Memuat materi" />
         ) : error ? (
           <>
             <InfoNote tone="warning" text={errorMessage(error)} testID="practice-error" />

@@ -7,8 +7,8 @@ jest.mock('expo-constants', () => ({ __esModule: true, default: { expoConfig: { 
 
 it('shows product limits, privacy and app/server versions without needing a server', async () => {
   await render(<About />);
-  expect(screen.getByText('App: 0.1.0')).toBeTruthy();
-  expect(screen.getByText('Mesin: Belum terhubung ke server')).toBeTruthy();
+  expect(screen.getByLabelText('Aplikasi: 0.1.0')).toBeTruthy();
+  expect(screen.getByLabelText('Mesin: Belum terhubung ke server')).toBeTruthy();
   expect(screen.getByLabelText(/bukan penilaian klinis/i)).toBeTruthy();
   expect(screen.getByText(/tanpa video atau audio/)).toBeTruthy();
 });
@@ -16,6 +16,13 @@ it('shows product limits, privacy and app/server versions without needing a serv
 it('shows the connected engine and identifies mock results', async () => {
   mockHealth = { engine_version: '0.2.0', mock_mode: true };
   await render(<About />);
-  expect(screen.getByText('Mesin: 0.2.0')).toBeTruthy();
+  expect(screen.getByLabelText('Mesin: 0.2.0')).toBeTruthy();
   expect(screen.getByLabelText(/Server memakai mode contoh/)).toBeTruthy();
+});
+
+it('has a section per topic, each a heading (Figma 51:558)', async () => {
+  await render(<About />);
+  for (const name of ['Tentang Rekan Wicara', 'Batas penggunaan', 'Privasi', 'Versi']) {
+    expect(screen.getByRole('header', { name })).toBeTruthy();
+  }
 });

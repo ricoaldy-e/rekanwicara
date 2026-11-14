@@ -1,30 +1,15 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import type { ReactNode } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { errorMessage } from '../../../src/api/errors';
 import { useAuth } from '../../../src/auth/AuthProvider';
-import {
-  BigButton,
-  Body,
-  Card,
-  HeroCard,
-  InfoNote,
-  LetterTile,
-  LevelTile,
-  LipIllustration,
-  ListGroup,
-  ListRow,
-  ProgressRing,
-  Screen,
-  StatTile,
-  StatusBadge,
-} from '../../../src/components';
+import { BigButton, Body, Card, HeroCard, InfoNote, LetterTile, LevelTile, LipIllustration, ListGroup, ListRow, LoadingView, ProgressRing, Screen, StatTile, StatusBadge } from '../../../src/components';
 import { DATASET_MODE } from '../../../src/config';
 import { describeItem, nextItem, recentActivity, summary } from '../../../src/data/progress';
 import { useCatalog } from '../../../src/data/useCatalog';
-import { targetShape } from '../../../src/results/lipShapes';
+import { soundShape } from '../../../src/results/lipShapes';
 import { useContent } from '../../../src/state/content';
 import { fraction } from '../../../src/state/homeStats';
 import { useSettings } from '../../../src/state/settings';
@@ -91,7 +76,7 @@ export default function Home() {
       ? router.push({ pathname: '/home/words/[wordId]', params: { wordId: item.itemId } })
       : router.push({ pathname: '/practice/[itemId]', params: { itemId: item.itemId } });
 
-  const heroShape = (item: HeroItem) => (item.level === 1 ? targetShape([item.text.toLowerCase()]) : null);
+  const heroShape = (item: HeroItem) => (item.level === 1 ? soundShape(item.text) : null);
   const heroIllustration = (item: HeroItem) => {
     const shape = heroShape(item);
     return shape ? <LipIllustration shape={shape} size={homeList.heroIllustration} tone="hero" /> : undefined;
@@ -149,12 +134,7 @@ export default function Home() {
       {health?.mock_mode ? <InfoNote text="Server dalam mode contoh (mock). Hasil bukan analisis sebenarnya." /> : null}
       {healthError ? <InfoNote tone="warning" text={errorMessage(healthError)} /> : null}
 
-      {loading && !data ? (
-        <View style={styles.center} accessible accessibilityLabel="Memuat materi">
-          <ActivityIndicator size="large" color={colors.text} />
-          <Body>Memuat materi…</Body>
-        </View>
-      ) : null}
+      {loading && !data ? <LoadingView label="Memuat materi" text="Memuat materi…" /> : null}
 
       {error ? (
         <View style={styles.gap}>
