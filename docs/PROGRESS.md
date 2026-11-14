@@ -948,3 +948,5 @@ Skill yang dimuat: `figma-design-to-code` (membaca konteks), `figma-use` dan `fi
 - FG-21b: Figma Kata baru dan Ubah kata kini menggambar tombol video (Ganti video, Hapus) di tiap kartu suku kata, di bawah ringkasan video; kode sudah punya `VideoField` per suku kata. Tidak ada perubahan kode.
 
 - FG-21c: video suku kata memakai kartu video yang sama dengan video kata (ubin 64, nama berkas, "0:02 · 1,2 MB", pratinjau muted); varian `compact` di `VideoField` dihapus. Figma Kata baru dan Ubah kata disamakan. Kontrol video (Ganti, Hapus, Rekam) tetap di bawah kartu.
+
+- FG-21d: kartu suku kata punya keterangan yang sama dengan kata: teks bantu di bawah kolom suku kata ("Huruf saja, tanpa spasi. Maksimal 10 huruf."), label "Video contoh" di atas kartu video (nama untuk pembaca layar tetap "Suku kata n: video"), teks bantu instruksi, tombol AI dan catatannya. Figma disamakan.

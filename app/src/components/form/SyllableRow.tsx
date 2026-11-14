@@ -62,6 +62,7 @@ export function SyllableRow({ index, parentWord = '', total, value, problems, on
         ref={textRef}
         testID={`syllable-${index + 1}-text`}
         label={`${title}: tulisan`}
+        hint={MESSAGES.syllableHint}
         value={value.text}
         onChangeText={(text) => {
           setNeedText(null);
@@ -75,6 +76,7 @@ export function SyllableRow({ index, parentWord = '', total, value, problems, on
       <VideoField
         testID={`syllable-${index + 1}-video`}
         label={`${title}: video`}
+        shownLabel="Video contoh"
         value={value.video}
         onChange={(video) => onChange({ ...value, video })}
         error={err(problems?.video)}

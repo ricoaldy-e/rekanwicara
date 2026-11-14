@@ -42,6 +42,7 @@ export const MESSAGES = {
   wordChars: 'Gunakan huruf saja. Spasi atau tanda hubung boleh di antara huruf.',
   wordLong: `Maksimal ${LIMITS.word.max} karakter.`,
   wordDuplicate: 'Kata ini sudah ada.',
+  syllableHint: `Huruf saja, tanpa spasi. Maksimal ${LIMITS.syllable.max} huruf.`,
   syllableEmpty: 'Isi suku kata atau hapus baris ini.',
   syllableChars: 'Suku kata hanya huruf, tanpa spasi.',
   syllableLong: `Maksimal ${LIMITS.syllable.max} huruf.`,

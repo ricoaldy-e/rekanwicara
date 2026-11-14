@@ -14,7 +14,10 @@ import { FieldError } from './FieldError';
 import { InfoNote } from '../InfoNote';
 
 export interface VideoFieldProps {
+  /** Spoken name; also the visible label unless `shownLabel` is given. */
   label: string;
+  /** Visible label when it should be shorter than the spoken one (a syllable: "Video contoh"). */
+  shownLabel?: string;
   value: VideoInput | null;
   onChange: (value: VideoInput | null) => void;
   /** Already-formatted error from the form (e.g. "Pilih atau rekam video contoh."). */
@@ -26,7 +29,7 @@ export interface VideoFieldProps {
  * One video: pick from the gallery or record, preview without sound, replace or delete. A picked file is checked
  * (format, size, length) before it is accepted; a wrong one is refused with the reason and the old value stays.
  */
-export function VideoField({ label, value, onChange, error, testID }: VideoFieldProps) {
+export function VideoField({ label, shownLabel, value, onChange, error, testID }: VideoFieldProps) {
   const [pickError, setPickError] = useState<string | null>(null);
   const [denied, setDenied] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -52,7 +55,7 @@ export function VideoField({ label, value, onChange, error, testID }: VideoField
   const shownError = pickError ?? error ?? null;
   return (
     <View style={styles.wrap} testID={testID}>
-      <Text style={[styles.label, textFont(true)]}>{label}</Text>
+      <Text style={[styles.label, textFont(true)]}>{shownLabel ?? label}</Text>
       {value ? <FileCard value={value} /> : null}
       {value?.kind === 'new' ? <Preview uri={value.file.uri} label={label} /> : null}
       <View style={styles.row}>
