@@ -1,15 +1,15 @@
 import type { ReactNode } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors, spacing } from '../theme';
 
 /** Scrollable page container with safe-area padding and consistent spacing. */
 /** `footer` sits below the scroll area (inside the safe area), so it never covers content. */
-export function Screen({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
+export function Screen({ children, footer, contentStyle }: { children: ReactNode; footer?: ReactNode; contentStyle?: StyleProp<ViewStyle> }) {
   return (
     <SafeAreaView style={styles.safe} edges={['bottom', 'left', 'right']}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={[styles.content, contentStyle]} keyboardShouldPersistTaps="handled">
         {children}
       </ScrollView>
       {footer}

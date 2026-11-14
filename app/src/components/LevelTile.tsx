@@ -1,68 +1,59 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSize, radius, spacing, stroke } from '../theme';
-
-type IconName = ComponentProps<typeof Ionicons>['name'];
-
-const ICONS: Record<number, IconName> = {
-  0: 'volume-medium-outline',
-  1: 'happy-outline',
-  2: 'chatbubble-outline',
-  3: 'text-outline',
-  4: 'swap-horizontal-outline',
-};
+import { useFocusRing } from '../a11y/useFocusRing';
+import { colors, fontSize, levelTile, lineHeight, radius, stroke, textFont } from '../theme';
 
 export interface LevelTileProps {
-  level: number;
-  name: string;
-  selected: boolean;
-  locked: boolean;
+  /** e.g. "Level 1". */
+  level: string;
+  /** e.g. "Bunyi vokal". */
+  title: string;
+  icon: ComponentProps<typeof Ionicons>['name'];
   onPress: () => void;
+  /** Spoken name; defaults to "level, title". */
+  accessibilityLabel?: string;
+  testID?: string;
 }
 
-/** One tile per level (design.md §5.8). Choosing it only changes which level is listed below. */
-export function LevelTile({ level, name, selected, locked, onPress }: LevelTileProps) {
-  const fg = locked ? colors.textMuted : colors.text;
+/** Level shortcut, two per row (design.md §5.10, Figma 57:422): icon on top, level and name at the bottom. */
+export function LevelTile({ level, title, icon, onPress, accessibilityLabel, testID }: LevelTileProps) {
+  const { focusProps, focusStyle } = useFocusRing();
   return (
     <Pressable
+      testID={testID}
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityState={{ selected }}
-      accessibilityLabel={`Level ${level}: ${name}${locked ? ', terkunci' : ''}`}
-      testID={`level-${level}`}
-      style={({ pressed }) => [styles.tile, (selected || pressed) && styles.raised, selected && styles.selected]}
+      accessibilityLabel={accessibilityLabel ?? `${level}, ${title}`}
+      {...focusProps}
+      style={({ pressed }) => [styles.tile, pressed && styles.pressed, focusStyle]}
     >
-      <Ionicons name={locked ? 'lock-closed' : (ICONS[level] ?? 'ellipse-outline')} size={22} color={fg} />
-      <Text maxFontSizeMultiplier={2} style={[styles.label, { color: fg }]}>
-        Level {level}
+      <Ionicons name={icon} size={levelTile.icon} color={colors.text} accessible={false} />
+      <View style={styles.spacer} />
+      <Text maxFontSizeMultiplier={2} style={[styles.level, textFont()]}>
+        {level}
       </Text>
-      {locked ? (
-        <Text maxFontSizeMultiplier={2} style={styles.locked}>
-          Terkunci
-        </Text>
-      ) : null}
+      <Text maxFontSizeMultiplier={2} style={[styles.title, textFont(true)]}>
+        {title}
+      </Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   tile: {
-    flexGrow: 1,
-    flexBasis: 72,
-    minHeight: 72,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    padding: spacing.sm,
-    borderRadius: radius.tile,
-    borderWidth: stroke.thick,
-    borderColor: 'transparent',
+    flex: 1,
+    minWidth: 1,
+    minHeight: levelTile.height,
+    padding: levelTile.padding,
+    borderRadius: radius.card,
+    borderWidth: stroke.hairline,
+    borderColor: colors.hairline,
     backgroundColor: colors.surface,
   },
-  raised: { backgroundColor: colors.surfaceRaised },
-  selected: { borderColor: colors.border },
-  label: { fontSize: fontSize.small, fontWeight: '700', textAlign: 'center' },
-  locked: { fontSize: fontSize.small, color: colors.textMuted, textAlign: 'center' },
+  pressed: { backgroundColor: colors.surfaceRaised },
+  spacer: { flex: 1 },
+  level: { fontSize: fontSize.small, lineHeight: lineHeight.small, color: colors.textMuted },
+  title: { fontSize: fontSize.large, lineHeight: lineHeight.large, color: colors.text },
 });

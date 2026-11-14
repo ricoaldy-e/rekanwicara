@@ -90,11 +90,12 @@ export const fontSize = {
   label: 16,
   large: 20,
   title: 24,
+  titleLarge: 28,
   display: 34,
 } as const;
 
 /** Line height for body text (1.5 × body). */
-export const lineHeight = { body: 24 } as const;
+export const lineHeight = { body: 24, small: 22, label: 22, large: 28, titleLarge: 36 } as const;
 
 export const spacing = {
   xs: 4,
@@ -164,5 +165,15 @@ export const listGroup = {
   chevron: 20,
   titleGap: 8,
 } as const;
+
+/** Home layout from Figma "Beranda Latihan" (57:385), design.md §3.3 and §6.1: screen gutter, group gap, section heading gap. */
+export const layout = { gutter: 20, groupGap: 24, sectionGap: 12 } as const;
+
+/** Home tiles from Figma: LevelTile (57:422) and StatTile (57:449). */
+export const levelTile = { height: 132, padding: 16, icon: 28 } as const;
+export const statTile = { padding: 12, gap: 12, ring: 40, ringWidth: 4, icon: 20 } as const;
+
+/** Home header avatar and list tiles from Figma 57:385 / 64:585: letter tile, "Langkah awal" marker and row padding. */
+export const homeList = { avatar: 44, letterTile: 44, marker: 32, markerInset: 44, stepRowPadding: 14, activityGroupPadding: 4, groupSidePadding: 16, emptyGap: 14, checkIcon: 18, heroIllustration: 112 } as const;
 
 export const theme = { colors, fontSize, spacing, radius, touchTarget, buttonHeight, statusStyles, overlay, chart, stroke, fontFamily } as const;

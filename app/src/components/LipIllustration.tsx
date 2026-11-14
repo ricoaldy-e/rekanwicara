@@ -4,20 +4,34 @@ import { lipOpening, lipPolygon, LIP_LABELS, toSvgPoints, type LipShape } from '
 import { colors } from '../theme';
 
 
-function Lips({ shape, cx, cy, scale = 1 }: { shape: LipShape; cx: number; cy: number; scale?: number }) {
+function Lips({
+  shape,
+  cx,
+  cy,
+  scale = 1,
+  line = colors.text,
+  inner = colors.background,
+}: {
+  shape: LipShape;
+  cx: number;
+  cy: number;
+  scale?: number;
+  line?: string;
+  inner?: string;
+}) {
   const opening = lipOpening(shape, cx, cy, scale);
   return (
     <>
       <Polygon
         points={toSvgPoints(lipPolygon(shape, cx, cy, scale))}
         fill="none"
-        stroke={colors.text}
+        stroke={line}
         strokeWidth={3}
         strokeLinejoin="round"
       />
-      {opening ? <Polygon points={toSvgPoints(opening)} fill={colors.background} stroke={colors.text} strokeWidth={3} strokeLinejoin="round" /> : null}
+      {opening ? <Polygon points={toSvgPoints(opening)} fill={inner} stroke={line} strokeWidth={3} strokeLinejoin="round" /> : null}
       {shape === 'closed' ? (
-        <Line x1={cx - 36 * scale} y1={cy} x2={cx + 36 * scale} y2={cy} stroke={colors.text} strokeWidth={3} />
+        <Line x1={cx - 36 * scale} y1={cy} x2={cx + 36 * scale} y2={cy} stroke={line} strokeWidth={3} />
       ) : null}
     </>
   );
@@ -27,11 +41,13 @@ export interface LipIllustrationProps {
   shape: LipShape;
   /** Width in dp; height is two thirds of it. */
   size?: number;
+  /** `hero`: cream line on the green hero card (design.md §5.9). */
+  tone?: 'surface' | 'hero';
   testID?: string;
 }
 
 /** Drawn lip shape: relaxed, /a/ open, /i/ spread, /u/ rounded, closed (SPEC §8.1). */
-export function LipIllustration({ shape, size = 140, testID }: LipIllustrationProps) {
+export function LipIllustration({ shape, size = 140, tone = 'surface', testID }: LipIllustrationProps) {
   return (
     <Svg
       testID={testID}
@@ -42,7 +58,13 @@ export function LipIllustration({ shape, size = 140, testID }: LipIllustrationPr
       accessibilityRole="image"
       accessibilityLabel={LIP_LABELS[shape]}
     >
-      <Lips shape={shape} cx={60} cy={40} />
+      <Lips
+        shape={shape}
+        cx={60}
+        cy={40}
+        line={tone === 'hero' ? colors.onHero : colors.text}
+        inner={tone === 'hero' ? colors.hero : colors.background}
+      />
     </Svg>
   );
 }
