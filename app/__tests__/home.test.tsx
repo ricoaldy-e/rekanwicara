@@ -26,7 +26,7 @@ beforeEach(() => {
   mockProfile = { ...newProfile(), calibrated: true };
   mockCatalog = {
     data: {
-      level1: ['l1_a', 'l1_i', 'l1_u', 'l1_o', 'l0_hold_a', 'l0_soft_loud'].map(item),
+      level1: ['l1_a', 'l1_i', 'l1_u', 'l0_hold_a', 'l0_soft_loud'].map(item),
       words: [
         { id: 'l3_mama', text: 'MAMA', source: 'default', hasLevel2: true },
         { id: 'l3_papa', text: 'PAPA', source: 'default', hasLevel2: true },
@@ -41,7 +41,7 @@ beforeEach(() => {
 it('shows two cards with "x dari N sesuai" counted per unique item', async () => {
   mockProfile.attempts = [attempt('l1_a', 'merah'), attempt('l1_a', 'hijau'), attempt('l1_a', 'hijau'), attempt('l1_i', 'kuning')];
   await render(<Home />);
-  expect(screen.getByRole('button', { name: 'Level 1, Bunyi vokal, 1 dari 6 sesuai' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Level 1, Bunyi vokal, 1 dari 5 sesuai' })).toBeTruthy();
   expect(screen.getByRole('button', { name: 'Level 2 dan 3, Pilih kata, 0 dari 2 sesuai' })).toBeTruthy();
   expect(screen.queryByText(/Misi hari ini/)).toBeNull();
   expect(screen.queryByText(/Terkunci/)).toBeNull();
@@ -126,7 +126,7 @@ describe('with practice history', () => {
 
   it('shows stat tiles with the real counts and the latest activity, newest first, with status text', async () => {
     await render(<Home />);
-    expect(screen.getByTestId('stat-vowels')).toHaveAccessibleName('1 dari 6 vokal sesuai');
+    expect(screen.getByTestId('stat-vowels')).toHaveAccessibleName('1 dari 5 vokal sesuai');
     expect(screen.getByTestId('stat-words')).toHaveAccessibleName('0 dari 2 kata sesuai');
     expect(screen.queryByTestId('progress-empty')).toBeNull();
     expect(screen.getByTestId('activity-l1_i')).toHaveAccessibleName('Vokal “i”. Level 1. Mendekati');

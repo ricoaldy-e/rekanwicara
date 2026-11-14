@@ -17,7 +17,6 @@ const SOUND: Record<string, { hint: string; tile?: string; icon?: ComponentProps
   l1_a: { hint: 'Bibir terbuka' },
   l1_i: { hint: 'Bibir melebar' },
   l1_u: { hint: 'Bibir membulat' },
-  l1_o: { hint: 'Bibir bulat' },
   l0_hold_a: { hint: 'Tahan suara', tile: 'a~' },
   l0_soft_loud: { hint: 'Atur volume', icon: 'volume-medium-outline' },
 };
