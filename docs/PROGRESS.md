@@ -915,3 +915,5 @@ Pengaturan tidak dikunci PIN dan Keluar meminta PIN (rute baru `/settings/sign-o
 - Saran skill yang ditolak: tidak ada yang dipakai (tidak ada skill UI dimuat di langkah ini selain figma-design-to-code).
 - Tes: `SplashIntro.test` (baru); `auth.test` memakai tiruan `SplashIntro` agar tes gerbang tidak menunggu animasi.
 - **Belum diuji di perangkat:** kelancaran 60 fps, kesesuaian posisi logo dengan splash native di Android/iOS (ada kemungkinan lompatan kecil), dan fade ke layar tujuan.
+
+- FG-13b: bilah di Memuat menjadi indikator tak-tentu (isi 38 dp bergeser, `splashMotion.bar`) selama animasi pembuka dan selama gerbang belum siap; diam bila Reduce Motion. Tidak menampilkan persentase karena gerbang tidak melaporkan kemajuan. Belum diuji di perangkat.

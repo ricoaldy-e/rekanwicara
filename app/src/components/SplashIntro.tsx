@@ -5,6 +5,9 @@ import { useReduceMotion } from '../a11y/useReduceMotion';
 import { colors, displayFont, entry, fontSize, lineHeight, spacing, splashMotion as m, textFont } from '../theme';
 import { LogoMark } from './LogoMark';
 
+// Animated value at which the fill sits at the left edge of the track (the still Figma state).
+const BAR_REST = entry.splashBar.fill / (entry.splashBar.fill + entry.splashBar.width);
+
 type Props = {
   /** The start gate has decided where to go; the screen fades out as soon as the intro has also finished. */
   ready: boolean;
@@ -26,7 +29,7 @@ export function SplashIntro({ ready, animate, onDone }: Props) {
   const from = animate ? 0 : 1;
   const v = useRef({
     logo: new Animated.Value(0), logoY: new Animated.Value(0), name: new Animated.Value(from), nameY: new Animated.Value(0),
-    tagline: new Animated.Value(from), taglineY: new Animated.Value(0), foot: new Animated.Value(from), screen: new Animated.Value(1),
+    tagline: new Animated.Value(from), taglineY: new Animated.Value(0), foot: new Animated.Value(from), bar: new Animated.Value(0), screen: new Animated.Value(1),
   }).current;
   const doneRef = useRef(onDone);
   doneRef.current = onDone;
@@ -43,6 +46,7 @@ export function SplashIntro({ ready, animate, onDone }: Props) {
     if (instant) {
       [v.name, v.tagline, v.foot].forEach((a) => a.setValue(1));
       [v.logoY, v.nameY, v.taglineY].forEach((a) => a.setValue(0));
+      v.bar.setValue(BAR_REST);
       const timer = setTimeout(() => setHeld(true), animate ? m.reducedRest : 0);
       return () => clearTimeout(timer);
     }
@@ -60,12 +64,17 @@ export function SplashIntro({ ready, animate, onDone }: Props) {
         to(v.foot, 1, m.footFade, m.footDelay),
       ]),
     ]);
+    // Indeterminate: it moves while the app waits and says nothing about how far along it is.
+    const sweep = Animated.loop(Animated.timing(v.bar, { toValue: 1, duration: m.bar, easing: Easing.inOut(Easing.quad), useNativeDriver: true }));
+    v.bar.setValue(0);
+    sweep.start();
     let timer: ReturnType<typeof setTimeout> | undefined;
     run.start(({ finished }) => {
       if (finished) timer = setTimeout(() => setHeld(true), m.rest);
     });
     return () => {
       run.stop();
+      sweep.stop();
       clearTimeout(timer);
     };
   }, [shift, instant, animate, v]);
@@ -114,7 +123,7 @@ export function SplashIntro({ ready, animate, onDone }: Props) {
       <Animated.View style={[styles.bottom, { opacity: v.foot }]}>
         {/* Decorative: a still bar, it does not report progress. */}
         <View style={styles.track}>
-          <View style={styles.fill} />
+          <Animated.View style={[styles.fill, { transform: [{ translateX: v.bar.interpolate({ inputRange: [0, 1], outputRange: [-entry.splashBar.fill, entry.splashBar.width] }) }] }]} />
         </View>
         <Text maxFontSizeMultiplier={2} style={[styles.note, textFont()]}>Alat bantu latihan, bukan pengganti terapis wicara.</Text>
       </Animated.View>

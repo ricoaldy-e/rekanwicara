@@ -233,6 +233,7 @@ export const splashMotion = {
   rest: 600,
   exit: 300,
   reducedRest: 600,
+  bar: 1100,
   ease: [0.22, 1, 0.36, 1],
 } as const;
 
