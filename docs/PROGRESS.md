@@ -733,3 +733,15 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   - Tes: `BackButton.test.tsx` baru; `BigButton.test.tsx` menambah kasus danger. Skill `figma-design-to-code` dimuat dari MCP resource `skill://figma/figma-design-to-code/SKILL.md` (tidak ada di Skill tool); `get_design_context` dipanggil dengan `skillNames: resource:figma-design-to-code`.
   - Saran skill `interfaces:better-ui` yang ditolak: skala tekan 0,96 (design.md §5.1: 0,98), pengganti garis dengan bayangan (design.md: tanpa bayangan), transisi kustom (efek tekan hanya perubahan isi).
   - Belum diverifikasi di perangkat: bentuk kapsul `headerLeft` di iOS dan Android (tinggi header), keterangan tujuan yang panjang di skala teks 200%.
+- FG-3 (14 Nov 2026): StatusBadge baru, mengikuti Figma ("StatusBadge" di "Komponen", node 25:86; glyph `status-glyph/*`).
+  - `StatusBadge`: tanpa wadah (latar, `borderLeft`, padding, radius dihapus). Isinya glyph + label `text` bobot 700 (`textFont(true)`), padding vertikal 2, jarak glyph-label 6 (md) atau 10 (lg).
+    Ukuran teks dan lineHeight md 15/20, lg 16/22. `accessibilityLabel`, `testID` (`<id>-icon`), prop `status`/`label`/`size` tidak berubah. Metrik masuk token baru `statusBadge` di theme.
+  - `StatusIcon`: tiga simbol lingkaran dengan react-native-svg, path disalin dari aset SVG Figma (digambar dalam kotak 18, diskalakan; garis tetap dalam dp):
+    lingkaran penuh + centang (centang `colors.background`), lingkaran garis + setengah terisi, lingkaran garis + panah ulang. `testID` bentuk: `status-shape-full`, `-half`, `-retry` (dulu `-circle`, `-triangle`, `-square`).
+  - Ukuran glyph md 18 dan lg 26 mengikuti Figma (design.md §5.4 menulis 24 untuk lg; Figma menang, design.md perlu diperbarui). `CombinedObservations` memakai `StatusIcon size={28}` dan tetap jalan (tampilan lama, di luar FG-3).
+  - "Mendekati" di Level 2–3 dipetakan ke "belum sesuai" oleh `data/mappers.ts` sejak sebelum FG-3; tidak diubah.
+  - Tes `StatusBadge.test.tsx` diubah: testID bentuk baru, assert tanpa wadah (tanpa `backgroundColor`, `borderLeftWidth`, `borderRadius`) dan label berwarna `text` (bukan lagi `borderLeftColor`),
+    ditambah tes ukuran glyph/teks md dan lg. `npm test` 595 lulus, `npm run typecheck` bersih.
+  - Skill `figma-design-to-code` dan `interfaces:better-accessibility` dimuat lewat Skill tool sebelum kode. Saran skill: tidak ada yang bertentangan dengan design.md. Catatan a11y skill yang dipakai:
+    glyph disembunyikan dari pembaca layar (`accessible={false}`), label teks membawa arti, status tidak hanya warna (bentuk glyph berbeda; 1.4.1).
+  - Belum diverifikasi di perangkat: tampilan glyph di HP Android (Expo Go), skala teks 200% (label panjang "Suara: Belum sesuai" membungkus karena `flexShrink`), kecocokan piksel dengan Figma.

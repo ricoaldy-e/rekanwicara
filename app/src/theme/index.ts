@@ -136,4 +136,11 @@ export const statusStyles: Record<ResultStatus, StatusStyle> = {
   belum_sesuai: { label: 'Belum sesuai', foreground: colors.danger },
 };
 
+/** StatusBadge metrics from Figma "StatusBadge" (25:86): glyph, glyph-label gap, text size and line height. */
+export const statusBadge = {
+  md: { glyph: 18, gap: 6, fontSize: fontSize.small, lineHeight: 20 },
+  lg: { glyph: 26, gap: 10, fontSize: fontSize.label, lineHeight: 22 },
+  paddingVertical: 2,
+} as const;
+
 export const theme = { colors, fontSize, spacing, radius, touchTarget, buttonHeight, statusStyles, overlay, chart, stroke, fontFamily } as const;

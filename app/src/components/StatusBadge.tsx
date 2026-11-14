@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import type { ResultStatus } from '../api/types';
-import { colors, fontSize, radius, spacing, statusStyles } from '../theme';
+import { colors, statusBadge, statusStyles, textFont } from '../theme';
 import { StatusIcon } from './StatusIcon';
 
 export interface StatusBadgeProps {
@@ -12,38 +12,34 @@ export interface StatusBadgeProps {
   testID?: string;
 }
 
-/** Status shown as color + icon + text, never color alone (SPEC §8.3, CLAUDE.md). */
+/**
+ * Status as glyph + text, no container (design.md §5.4, Figma 25:86). The glyph shape differs per status,
+ * so it is never color alone. Level 2–3 "mendekati" is mapped to "belum_sesuai" before it reaches here (data/mappers.ts).
+ */
 export function StatusBadge({ status, label, size = 'md', testID }: StatusBadgeProps) {
   const s = statusStyles[status];
   const text = label ? `${label}: ${s.label}` : s.label;
-  const big = size === 'lg';
+  const m = statusBadge[size];
   return (
     <View
       testID={testID}
       accessible
       accessibilityRole="text"
       accessibilityLabel={text}
-      style={[styles.badge, { borderLeftColor: s.foreground }, big && styles.badgeLg]}
+      style={[styles.row, { gap: m.gap }]}
     >
-      <StatusIcon testID={testID ? `${testID}-icon` : undefined} status={status} size={big ? 28 : 22} />
-      <Text maxFontSizeMultiplier={2} style={[styles.text, { color: s.foreground }, big && styles.textLg]}>{text}</Text>
+      <StatusIcon testID={testID ? `${testID}-icon` : undefined} status={status} size={m.glyph} />
+      <Text
+        maxFontSizeMultiplier={2}
+        style={[styles.text, textFont(true), { fontSize: m.fontSize, lineHeight: m.lineHeight }]}
+      >
+        {text}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.tile,
-    backgroundColor: colors.surface,
-    borderLeftWidth: 4,
-  },
-  badgeLg: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-  text: { fontSize: fontSize.label, fontWeight: '700' },
-  textLg: { fontSize: fontSize.large },
+  row: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', paddingVertical: statusBadge.paddingVertical },
+  text: { color: colors.text, flexShrink: 1 },
 });
