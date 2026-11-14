@@ -950,3 +950,11 @@ Skill yang dimuat: `figma-design-to-code` (membaca konteks), `figma-use` dan `fi
 - FG-21c: video suku kata memakai kartu video yang sama dengan video kata (ubin 64, nama berkas, "0:02 · 1,2 MB", pratinjau muted); varian `compact` di `VideoField` dihapus. Figma Kata baru dan Ubah kata disamakan. Kontrol video (Ganti, Hapus, Rekam) tetap di bawah kartu.
 
 - FG-21d: kartu suku kata punya keterangan yang sama dengan kata: teks bantu di bawah kolom suku kata ("Huruf saja, tanpa spasi. Maksimal 10 huruf."), label "Video contoh" di atas kartu video (nama untuk pembaca layar tetap "Suku kata n: video"), teks bantu instruksi, tombol AI dan catatannya. Figma disamakan.
+
+## FG-22 (14 Nov 2026): Kebijakan privasi dan Tentang
+
+- Halaman baru **Kebijakan Privasi** (`app/privacy.tsx`, isi di `src/content/privacy.ts`, 10 bagian: ringkasan, rekaman latihan, data akun, hasil dan kalibrasi, kata dan video Pendamping, instruksi AI, data di HP, pilihan, batas penggunaan, perubahan). Dapat dibaca sebelum masuk (rute `privacy` ditambahkan ke daftar `SignedOutRedirect`). Tautan dari Tentang (baris "Baca kebijakan privasi") dan dari Daftar (menggantikan tautan ke Tentang). Figma: frame baru "Kebijakan privasi" di sebelah Tentang.
+- Teks **Tentang** diperbarui (Level 1 a, i, u, e, o; Level 2 suku kata; Level 3 kata; evaluasi awal tiga anggota tim; layanan online menyimpan hasil tanpa video atau audio). Figma 51:558 disamakan. Wav2Vec2 sengaja tidak disebut di teks produk karena belum ada di server lokal (prinsip jujur); tambahkan setelah backend siap.
+- Komponen bersama `InfoSection` dipakai Tentang dan Kebijakan privasi.
+- **Perlu keputusan tim:** kebijakan menyatakan penghapusan akun dan data online belum tersedia dan meminta menghubungi tim pengembang, tetapi belum ada kontak. Tambahkan kontak (email) di `src/content/privacy.ts` bagian "Pilihanmu". Isi kebijakan ditulis dari perilaku kode, bukan nasihat hukum; tinjau sebelum submission.
+- Selisih Figma lama: kartu versi di Figma Tentang hanya satu baris (Aplikasi); app punya dua (Aplikasi, Mesin).
