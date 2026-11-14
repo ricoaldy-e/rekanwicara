@@ -33,60 +33,6 @@
   ],
   "words": [
     {
-      "id": "l3_mama",
-      "text": "MAMA",
-      "source": "default",
-      "has_level_2": true
-    },
-    {
-      "id": "l3_papa",
-      "text": "PAPA",
-      "source": "default",
-      "has_level_2": true
-    },
-    {
-      "id": "l3_bibi",
-      "text": "BIBI",
-      "source": "default",
-      "has_level_2": true
-    },
-    {
-      "id": "l3_pipi",
-      "text": "PIPI",
-      "source": "default",
-      "has_level_2": true
-    },
-    {
-      "id": "l3_apa",
-      "text": "APA",
-      "source": "default",
-      "has_level_2": false
-    },
-    {
-      "id": "l3_abu",
-      "text": "ABU",
-      "source": "default",
-      "has_level_2": false
-    },
-    {
-      "id": "l3_ibu",
-      "text": "IBU",
-      "source": "default",
-      "has_level_2": false
-    },
-    {
-      "id": "l3_ubi",
-      "text": "UBI",
-      "source": "default",
-      "has_level_2": false
-    },
-    {
-      "id": "l3_bumi",
-      "text": "BUMI",
-      "source": "default",
-      "has_level_2": true
-    },
-    {
       "id": "kp_tolong",
       "text": "TOLONG",
       "source": "default",

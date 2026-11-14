@@ -2,6 +2,7 @@ import type { AnalyzeResponse, Status } from '../src/api/types';
 import { catalogToL1, clampStatus, cleanV2, fromStored, fromV1, toStored, wordToPath } from '../src/data/mappers';
 import type { AnalyzeResult } from '../src/data/types';
 import { MOCK_CATALOG, MOCK_WORDS } from '../src/mock';
+import { SAMPLE_WORDS } from '../test-fixtures/sampleWords';
 
 const visuals = { vowel_point: { f1: 700, f2: 1300 }, vowel_anchors: null, lip_contour: null, loudness: null };
 
@@ -106,7 +107,7 @@ describe('catalog mappers', () => {
   });
 
   it('gives the two PA steps different keys but the same itemId', () => {
-    const path = wordToPath(MOCK_WORDS.l3_papa);
+    const path = wordToPath(SAMPLE_WORDS.l3_papa);
     expect(path.syllables.map((s) => s.key)).toEqual(['l2_pa#1', 'l2_pa#2']);
     expect(new Set(path.syllables.map((s) => s.itemId))).toEqual(new Set(['l2_pa']));
     expect(path.whole).toMatchObject({ key: 'l3_papa', level: 3, source: 'default' });
@@ -164,8 +165,8 @@ describe('mock data mirrors the server catalog', () => {
 
 describe('automatic_evaluation', () => {
   it('marks every step of an unscorable word, and leaves scorable words unmarked', () => {
-    const path = wordToPath({ ...MOCK_WORDS.l3_papa, automatic_evaluation: false });
+    const path = wordToPath({ ...SAMPLE_WORDS.l3_papa, automatic_evaluation: false });
     expect([...path.syllables, path.whole].every((s) => s.scorable === false)).toBe(true);
-    expect(wordToPath(MOCK_WORDS.l3_papa).whole.scorable).toBeUndefined();
+    expect(wordToPath(SAMPLE_WORDS.l3_papa).whole.scorable).toBeUndefined();
   });
 });

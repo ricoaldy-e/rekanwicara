@@ -1124,3 +1124,10 @@ Skill yang dimuat: `figma-design-to-code` (membaca konteks), `figma-use` dan `fi
 - SPEC §1 dan README diperbarui.
 - **Masih memakai v1 (bukan penilaian):** `/v1/health`, `/v1/items` (sinkronisasi lama), `/v1/calibrate` (belum ada padanan v2 di server), alat dataset tim.
 - **Belum:** isi bucket Storage belum diperiksa (video yang belum diunggah tidak tampil, kata m/p/b tanpa video tidak masuk katalog server). Instruksi m/p/b ditulis tim, belum ditinjau ahli. Belum diuji di perangkat.
+
+## DATA-2 (14 Nov 2026): hanya 8 Kata Penting dan suku katanya
+
+- Keputusan Rico: kata dan suku kata m/p/b (mama, papa, ma, pa, …) **tidak dipakai**. Level 2–3 = 8 Kata Penting (TOLONG, POLISI, API, SAKIT, OBAT, ALAMAT, MAKAN, HAUS) beserta suku katanya, semuanya dinilai otomatis (Wav2Vec2 terhadap teks target). Level 1 tetap a, i, u, e, o.
+- Server: katalog v2 tidak lagi mendaftar kata m/p/b; `default_instructions.json` dari DATA-1 dihapus dan `word()` untuk item lama kembali seperti semula (tes lama dipulihkan). `pytest` 755 lulus, ruff bersih.
+- App: mock = 5 vokal + 8 Kata Penting + 2 kata Pendamping contoh. MAMA/PAPA hanya tersisa sebagai fixture tes (`test-fixtures/sampleWords.ts`) untuk tes jalur kata (suku kata berulang). `npm test` 848/848, typecheck bersih.
+- Penghalang demo: `.env` lokal app `EXPO_PUBLIC_USE_MOCK=false` (mode mock memakai token palsu yang ditolak `/v2/analyze`). Storage: 29/29 video (24 Kata Penting + 5 vokal) ada; akses baca akun sudah diuji tim setelah RLS diperbarui (baris "Uji ulang RLS video v2").

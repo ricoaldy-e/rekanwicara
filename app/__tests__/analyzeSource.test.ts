@@ -2,7 +2,7 @@ import type { ApiClient } from '../src/api/client';
 import { parseAnalyzeApi } from '../src/config';
 import { analyze, NotSupportedError } from '../src/data/analyze';
 import { wordToPath } from '../src/data/mappers';
-import { MOCK_WORDS } from '../src/mock';
+import { SAMPLE_WORDS as MOCK_WORDS } from '../test-fixtures/sampleWords';
 
 const file = { uri: 'file:///clip.mp4', name: 'clip.mp4', type: 'video/mp4' };
 const tolong = wordToPath(MOCK_WORDS['custom_word:11111111-1111-1111-1111-111111111111']).whole;

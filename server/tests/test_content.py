@@ -106,15 +106,3 @@ def test_missing_hint_is_rejected(content_copy: Path) -> None:
     path.write_text(json.dumps(hints), encoding="utf-8")
     with pytest.raises(ContentError, match="missing hint ids \\['p_silent'\\]"):
         load_content(content_copy)
-
-
-def test_every_default_syllable_and_word_has_step_instructions() -> None:
-    content = load_content()
-    steps = json.loads((CONTENT_DIR / "default_instructions.json").read_text("utf-8"))
-    needed = {i.item_id for i in content.items if i.active and i.level in (2, 3)}
-    assert set(steps) == needed
-    # Same limits as the app's instruction steps (FG-24): 1-5 steps, 5-120 characters each.
-    assert all(1 <= len(lines) <= 5 for lines in steps.values())
-    assert all(5 <= len(line) <= 120 for lines in steps.values() for line in lines)
-    banned = ("normal", "gangguan", "diagnosis", "terdengar")
-    assert not any(b in line.lower() for lines in steps.values() for line in lines for b in banned)

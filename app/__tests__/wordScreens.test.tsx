@@ -5,7 +5,7 @@ import NewWord from '../app/(tabs)/companion/words/new';
 import EditWord from '../app/(tabs)/companion/words/[wordId]/edit';
 import { getCatalog, getWord } from '../src/data/catalog';
 import { catalogToWords } from '../src/data/mappers';
-import { MOCK_CATALOG } from '../src/mock';
+import { SAMPLE_CATALOG as MOCK_CATALOG } from '../test-fixtures/sampleWords';
 import { createMockWordStore } from '../src/mock/words';
 
 const mockBack = jest.fn();

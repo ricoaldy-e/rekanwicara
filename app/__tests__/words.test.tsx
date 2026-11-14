@@ -3,7 +3,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react-native
 import WordPath from '../app/(tabs)/home/words/[wordId]';
 import Words from '../app/(tabs)/home/words';
 import { catalogToWords, wordToPath } from '../src/data/mappers';
-import { MOCK_CATALOG, MOCK_WORDS } from '../src/mock';
+import { SAMPLE_CATALOG as MOCK_CATALOG, SAMPLE_WORDS as MOCK_WORDS } from '../test-fixtures/sampleWords';
 import { newProfile, type Attempt } from '../src/user/pure';
 
 const DEFAULTS = MOCK_CATALOG.words.filter((w) => w.source === 'default').length;

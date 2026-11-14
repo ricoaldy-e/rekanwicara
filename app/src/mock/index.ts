@@ -12,21 +12,12 @@ import kpObat from './words/kp_obat.json';
 import kpPolisi from './words/kp_polisi.json';
 import kpSakit from './words/kp_sakit.json';
 import kpTolong from './words/kp_tolong.json';
-import l3Abu from './words/l3_abu.json';
-import l3Apa from './words/l3_apa.json';
-import l3Bibi from './words/l3_bibi.json';
-import l3Bumi from './words/l3_bumi.json';
-import l3Ibu from './words/l3_ibu.json';
-import l3Mama from './words/l3_mama.json';
-import l3Papa from './words/l3_papa.json';
-import l3Pipi from './words/l3_pipi.json';
-import l3Ubi from './words/l3_ubi.json';
 
 export const MOCK_CATALOG = catalog as CatalogDTO;
 
 // File names avoid ':' (not allowed on Windows); the ids inside are the contract ids.
 export const MOCK_WORDS: Readonly<Record<string, WordDTO>> = Object.fromEntries(
-  ([custom1111, custom2222, kpAlamat, kpApi, kpHaus, kpMakan, kpObat, kpPolisi, kpSakit, kpTolong, l3Abu, l3Apa, l3Bibi, l3Bumi, l3Ibu, l3Mama, l3Papa, l3Pipi, l3Ubi] as WordDTO[]).map((w) => [w.id, w]),
+  ([custom1111, custom2222, kpAlamat, kpApi, kpHaus, kpMakan, kpObat, kpPolisi, kpSakit, kpTolong] as WordDTO[]).map((w) => [w.id, w]),
 );
 
 /** Mock analysis results in turn: sesuai, then not quite (mendekati at L1), then retry. */

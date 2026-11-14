@@ -36,16 +36,8 @@ GUIDE_ITEMS = {item.item_id: item for item in tutorial_catalogue()}
 GUIDE_WORDS = [item for item in GUIDE_ITEMS.values() if item.kind == "word"]
 OFFLINE_IDS = frozenset(GUIDE_ITEMS)
 OFFLINE_WORDS = frozenset(item.target.casefold() for item in GUIDE_WORDS)
-# Level 1 is the five vowels only (decided 14 Nov 2026). Step instructions per default material:
-# vowels from the Level 1 tutorial manifest, m/p/b items from default_instructions.json.
-INSTRUCTION_STEPS: dict[str, list[str]] = {
-    **json.loads(
-        (Path(__file__).resolve().parents[2] / "content/default_instructions.json").read_text(
-            "utf-8"
-        )
-    ),
-    **{item.item_id: item.steps for item in tutorial_catalogue("level_1")},
-}
+# Level 1 is the five vowels only (decided 14 Nov 2026), with step instructions from their manifest.
+INSTRUCTION_STEPS = {item.item_id: item.steps for item in tutorial_catalogue("level_1")}
 
 
 def text(value: object) -> str:
@@ -210,7 +202,7 @@ class Catalogue:
             )
             for item in GUIDE_WORDS
         ]
-        project_words = []
+        # Default words: the eight important words only (14 Nov 2026); m/p/b items are not listed.
         for item in self.content.items:
             if item.item_id in VOWEL_IDS:
                 basics.append(
@@ -221,28 +213,6 @@ class Catalogue:
                         videos=self.default_video(item.item_id, False),
                     )
                 )
-            elif (
-                item.level == 3
-                and item.active
-                and item.item_id not in OFFLINE_IDS
-                and item.text.casefold() not in OFFLINE_WORDS
-            ):
-                # Listed only when it can be opened: a word without its tutorial videos is left out.
-                try:
-                    detail = self.word(item.item_id)
-                except ApiError as exc:
-                    if exc.code in ("INVALID_MATERIAL", "VIDEO_NOT_FOUND"):
-                        continue
-                    raise
-                project_words.append(
-                    V2WordSummary(
-                        id=detail.id,
-                        text=detail.text,
-                        source="default",
-                        has_level_2=bool(detail.level_2),
-                    )
-                )
-        words = project_words + words
         owned = self.account.rows(
             "custom_words",
             {
@@ -311,15 +281,13 @@ class Catalogue:
                 None,
             )
             if syllable is None:
-                # A vowel unit (apa, ibu) has no Level 2 syllable: whole word only.
-                parts = []
-                break
+                raise ApiError(422, "INVALID_MATERIAL", "Tahapan materi ini belum tersedia.")
             parts.append(
                 V2Syllable(
                     id=syllable.item_id,
                     text=unit.upper(),
                     position=position,
-                    instruction=default_instruction(syllable.item_id, unit.upper()),
+                    instruction=f"Ucapkan {unit.upper()}.",
                     videos=self.default_video(syllable.item_id, True),
                 )
             )
@@ -329,7 +297,7 @@ class Catalogue:
             source="default",
             level_2=parts,
             level_3=V2WordStage(
-                instruction=default_instruction(item.item_id, item.text.upper()),
+                instruction=f"Ucapkan {item.text.upper()} secara lengkap.",
                 videos=self.default_video(item.item_id, True),
             ),
         )

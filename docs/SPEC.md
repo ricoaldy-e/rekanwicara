@@ -21,8 +21,8 @@ Siklus satu percobaan: **Lihat** (video model + garis bibir target) → **Tiru**
 |---|---|---|
 | 0 | Suara: tahan "aaa", pelan lalu keras | Tidak tampil di app sejak 14 Nov 2026 (data tetap untuk dataset) |
 | 1 | Vokal: a, i, u, e, o (diputuskan 14 Nov 2026; mmm tidak tampil di app) | Wajib |
-| 2 | Suku kata: ma mi mu pa pi pu ba bi bu | Wajib |
-| 3 | Kata (lihat §3) | Wajib |
+| 2 | Suku kata dari 8 Kata Penting (14 Nov 2026; ma mi mu pa pi pu ba bi bu tidak tampil di app) | Wajib |
+| 3 | 8 Kata Penting: TOLONG, POLISI, API, SAKIT, OBAT, ALAMAT, MAKAN, HAUS (14 Nov 2026; kata m/p/b §3 tidak tampil di app) | Wajib |
 | 4 | Pasangan minimal | Bonus |
 
 Setiap materi naik level sendiri-sendiri (lihat §8.4).

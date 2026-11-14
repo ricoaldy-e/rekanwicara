@@ -27,11 +27,6 @@ HEADERS = {"Authorization": "Bearer fixture-user-token"}
 PUBLIC_KEY = "fixture-public-key"
 PRIVATE_KEY = "fixture-service-role-not-used-by-v2"
 CUSTOM_PATH = f"{UID}/words/{WORD}/video.mp4"
-# Active Level 3 m/p/b words; those with a vowel unit are whole-word only.
-PROJECT_WORD_IDS = [
-    "l3_mama", "l3_papa", "l3_bibi", "l3_pipi", "l3_apa", "l3_abu", "l3_ibu", "l3_ubi", "l3_bumi",
-]  # fmt: skip
-PROJECT_HAS_LEVEL_2 = [True, True, True, True, False, False, False, False, True]
 IMPORTANT_WORDS = {
     "tolong": ["to", "long"],
     "polisi": ["po", "li", "si"],
@@ -185,12 +180,11 @@ def test_catalog_default_and_only_complete_owned_custom(
     assert [item["id"] for item in body["level_1"]] == ["l1_a", "l1_i", "l1_u", "l1_e", "l1_o"]
     assert all("\n" in item["instruction"] for item in body["level_1"])
     defaults = [word for word in body["words"] if word["source"] == "default"]
-    # Project m/p/b words first (scorable), then the important words (also scorable).
-    assert [word["id"] for word in defaults] == PROJECT_WORD_IDS + [
-        f"kp_{word}" for word in IMPORTANT_WORDS
-    ]
+    # Default words are the eight important words only (14 Nov 2026), all scorable.
+    assert [word["id"] for word in defaults] == [f"kp_{word}" for word in IMPORTANT_WORDS]
     assert all(word["automatic_evaluation"] is True for word in defaults)
-    assert [word["has_level_2"] for word in defaults] == PROJECT_HAS_LEVEL_2 + [True] * 7 + [False]
+    assert [word["has_level_2"] for word in defaults] == [True] * 7 + [False]
+    assert not any(word["id"].startswith("l3_") for word in body["words"])
     assert [word["id"] for word in body["words"] if word["source"] == "custom"] == [
         f"custom_word:{WORD}"
     ]
@@ -734,8 +728,7 @@ def test_word_with_unmapped_level_two_vowel_is_not_given_a_level_one_item(
     v2_client: TestClient, upstream: dict
 ) -> None:
     result = v2_client.get("/v2/words/l3_apa", headers=HEADERS)
-    assert result.status_code == 200, result.text
-    assert result.json()["level_2"] == [] and result.json()["level_3"]["videos"]
+    assert result.status_code == 422 and result.json()["detail"]["code"] == "INVALID_MATERIAL"
 
 
 def test_oversized_v2_upload_preserves_v1_limit_with_v2_error_code(
@@ -757,14 +750,3 @@ def test_catalog_has_no_held_or_hum_items(v2_client: TestClient, upstream: dict)
     result = v2_client.get("/v2/catalog", headers=HEADERS)
     ids = {item["id"] for item in result.json()["level_1"]}
     assert ids == VOWEL_IDS and not ids & {"l0_hold_a", "l0_soft_loud", "l1_m"}
-
-
-def test_default_word_and_syllables_carry_step_instructions(
-    v2_client: TestClient, upstream: dict
-) -> None:
-    body = v2_client.get("/v2/words/l3_papa", headers=HEADERS).json()
-    assert (
-        body["level_3"]["instruction"].splitlines()[-1]
-        == "Gabungkan menjadi PAPA dengan irama sama."
-    )
-    assert all(len(part["instruction"].splitlines()) == 2 for part in body["level_2"])

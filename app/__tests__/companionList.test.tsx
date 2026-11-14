@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 
 import Companion from '../app/(tabs)/companion';
 import { catalogToWords } from '../src/data/mappers';
-import { MOCK_CATALOG } from '../src/mock';
+import { SAMPLE_CATALOG as MOCK_CATALOG } from '../test-fixtures/sampleWords';
 import { createMockWordStore } from '../src/mock/words';
 
 const mockPush = jest.fn();
