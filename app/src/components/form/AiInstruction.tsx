@@ -123,8 +123,6 @@ export function AiInstruction({ request, instruction, onFill, onNeedText, onBusy
         />
       )}
 
-      <Text maxFontSizeMultiplier={2} style={[styles.note, textFont()]}>{AI.disclosure}</Text>
-
       {failure ? (
         <View style={styles.failure} testID={`${testID}-error`}>
           <FieldError text={failure === 'offline' ? AI.offline : failure === 'rate' ? AI.rateLimited : AI.failed} />
@@ -132,12 +130,15 @@ export function AiInstruction({ request, instruction, onFill, onNeedText, onBusy
         </View>
       ) : null}
 
+      {/* Figma 50:559: the "made with AI" label comes first, then what is sent to the service. */}
       {showLabel ? (
         <View style={styles.label} accessible accessibilityLabel={AI.label} testID={`${testID}-label`}>
-          <Ionicons name="sparkles-outline" size={iconSize.chip} color={colors.textMuted} accessible={false} />
+          <Ionicons name="information-circle-outline" size={iconSize.chip} color={colors.textMuted} accessible={false} />
           <Text accessible={false} maxFontSizeMultiplier={2} style={[styles.note, styles.labelText, textFont()]}>{AI.label}</Text>
         </View>
       ) : null}
+
+      <Text maxFontSizeMultiplier={2} style={[styles.note, textFont()]}>{AI.disclosure}</Text>
 
       {previous !== null ? (
         <Pressable

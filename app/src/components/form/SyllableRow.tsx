@@ -75,6 +75,7 @@ export function SyllableRow({ index, parentWord = '', total, value, problems, on
       <VideoField
         testID={`syllable-${index + 1}-video`}
         label={`${title}: video`}
+        compact
         value={value.video}
         onChange={(video) => onChange({ ...value, video })}
         error={err(problems?.video)}
@@ -105,16 +106,23 @@ export function SyllableRow({ index, parentWord = '', total, value, problems, on
         onFilled={() => instructionRef.current?.focus()}
       />
       <View style={styles.actions}>
-        <BigButton label={UI.moveUp} icon="arrow-up" variant="secondary" disabled={index === 0} accessibilityLabel={`${UI.moveUp}, ${title}`} onPress={onMoveUp} testID={`syllable-${index + 1}-up`} />
-        <BigButton label={UI.moveDown} icon="arrow-down" variant="secondary" disabled={index === total - 1} accessibilityLabel={`${UI.moveDown}, ${title}`} onPress={onMoveDown} testID={`syllable-${index + 1}-down`} />
-        <BigButton
-          label={UI.removeSyllable}
-          icon="trash-outline"
-          variant="secondary"
-          accessibilityLabel={`${UI.removeSyllable}, ${title}`}
-          onPress={() => (hasContent(value) ? setConfirming(true) : onRemove())}
-          testID={`syllable-${index + 1}-remove`}
-        />
+        <View style={styles.cell}>
+          <BigButton compact label={UI.moveUp} icon="arrow-up" variant="secondary" disabled={index === 0} accessibilityLabel={`${UI.moveUp}, ${title}`} onPress={onMoveUp} testID={`syllable-${index + 1}-up`} />
+        </View>
+        <View style={styles.cell}>
+          <BigButton compact label={UI.moveDown} icon="arrow-down" variant="secondary" disabled={index === total - 1} accessibilityLabel={`${UI.moveDown}, ${title}`} onPress={onMoveDown} testID={`syllable-${index + 1}-down`} />
+        </View>
+        <View style={styles.cell}>
+          <BigButton
+            compact
+            label={UI.removeSyllable}
+            icon="trash-outline"
+            variant="secondary"
+            accessibilityLabel={`${UI.removeSyllable}, ${title}`}
+            onPress={() => (hasContent(value) ? setConfirming(true) : onRemove())}
+            testID={`syllable-${index + 1}-remove`}
+          />
+        </View>
       </View>
       <ConfirmDialog
         visible={confirming}
@@ -131,8 +139,10 @@ export function SyllableRow({ index, parentWord = '', total, value, problems, on
   );
 }
 
+// Figma 50:567: a card (surface + hairline) with the title, the fields and a row of three buttons.
 const styles = StyleSheet.create({
-  box: { gap: spacing.md, padding: spacing.md, borderRadius: radius.card, borderWidth: stroke.thick, borderColor: colors.border },
-  title: { fontSize: fontSize.large, fontWeight: '700', color: colors.text },
-  actions: { gap: spacing.sm },
+  box: { gap: spacing.sm + spacing.xs, padding: spacing.md, borderRadius: radius.card, borderWidth: stroke.hairline, borderColor: colors.hairline, backgroundColor: colors.surface },
+  title: { fontSize: fontSize.label, fontWeight: '700', color: colors.text },
+  actions: { flexDirection: 'row', gap: spacing.sm },
+  cell: { flex: 1, minWidth: 1 },
 });

@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useFocusRing } from '../a11y/useFocusRing';
 import { useReduceMotion } from '../a11y/useReduceMotion';
-import { buttonHeight, colors, fontSize, iconSize, radius, spacing, stroke, textFont, touchTarget } from '../theme';
+import { buttonHeight, colors, fontSize, iconSize, radius, spacing, stroke, textFont, touchTarget, wordForm } from '../theme';
 
 type Variant = 'primary' | 'secondary' | 'danger';
 
@@ -17,6 +17,8 @@ export interface BigButtonProps {
   accessibilityHint?: string;
   /** Spoken name when the visible label is not enough on its own (e.g. "Hapus TOLONG"); defaults to the label. */
   accessibilityLabel?: string;
+  /** Narrow variant for three buttons in a row (Figma 50:584): small icon, 15 text, 10 dp padding. */
+  compact?: boolean;
   testID?: string;
 }
 
@@ -28,6 +30,7 @@ export function BigButton({
   disabled = false,
   accessibilityHint,
   accessibilityLabel,
+  compact = false,
   testID,
 }: BigButtonProps) {
   const reduceMotion = useReduceMotion();
@@ -48,13 +51,14 @@ export function BigButton({
         styles[variant],
         pressed && !disabled && pressedStyle[variant],
         pressed && !disabled && !reduceMotion && styles.scaled,
+        compact && styles.compact,
         disabled && styles.disabled,
         focusStyle,
       ]}
     >
-      <View style={styles.row}>
-        {icon ? <Ionicons name={icon} size={iconSize.button} color={fg} accessible={false} /> : null}
-        <Text maxFontSizeMultiplier={2} style={[styles.label, textFont(true), { color: fg }]}>{label}</Text>
+      <View style={[styles.row, compact && styles.rowCompact]}>
+        {icon ? <Ionicons name={icon} size={compact ? wordForm.compactIcon : iconSize.button} color={fg} accessible={false} /> : null}
+        <Text maxFontSizeMultiplier={2} style={[styles.label, textFont(true), compact && styles.labelCompact, { color: fg }]}>{label}</Text>
       </View>
     </Pressable>
   );
@@ -76,8 +80,11 @@ const styles = StyleSheet.create({
   // Disabled: fill only, no line, no opacity (design.md §5.1).
   disabled: { backgroundColor: colors.surfaceRaised, borderWidth: 0 },
   scaled: { transform: [{ scale: 0.98 }] },
+  compact: { paddingHorizontal: wordForm.compactPadding },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm + spacing.xs / 2 },
+  rowCompact: { gap: wordForm.compactGap },
   label: { flexShrink: 1, fontSize: fontSize.label, textAlign: 'center' },
+  labelCompact: { fontSize: fontSize.small },
 });
 
 const pressedStyle = StyleSheet.create({

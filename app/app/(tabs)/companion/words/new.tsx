@@ -3,8 +3,9 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { ActivityIndicator } from 'react-native';
 
-import { InfoNote, LoadingView, Screen } from '../../../../src/components';
+import { InfoNote, LoadingView } from '../../../../src/components';
 import { WordForm } from '../../../../src/components/form/WordForm';
+import { WordFormScreen } from '../../../../src/components/form/WordFormScreen';
 import { getWordStore } from '../../../../src/data/media';
 import { useCatalog } from '../../../../src/data/useCatalog';
 import { createWord, listMine, type WordFormData } from '../../../../src/data/words';
@@ -29,16 +30,16 @@ export default function NewWord() {
 
   if (!store) {
     return (
-      <Screen>
+      <WordFormScreen title="Kata baru" onBack={close}>
         <InfoNote text={MESSAGES.companionWordsUnavailable} testID="companion-unavailable" />
-      </Screen>
+      </WordFormScreen>
     );
   }
   if (!mine || !catalog.data) {
     return (
-      <Screen>
+      <WordFormScreen title="Kata baru" onBack={close}>
         <LoadingView label="Memuat" />
-      </Screen>
+      </WordFormScreen>
     );
   }
   const builtIn = catalog.data.words.filter((w) => w.source === 'default').map((w) => w.text);

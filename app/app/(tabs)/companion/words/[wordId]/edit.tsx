@@ -4,8 +4,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 
 import { useFocusRing } from '../../../../../src/a11y/useFocusRing';
-import { BigButton, ConfirmDialog, InfoNote, LoadingView, Screen } from '../../../../../src/components';
+import { BigButton, ConfirmDialog, InfoNote, LoadingView } from '../../../../../src/components';
 import { WordForm } from '../../../../../src/components/form/WordForm';
+import { WordFormScreen } from '../../../../../src/components/form/WordFormScreen';
 import { getWordStore } from '../../../../../src/data/media';
 import { useCatalog } from '../../../../../src/data/useCatalog';
 import { formDataOf, getRows, listMine, removeWord, updateWord, type WordRows } from '../../../../../src/data/words';
@@ -39,24 +40,24 @@ export default function EditWord() {
 
   if (!store) {
     return (
-      <Screen>
+      <WordFormScreen title="Ubah kata" onBack={close}>
         <InfoNote text={MESSAGES.companionWordsUnavailable} testID="companion-unavailable" />
-      </Screen>
+      </WordFormScreen>
     );
   }
   if (!state || !catalog.data) {
     return (
-      <Screen>
+      <WordFormScreen title="Ubah kata" onBack={close}>
         <LoadingView label="Memuat" />
-      </Screen>
+      </WordFormScreen>
     );
   }
   if (!state.rows) {
     return (
-      <Screen>
+      <WordFormScreen title="Ubah kata" onBack={close}>
         <InfoNote tone="warning" text="Materi tidak ditemukan." testID="word-not-found" />
         <BigButton label="Kembali" variant="secondary" onPress={close} />
-      </Screen>
+      </WordFormScreen>
     );
   }
   const builtIn = catalog.data.words.filter((w) => w.source === 'default').map((w) => w.text);
@@ -80,6 +81,7 @@ export default function EditWord() {
   return (
     <>
       <WordForm
+        title="Ubah kata"
         initial={initial}
         otherWords={[...state.others, ...builtIn]}
         onSubmit={(data, onProgress, signal) => updateWord(store, wordId, data, onProgress, signal)}

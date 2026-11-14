@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useState } from 'react';
 import { Linking, StyleSheet, Text, View } from 'react-native';
@@ -6,7 +7,8 @@ import { pickFromGallery, recordWithCamera, type PickResult } from '../../data/p
 import type { VideoInput } from '../../data/words';
 import { MESSAGES, messageOf, UI } from '../../forms/messages';
 import { videoFile } from '../../forms/validators/video';
-import { colors, fontSize, radius, spacing } from '../../theme';
+import { describeVideo } from '../../forms/videoMeta';
+import { colors, fontSize, iconSize, lineHeight, radius, spacing, stroke, textFont, wordForm } from '../../theme';
 import { BigButton } from '../BigButton';
 import { FieldError } from './FieldError';
 import { InfoNote } from '../InfoNote';
@@ -17,6 +19,8 @@ export interface VideoFieldProps {
   onChange: (value: VideoInput | null) => void;
   /** Already-formatted error from the form (e.g. "Pilih atau rekam video contoh."). */
   error?: string | null;
+  /** A syllable's video: a one-line summary instead of the card and the preview (Figma 50:574). */
+  compact?: boolean;
   testID?: string;
 }
 
@@ -24,7 +28,7 @@ export interface VideoFieldProps {
  * One video: pick from the gallery or record, preview without sound, replace or delete. A picked file is checked
  * (format, size, length) before it is accepted; a wrong one is refused with the reason and the old value stays.
  */
-export function VideoField({ label, value, onChange, error, testID }: VideoFieldProps) {
+export function VideoField({ label, value, onChange, error, compact = false, testID }: VideoFieldProps) {
   const [pickError, setPickError] = useState<string | null>(null);
   const [denied, setDenied] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -50,35 +54,56 @@ export function VideoField({ label, value, onChange, error, testID }: VideoField
   const shownError = pickError ?? error ?? null;
   return (
     <View style={styles.wrap} testID={testID}>
-      <Text style={styles.label}>{label}</Text>
-      {value?.kind === 'new' ? <Preview uri={value.file.uri} label={label} /> : null}
-      {value?.kind === 'kept' ? <Text style={styles.kept}>{MESSAGES.videoKept}</Text> : null}
-      <BigButton
-        label={value ? UI.replaceGallery : UI.pickGallery}
-        icon="images-outline"
-        variant="secondary"
-        disabled={busy}
-        accessibilityLabel={`${value ? UI.replaceGallery : UI.pickGallery}, ${label}`}
-        onPress={() => take(pickFromGallery)}
-        testID={testID ? `${testID}-gallery` : undefined}
-      />
-      <BigButton
-        label={value ? UI.recordAgain : UI.recordVideo}
-        icon="videocam-outline"
-        variant="secondary"
-        disabled={busy}
-        accessibilityLabel={`${value ? UI.recordAgain : UI.recordVideo}, ${label}`}
-        onPress={() => take(recordWithCamera)}
-        testID={testID ? `${testID}-camera` : undefined}
-      />
+      <Text style={[styles.label, textFont(true)]}>{label}</Text>
+      {value ? <FileCard value={value} compact={compact} /> : null}
+      {value?.kind === 'new' && !compact ? <Preview uri={value.file.uri} label={label} /> : null}
+      <View style={styles.row}>
+        <View style={styles.cell}>
+          <BigButton
+            compact
+            label={value ? UI.replaceGallery : UI.pickGallery}
+            icon="images-outline"
+            variant="secondary"
+            disabled={busy}
+            accessibilityLabel={`${value ? UI.replaceGallery : UI.pickGallery}, ${label}`}
+            onPress={() => take(pickFromGallery)}
+            testID={testID ? `${testID}-gallery` : undefined}
+          />
+        </View>
+        <View style={styles.cell}>
+          {value ? (
+            <BigButton
+              compact
+              label={UI.removeVideo}
+              icon="trash-outline"
+              variant="secondary"
+              accessibilityLabel={`${UI.removeVideo}, ${label}`}
+              onPress={() => onChange(null)}
+              testID={testID ? `${testID}-remove` : undefined}
+            />
+          ) : (
+            <BigButton
+              compact
+              label={UI.recordVideo}
+              icon="videocam-outline"
+              variant="secondary"
+              disabled={busy}
+              accessibilityLabel={`${UI.recordVideo}, ${label}`}
+              onPress={() => take(recordWithCamera)}
+              testID={testID ? `${testID}-camera` : undefined}
+            />
+          )}
+        </View>
+      </View>
       {value ? (
         <BigButton
-          label={UI.removeVideo}
-          icon="trash-outline"
+          label={UI.recordAgain}
+          icon="videocam-outline"
           variant="secondary"
-          accessibilityLabel={`${UI.removeVideo}, ${label}`}
-          onPress={() => onChange(null)}
-          testID={testID ? `${testID}-remove` : undefined}
+          disabled={busy}
+          accessibilityLabel={`${UI.recordAgain}, ${label}`}
+          onPress={() => take(recordWithCamera)}
+          testID={testID ? `${testID}-camera` : undefined}
         />
       ) : null}
       {denied ? (
@@ -88,6 +113,30 @@ export function VideoField({ label, value, onChange, error, testID }: VideoField
         </>
       ) : null}
       {shownError ? <FieldError text={shownError} testID={testID ? `${testID}-error` : undefined} /> : null}
+    </View>
+  );
+}
+
+/** The chosen video: thumbnail, name and facts (Figma 50:534), or one line for a syllable (Figma 50:574). */
+function FileCard({ value, compact }: { value: VideoInput; compact: boolean }) {
+  const { name, length, size } = describeVideo(value);
+  if (compact) {
+    return (
+      <View style={styles.compact} testID="video-summary">
+        <Ionicons name="videocam-outline" size={iconSize.base} color={colors.text} accessible={false} />
+        <Text numberOfLines={1} maxFontSizeMultiplier={2} style={[styles.compactText, textFont()]}>{length ? `${name} · ${length}` : MESSAGES.videoKept}</Text>
+      </View>
+    );
+  }
+  return (
+    <View style={styles.card} testID="video-card">
+      <View style={styles.thumb}>
+        <Ionicons name="videocam-outline" size={wordForm.thumbIcon} color={colors.text} accessible={false} />
+      </View>
+      <View style={styles.cardText}>
+        <Text numberOfLines={1} maxFontSizeMultiplier={2} style={[styles.name, textFont(true)]}>{name}</Text>
+        <Text maxFontSizeMultiplier={2} style={[styles.facts, textFont()]}>{length && size ? `${length} · ${size}` : MESSAGES.videoKept}</Text>
+      </View>
     </View>
   );
 }
@@ -107,8 +156,16 @@ function Preview({ uri, label }: { uri: string; label: string }) {
 
 const styles = StyleSheet.create({
   wrap: { gap: spacing.sm },
-  label: { fontSize: fontSize.label, fontWeight: '700', color: colors.text },
-  kept: { fontSize: fontSize.body, color: colors.textMuted },
+  label: { fontSize: fontSize.small, color: colors.text },
+  row: { flexDirection: 'row', gap: spacing.sm },
+  cell: { flex: 1, minWidth: 1 },
+  card: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm + spacing.xs, padding: spacing.sm + spacing.xs, borderRadius: radius.tile, borderWidth: stroke.hairline, borderColor: colors.border, backgroundColor: colors.surface },
+  thumb: { width: wordForm.thumb, height: wordForm.thumb, borderRadius: wordForm.thumbRadius, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceRaised },
+  cardText: { flex: 1, minWidth: 1, gap: spacing.xs / 2 },
+  name: { fontSize: fontSize.body, lineHeight: lineHeight.label, color: colors.text },
+  facts: { fontSize: fontSize.small, lineHeight: lineHeight.small, color: colors.textMuted },
+  compact: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm + spacing.xs, padding: spacing.sm + spacing.xs, borderRadius: radius.tile, backgroundColor: colors.surfaceRaised },
+  compactText: { flex: 1, minWidth: 1, fontSize: fontSize.body, lineHeight: lineHeight.body, color: colors.text },
   frame: { width: '100%', aspectRatio: 3 / 4, maxHeight: 280, borderRadius: radius.card, overflow: 'hidden', backgroundColor: colors.surface },
   video: { width: '100%', height: '100%' },
 });

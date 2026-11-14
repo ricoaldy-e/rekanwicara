@@ -182,6 +182,9 @@ export const statTile = { padding: 12, gap: 12, ring: 40, ringWidth: 4, icon: 20
 export const homeList = { avatar: 44, letterTile: 44, marker: 32, markerInset: 44, stepRowPadding: 14, activityGroupPadding: 4, groupSidePadding: 16, emptyGap: 14, checkIcon: 18, heroIllustration: 112 } as const;
 
 /** Practice session from Figma "Latihan · …" (46:135, 46:177, 46:217, 46:253), design.md §5.14, §6.4. */
+/** Kata baru / Ubah kata (Figma 50:506): video card thumb, compact buttons of a syllable. */
+export const wordForm = { thumb: 64, thumbRadius: 10, thumbIcon: 26, compactPadding: 10, compactGap: 6, compactIcon: 18 } as const;
+
 /** Kalibrasi (Figma 29:274): the lip card above the camera. */
 export const calibration = { lipWidth: 130, cardPadding: 14, cardGap: 16 } as const;
 

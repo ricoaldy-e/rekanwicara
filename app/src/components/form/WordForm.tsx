@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useNavigation, usePreventRemove } from 'expo-router'; // not from @react-navigation/native (separate context)
 import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 
 import { showFlash } from '../../forms/flash';
 import { LIMITS, MAX_SYLLABLES } from '../../forms/limits';
@@ -10,11 +10,11 @@ import { useFormState, type Rules } from '../../forms/useFormState';
 import * as word from '../../forms/validators/word';
 import { newKey } from '../../forms/keys';
 import type { SaveProgress, VideoInput, WordFormData } from '../../data/words';
-import { spacing } from '../../theme';
+import { colors, fontSize, lineHeight, spacing, textFont } from '../../theme';
 import { BigButton } from '../BigButton';
 import { AiInstruction } from './AiInstruction';
 import { Body } from '../Typography';
-import { Screen } from '../Screen';
+import { WordFormScreen } from './WordFormScreen';
 import { ProgressBar } from '../ProgressBar';
 import { announce } from './announce';
 import { Checkbox } from './Checkbox';
@@ -34,6 +34,8 @@ type Values = {
 };
 
 export interface WordFormProps {
+  /** Screen title: "Kata baru" or "Ubah kata". */
+  title?: string;
   /** Starting values: empty for a new word, the stored word for an edit. */
   initial: WordFormData;
   /** The other words (companion's and built-in) for the duplicate check; leave out the word being edited. */
@@ -65,7 +67,7 @@ export function syllableProblems(rows: readonly SyllableValue[]): SyllableProble
 const rowErrorCount = (p: SyllableProblems[]) => p.reduce((n, r) => n + [r.text, r.instruction, r.video].filter(Boolean).length, 0);
 
 /** The form of a word with 0–6 syllables (flow §7.7.3). The instruction is typed by hand here. */
-export function WordForm({ initial, otherWords, onSubmit, onClose, footer }: WordFormProps) {
+export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, onClose, footer }: WordFormProps) {
   const navigation = useNavigation();
   const start = useRef(toValues(initial)).current;
   const rules: Rules<Values> = {
@@ -158,8 +160,7 @@ export function WordForm({ initial, otherWords, onSubmit, onClose, footer }: Wor
 
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Screen>
-        <Body>{MESSAGES.requiredNote}</Body>
+      <WordFormScreen title={title} note={MESSAGES.requiredNote} onBack={() => navigation.goBack()}>
         {failure ? <FormBanner text={failure} onRetry={submit} testID="word-form-banner" /> : null}
 
         <TextField
@@ -176,7 +177,7 @@ export function WordForm({ initial, otherWords, onSubmit, onClose, footer }: Wor
           autoCorrect={false}
           editable={!busy}
         />
-        <VideoField testID="word-video" label="Video kata" value={values.video} onChange={(v) => form.setValue('video', v)} error={err('video')} />
+        <VideoField testID="word-video" label="Video contoh" value={values.video} onChange={(v) => form.setValue('video', v)} error={err('video')} />
         <TextField
           ref={instructionRef}
           testID="word-instruction"
@@ -203,9 +204,8 @@ export function WordForm({ initial, otherWords, onSubmit, onClose, footer }: Wor
           onBusyChange={setAiBusy}
           onFilled={() => instructionRef.current?.focus()}
         />
-        <Body muted>{AI.warning}</Body>
 
-        <Body>{UI.sectionSyllables}</Body>
+        <Text accessibilityRole="header" maxFontSizeMultiplier={2} style={[styles.section, textFont(true)]}>{UI.sectionSyllables}</Text>
         {values.syllables.map((s, i) => (
           <SyllableRow
             key={s.key}
@@ -229,11 +229,7 @@ export function WordForm({ initial, otherWords, onSubmit, onClose, footer }: Wor
           onPress={() => setSyllables([...values.syllables, { key: newKey(), text: '', instruction: '', video: null }])}
           testID="add-syllable"
         />
-        {values.syllables.length >= MAX_SYLLABLES ? (
-          <View testID="syllables-full">
-            <Body muted>{MESSAGES.syllablesFull}</Body>
-          </View>
-        ) : null}
+        <Text testID="syllables-full" maxFontSizeMultiplier={2} style={[styles.note, textFont()]}>{MESSAGES.syllablesFull}</Text>
 
         <Checkbox
           testID="consent"
@@ -242,6 +238,7 @@ export function WordForm({ initial, otherWords, onSubmit, onClose, footer }: Wor
           text={MESSAGES.consentVideo}
           error={err('consent')}
         />
+        <Text maxFontSizeMultiplier={2} style={[styles.note, textFont()]}>{AI.warning}</Text>
 
         {progressText ? (
           <View style={styles.progress} testID="upload-progress">
@@ -251,7 +248,7 @@ export function WordForm({ initial, otherWords, onSubmit, onClose, footer }: Wor
           </View>
         ) : null}
 
-        <BigButton label={busy ? 'Menyimpan…' : UI.save} icon="save-outline" disabled={busy} onPress={submit} testID="word-save" />
+        <BigButton label={busy ? 'Menyimpan…' : UI.save} disabled={busy} onPress={submit} testID="word-save" />
         <BigButton label={UI.cancel} variant="secondary" disabled={busy} onPress={() => navigation.goBack()} testID="word-cancel" />
         {footer && !busy ? footer : null}
 
@@ -268,7 +265,7 @@ export function WordForm({ initial, otherWords, onSubmit, onClose, footer }: Wor
             leave?.();
           }}
         />
-      </Screen>
+      </WordFormScreen>
     </KeyboardAvoidingView>
   );
 }
@@ -276,4 +273,6 @@ export function WordForm({ initial, otherWords, onSubmit, onClose, footer }: Wor
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   progress: { gap: spacing.sm },
+  section: { fontSize: fontSize.label, lineHeight: lineHeight.label, color: colors.text },
+  note: { fontSize: fontSize.small, lineHeight: lineHeight.small, color: colors.textMuted },
 });
