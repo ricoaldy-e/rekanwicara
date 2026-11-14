@@ -1,34 +1,67 @@
-# Cermin Wicara
+# Rekan Wicara
 
-Alat bantu latihan pelafalan untuk teman Tuli/tunarungu yang **memilih** berlatih bicara.
-Pengguna merekam 2–3 detik video wajah dan suara; aplikasi menampilkan indikator Bibir,
-Suara, dan satu petunjuk. Status selalu memakai ikon, teks dan warna; tanpa isyarat suara.
+Aplikasi latihan pelafalan untuk teman Tuli dan tunarungu yang memilih berlatih bicara.
+Pengguna merekam video wajah dan suara selama 2–3 detik. Aplikasi lalu menampilkan dua
+indikator, **Bibir** dan **Suara**, beserta satu petunjuk yang bisa langsung dicoba lagi.
+Seluruh umpan balik bersifat visual: warna, ikon, dan teks, dengan getar sebagai pelengkap.
+Tidak ada isyarat yang hanya berupa bunyi.
 
-Hasil adalah **perkiraan sistem untuk latihan**, bukan penilaian klinis atau pengganti
-guru/terapis. Dibuat oleh tim Cermin Wicara (3 anggota) untuk LOGICODIX 2026,
-subtema Inclusive Health. Versi submission: tag `v1.0-submission`.
+Proyek ini dibuat tim kami untuk LOGICODIX 2026, subtema Inclusive Health.
 
-## Arsitektur
+> **Batas produk.** Rekan Wicara adalah alat bantu latihan. Aplikasi ini bukan alat
+> diagnosis, bukan terapi, dan tidak menggantikan terapis wicara atau guru. Hasilnya
+> adalah perkiraan sistem untuk latihan, bukan penilaian klinis.
 
-- `app/`: Expo Go, React Native, TypeScript strict dan expo-router. Kamera merekam video
-  beserta audio; hasil/progres disimpan lokal. Profil demo terpisah di memori.
-- `server/`: FastAPI, Python 3.11. FFmpeg menyiapkan audio/frame, MediaPipe mengukur
-  geometri mulut, Parselmouth/Praat mengukur suara, lalu aturan berambang menilai hasil.
-  Tidak ada pengenalan identitas wajah atau training model.
-- Supabase opsional: autentikasi anonim, profil/hasil/progres numerik, antrean sinkronisasi
-  dan RLS berdasarkan `auth.uid()`. Video tidak dikirim ke Supabase.
-- `ml/`: alat dataset, label, penyetelan ambang dan evaluasi, memakai ulang pipeline server.
-- `docs/`: kontrak, evaluasi, model card, bukti uji dan panduan submission.
+## Fitur
 
-HP menghubungi server laptop melalui LAN. Internet dibutuhkan untuk instalasi, akun Expo
-dan sinkronisasi Supabase; analisis berjalan di laptop. Wav2Vec2, torch dan transformers
-ditunda. MVP mencakup Level 0–3, vokal a/i/u dan konsonan m/p/b.
+- **Latihan bertahap.** Level 1 melatih bunyi vokal, Level 2 suku kata, dan Level 3 kata
+  sederhana. Setiap latihan terdiri atas empat langkah: Lihat, Tiru, Menganalisis, Hasil.
+- **Dua indikator terpisah.** Bibir dinilai dari geometri mulut, Suara dari ciri akustik.
+  Status memakai tiga label: *Sesuai*, *Mendekati*, dan *Belum sesuai*. Tidak ada skor angka.
+- **Hasil yang bisa dibandingkan.** Level 1 menampilkan "Cermin bibir" dan "Peta vokal",
+  yaitu bentuk target dan bentuk milik pengguna pada grafik yang sama.
+- **Mode Pendamping.** Keluarga atau guru dapat menambah kata latihan sendiri. Mode ini
+  dikunci dengan PIN.
+- **Akun opsional.** Dengan Supabase, riwayat dan kemajuan tersimpan per akun. Tanpa
+  Supabase, aplikasi tetap bisa dipakai dan menyimpan data di perangkat.
+- **Aksesibilitas sebagai syarat.** Teks tidak lebih kecil dari 15, target sentuh minimal
+  48 dp, kontras diukur, status tidak dibedakan hanya lewat warna, dan animasi mengikuti
+  pengaturan Reduce Motion.
 
-## Prasyarat
+## Cara kerja
 
-Git, **Python 3.11**, **FFmpeg dan ffprobe di PATH**, **Node ≥22.13**, serta HP dengan
-Expo Go yang mendukung SDK proyek (SDK 58 pada pengujian). HP dan laptop harus berada
-di jaringan yang mengizinkan komunikasi antarkeduanya.
+```
+HP (Expo Go)                              Laptop (server lokal)
+┌───────────────────────┐   video+audio   ┌──────────────────────────────┐
+│ Kamera: satu rekaman  │ ──────────────▶ │ FFmpeg: ambil frame dan audio │
+│ Hasil: Bibir + Suara  │ ◀────────────── │ MediaPipe: geometri mulut     │
+└───────────────────────┘   JSON angka    │ Parselmouth: ciri suara       │
+                                          │ Aturan berambang: status      │
+                                          └──────────────────────────────┘
+```
+
+Rekaman latihan dihapus segera setelah dianalisis, termasuk ketika terjadi galat. Log
+hanya memuat angka dan kode status. Wajah dipakai semata-mata untuk mengukur bentuk mulut;
+tidak ada pengenalan identitas. Penilaian memakai aturan berambang yang disetel dari data
+tim, bukan model yang dilatih.
+
+## Struktur repositori
+
+| Folder | Isi |
+|---|---|
+| `app/` | Aplikasi Expo: React Native, TypeScript strict, expo-router |
+| `server/` | Server FastAPI (Python 3.11) dan pipeline analisis di `server/app/pipeline` |
+| `ml/` | Skrip dataset, pelabelan, penyetelan ambang, dan evaluasi; memakai ulang pipeline server |
+| `docs/` | Spesifikasi (`SPEC.md`), desain (`design.md`), laporan evaluasi, model card, skema Supabase |
+| `data/` | Data pengembangan lokal. Tidak di-commit |
+
+## Menjalankan secara lokal
+
+### Prasyarat
+
+Git, Python 3.11, FFmpeg dan ffprobe di `PATH`, Node 22.13 atau lebih baru, dan HP dengan
+Expo Go untuk SDK 58. HP dan laptop harus berada di jaringan yang sama. Perintah di bawah
+untuk PowerShell; `npm.cmd` dan `npx.cmd` menghindari blokir skrip `.ps1`.
 
 ```powershell
 py -3.11 --version
@@ -37,13 +70,7 @@ ffprobe -version
 node --version
 ```
 
-Jika launcher `py` tidak tersedia, gunakan interpreter Python 3.11 yang terpasang.
-Untuk venv yang sudah dibuat, cek interpreter venv langsung. Berhenti bila prasyarat gagal.
-Perintah di bawah memakai PowerShell; `npm.cmd`/`npx.cmd` menghindari blokir skrip `.ps1`.
-
-## Menyiapkan server
-
-Dari root repo:
+### Server
 
 ```powershell
 cd server
@@ -53,12 +80,11 @@ if (!(Test-Path .env)) { Copy-Item .env.example .env }
 .venv/Scripts/python.exe scripts/download_models.py
 ```
 
-Model tidak disertakan di Git. SHA-256 unduhan yang diuji:
-`64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff`.
-Bandingkan keluaran skrip; URL upstream memakai `latest` sehingga isinya dapat berubah.
-Lisensi komponen bundle ada di [THIRD_PARTY.md](docs/THIRD_PARTY.md).
+Model Face Landmarker tidak disertakan di Git; skrip di atas mengunduhnya. SHA-256 unduhan
+yang diuji ialah `64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff`.
+Bandingkan dengan keluaran skrip, karena URL sumber memakai `latest` dan isinya dapat berubah.
 
-Atur `server/.env` untuk produk/demo:
+Untuk penggunaan sungguhan, atur `server/.env`:
 
 ```dotenv
 MOCK_MODE=false
@@ -67,22 +93,20 @@ DEBUG=false
 SCORER_MODE=rules
 ```
 
-`MOCK_MODE=true` menghasilkan contoh hasil dan tidak membuktikan analisis sungguhan.
-Variabel shell mengalahkan `.env`; singkirkan override `DEBUG=release` bila diwarisi terminal.
-`DATA_DIR` menyimpan kalibrasi numerik dan video model lokal. `FACE_MODEL_PATH`, `TMP_DIR`,
-`MAX_UPLOAD_MB`, dan `ENGINE_VERSION` dijelaskan di `.env.example`. Server tidak memerlukan
-kunci Supabase untuk MVP. Jalankan dan biarkan terminal terbuka:
+`MOCK_MODE=true` hanya mengembalikan contoh hasil dan tidak membuktikan analisis. Variabel
+shell mengalahkan `.env`, jadi pastikan terminal tidak mewarisi `DEBUG=release` atau sejenisnya.
+Variabel lain dijelaskan di `server/.env.example`. Jalankan server dan biarkan terminal terbuka:
 
 ```powershell
 .venv/Scripts/python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --no-access-log
 ```
 
-Dari browser HP, buka `http://<IP-laptop>:8000/v1/health`; harus tampil JSON dengan
-`mock_mode:false`. Cari IPv4 Wi-Fi laptop memakai `ipconfig`.
+Dari browser HP, buka `http://<IP-laptop>:8000/v1/health`. Responsnya harus berupa JSON
+dengan `mock_mode: false`. IPv4 Wi-Fi laptop bisa dilihat dengan `ipconfig`.
 
-## Menyiapkan app
+### Aplikasi
 
-Di terminal kedua dari root repo:
+Di terminal kedua, dari root repositori:
 
 ```powershell
 cd app
@@ -92,70 +116,45 @@ if (!(Test-Path .env)) { Copy-Item .env.example .env }
 
 Isi `app/.env`:
 
-- `EXPO_PUBLIC_API_URL=http://<IP-laptop>:8000`
-- `EXPO_PUBLIC_DATASET_MODE=false`
-- Opsional: `EXPO_PUBLIC_SUPABASE_URL` dan `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
-  Aktifkan **Anonymous Sign-Ins**, simpan pengaturan dan jalankan seluruh
-  [schema.sql](docs/supabase/schema.sql) di SQL Editor Supabase. Jangan gunakan
-  service-role key di app. Tanpa konfigurasi ini, latihan tetap berjalan dengan
-  penyimpanan lokal dan sinkronisasi tidak aktif.
+| Variabel | Keterangan |
+|---|---|
+| `EXPO_PUBLIC_API_URL` | `http://<IP-laptop>:8000` |
+| `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Opsional. Aktifkan penyedia Email di Supabase, lalu jalankan [schema.sql](docs/supabase/schema.sql) di SQL Editor. Jangan menaruh service-role key di aplikasi |
+| `EXPO_PUBLIC_USE_MOCK` | `true` memakai katalog dan kata contoh bawaan aplikasi. Server lokal baru menyediakan `/v1`, jadi nilai ini diperlukan agar katalog tampil |
+| `EXPO_PUBLIC_ANALYZE_API` | `v1` (bawaan), `v2`, atau `mock` |
+| `EXPO_PUBLIC_DATASET_MODE` | `false` untuk build produk |
 
 ```powershell
 npx.cmd expo login --no-browser
-npx.cmd expo whoami
 npx.cmd expo start -c --lan --go
 ```
 
-Login akun Expo yang sama di CLI dan Expo Go iPhone. Pindai QR atau buka
-`exp://<IP-laptop>:8081` dari Safari lalu pilih Expo Go. Izinkan jaringan lokal, kamera
-dan mikrofon. Login situs Expo saja belum membuktikan CLI sudah login.
+Masuk ke akun Expo yang sama di CLI dan Expo Go, lalu pindai QR atau buka
+`exp://<IP-laptop>:8081`. Izinkan jaringan lokal, kamera, dan mikrofon. Jika koneksi gagal,
+periksa IP terbaru, jaringan, dan izin Windows Firewall untuk port 8000 dan 8081 (izinkan
+jaringan lokal; jangan mematikan firewall). Alamat server dan tes koneksi tersedia di bagian
+operator pada tab Pengaturan.
 
-Jika timeout, cek IP terbaru, jaringan HP/laptop, proses server/Metro dan izin firewall
-LAN untuk port 8000/8081. Gunakan izin terbatas jaringan lokal; jangan mematikan firewall.
-Runtime dalam sandbox agen sempat tidak dapat dijangkau HP; gunakan terminal lokal yang
-mengizinkan LAN. Setelah pindah jaringan, perbarui URL dan jalankan ulang Metro.
-Tekan lama **Misi hari ini** 2 detik untuk URL dan **Tes koneksi**.
-
-## Alur demo
-
-Onboarding → kalibrasi diam/a/i/u → latihan a → ma → mama → Mode Pendamping.
-Checkbox **Buka semua materi** membuka akses. Untuk contoh materi yang sudah lulus,
-aktifkan **Gunakan profil demo** di pengaturan tersembunyi. Demo tidak menimpa atau
-menyinkronkan progres pribadi; matikan checkbox untuk kembali ke profil pribadi.
-Layar **Tentang aplikasi** memuat privasi dan versi app/mesin server.
-
-Dataset teman **tidak diperlukan** untuk menjalankan app atau tes. Video model opsional
-dapat disiapkan sendiri secara lokal; tanpa video, app memakai teks dan ilustrasi bibir.
-Agen tidak boleh membuka, memutar, menyalin atau mengunggah isi `data/`.
-Panduan dan checklist: [app/README.md](app/README.md). Target yang diuji ialah Expo Go
-iPhone; APK/EAS belum disiapkan karena belum diminta.
-
-## Verifikasi
-
-Dari `server/`:
+## Pengujian
 
 ```powershell
+# dari server/
 .venv/Scripts/python.exe -m pytest -q
 .venv/Scripts/python.exe -m ruff check app tests ../ml
 .venv/Scripts/python.exe -m ruff format --check app tests ../ml
-```
 
-Dari `app/`:
-
-```powershell
+# dari app/
 npm.cmd test
-npx.cmd tsc --noEmit
+npm.cmd run typecheck
 npx.cmd expo lint
-npx.cmd --yes expo-doctor@1.21.6
 ```
 
-Hasil F, pemeriksaan privasi dan berkas pengumpulan dicatat di
-[SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md). Tes ML termasuk dalam pytest
-server, memakai data sintetis/temporer. Evaluasi dataset nyata tidak dijalankan ulang.
+Tes ML ikut berjalan di pytest server dengan data sintetis. Dataset nyata tidak diperlukan
+untuk menjalankan aplikasi maupun tes.
 
 ## Hasil dan keterbatasan
 
-Evaluasi LOSO dari 3 anggota tim, seluruhnya iPhone di satu ruangan:
+Evaluasi leave-one-speaker-out dengan 3 anggota tim, seluruhnya memakai iPhone di satu ruangan:
 
 | Pengukuran | Hasil | Target |
 |---|---|---|
@@ -163,30 +162,40 @@ Evaluasi LOSO dari 3 anggota tim, seluruhnya iPhone di satu ruangan:
 | Suara saat bibir rapat | 43/50 (86%) | ≥80% |
 | Vokal a/i/u | 19/23 (83%) | ≥85%, belum tercapai |
 | Status kata | 12/22 (55%) | ≥80%, belum tercapai |
-| Waktu proses server p90 | 984 ms | ≤5 s |
+| Waktu proses server (p90) | 984 ms | ≤5 s |
 
-I1 melalui iPhone: 20 durasi manual dari selesai merekam sampai hasil, p50 2,385 s,
-p90 3,91 s, maksimum 14,5 s. Seluruh sampel termasuk retry dihitung. Antrean pulih
-saat koneksi kembali; putus WAN fisik diganti simulasi kegagalan Supabase.
+Angka ini adalah bukti awal, **bukan akurasi pada pengguna sasaran**. Belum ada pengujian
+dengan penutur Tuli, anak-anak, atau kamera Android. Pembedaan p/b dan penilaian kata masih
+lemah, dan seluruh antarmuka hasil desain terbaru belum diuji di perangkat (termasuk skala
+teks 200%, layar 360 dp, dan pembaca layar). Rincian ada di [EVAL_REPORT.md](docs/EVAL_REPORT.md)
+dan [MODEL_CARD.md](docs/MODEL_CARD.md).
 
-Ini bukti awal, **bukan akurasi pada pengguna sasaran**. Belum diuji pada penutur Tuli,
-anak atau kamera Android. Kata dan perbedaan p/b masih lemah; kalibrasi belum dievaluasi
-kuantitatif pada dataset. Mama dipakai untuk demo; ibu/bumi kurang stabil. VoiceOver
-menyeluruh dan splash release belum diuji. Rincian: [EVAL_REPORT.md](docs/EVAL_REPORT.md),
-[MODEL_CARD.md](docs/MODEL_CARD.md), [I1_CHECKLIST.md](docs/I1_CHECKLIST.md).
+## Privasi
 
-## Privasi, lisensi dan serah terima
+Rekaman latihan tidak disimpan. Yang tersimpan hanya angka kalibrasi dan riwayat hasil.
+Dataset pengembangan berasal dari persetujuan tertulis penutur, tetap berada di mesin lokal,
+dan tidak diunggah ke layanan publik. `.env`, `data/`, virtual environment, `node_modules`,
+dan model unduhan tidak ada di Git.
 
-Rekaman latihan dihapus setelah dianalisis, termasuk saat error. Kalibrasi dan riwayat
-yang disimpan berupa angka; log aplikasi tidak memuat path rekaman. Dataset pengembangan
-tetap lokal dan tidak dikumpulkan. `.env`, `data/`, venv, node_modules dan model unduhan
-tidak disertakan di Git. Jangan menaruh token/kunci di chat, log atau commit.
+## Pengembangan dengan bantuan AI
 
-Kode milik tim berlisensi [MIT](LICENSE). Komponen pihak ketiga mempertahankan lisensinya,
-termasuk kewajiban GPL Parselmouth/Praat dan lisensi build FFmpeg; MIT repo tidak
-menggantikan ketentuan tersebut. Sumber: [THIRD_PARTY.md](docs/THIRD_PARTY.md).
+Proyek ini dikembangkan dengan bantuan alat AI: **Claude** (Claude Code, Anthropic) dan
+**Codex** (OpenAI). Keduanya dipakai untuk menulis dan meninjau kode, tes, dokumentasi, serta
+menerjemahkan rancangan Figma ke komponen aplikasi. Arah produk, batas penggunaan, desain,
+pengambilan data, penyetelan ambang, dan keputusan akhir ada pada tim. Hasil kerja AI
+diperiksa dan diuji lewat tes otomatis serta pengujian manual oleh tim. Aturan kerja agen tertulis di
+[CLAUDE.md](CLAUDE.md) dan [AGENTS.md](AGENTS.md); riwayat keputusan ada di
+[PROGRESS.md](docs/PROGRESS.md).
 
-Aturan: [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md). Kontrak: [SPEC.md §5](docs/SPEC.md).
-Status: [PROGRESS.md](docs/PROGRESS.md), [CONTEXT.md](CONTEXT.md),
-[NEXT_STEPS.md](docs/NEXT_STEPS.md). Setelah tag submission dibuat, kode dibekukan.
-Video demo dan pengiriman ke panitia tetap dikerjakan tim. Jangan push tanpa instruksi.
+## Lisensi
+
+Kode milik tim dirilis di bawah [Lisensi MIT](LICENSE). Komponen pihak ketiga tetap memakai
+lisensi masing-masing, termasuk ketentuan GPL pada Parselmouth/Praat dan lisensi build FFmpeg
+yang dipakai; lisensi MIT di repositori ini tidak menggantikannya. Daftar lengkap ada di
+[THIRD_PARTY.md](docs/THIRD_PARTY.md).
+
+## Dokumen lain
+
+[SPEC.md](docs/SPEC.md) (kontrak API di §5) · [design.md](docs/design.md) ·
+[PROGRESS.md](docs/PROGRESS.md) · [SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md) ·
+[app/README.md](app/README.md) · [server/README.md](server/README.md)
