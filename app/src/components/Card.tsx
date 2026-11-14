@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useFocusRing } from '../a11y/useFocusRing';
-import { colors, radius, spacing, stroke, touchTarget } from '../theme';
+import { colors, iconSize, radius, spacing, stroke, touchTarget } from '../theme';
 
 export interface CardProps {
   children: ReactNode;
@@ -36,7 +36,7 @@ export function Card({ children, onPress, accessibilityLabel, accessibilityHint,
     >
       <View style={styles.row}>
         <View style={styles.content}>{children}</View>
-        <Ionicons name="chevron-forward" size={22} color={colors.textMuted} accessible={false} />
+        <Ionicons name="chevron-forward" size={iconSize.base} color={colors.textMuted} accessible={false} />
       </View>
     </Pressable>
   );

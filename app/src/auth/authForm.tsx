@@ -5,7 +5,7 @@ import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } fro
 import { LogoMark, Screen } from '../components';
 import { fill, MESSAGES, UI } from '../forms/messages';
 import { LIMITS } from '../forms/limits';
-import { colors, displayFont, entry, fontSize, lineHeight, spacing, textFont, touchTarget } from '../theme';
+import { colors, displayFont, entry, fontSize, iconSize, lineHeight, spacing, textFont, touchTarget } from '../theme';
 import type { AuthCode } from './errors';
 
 /**
@@ -80,7 +80,7 @@ export function PasswordChecklist({ password }: { password: string }) {
     <View style={styles.list} testID="password-checklist">
       {rules.map((r) => (
         <View key={r.text} style={styles.row} accessible accessibilityLabel={`${r.text}, ${r.ok ? UI.ruleMet : UI.ruleNotMet}`}>
-          <Ionicons name={r.ok ? 'checkmark-circle-outline' : 'ellipse-outline'} size={20} color={r.ok ? colors.success : colors.textMuted} accessible={false} />
+          <Ionicons name={r.ok ? 'checkmark-circle-outline' : 'ellipse-outline'} size={iconSize.field} color={r.ok ? colors.success : colors.textMuted} accessible={false} />
           <Text maxFontSizeMultiplier={2} style={[styles.text, textFont()]}>{r.text}</Text>
         </View>
       ))}

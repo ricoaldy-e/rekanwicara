@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { useFocusRing } from '../a11y/useFocusRing';
-import { colors, fontSize, radius, spacing, stroke, textFont, touchTarget } from '../theme';
+import { colors, fontSize, iconSize, radius, spacing, stroke, textFont, touchTarget } from '../theme';
 
 export interface BackButtonProps {
   /** Names the destination ("Latihan", "Keluar latihan"), not just "Kembali" (design.md §5.2). */
@@ -24,7 +24,7 @@ export function BackButton({ label, onPress, accessibilityLabel, testID }: BackB
       {...focusProps}
       style={({ pressed }) => [styles.base, pressed && styles.pressed, focusStyle]}
     >
-      <Ionicons name="chevron-back" size={22} color={colors.text} accessible={false} />
+      <Ionicons name="chevron-back" size={iconSize.base} color={colors.text} accessible={false} />
       <Text maxFontSizeMultiplier={2} numberOfLines={1} style={[styles.label, textFont()]}>
         {label}
       </Text>

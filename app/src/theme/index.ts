@@ -92,6 +92,8 @@ export const fontSize = {
   title: 24,
   titleLarge: 28,
   display: 34,
+  /** Large target word of the dataset recorder (team-only screens). */
+  hero: 56,
 } as const;
 
 /** Line height for body text (1.5 × body). */
@@ -210,5 +212,12 @@ export const entry = {
   check: { box: 28, radius: 8, icon: 20, gap: 12 },
   stepBarGap: 8,
 } as const;
+
+/** Icon sizes in dp. Outline Ionicons are drawn in these boxes; labels carry the meaning (design.md §2). */
+export const iconSize = { chip: 18, field: 20, base: 22, button: 24, option: 26, note: 28, add: 32, status: 34, gate: 48 } as const;
+
+/** Permission gate badge (camera / microphone), and the step bar of the older StepHeader. */
+export const gate = { badge: 88, badgeBorder: 3 } as const;
+export const stepHeaderBar = 12;
 
 export const theme = { colors, fontSize, spacing, radius, touchTarget, buttonHeight, statusStyles, overlay, chart, stroke, fontFamily } as const;

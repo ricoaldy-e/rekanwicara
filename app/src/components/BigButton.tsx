@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useFocusRing } from '../a11y/useFocusRing';
 import { useReduceMotion } from '../a11y/useReduceMotion';
-import { buttonHeight, colors, fontSize, radius, spacing, stroke, textFont, touchTarget } from '../theme';
+import { buttonHeight, colors, fontSize, iconSize, radius, spacing, stroke, textFont, touchTarget } from '../theme';
 
 type Variant = 'primary' | 'secondary' | 'danger';
 
@@ -53,7 +53,7 @@ export function BigButton({
       ]}
     >
       <View style={styles.row}>
-        {icon ? <Ionicons name={icon} size={24} color={fg} accessible={false} /> : null}
+        {icon ? <Ionicons name={icon} size={iconSize.button} color={fg} accessible={false} /> : null}
         <Text maxFontSizeMultiplier={2} style={[styles.label, textFont(true), { color: fg }]}>{label}</Text>
       </View>
     </Pressable>

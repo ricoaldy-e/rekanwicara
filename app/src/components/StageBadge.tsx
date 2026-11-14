@@ -3,7 +3,7 @@ import type { ComponentProps } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import type { Stage } from '../state/progression';
-import { colors, fontSize, radius, spacing } from '../theme';
+import { colors, fontSize, iconSize, radius, spacing } from '../theme';
 
 const STAGES: Record<Stage, { label: string; icon: ComponentProps<typeof Ionicons>['name'] }> = {
   terkunci: { label: 'Terkunci', icon: 'lock-closed' },
@@ -20,7 +20,7 @@ export function StageBadge({ stage, testID }: { stage: Stage; testID?: string })
   const s = STAGES[stage];
   return (
     <View testID={testID} accessible accessibilityLabel={`Tahap: ${s.label}`} style={styles.badge}>
-      <Ionicons name={s.icon} size={22} color={colors.text} />
+      <Ionicons name={s.icon} size={iconSize.base} color={colors.text} />
       <Text style={styles.text}>{s.label}</Text>
     </View>
   );

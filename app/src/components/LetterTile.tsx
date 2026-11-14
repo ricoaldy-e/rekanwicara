@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, displayFont, fontSize, homeList, lineHeight, radius, stroke } from '../theme';
+import { colors, displayFont, fontSize, homeList, lineHeight, radius, spacing, stroke } from '../theme';
 
 export interface LetterTileProps {
   letter?: string;
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
   tile: { width: homeList.letterTile, height: homeList.letterTile, borderRadius: radius.tile, alignItems: 'center', justifyContent: 'center' },
   raised: { backgroundColor: colors.surfaceRaised },
   outline: { borderWidth: stroke.hairline, borderColor: colors.hairline },
-  wide: { width: undefined, minWidth: homeList.letterTile, paddingHorizontal: 12 },
+  wide: { width: undefined, minWidth: homeList.letterTile, paddingHorizontal: spacing.sm + spacing.xs },
   letter: { fontSize: fontSize.large, lineHeight: lineHeight.large, color: colors.text },
   letterLarge: { fontSize: fontSize.title, lineHeight: lineHeight.title },
 });

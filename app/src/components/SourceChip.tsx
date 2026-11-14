@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import type { Source } from '../api/types';
-import { colors, fontSize, radius, textFont, wordList } from '../theme';
+import { colors, fontSize, iconSize, radius, textFont, wordList } from '../theme';
 
 /**
  * Where a word comes from: the team ("Bawaan", lock) or the companion ("Dari Pendamping", person).
@@ -12,7 +12,7 @@ export function SourceChip({ source, tall = false }: { source: Source; tall?: bo
   const builtIn = source === 'default';
   return (
     <View style={[styles.chip, tall && styles.tall]}>
-      <Ionicons name={builtIn ? 'lock-closed-outline' : 'person-outline'} size={18} color={colors.text} accessible={false} />
+      <Ionicons name={builtIn ? 'lock-closed-outline' : 'person-outline'} size={iconSize.chip} color={colors.text} accessible={false} />
       <Text maxFontSizeMultiplier={2} style={[styles.text, textFont(true)]}>{builtIn ? 'Bawaan' : 'Dari Pendamping'}</Text>
     </View>
   );

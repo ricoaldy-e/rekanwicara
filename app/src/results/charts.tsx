@@ -1,11 +1,11 @@
 import Svg, { Circle, Line, Polygon, Polyline, Rect, Text as SvgText } from 'react-native-svg';
 
 import type { FormantPoint, LipContour, Loudness, VowelAnchors } from '../api/types';
-import { chart, colors } from '../theme';
+import { chart, colors, fontSize } from '../theme';
 import { toSvgPoints, lipRing, type LipShape, type Point } from './lipShapes';
 import { downsample, loudnessXY, nearestAnchor, vowelMapXY } from './scale';
 
-const LABEL = { fontSize: 15, fill: colors.textMuted } as const;
+const LABEL = { fontSize: fontSize.small, fill: colors.textMuted } as const;
 
 // ---------- Peta Vokal (SPEC §8.3) ----------
 

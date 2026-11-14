@@ -240,7 +240,7 @@ export default function DatasetSessionScreen() {
 }
 
 const styles = StyleSheet.create({
-  target: { fontSize: 56, fontWeight: '700', color: colors.text, textAlign: 'center' },
+  target: { fontSize: fontSize.hero, fontWeight: '700', color: colors.text, textAlign: 'center' },
   meta: { fontSize: fontSize.body, color: colors.textMuted, textAlign: 'center', marginTop: spacing.xs },
   saved: { fontSize: fontSize.body, fontWeight: '700', color: colors.success },
   gap: { gap: spacing.sm },

@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSize, radius, spacing, touchTarget } from '../theme';
+import { colors, fontSize, iconSize, radius, spacing, touchTarget } from '../theme';
 
 export interface Option<T extends string> {
   value: T;
@@ -35,7 +35,7 @@ export function OptionGroup<T extends string>({ label, options, value, onChange,
             >
               <Ionicons
                 name={selected ? 'checkmark-circle' : 'ellipse-outline'}
-                size={26}
+                size={iconSize.option}
                 color={selected ? colors.onPrimary : colors.text}
               />
               <Text style={[styles.text, selected && styles.textSelected]}>{o.label}</Text>

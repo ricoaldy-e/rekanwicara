@@ -852,3 +852,45 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   - Catatan pengembang: rute baru perlu `npx expo start` sekali agar `.expo/types/router.d.ts` dibuat ulang sebelum `npm run typecheck` (sama seperti FG-10).
   - Skill `figma-design-to-code` dan `interfaces:build-design` dimuat lewat Skill tool; tidak ada saran yang bertentangan dengan design.md. Aset logo dari Figma dipakai apa adanya (tanpa menggambar ulang). Kemiripan logo dengan produk lain belum diperiksa (design.md §14).
   - Belum diverifikasi di perangkat: splash native (butuh build), margin transparan di sekitar tile logo (logo tampak sedikit lebih kecil dari Figma karena PNG punya tepi transparan ±4%), keyboard di Masuk/Daftar dengan header tersembunyi, 360 dp dan skala teks 200%, dan perilaku Android back dari Daftar (kembali ke Selamat datang).
+
+## FG-12 (14 Nov 2026): pemeriksaan akhir dan ringkasan seri FG-1 sampai FG-12
+
+Hasil akhir: `npm test` 55 suite lulus (644 tes), `npm run typecheck` bersih. Penelusuran literal: tidak ada hex atau `rgba` di luar `src/theme`; 24 ukuran literal (ikon, `fontSize: 56` layar dataset, lingkaran `PermissionGate`, label grafik, tinggi `StepHeader`, padding `LetterTile`) dipindah ke token (`iconSize`, `fontSize.hero`, `gate`, `stepHeaderBar`, `spacing`) tanpa mengubah ukuran. Tes baru `theme.literals.test.ts` menjaga agar hex dan ukuran literal tidak masuk lagi. design.md diperbarui ke v7.1 (nilai Figma dan implementasi; bagian 12 berisi D1 sampai D12). Daftar periksa manual: `docs/CHECKLIST_360_200.md`.
+
+### Ringkasan per langkah (satu baris)
+- FG-1: token v7 netral, Inter dimuat, tes kontras.
+- FG-2: Button (danger, tekan mengubah isi), Card `hairline`, Field 1 dp, `BackButton` kapsul berketerangan.
+- FG-3: `StatusBadge` tanpa wadah, tiga simbol lingkaran (md 18, lg 26).
+- FG-4: `ConfirmDialog` tengah (aman di atas), `SegmentedControl`, `ListGroup`/`ListRow`.
+- FG-5: `BottomBar` 80 dp, kunci PIN bulat 76, titik 22.
+- FG-6: Beranda (hero Lanjutkan, `LevelTile`, `StatTile`, aktivitas, pengguna baru); `nextItem`, `recentActivity`, `describeItem`.
+- FG-7: sesi latihan (`SessionHeader`, panel rekam baru, Lihat, Menganalisis, Batalkan).
+- FG-8: Hasil (kartu indikator, `ActionBar` menempel, Kekerasan suara bersyarat).
+- FG-9: Level 1, Pilih kata (filter), Jalur kata.
+- FG-10: Pendamping dan Pengaturan; Pengaturan tidak dikunci PIN, Keluar lewat `/settings/sign-out` (PIN), Hapus kata di layar Ubah.
+- FG-11: Splash, Selamat datang (`/welcome`), Masuk/Daftar, onboarding; logo dari Figma.
+- FG-12: pemeriksaan literal, token ikon, design.md v7.1, daftar periksa, ringkasan ini.
+
+### Perubahan perilaku yang disetujui Rico
+Pengaturan tidak dikunci PIN dan Keluar meminta PIN (rute baru `/settings/sign-out`); Hapus kata pindah ke layar Ubah; rute baru `/welcome`; "Batalkan" di Menganalisis membatalkan unggahan (penjaga hasil terlambat `sendId`). Logika lain (API, progresi, sinkronisasi, aturan penilaian) tidak diubah.
+
+### Saran skill yang ditolak (bertentangan dengan design.md atau CLAUDE.md)
+- `interfaces:better-colors` (FG-1): ganti nama `primary` menjadi `accent`; tier primitif/semantik dan ramp 50–950; `prefers-color-scheme` (hanya tema gelap).
+- `interfaces:better-ui` (FG-2, FG-4): skala tekan 0,96 (design.md: 0,98); pengganti garis dengan bayangan berlapis (tanpa bayangan); animasi masuk/keluar dialog dengan blur dan translate (gerak hanya efek tekan, cincin, transisi bawaan).
+- `interfaces:better-layout` (FG-6): "pisahkan grup dengan ruang saja, tanpa garis" (grup daftar memakai pemisah `hairline`, design.md §5.3); tombol penuh dengan inset 16 (gutter Figma 20/24); properti logis (`marginInlineStart`) tidak dipakai karena app hanya LTR.
+- `interfaces:better-interface` (FG-12): tidak ada saran yang bertentangan. Skill ini berorientasi tinjauan baca-saja; dipakai sebagai kerangka daftar periksa, bukan untuk membuat laporan temuan penuh.
+- Selisih Figma vs design.md lain (Figma diikuti dan design.md diperbarui): ikon bar 22, simbol badge lg 26, dialog `surface` + `hairline`, tombol Hapus kata berupa kotak (bukan tombol merah), teks segmen 15 Bold (Semi Bold tidak dimuat), kunci PIN tanpa garis.
+
+### Tes yang berubah atau ditambah (seri FG)
+- Diubah: `StatusBadge.test` (testID bentuk, tanpa wadah), `formComponents.test` (dialog: tombol krem/merah, tanpa `danger`, PinPad/PinDots), `BottomBar.test`, `home.test` (mock `useAuth`, hero, pengguna baru, aktivitas), `practice.test` (langkah 1–4, Batalkan, bar aksi, tombol keluar di isi layar), `RecordPanel.test`, `ResultView.test` (teks status terpisah, kata target huruf kecil), `level1.test`, `words.test` (badge tanpa "Terakhir:/Terbaik:", filter, Jalur kata), `settings.test` (Keluar lewat rute PIN), `companionList.test` (tanpa hapus per baris), `wordScreens.test` (Hapus di Ubah), `auth.test` dan `v2Auth.test` (gerbang ke `/welcome`), `onboarding.test`, `progress.test`.
+- Ditambah: `SegmentedControl.test`, `ListGroup.test`, `SessionHeader.test`, `AnalyzingView.test`, `signOut.test`, `welcome.test`, `theme.literals.test`.
+
+### Yang masih kurang / terbuka
+1. **Belum diuji di perangkat sama sekali:** semua tampilan, 360 dp, skala 200%, TalkBack, kamera dengan oval SVG, splash native, keyboard di Masuk/Daftar (daftar periksa di `docs/CHECKLIST_360_200.md`).
+2. **D3:** batang target "Kekerasan suara" butuh nilai target dari backend dan perubahan kontrak API (SPEC §5).
+3. **D9:** lencana "Cahaya cukup" tidak dipasang (tidak ada cek pencahayaan di klien).
+4. **D12:** dialog keluar sesi latihan masih `Alert` sistem.
+5. Layar yang tidak di-restyle: Cek email, Masuk · Galat, Buat PIN, Lupa PIN, Kalibrasi, Tentang, formulir Kata baru/Ubah (selain tombol Hapus), layar Dataset/eksperimen. Keadaan Hasil "semua sesuai" (48:280) dan "rekaman tidak dihitung" (48:335) belum dibandingkan dengan Figma.
+6. Judul aktivitas Level 2 memakai id suku kata (riwayat tidak menyimpan kata induk); daftar kata Pendamping hanya menampilkan jumlah suku kata (data tidak menyimpan teksnya).
+7. flow-srs-ui.md belum diperbarui (D1, D2, D11 berbeda dari flow); logo belum diperiksa kemiripannya; ilustrasi bibir "u" masih kasar; penggunaan AI untuk desain dan kode wajib dicatat di dokumentasi lomba.
+8. Dev: setelah menarik komit dengan rute baru, jalankan `npx expo start` sekali agar `.expo/types/router.d.ts` dibuat ulang sebelum `npm run typecheck`.

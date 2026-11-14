@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { fill, UI } from '../../forms/messages';
-import { colors, fontSize, pin, textFont } from '../../theme';
+import { colors, fontSize, iconSize, pin, spacing, textFont } from '../../theme';
 
 const ROWS = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9']] as const;
 
@@ -31,7 +31,7 @@ export function PinPad({ onDigit, onDelete, disabled = false }: PinPadProps) {
         <View style={styles.key} />
         {digit('0')}
         <Key label={UI.delete} disabled={disabled} onPress={onDelete} testID="pin-delete">
-          <Ionicons name="backspace-outline" size={22} accessible={false} color={disabled ? colors.textMuted : colors.text} />
+          <Ionicons name="backspace-outline" size={iconSize.base} accessible={false} color={disabled ? colors.textMuted : colors.text} />
           <Text maxFontSizeMultiplier={2} style={[styles.deleteText, textFont(true), disabled && styles.muted]}>{UI.delete}</Text>
         </Key>
       </View>
@@ -59,7 +59,7 @@ function Key({ label, disabled, onPress, testID, children }: { label: string; di
 const styles = StyleSheet.create({
   pad: { gap: pin.rowGap, alignSelf: 'center' },
   row: { flexDirection: 'row', gap: pin.columnGap, justifyContent: 'center' },
-  key: { width: pin.key, height: pin.key, borderRadius: pin.key / 2, alignItems: 'center', justifyContent: 'center', gap: 2 },
+  key: { width: pin.key, height: pin.key, borderRadius: pin.key / 2, alignItems: 'center', justifyContent: 'center', gap: spacing.xs / 2 },
   keyFace: { backgroundColor: colors.surface },
   keyRaised: { backgroundColor: colors.surfaceRaised },
   digit: { fontSize: pin.digit, lineHeight: 28, color: colors.text },

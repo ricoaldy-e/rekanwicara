@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { UI } from '../../forms/messages';
-import { colors, fontSize, radius, spacing, touchTarget } from '../../theme';
+import { colors, fontSize, iconSize, radius, spacing, touchTarget } from '../../theme';
 import { announce } from './announce';
 
 /** Shortest time a message may stay (flow §7.7.1: at least 5 seconds). */
@@ -32,7 +32,7 @@ export function Snackbar({ message, onDismiss, durationMs = SNACKBAR_MIN_MS }: {
       accessibilityLiveRegion="polite"
       style={styles.bar}
     >
-      <Ionicons name="checkmark-circle-outline" size={22} color={colors.text} />
+      <Ionicons name="checkmark-circle-outline" size={iconSize.base} color={colors.text} />
       <Text style={styles.text}>{message}</Text>
     </Pressable>
   );

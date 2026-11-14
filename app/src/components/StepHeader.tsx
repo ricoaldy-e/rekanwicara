@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, displayFont, fontSize, radius, spacing } from '../theme';
+import { colors, displayFont, fontSize, radius, spacing, stepHeaderBar } from '../theme';
 
 export interface StepHeaderProps {
   step: number;
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
   step: { fontSize: fontSize.small, color: colors.textMuted },
   title: { fontSize: fontSize.title, color: colors.text },
   track: {
-    height: 12,
+    height: stepHeaderBar,
     borderRadius: radius.tile,
     backgroundColor: colors.surfaceRaised,
     overflow: 'hidden',
