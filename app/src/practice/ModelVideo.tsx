@@ -7,6 +7,7 @@ import { BigButton, Body, InfoNote, LipIllustration } from '../components';
 import { ANALYZE_API, type AnalyzeApi } from '../config';
 import type { PracticeItem } from '../data/types';
 import { soundShape } from '../results/lipShapes';
+import { InstructionCarousel } from './InstructionCarousel';
 import { useSettings } from '../state/settings';
 import { colors, displayFont, fontSize, lineHeight, radius, session, spacing, stroke, textFont } from '../theme';
 
@@ -70,7 +71,7 @@ function Instruction({ item }: { item: PracticeItem }) {
     <View style={styles.instruction}>
       <Text accessibilityRole="header" maxFontSizeMultiplier={2} style={[styles.instructionTitle, textFont(true)]}>Cara mengucapkan</Text>
       <View testID="model-instruction">
-        <Body>{item.instruction}</Body>
+        <InstructionCarousel text={item.instruction} />
         {item.instructionSource === 'ai' ? <Body muted>Instruksi dibuat dengan bantuan AI</Body> : null}
       </View>
     </View>

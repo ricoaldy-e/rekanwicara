@@ -6,5 +6,5 @@
     { "id": "l2_ma", "text": "MA", "position": 1, "instruction": "Rapatkan bibir, lalu buka dan ucapkan MA.", "videos": [] },
     { "id": "l2_ma", "text": "MA", "position": 2, "instruction": "Rapatkan bibir lagi, lalu ucapkan MA.", "videos": [] }
   ],
-  "level_3": { "instruction": "Ucapkan MAMA perlahan.", "videos": [] }
+  "level_3": { "instruction": "Rapatkan bibir untuk MA yang pertama.\nBuka mulut, lalu rapatkan lagi untuk MA yang kedua.\nUcapkan MAMA perlahan dengan irama sama.", "videos": [] }
 }

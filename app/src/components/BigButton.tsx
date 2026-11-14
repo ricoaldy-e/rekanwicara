@@ -19,6 +19,8 @@ export interface BigButtonProps {
   accessibilityLabel?: string;
   /** Narrow variant for three buttons in a row (Figma 50:584): small icon, 15 text, 10 dp padding. */
   compact?: boolean;
+  /** The icon follows the label instead of leading it ("Berikutnya ›"). */
+  iconAfter?: boolean;
   testID?: string;
 }
 
@@ -31,6 +33,7 @@ export function BigButton({
   accessibilityHint,
   accessibilityLabel,
   compact = false,
+  iconAfter = false,
   testID,
 }: BigButtonProps) {
   const reduceMotion = useReduceMotion();
@@ -57,8 +60,9 @@ export function BigButton({
       ]}
     >
       <View style={[styles.row, compact && styles.rowCompact]}>
-        {icon ? <Ionicons name={icon} size={compact ? wordForm.compactIcon : iconSize.button} color={fg} accessible={false} /> : null}
+        {icon && !iconAfter ? <Ionicons name={icon} size={compact ? wordForm.compactIcon : iconSize.button} color={fg} accessible={false} /> : null}
         <Text maxFontSizeMultiplier={2} style={[styles.label, textFont(true), compact && styles.labelCompact, { color: fg }]}>{label}</Text>
+        {icon && iconAfter ? <Ionicons name={icon} size={compact ? wordForm.compactIcon : iconSize.button} color={fg} accessible={false} /> : null}
       </View>
     </Pressable>
   );
