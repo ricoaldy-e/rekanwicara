@@ -9,8 +9,9 @@ import { fill, MESSAGES, messageOf, UI, type Problem, AI } from '../../forms/mes
 import { useFormState, type Rules } from '../../forms/useFormState';
 import * as word from '../../forms/validators/word';
 import { newKey } from '../../forms/keys';
+import { cleanInstruction, splitSteps } from '../../forms/instructionSteps';
 import type { SaveProgress, VideoInput, WordFormData } from '../../data/words';
-import { colors, fontSize, lineHeight, spacing, textFont } from '../../theme';
+import { colors, fontSize, layout, lineHeight, spacing, stroke, textFont } from '../../theme';
 import { BigButton } from '../BigButton';
 import { AiInstruction } from './AiInstruction';
 import { Body } from '../Typography';
@@ -21,6 +22,7 @@ import { Checkbox } from './Checkbox';
 import { ConfirmDialog } from './ConfirmDialog';
 import { FormBanner } from './FormBanner';
 import { InfoNote } from '../InfoNote';
+import { InstructionSteps } from './InstructionSteps';
 import { SyllableRow, type SyllableProblems, type SyllableValue } from './SyllableRow';
 import { TextField, type TextFieldRef } from './TextField';
 import { VideoField } from './VideoField';
@@ -50,9 +52,10 @@ export interface WordFormProps {
 
 const toValues = (d: WordFormData): Values => ({
   text: d.text,
-  instruction: d.instruction,
+  // An old one-paragraph instruction opens as steps (long ones are split by sentence).
+  instruction: splitSteps(d.instruction).join('\n'),
   video: d.video,
-  syllables: d.syllables.map((s) => ({ ...s, key: newKey() })),
+  syllables: d.syllables.map((s) => ({ ...s, instruction: splitSteps(s.instruction).join('\n'), key: newKey() })),
   consent: false,
 });
 
@@ -91,6 +94,8 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
   const [failure, setFailure] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [aiBusy, setAiBusy] = useState(false);
+  /** The one syllable card that is open; the others show a summary line. */
+  const [openKey, setOpenKey] = useState<string | null>(null);
   const [discarding, setDiscarding] = useState<null | (() => void)>(null);
   const abort = useRef<AbortController | null>(null);
 
@@ -119,6 +124,8 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
     setShowRows(true);
     const result = form.submit();
     if (!result.ok) {
+      const bad = syllableProblems(values.syllables).findIndex((r) => r.text || r.instruction || r.video);
+      if (bad >= 0) setOpenKey(values.syllables[bad].key); // a problem must not hide in a folded card
       const rows = rowErrorCount(syllableProblems(values.syllables));
       // the syllable rows count as one field in the form state; count every wrong row field instead
       const count = result.count - (rows > 0 ? 1 : 0) + rows;
@@ -129,12 +136,12 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
     }
     const data: WordFormData = {
       text: word.normalizeWord(values.text).toUpperCase(),
-      instruction: word.normalizeInstruction(values.instruction),
+      instruction: cleanInstruction(values.instruction),
       video: values.video,
       syllables: values.syllables.map((s) => ({
         id: s.id,
         text: word.normalizeSyllable(s.text).toUpperCase(),
-        instruction: word.normalizeInstruction(s.instruction),
+        instruction: cleanInstruction(s.instruction),
         video: s.video,
       })),
     };
@@ -160,7 +167,24 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
 
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <WordFormScreen title={title} note={MESSAGES.requiredNote} onBack={() => navigation.goBack()}>
+      <WordFormScreen
+        title={title}
+        note={MESSAGES.requiredNote}
+        onBack={() => navigation.goBack()}
+        footer={
+          <View style={styles.footer}>
+            {progressText ? (
+              <View style={styles.progress} testID="upload-progress">
+                <Body>{progressText}</Body>
+                <ProgressBar value={pct / 100} accessibilityLabel={progressText} />
+                <BigButton label={UI.cancelUpload} variant="secondary" onPress={() => abort.current?.abort()} testID="cancel-upload" />
+              </View>
+            ) : null}
+            <BigButton label={busy ? 'Menyimpan…' : UI.save} disabled={busy} onPress={submit} testID="word-save" />
+            <BigButton label={UI.cancel} variant="secondary" disabled={busy} onPress={() => navigation.goBack()} testID="word-cancel" />
+          </View>
+        }
+      >
         {failure ? <FormBanner text={failure} onRetry={submit} testID="word-form-banner" /> : null}
 
         <TextField
@@ -178,17 +202,12 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
           editable={!busy}
         />
         <VideoField testID="word-video" label="Video contoh" value={values.video} onChange={(v) => form.setValue('video', v)} error={err('video')} />
-        <TextField
+        <InstructionSteps
           ref={instructionRef}
           testID="word-instruction"
-          label="Instruksi pelafalan"
-          hint={MESSAGES.instructionHint}
           value={values.instruction}
-          onChangeText={(t) => form.setValue('instruction', t)}
-          onBlur={() => form.blur('instruction')}
+          onChange={(t) => form.setValue('instruction', t)}
           error={err('instruction')}
-          maxLength={LIMITS.instruction.max}
-          multiline
           editable={!busy && !aiBusy}
         />
         <AiInstruction
@@ -214,6 +233,8 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
             total={values.syllables.length}
             value={s}
             problems={rowProblems[i]}
+            expanded={openKey === s.key}
+            onToggle={() => setOpenKey(openKey === s.key ? null : s.key)}
             onChange={(next) => setSyllables(values.syllables.map((x, j) => (j === i ? next : x)))}
             onMoveUp={() => move(i, -1)}
             onMoveDown={() => move(i, 1)}
@@ -226,7 +247,11 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
           icon="add"
           variant="secondary"
           disabled={values.syllables.length >= MAX_SYLLABLES}
-          onPress={() => setSyllables([...values.syllables, { key: newKey(), text: '', instruction: '', video: null }])}
+          onPress={() => {
+            const key = newKey();
+            setSyllables([...values.syllables, { key, text: '', instruction: '', video: null }]);
+            setOpenKey(key); // the new card opens, the others fold
+          }}
           testID="add-syllable"
         />
         <Text testID="syllables-full" maxFontSizeMultiplier={2} style={[styles.note, textFont()]}>{MESSAGES.syllablesFull}</Text>
@@ -240,16 +265,6 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
         />
         <Text maxFontSizeMultiplier={2} style={[styles.note, textFont()]}>{AI.warning}</Text>
 
-        {progressText ? (
-          <View style={styles.progress} testID="upload-progress">
-            <Body>{progressText}</Body>
-            <ProgressBar value={pct / 100} accessibilityLabel={progressText} />
-            <BigButton label={UI.cancelUpload} variant="secondary" onPress={() => abort.current?.abort()} testID="cancel-upload" />
-          </View>
-        ) : null}
-
-        <BigButton label={busy ? 'Menyimpan…' : UI.save} disabled={busy} onPress={submit} testID="word-save" />
-        <BigButton label={UI.cancel} variant="secondary" disabled={busy} onPress={() => navigation.goBack()} testID="word-cancel" />
         {footer && !busy ? footer : null}
 
         <ConfirmDialog
@@ -273,6 +288,8 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   progress: { gap: spacing.sm },
+  // Sticks to the bottom of the screen (Figma "Aksi"): a thin line above, the screen colour behind.
+  footer: { gap: spacing.sm + spacing.xs, paddingHorizontal: layout.gutter, paddingTop: spacing.sm + spacing.xs, paddingBottom: spacing.sm, borderTopWidth: stroke.hairline, borderTopColor: colors.hairline, backgroundColor: colors.background },
   section: { fontSize: fontSize.label, lineHeight: lineHeight.label, color: colors.text },
   note: { fontSize: fontSize.small, lineHeight: lineHeight.small, color: colors.textMuted },
 });

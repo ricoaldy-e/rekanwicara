@@ -1,5 +1,5 @@
 /** Pure rules for the word and syllable form (flow §7.7.3). A validator returns a Problem or null. */
-import { LIMITS, MAX_SYLLABLES } from '../limits';
+import { LIMITS, MAX_STEPS, MAX_SYLLABLES } from '../limits';
 import type { MessageKey, Problem } from '../messages';
 
 const WORD_SHAPE = /^[A-Za-z]+([ -][A-Za-z]+)*$/;
@@ -8,8 +8,6 @@ const LETTERS = /^[A-Za-z]+$/;
 /** Trim and turn runs of spaces into one; nothing else is changed. */
 export const normalizeWord = (s: string) => s.trim().replace(/\s+/g, ' ');
 export const normalizeSyllable = (s: string) => s.trim();
-/** Trim ends and collapse spaces and tabs; line breaks stay. */
-export const normalizeInstruction = (s: string) => s.trim().replace(/[ \t]+/g, ' ');
 
 const length = (s: string) => [...s].length;
 const letters = (s: string) => s.toLowerCase().replace(/[ -]/g, '');
@@ -48,10 +46,16 @@ export const canAddSyllable = (count: number) => count < MAX_SYLLABLES;
 /** The "full" note for the Add button, or null while there is room. */
 export const maxSyllables = (count: number): MessageKey | null => (canAddSyllable(count) ? null : 'syllablesFull');
 
+/** The instruction as rows (one per step): 1–5 steps, each 5–120 characters, 10–500 in all. First problem wins. */
 export function instruction(value: string): MessageKey | null {
-  const v = normalizeInstruction(value);
-  if (v === '') return 'instructionEmpty';
-  if (length(v) < LIMITS.instruction.min) return 'instructionShort';
-  if (length(v) > LIMITS.instruction.max) return 'instructionLong';
+  const rows = value.split(/\r?\n/).map((r) => r.trim().replace(/[ \t]+/g, ' '));
+  if (rows.every((r) => r === '')) return 'instructionEmpty';
+  if (rows.length > MAX_STEPS) return 'stepsMany';
+  if (rows.some((r) => r === '')) return 'stepEmpty';
+  if (rows.some((r) => length(r) < LIMITS.instructionStep.min)) return 'stepShort';
+  if (rows.some((r) => length(r) > LIMITS.instructionStep.max)) return 'stepLong';
+  const all = rows.join('\n');
+  if (length(all) < LIMITS.instruction.min) return 'instructionShort';
+  if (length(all) > LIMITS.instruction.max) return 'instructionLong';
   return null;
 }

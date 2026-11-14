@@ -3,6 +3,9 @@
 /** Most syllable rows a word may have. */
 export const MAX_SYLLABLES = 6;
 
+/** Most steps an instruction may have (one field and one card per step). */
+export const MAX_STEPS = 5;
+
 export const VIDEO_LIMITS = {
   maxBytes: 50 * 1024 * 1024,
   maxDurationMs: 30_000,
@@ -15,7 +18,10 @@ export const LIMITS = {
   password: { min: 8, max: 64 },
   word: { max: 30 },
   syllable: { max: 10 },
+  /** The whole instruction (steps joined by line breaks). */
   instruction: { min: 10, max: 500 },
+  /** One step. */
+  instructionStep: { min: 5, max: 120 },
 } as const;
 
 /** The counter "n / max" shows from this share of the limit (flow §7.7.1). */

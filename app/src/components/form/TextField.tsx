@@ -9,6 +9,8 @@ import { FieldError } from './FieldError';
 export interface TextFieldProps extends Omit<TextInputProps, 'style' | 'accessibilityLabel' | 'accessibilityHint'> {
   /** Always visible above the field; a placeholder is only an example. */
   label: string;
+  /** Spoken name when the visible label alone would be ambiguous ("Suku kata 1: instruksi, langkah 2"). */
+  spokenLabel?: string;
   /** One line with the rule or an example; replaced by the error while there is one. */
   hint?: string;
   /** Already-formatted error text. */
@@ -23,7 +25,7 @@ export interface TextFieldProps extends Omit<TextInputProps, 'style' | 'accessib
 export type TextFieldRef = ComponentRef<typeof TextInput>;
 
 export const TextField = forwardRef<TextFieldRef, TextFieldProps>(function TextField(
-  { label, hint, error, optional, accessory, testID, onFocus, onBlur, value, maxLength, multiline, ...input },
+  { label, spokenLabel, hint, error, optional, accessory, testID, onFocus, onBlur, value, maxLength, multiline, ...input },
   ref,
 ) {
   const [focused, setFocused] = useState(false);
@@ -45,7 +47,7 @@ export const TextField = forwardRef<TextFieldRef, TextFieldProps>(function TextF
           value={value}
           maxLength={maxLength}
           multiline={multiline}
-          accessibilityLabel={optional ? `${label} ${UI.optional}` : label}
+          accessibilityLabel={spokenLabel ?? (optional ? `${label} ${UI.optional}` : label)}
           accessibilityHint={error ? undefined : hint}
           placeholderTextColor={colors.textMuted}
           onFocus={(e) => {

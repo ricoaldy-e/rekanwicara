@@ -1,5 +1,5 @@
 /** Every user-facing form text (flow §7.1.1, §7.7.1–§7.7.3), so it can be reviewed in one place. */
-import { LIMITS, MAX_SYLLABLES, VIDEO_LIMITS } from './limits';
+import { LIMITS, MAX_STEPS, MAX_SYLLABLES, VIDEO_LIMITS } from './limits';
 
 const MAX_VIDEO_MB = Math.round(VIDEO_LIMITS.maxBytes / (1024 * 1024));
 const MAX_VIDEO_SECONDS = Math.round(VIDEO_LIMITS.maxDurationMs / 1000);
@@ -53,6 +53,12 @@ export const MESSAGES = {
   instructionShort: `Tulis minimal ${LIMITS.instruction.min} karakter agar jelas.`,
   instructionLong: `Maksimal ${LIMITS.instruction.max} karakter.`,
   instructionHint: 'Jelaskan posisi bibir, lidah, dan rahang saat mengucapkannya.',
+  stepsHint: `Satu langkah, satu gerakan. Maksimal ${MAX_STEPS} langkah, tiap langkah ${LIMITS.instructionStep.min}–${LIMITS.instructionStep.max} karakter.`,
+  stepEmpty: 'Isi langkah ini atau hapus.',
+  stepShort: `Tiap langkah minimal ${LIMITS.instructionStep.min} karakter.`,
+  stepLong: `Tiap langkah maksimal ${LIMITS.instructionStep.max} karakter.`,
+  stepsMany: `Maksimal ${MAX_STEPS} langkah.`,
+  stepsFull: `Maksimal ${MAX_STEPS} langkah`,
   // Instruksi dengan AI (flow §7.5.2)
   aiNeedWord: 'Isi kata dulu untuk membuat instruksi.',
   aiNeedSyllable: 'Isi suku kata dulu untuk membuat instruksi.',

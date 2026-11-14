@@ -49,13 +49,13 @@ const open = async (props: Props = {}) => {
 async function fillWord(text = 'susu') {
   await fireEvent.changeText(screen.getByTestId('word-text'), text);
   await fireEvent.press(screen.getByTestId('word-video-gallery'));
-  await fireEvent.changeText(screen.getByTestId('word-instruction'), GOOD_INSTRUCTION);
+  await fireEvent.changeText(screen.getByTestId('word-instruction-1'), GOOD_INSTRUCTION);
 }
 async function addSyllable(i: number, text = 'su') {
   await fireEvent.press(screen.getByTestId('add-syllable'));
   await fireEvent.changeText(screen.getByTestId(`syllable-${i}-text`), text);
   await fireEvent.press(screen.getByTestId(`syllable-${i}-video-gallery`));
-  await fireEvent.changeText(screen.getByTestId(`syllable-${i}-instruction`), GOOD_INSTRUCTION);
+  await fireEvent.changeText(screen.getByTestId(`syllable-${i}-instruction-1`), GOOD_INSTRUCTION);
 }
 
 describe('WordForm required fields', () => {
@@ -104,8 +104,9 @@ describe('syllables', () => {
     expect(screen.getByTestId('syllable-1-up')).toBeDisabled();
     expect(screen.getByTestId('syllable-2-down')).toBeDisabled();
     await fireEvent.press(screen.getByTestId('syllable-1-down'));
+    // the open card ("ta") moved to place 1; the folded one ("ma") is now second and its summary names it
     expect(screen.getByTestId('syllable-1-text').props.value).toBe('ta');
-    expect(screen.getByTestId('syllable-2-text').props.value).toBe('ma');
+    expect(screen.getByTestId('syllable-2-toggle').props.accessibilityLabel).toMatch(/MA/);
   });
 
   it('deleting a row with content asks first; an empty row goes at once', async () => {
@@ -160,7 +161,7 @@ describe('saving', () => {
     await waitFor(() => expect(screen.getByTestId('word-form-banner')).toHaveAccessibleName('Unggah gagal. Periksa koneksi lalu coba lagi.'));
     expect(screen.getByTestId('word-text').props.value).toBe('susu');
     expect(screen.getByTestId('syllable-1-text').props.value).toBe('su');
-    expect(screen.getByTestId('word-instruction').props.value).toBe(GOOD_INSTRUCTION);
+    expect(screen.getByTestId('word-instruction-1').props.value).toBe(GOOD_INSTRUCTION);
     expect(onClose).not.toHaveBeenCalled();
     await fireEvent.press(screen.getByRole('button', { name: 'Coba lagi' }));
     await waitFor(() => expect(onClose).toHaveBeenCalled());
@@ -229,7 +230,8 @@ describe('leaving the form', () => {
     expect(stored.video).toEqual({ kind: 'kept', path: 'a.mp4' });
     const { onSubmit } = await open({ initial: stored });
     expect(mockPrevent.prevent).toBe(false);
-    expect(screen.getAllByText('Video sudah tersimpan.')).toHaveLength(3);
+    expect(screen.getAllByText('Video sudah tersimpan.')).toHaveLength(1); // the word's card; the syllables are folded
+    expect(screen.getByTestId('syllable-1-toggle').props.accessibilityLabel).toMatch(/Video ada/);
     await fireEvent.press(screen.getByRole('checkbox'));
     await fireEvent.press(screen.getByTestId('word-save'));
     await waitFor(() => expect(onSubmit).toHaveBeenCalled());
@@ -288,5 +290,73 @@ describe('VideoField', () => {
     expect(screen.getByRole('button', { name: 'Ganti dari galeri, Video kata' })).toBeTruthy();
     await fireEvent.press(screen.getByTestId('v-remove'));
     expect(onChange).toHaveBeenCalledWith(null);
+  });
+});
+
+describe('instruction steps', () => {
+  it('adds and removes a step, and saves the steps joined by a line break', async () => {
+    const { onSubmit } = await open();
+    await fireEvent.changeText(screen.getByTestId('word-text'), 'susu');
+    await fireEvent.press(screen.getByTestId('word-video-gallery'));
+    await fireEvent.changeText(screen.getByTestId('word-instruction-1'), 'Rapatkan bibir dengan nyaman.');
+    await fireEvent.press(screen.getByTestId('word-instruction-add'));
+    await fireEvent.changeText(screen.getByTestId('word-instruction-2'), '  Ucapkan  susu perlahan. ');
+    await fireEvent.press(screen.getByTestId('word-instruction-add'));
+    expect(screen.getByTestId('word-instruction-3')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('word-instruction-3-remove'));
+    expect(screen.queryByTestId('word-instruction-3')).toBeNull();
+    await fireEvent.press(screen.getByRole('checkbox'));
+    await fireEvent.press(screen.getByTestId('word-save'));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect((onSubmit as jest.Mock).mock.calls[0][0].instruction).toBe('Rapatkan bibir dengan nyaman.\nUcapkan susu perlahan.');
+  });
+
+  it('stops at five steps and refuses an empty step', async () => {
+    const { onSubmit } = await open();
+    for (let i = 1; i <= 4; i++) await fireEvent.press(screen.getByTestId('word-instruction-add'));
+    expect(screen.getByRole('button', { name: /^Tambah langkah/ })).toBeDisabled();
+    await fireEvent.changeText(screen.getByTestId('word-text'), 'susu');
+    await fireEvent.changeText(screen.getByTestId('word-instruction-1'), 'Rapatkan bibir dengan nyaman.');
+    await fireEvent.press(screen.getByTestId('word-save'));
+    expect(screen.getByTestId('word-instruction-error')).toHaveAccessibleName('Isi langkah ini atau hapus.');
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('opens an old one-paragraph instruction as steps, one per sentence when it is long', async () => {
+    const long = 'Tutup bibir rapat dan tahan sebentar sampai terasa rileks. Buka mulut perlahan dan turunkan rahang sedikit demi sedikit. Ucapkan bunyi a panjang sambil melihat cermin.';
+    await open({ initial: { text: 'MAMA', instruction: long, video: { kind: 'kept', path: 'a.mp4' }, syllables: [] } });
+    expect(screen.getByTestId('word-instruction-3')).toBeTruthy();
+    expect(screen.getByTestId('word-instruction-1').props.value).toBe('Tutup bibir rapat dan tahan sebentar sampai terasa rileks.');
+  });
+});
+
+describe('folded syllable cards', () => {
+  it('a new card opens and the one before it folds', async () => {
+    await open();
+    await fireEvent.press(screen.getByTestId('add-syllable'));
+    expect(screen.getByTestId('syllable-1-text')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('add-syllable'));
+    expect(screen.queryByTestId('syllable-1-text')).toBeNull();
+    expect(screen.getByTestId('syllable-2-text')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('syllable-1-toggle')); // tap to open another: only one is open
+    expect(screen.getByTestId('syllable-1-text')).toBeTruthy();
+  });
+
+  it('a problem in a folded card opens that card when saving', async () => {
+    await open();
+    await fillWord();
+    await fireEvent.press(screen.getByRole('checkbox'));
+    await fireEvent.press(screen.getByTestId('add-syllable')); // card 1: left empty
+    await fireEvent.press(screen.getByTestId('add-syllable')); // card 2 opens, card 1 folds
+    expect(screen.queryByTestId('syllable-1-text')).toBeNull();
+    await fireEvent.press(screen.getByTestId('word-save'));
+    expect(screen.getByTestId('syllable-1-text-error')).toHaveAccessibleName('Isi suku kata atau hapus baris ini.');
+  });
+
+  it('the folded line says what is missing', async () => {
+    await open();
+    await fireEvent.press(screen.getByTestId('add-syllable'));
+    await fireEvent.press(screen.getByTestId('add-syllable'));
+    expect(screen.getByTestId('syllable-1-toggle').props.accessibilityLabel).toBe('Suku kata 1, Belum diisi · Belum ada video · Belum ada instruksi');
   });
 });

@@ -38,7 +38,7 @@ describe('Buat dengan AI', () => {
     await open();
     await fireEvent.changeText(screen.getByTestId('word-text'), 'susu');
     await fireEvent.press(screen.getByTestId('word-ai'));
-    await waitFor(() => expect(screen.getByTestId('word-instruction').props.value).toBe(SUGGESTION));
+    await waitFor(() => expect(screen.getByTestId('word-instruction-1').props.value).toBe(SUGGESTION));
     expect(mockGenerate).toHaveBeenCalledWith({ type: 'word', text: 'susu' }, expect.objectContaining({ baseUrl: 'http://x' }));
     expect(screen.getByTestId('word-ai-label')).toBeTruthy();
     expect(screen.getByRole('button', { name: /Buat ulang/ })).toBeTruthy();
@@ -51,25 +51,25 @@ describe('Buat dengan AI', () => {
     await fireEvent.changeText(screen.getByTestId('word-text'), 'susu');
     await fireEvent.press(screen.getByTestId('word-ai'));
     await waitFor(() => expect(screen.getByTestId('word-ai-label')).toBeTruthy());
-    await fireEvent.changeText(screen.getByTestId('word-instruction'), `${SUGGESTION} Tahan sebentar.`);
+    await fireEvent.changeText(screen.getByTestId('word-instruction-1'), `${SUGGESTION} Tahan sebentar.`);
     expect(screen.queryByTestId('word-ai-label')).toBeNull();
   });
 
   it('asks before replacing typed text, and can bring the earlier text back once', async () => {
     await open();
     await fireEvent.changeText(screen.getByTestId('word-text'), 'susu');
-    await fireEvent.changeText(screen.getByTestId('word-instruction'), 'Tulisan saya sendiri.');
+    await fireEvent.changeText(screen.getByTestId('word-instruction-1'), 'Tulisan saya sendiri.');
     await fireEvent.press(screen.getByTestId('word-ai'));
     expect(screen.getByText('Ganti instruksi yang sudah ditulis?')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('confirm-cancel'));
     expect(mockGenerate).not.toHaveBeenCalled();
-    expect(screen.getByTestId('word-instruction').props.value).toBe('Tulisan saya sendiri.');
+    expect(screen.getByTestId('word-instruction-1').props.value).toBe('Tulisan saya sendiri.');
 
     await fireEvent.press(screen.getByTestId('word-ai'));
     await fireEvent.press(screen.getByTestId('confirm-ok'));
-    await waitFor(() => expect(screen.getByTestId('word-instruction').props.value).toBe(SUGGESTION));
+    await waitFor(() => expect(screen.getByTestId('word-instruction-1').props.value).toBe(SUGGESTION));
     await fireEvent.press(screen.getByTestId('word-ai-undo'));
-    expect(screen.getByTestId('word-instruction').props.value).toBe('Tulisan saya sendiri.');
+    expect(screen.getByTestId('word-instruction-1').props.value).toBe('Tulisan saya sendiri.');
     expect(screen.queryByTestId('word-ai-undo')).toBeNull();
   });
 
@@ -84,11 +84,11 @@ describe('Buat dengan AI', () => {
     await fireEvent.changeText(screen.getByTestId('word-text'), 'susu');
     await fireEvent.press(screen.getByTestId('word-ai'));
     expect(screen.getByTestId('word-ai-working')).toHaveAccessibleName('Sedang membuat instruksi');
-    expect(screen.getByTestId('word-instruction').props.editable).toBe(false);
+    expect(screen.getByTestId('word-instruction-1').props.editable).toBe(false);
     await fireEvent.press(screen.getByTestId('word-ai-cancel'));
     await waitFor(() => expect(screen.queryByTestId('word-ai-working')).toBeNull());
     expect(screen.queryByTestId('word-ai-error')).toBeNull();
-    expect(screen.getByTestId('word-instruction').props.editable).toBe(true);
+    expect(screen.getByTestId('word-instruction-1').props.editable).toBe(true);
   });
 
   it.each([
@@ -104,7 +104,7 @@ describe('Buat dengan AI', () => {
     expect(within(screen.getByTestId('word-ai-error')).getAllByText(text).length).toBeGreaterThan(0);
     expect(screen.getByTestId('word-text').props.value).toBe('susu');
     await fireEvent.press(screen.getByTestId('word-ai-retry'));
-    await waitFor(() => expect(screen.getByTestId('word-instruction').props.value).toBe(SUGGESTION));
+    await waitFor(() => expect(screen.getByTestId('word-instruction-1').props.value).toBe(SUGGESTION));
     expect(screen.queryByTestId('word-ai-error')).toBeNull();
   });
 
@@ -115,8 +115,8 @@ describe('Buat dengan AI', () => {
     await fireEvent.press(screen.getByTestId('word-ai'));
     await waitFor(() => expect(screen.getAllByText('Terlalu banyak permintaan. Coba lagi sebentar lagi.').length).toBeGreaterThan(0));
     expect(screen.getByTestId('word-ai')).toBeDisabled();
-    await fireEvent.changeText(screen.getByTestId('word-instruction'), 'Ketik sendiri saja.');
-    expect(screen.getByTestId('word-instruction').props.value).toBe('Ketik sendiri saja.');
+    await fireEvent.changeText(screen.getByTestId('word-instruction-1'), 'Ketik sendiri saja.');
+    expect(screen.getByTestId('word-instruction-1').props.value).toBe('Ketik sendiri saja.');
   });
 
   it('a syllable has its own button and sends its word as context', async () => {
@@ -127,7 +127,7 @@ describe('Buat dengan AI', () => {
     expect(screen.getByTestId('syllable-1-text-error')).toHaveAccessibleName('Isi suku kata dulu untuk membuat instruksi.');
     await fireEvent.changeText(screen.getByTestId('syllable-1-text'), 'ma');
     await act(async () => fireEvent.press(screen.getByTestId('syllable-1-ai')));
-    await waitFor(() => expect(screen.getByTestId('syllable-1-instruction').props.value).toBe(SUGGESTION));
+    await waitFor(() => expect(screen.getByTestId('syllable-1-instruction-1').props.value).toBe(SUGGESTION));
     expect(mockGenerate).toHaveBeenCalledWith({ type: 'syllable', text: 'ma', parent_word: 'mama' }, expect.anything());
     expect(screen.getByRole('button', { name: /Buat ulang, Suku kata 1/ })).toBeTruthy();
   });

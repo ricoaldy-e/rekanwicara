@@ -45,12 +45,12 @@ it('adds a word through the form and it reaches Pilih kata with its syllables', 
   await waitFor(() => expect(screen.getByTestId('word-text')).toBeTruthy());
   await fireEvent.changeText(screen.getByTestId('word-text'), 'susu');
   await fireEvent.press(screen.getByTestId('word-video-gallery'));
-  await fireEvent.changeText(screen.getByTestId('word-instruction'), 'Bulatkan bibir dan ucapkan susu.');
+  await fireEvent.changeText(screen.getByTestId('word-instruction-1'), 'Bulatkan bibir dan ucapkan susu.');
   for (const i of [1, 2]) {
     await fireEvent.press(screen.getByTestId('add-syllable'));
     await fireEvent.changeText(screen.getByTestId(`syllable-${i}-text`), 'su');
     await fireEvent.press(screen.getByTestId(`syllable-${i}-video-gallery`));
-    await fireEvent.changeText(screen.getByTestId(`syllable-${i}-instruction`), 'Bulatkan bibir, ucapkan su.');
+    await fireEvent.changeText(screen.getByTestId(`syllable-${i}-instruction-1`), 'Bulatkan bibir, ucapkan su.');
   }
   await fireEvent.press(screen.getByRole('checkbox'));
   await fireEvent.press(screen.getByTestId('word-save'));
@@ -81,7 +81,7 @@ it('edits a companion word and keeps its stored videos', async () => {
   mockWordId = 'custom_word:22222222-2222-2222-2222-222222222222';
   await render(<EditWord />);
   await waitFor(() => expect(screen.getByTestId('word-text').props.value).toBe('MINUM'));
-  await fireEvent.changeText(screen.getByTestId('word-instruction'), 'Rapatkan bibir lalu ucapkan minum.');
+  await fireEvent.changeText(screen.getByTestId('word-instruction-1'), 'Rapatkan bibir lalu ucapkan minum.');
   await fireEvent.press(screen.getByRole('checkbox'));
   await fireEvent.press(screen.getByTestId('word-save'));
   await waitFor(() => expect(mockBack).toHaveBeenCalled());

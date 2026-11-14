@@ -176,19 +176,26 @@ describe('syllable', () => {
   });
 });
 
-describe('instruction', () => {
+describe('instruction (steps)', () => {
+  const step = (n: number) => 'a'.repeat(n);
   it.each([
     ['', 'instructionEmpty'],
     ['   \n ', 'instructionEmpty'],
-    ['a'.repeat(9), 'instructionShort'],
-    ['a'.repeat(10), null],
-    ['a'.repeat(500), null],
-    ['a'.repeat(501), 'instructionLong'],
-    ['     ' + 'a'.repeat(9) + '     ', 'instructionShort'], // trimmed first
+    [step(4), 'stepShort'],
+    [step(5), 'instructionShort'], // one step of 5: ok as a step, short as a whole (10 in all)
+    [step(10), null],
+    [step(120), null],
+    [step(121), 'stepLong'],
+    [`${step(10)}\n${step(10)}`, null],
+    [`${step(10)}\n\n${step(10)}`, 'stepEmpty'], // an empty step between two others
+    [`${step(10)}\n`, 'stepEmpty'], // a new step that was added but not filled
+    [`${step(10)}\n${step(4)}`, 'stepShort'],
+    [[1, 2, 3, 4, 5].map(() => step(10)).join('\n'), null],
+    [[1, 2, 3, 4, 5, 6].map(() => step(10)).join('\n'), 'stepsMany'],
+    [[1, 2, 3, 4, 5].map(() => step(110)).join('\n'), 'instructionLong'], // 5 steps of 110 = 554 > 500
+    ['     ' + step(9) + '     ', 'instructionShort'], // trimmed first
     ['😀'.repeat(10), null],
   ])('%j → %s', (value, expected) => expect(word.instruction(value)).toBe(expected));
-
-  it('collapses spaces but keeps line breaks', () => expect(word.normalizeInstruction(' a   b\n\nc ')).toBe('a b\n\nc'));
 });
 
 describe('video', () => {

@@ -4,6 +4,7 @@ import type { InstructionRequest } from '../api/types';
 import { createV2Client, type V2Options } from '../api/v2';
 import { withAccount } from '../auth/v2Auth';
 import { USE_MOCK } from '../config';
+import { fromAi } from '../forms/instructionSteps';
 
 export interface GenerateOptions extends Pick<V2Options, 'getToken' | 'refreshSession' | 'onSessionLost'> {
   baseUrl: string;
@@ -18,7 +19,7 @@ const MOCK_DELAY_MS = 700;
 export async function generateInstruction(req: InstructionRequest, opts: GenerateOptions): Promise<string> {
   if (!(opts.mock ?? USE_MOCK)) {
     const res = await createV2Client(withAccount(opts)).generateInstruction(req, opts.signal);
-    return res.instruction;
+    return fromAi(res.instruction);
   }
   await new Promise<void>((resolve, reject) => {
     const timer = setTimeout(resolve, MOCK_DELAY_MS);
@@ -29,6 +30,6 @@ export async function generateInstruction(req: InstructionRequest, opts: Generat
   });
   const text = req.text.toLowerCase();
   return req.type === 'word'
-    ? `Rapatkan bibir dengan nyaman, lalu ucapkan “${text}” pelan-pelan dan jelas.`
-    : `Ucapkan “${text}” pendek dan jelas, sebagai bagian dari kata “${req.parent_word.toLowerCase()}”.`;
+    ? `Rapatkan bibir dengan nyaman.\nUcapkan “${text}” pelan-pelan dan jelas.`
+    : `Ucapkan “${text}” pendek dan jelas.\nIngat, ini bagian dari kata “${req.parent_word.toLowerCase()}”.`;
 }
