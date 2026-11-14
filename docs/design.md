@@ -196,7 +196,7 @@ Untuk filter pendek (mis. Semua kata / Bawaan / Pendamping). Wadah `surface` + g
 Gaya iOS: 51 × 31, trek `success` saat aktif dan `surfaceRaised` saat mati, ibu jari putih 27. Status ditulis juga ("Aktif" / "Mati") di samping.
 
 ### 5.9 Ilustrasi bibir (LipIllustration) dan logo
-- **LipIllustration:** gambar tetap dari Figma (halaman "Rekan Wicara · UI Final", frame "Ilustrasi bibir": LipIllustration/a, /i, /u, /closed; 130 × 82), tersimpan sebagai jalur SVG di `src/results/lipArt.ts`. Hanya **Level 1: a, i, u** (dan bibir rapat untuk langkah diam di Kalibrasi). Bunyi o dan e tidak ada di Level 1. Level 2–3 tidak memakai gambar bibir: video contoh dari backend, atau teks suku kata dan instruksi. Garis luar `text` 2,6 dp, bukaan mulut berisi `background` dengan garis `textMuted`; di hero garis `onHero`, garis bukaan `onHeroMuted`, isi `hero`. Tanpa gambar AI. **[Bentuk "i" dan "u" baru digambar tim; belum ditinjau ahli.]** Grafik "Cermin bibir" tetap memakai cincin 20 titik dari `lipShapes.ts` agar sebanding dengan kontur server.
+- **LipIllustration:** gambar tetap dari Figma (halaman "Rekan Wicara · UI Final", frame "Ilustrasi bibir": LipIllustration/a, /i, /u, /e, /o, /closed; 130 × 82), tersimpan sebagai jalur SVG di `src/results/lipArt.ts`. **Level 1: vokal a, i, u, e, o** (dan bibir rapat untuk langkah diam di Kalibrasi); tampil di sesi latihan, Hasil, kartu hero Beranda, dan Kalibrasi. Level 2–3 tidak memakai gambar bibir: video contoh dari backend, atau teks suku kata dan instruksi. Garis luar `text` 2,6 dp, bukaan mulut berisi `background` dengan garis `textMuted`; di hero garis `onHero`, garis bukaan `onHeroMuted`, isi `hero`. Tanpa gambar AI. **[Bentuk "i", "u", "e", "o" baru digambar tim; belum ditinjau ahli.]** Grafik "Cermin bibir" tetap memakai cincin 20 titik dari `lipShapes.ts` agar sebanding dengan kontur server.
 - **Logo:** "Logo/Mark" dari Figma: ubin hijau membulat berisi bibir garis krem dan gelombang suara koral. Aset PNG berkanal alfa `app/assets/images/logo-mark.png` (diekspor dari Figma, tidak digambar ulang), dipakai lewat komponen `LogoMark` di Splash, Selamat datang, dan Masuk. **Di header Beranda hanya teks "Rekan Wicara"**, tanpa logo. Aset punya tepi transparan ±4%. Kemiripan dengan logo lain belum diperiksa.
 
 ### 5.10 LevelTile dan StatTile
@@ -352,7 +352,7 @@ Daftar periksa rinci per layar untuk 360 dp dan skala teks 200%: `docs/CHECKLIST
 - Selisih permukaan kecil (1,22 dan 1,18) bergantung pada garis `hairline`; terbaca di cahaya terang belum diuji.
 - Font Inter dan Playfair Display di perangkat belum dicoba, termasuk cadangan font sistem.
 - Pola yang kini komponen di kode: `BackButton`, `ListGroup`/`ListRow`, `ConfirmDialog`, `SegmentedControl`, `PinPad`, `HeroCard`, `ActionBar`, `SessionHeader`, `LogoMark`. Di Figma belum semuanya komponen.
-- Ilustrasi bibir (a, i, u dan rapat; "i" dan "u" baru digambar tim) dan logo belum ditinjau ahli; kemiripan logo dengan produk lain belum diperiksa. Splash native dan batang Memuat belum dicoba di perangkat.
+- Ilustrasi bibir (a, i, u, e, o dan rapat; selain "a" baru digambar tim) dan logo belum ditinjau ahli; kemiripan logo dengan produk lain belum diperiksa. Splash native dan batang Memuat belum dicoba di perangkat.
 - Ikon di Figma digambar sebagai SVG bergaya garis; di app memakai Ionicons, jadi bentuk bisa sedikit berbeda.
 - Kontras dihitung dengan rumus WCAG pada 14 Nov 2026; hitung ulang bila warna diubah.
 - Arah gaya terinspirasi VibeMove hanya pada struktur dan suasana; itu bukan bukti kecocokan untuk teman Tuli.

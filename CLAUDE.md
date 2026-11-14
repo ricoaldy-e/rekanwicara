@@ -18,7 +18,7 @@ aplikasi menampilkan dua indikator (Bibir, Suara) dan satu petunjuk.
 - Tidak ada pengenalan identitas wajah. Wajah hanya dipakai untuk geometri mulut.
 - UI tidak boleh bergantung pada suara: semua isyarat visual (+ getar). Tidak ada bunyi beep.
 - Status tidak boleh dibedakan dengan warna saja: selalu warna + ikon + teks.
-- Cakupan MVP: Level 0–3, bunyi Tahap A (vokal a, i, u [+ e, o bonus]; konsonan m, p, b).
+- Cakupan MVP: Level 0–3. Level 1 = vokal a, i, u, e, o (diputuskan 14 Nov 2026; sebelumnya e, o bonus); konsonan m, p, b di Level 2–3.
   Level 4 (pasangan minimal) adalah bonus.
 
 ## Stack
@@ -27,7 +27,7 @@ aplikasi menampilkan dua indikator (Bibir, Suara) dan satu petunjuk.
   jangan menambah modul native custom.
 - `server/`: Python 3.11, FastAPI, MediaPipe Face Landmarker (Python Tasks API), praat-parselmouth,
   FFmpeg/ffprobe (binary sistem), numpy/scipy, scikit-learn (hanya untuk metrik evaluasi).
-  Wav2Vec2 DITUNDA ke roadmap: jangan memasang torch/transformers di MVP.
+  Wav2Vec2 dipakai untuk Level 1 (diputuskan 14 Nov 2026), dikerjakan di server oleh tim backend dan belum ada di server lokal; jangan memasang torch/transformers di `app/`.
 - Data tim: 3 perekam, maksimal 100 video. Tidak ada training model; data hanya untuk menyetel ambang dan menguji.
 - `ml/`: skrip dataset, pelabelan, penyetelan ambang, evaluasi. Wajib memakai ulang modul `server/app/pipeline`.
 - Supabase: profil, riwayat latihan, progres. Server menyimpan kalibrasi di disk lokal (angka saja).

@@ -28,7 +28,7 @@ Untuk Claude Code: dokumen ini menggantikan alur produk lama (misi harian, Level
 | Grafik (segitiga vokal, gambar mulut) | Level lain ikut | **Hanya L1** |
 | Pengaturan | Tersembunyi (tekan-lama 2 detik) | **Tab Pengaturan**: Getar, Ganti PIN, Tentang, Keluar. [REV 8] Tab **tidak dikunci PIN**; hanya Ganti PIN dan Keluar meminta PIN (§14 D2) |
 | Menu bawah | Ada di home | **Tetap terlihat** di semua layar utama |
-| Teknologi | MediaPipe + Wav2Vec2 | L1: MediaPipe + Parselmouth. L2–L3: MediaPipe + Wav2Vec2 [BE] |
+| Teknologi | MediaPipe + Wav2Vec2 | L1: MediaPipe + Parselmouth + Wav2Vec2 (vokal a, i, u, e, o) [REV 8, keputusan Rico 14 Nov]. L2–L3: MediaPipe + Wav2Vec2 [BE] |
 
 ---
 
@@ -575,7 +575,7 @@ Rujukan: `docs/design.md` v7.1 dan Figma `C5mdKAfFngxd8dz1BvAZrO`. Catatan langk
 | D14 | Pembuka app | splash lalu gerbang | splash native, lalu animasi pembuka (logo naik, nama dan tagline fade in, bilah memuat tak-tentu), sekali per peluncuran; layar tujuan masuk dengan fade; Reduce Motion: tanpa gerak |
 | D15 | Buat PIN | satu layar | dua langkah ("Langkah n dari 2"); tombol Kembali hanya di langkah 2 (langkah 1 tidak punya tujuan kembali); papan angka menempel di bawah |
 | D16 | Kalibrasi | tampil gambar, lalu tekan "Siap, rekam" | satu layar per langkah: header langkah, kartu bentuk bibir, panel kamera langsung; "Kembali" menggantikan "Lewati, ke beranda" (kembali ke layar sebelumnya, atau Beranda bila tidak ada) |
-| D17 | Gambar bibir | digambar dari parameter | gambar tetap dari Figma, **hanya Level 1: a, i, u** (dan bibir rapat untuk kalibrasi); bunyi o dan e tidak ada di Level 1. Level 2–3 memakai video contoh dari backend atau instruksi teks, tanpa gambar bibir |
+| D17 | Gambar bibir | digambar dari parameter | gambar tetap dari Figma, **hanya Level 1: vokal a, i, u, e, o** (dan bibir rapat untuk kalibrasi). Level 2–3 memakai video contoh dari backend atau instruksi teks, tanpa gambar bibir |
 | D18 | Judul aktivitas Level 2 | memakai id suku kata | memakai teks materi yang disimpan lokal bersama percobaan (tidak dikirim ke server) |
 | D19 | Daftar kata Pendamping | "n suku kata" | "Suku kata: to · long" dari data lokal Pendamping; tidak butuh perubahan kontrak |
 | D20 | Formulir Kata baru dan Ubah kata | header sistem | header buatan sendiri (Kembali "Daftar kata", judul serif, keterangan), kartu video, kartu suku kata, tombol Naik/Turun/Hapus sebaris |

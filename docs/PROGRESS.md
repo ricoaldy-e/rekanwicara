@@ -931,3 +931,12 @@ Skill yang dimuat: `figma-design-to-code` (membaca konteks), `figma-use` dan `fi
 - **Dokumen:** `flow-srs-ui.md` menjadi rev. 8 (bagian §14 merangkum D1, D2, D11, dan keputusan baru); `design.md` §5.9, §6.6, §6.8, §14 diperbarui.
 - **Belum diuji di perangkat:** semua layar di atas; terutama tiga tombol sebaris di kartu suku kata pada layar 360 dp dan skala teks 200%, alur Kalibrasi satu layar (kamera langsung), dan bentuk gambar "i" dan "u" (digambar tim, belum ditinjau). Alur email konfirmasi Supabase sengaja tidak diuji (tahap FE).
 - Tes: 682 lulus (jest), typecheck bersih.
+
+## FG-20 (14 Nov 2026): Level 1 menjadi vokal a, i, u, e, o
+
+- Keputusan Rico 14 Nov: Level 1 memuat **a, i, u, e, o** dan teknologi Level 1 ditambah **Wav2Vec2** (dikerjakan backend; app hanya menampilkan hasilnya).
+- Gambar bibir **e** dan **o** digambar di Figma (frame "Ilustrasi bibir", urutan a, i, u, e, o, rapat), lalu dipasang di `src/results/lipArt.ts`. Gambar tampil otomatis di sesi latihan, Hasil, **kartu hero Beranda** (lewat `soundShape`), dan Kalibrasi tidak berubah (diam, a, i, u).
+- Kembali: tipe `LipShape`, `LIP_LABELS`, cincin grafik "Cermin bibir" (`lipShapes.ts`), `soundShape`/`targetShape`/`unitShapes`, regex judul Level 1, katalog tiruan (`l1_e`, `l1_o`), teks bantu daftar Level 1 ("Bibir setengah terbuka", "Bibir bulat"). Hitungan Level 1 menjadi 7 materi (5 vokal + "a panjang" + "pelan ke keras").
+- `CLAUDE.md` (cakupan dan Wav2Vec2) dan `flow-srs-ui.md` (§1 teknologi, D17) diperbarui.
+- **Perlu backend:** `server/app/content/items.json` masih memuat `l1_e` dan `l1_o` dengan `active: false`; aktifkan, beserta aturan penilaian dan scorer Wav2Vec2 untuk e dan o, supaya `/v1/analyze` menerimanya. Sampai itu, penilaian e dan o hanya jalan dengan `EXPO_PUBLIC_ANALYZE_API=mock` atau v2. Kontrak API tidak diubah oleh app.
+- Belum diuji di perangkat; bentuk e dan o digambar tim dan belum ditinjau.
