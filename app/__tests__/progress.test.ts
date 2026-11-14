@@ -62,7 +62,8 @@ describe('recentActivity', () => {
 describe('describeItem', () => {
   it('titles vowels, syllables and words', () => {
     expect(describeItem(1, 'l1_u', 'U')).toEqual({ title: 'Vokal “u”', letter: 'u' });
-    expect(describeItem(1, 'l0_hold_a', 'A panjang')).toEqual({ title: 'A panjang', letter: 'a' });
+    expect(describeItem(1, 'l0_hold_a', 'A panjang')).toEqual({ title: '“a” panjang', letter: 'a' });
+    expect(describeItem(1, 'l0_soft_loud', 'Pelan ke keras')).toEqual({ title: 'Pelan ke keras', letter: 'p' });
     expect(describeItem(2, 'l2_ma')).toEqual({ title: 'Suku kata “ma”', letter: 'm' });
     expect(describeItem(3, 'l3_mama', 'MAMA')).toEqual({ title: 'mama', letter: 'm' });
   });

@@ -2,15 +2,18 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import type { Source } from '../api/types';
-import { colors, fontSize, radius, spacing } from '../theme';
+import { colors, fontSize, radius, textFont, wordList } from '../theme';
 
-/** Where a word comes from: the team ("Bawaan") or the companion ("Dari Pendamping"). Icon + text, not a capsule. */
-export function SourceChip({ source }: { source: Source }) {
+/**
+ * Where a word comes from: the team ("Bawaan", lock) or the companion ("Dari Pendamping", person).
+ * Icon + text on a `surfaceRaised` chip (Figma 37:414). `tall` is the slightly taller chip of "Jalur kata" (31:337).
+ */
+export function SourceChip({ source, tall = false }: { source: Source; tall?: boolean }) {
   const builtIn = source === 'default';
   return (
-    <View style={styles.chip}>
-      <Ionicons name={builtIn ? 'lock-closed-outline' : 'person-outline'} size={16} color={colors.textMuted} accessible={false} />
-      <Text maxFontSizeMultiplier={2} style={styles.text}>{builtIn ? 'Bawaan' : 'Dari Pendamping'}</Text>
+    <View style={[styles.chip, tall && styles.tall]}>
+      <Ionicons name={builtIn ? 'lock-closed-outline' : 'person-outline'} size={18} color={colors.text} accessible={false} />
+      <Text maxFontSizeMultiplier={2} style={[styles.text, textFont(true)]}>{builtIn ? 'Bawaan' : 'Dari Pendamping'}</Text>
     </View>
   );
 }
@@ -20,11 +23,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
+    gap: wordList.chipGap,
+    paddingHorizontal: wordList.chipPaddingHorizontal,
+    paddingVertical: wordList.chipPaddingVertical,
     borderRadius: radius.tile,
     backgroundColor: colors.surfaceRaised,
   },
-  text: { fontSize: fontSize.small, color: colors.textMuted },
+  tall: { paddingVertical: wordList.chipPaddingVerticalLarge },
+  text: { fontSize: fontSize.small, lineHeight: 20, color: colors.text },
 });

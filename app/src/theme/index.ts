@@ -95,7 +95,7 @@ export const fontSize = {
 } as const;
 
 /** Line height for body text (1.5 × body). */
-export const lineHeight = { body: 24, small: 22, label: 22, large: 28, titleLarge: 36, display: 42 } as const;
+export const lineHeight = { body: 24, small: 22, label: 22, large: 28, title: 32, titleLarge: 36, display: 42 } as const;
 
 export const spacing = {
   xs: 4,
@@ -188,5 +188,11 @@ export const session = {
 /** Result screen from Figma "Hasil · Level 1" (48:135): card paddings, target illustration and the sticky action bar. */
 export const result = { cardPadding: 16, targetPadding: 14, illustration: 110, cardGap: 10, legendGap: 16, hintPadding: 20, hintGap: 6, targetWordGap: 2 } as const;
 export const actionBar = { paddingTop: 12, paddingBottom: 24, gap: 12 } as const;
+
+/** Word and sound lists from Figma "Level 1" (37:260), "Pilih kata" (37:379): letter tile, row text, chips. */
+export const wordList = { tile: 44, textGap: 4, titleRowGap: 8, chipPaddingHorizontal: 10, chipPaddingVertical: 3, chipPaddingVerticalLarge: 6, chipGap: 6, chipIcon: 18, chevron: 22, banner: 14, bannerRing: 44 } as const;
+
+/** Step cards of "Jalur kata" (31:317): tile, padding and the "Berikutnya" chip. */
+export const pathCard = { padding: 14, paddingNext: 12, tileHeight: 56, tileMinWidth: 56, tilePaddingHorizontal: 12, gap: 12, textGap: 6, chevron: 24 } as const;
 
 export const theme = { colors, fontSize, spacing, radius, touchTarget, buttonHeight, statusStyles, overlay, chart, stroke, fontFamily } as const;

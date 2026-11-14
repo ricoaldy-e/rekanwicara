@@ -5,10 +5,7 @@ import Svg, { Circle } from 'react-native-svg';
 
 import { colors, statTile } from '../theme';
 
-const SIZE = statTile.ring;
 const WIDTH = statTile.ringWidth;
-const R = (SIZE - WIDTH) / 2;
-const CIRCUMFERENCE = 2 * Math.PI * R;
 const DOTS = 14;
 
 export interface ProgressRingProps {
@@ -18,13 +15,17 @@ export interface ProgressRingProps {
   icon?: ComponentProps<typeof Ionicons>['name'];
   /** Dotted empty ring for "no data yet": no fill, no icon. */
   dashed?: boolean;
+  /** Outer size in dp; defaults to 40 (StatTile). */
+  size?: number;
 }
 
 /** 40 dp ring: `hairline` track, `accent` fill. Decorative; the number beside it carries the information (design.md §5.10). */
-export function ProgressRing({ value, icon, dashed = false }: ProgressRingProps) {
+export function ProgressRing({ value, icon, dashed = false, size: SIZE = statTile.ring }: ProgressRingProps) {
   const v = Math.min(Math.max(value, 0), 1);
+  const R = (SIZE - WIDTH) / 2;
+  const CIRCUMFERENCE = 2 * Math.PI * R;
   return (
-    <View style={styles.box}>
+    <View style={{ width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' }}>
       <Svg width={SIZE} height={SIZE} accessible={false} style={StyleSheet.absoluteFill}>
         <Circle
           cx={SIZE / 2}
@@ -57,6 +58,3 @@ export function ProgressRing({ value, icon, dashed = false }: ProgressRingProps)
   );
 }
 
-const styles = StyleSheet.create({
-  box: { width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' },
-});

@@ -77,7 +77,8 @@ export function describeItem(level: number, itemId: string, text?: string): { ti
   }
   const base = text ?? itemId;
   if (level === 1) {
-    const title = /^[aiueo]$/i.test(base) ? `Vokal “${base.toLowerCase()}”` : base;
+    const held = /^([aiueo]) panjang$/i.exec(base);
+    const title = /^[aiueo]$/i.test(base) ? `Vokal “${base.toLowerCase()}”` : held ? `“${held[1].toLowerCase()}” panjang` : base;
     return { title, letter: base.charAt(0).toLowerCase() };
   }
   const word = base.toLowerCase();

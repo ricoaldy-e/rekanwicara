@@ -11,6 +11,7 @@ import {
   Card,
   HeroCard,
   InfoNote,
+  LetterTile,
   LevelTile,
   LipIllustration,
   ListGroup,
@@ -44,14 +45,6 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
     <View style={styles.section}>
       <Text accessibilityRole="header" style={[styles.sectionTitle, textFont(true)]}>{title}</Text>
       {children}
-    </View>
-  );
-}
-
-function LetterTile({ letter }: { letter: string }) {
-  return (
-    <View style={styles.letterTile}>
-      <Text accessible={false} maxFontSizeMultiplier={2} style={[styles.letter, displayFont()]}>{letter}</Text>
     </View>
   );
 }
@@ -291,7 +284,7 @@ export default function Home() {
                 testID={`activity-${a.itemId}`}
                 title={d.title}
                 subtitle={subtitle}
-                leading={<LetterTile letter={d.letter} />}
+                leading={<LetterTile letter={d.letter} tone="outline" />}
                 trailing={<StatusBadge status={a.status} />}
                 accessibilityLabel={`${d.title}. ${subtitle}. ${statusStyles[a.status].label}`}
               />

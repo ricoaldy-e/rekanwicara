@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, within } from '@testing-library/react-native';
 
 import WordPath from '../app/(tabs)/home/words/[wordId]';
 import Words from '../app/(tabs)/home/words';
@@ -40,7 +40,7 @@ describe('Pilih kata', () => {
   it('lists the four words with the right source chip', async () => {
     await render(<Words />);
     expect(screen.getAllByTestId(/^word-/)).toHaveLength(4);
-    expect(screen.getAllByText('Bawaan')).toHaveLength(2);
+    expect(screen.getAllByText('Bawaan')).toHaveLength(3); // two row chips + the filter segment
     expect(screen.getAllByText('Dari Pendamping')).toHaveLength(2);
     expect(screen.queryByText(/Terkunci/)).toBeNull();
   });
@@ -49,6 +49,30 @@ describe('Pilih kata', () => {
     await render(<Words />);
     await fireEvent.press(screen.getByTestId('word-l3_mama'));
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/home/words/[wordId]', params: { wordId: 'l3_mama' } });
+  });
+});
+
+describe('Pilih kata: filter and rows', () => {
+  it('filters by source with the segmented control, state only', async () => {
+    await render(<Words />);
+    expect(screen.getByRole('radio', { name: 'Semua kata' })).toBeSelected();
+    await fireEvent.press(screen.getByRole('radio', { name: 'Pendamping' }));
+    expect(screen.getAllByTestId(/^word-/)).toHaveLength(2);
+    expect(screen.queryByTestId('word-l3_mama')).toBeNull();
+    await fireEvent.press(screen.getByRole('radio', { name: 'Bawaan' }));
+    expect(screen.getAllByTestId(/^word-/)).toHaveLength(2);
+    expect(screen.getByTestId('word-l3_mama')).toBeTruthy();
+    expect(screen.queryByTestId('word-custom_word:11111111-1111-1111-1111-111111111111')).toBeNull();
+  });
+
+  it('shows the word in lower case with its syllables and "Belum dicoba" or the best status', async () => {
+    mockProfile.attempts = [{ ...attempt('l3_papa', 'hijau'), level: 3 }];
+    await render(<Words />);
+    const papa = screen.getByTestId('word-l3_papa');
+    expect(within(papa).getByText('papa')).toBeTruthy();
+    expect(within(papa).getByText('Suku kata: pa · pa')).toBeTruthy();
+    expect(within(papa).getByText('Sesuai')).toBeTruthy();
+    expect(within(screen.getByTestId('word-l3_mama')).getByText('Belum dicoba')).toBeTruthy();
   });
 });
 
@@ -80,7 +104,7 @@ describe('Jalur kata', () => {
   it('moves "Berikutnya" to the whole word once PA is sesuai, and both PA cards share the status', async () => {
     mockProfile.attempts = [attempt('l2_pa', 'hijau')];
     await render(<WordPath />);
-    expect(screen.getAllByLabelText('Terbaik: Sesuai')).toHaveLength(2);
+    expect(screen.getAllByText('Sesuai')).toHaveLength(2); // both PA cards share the status, shown as icon + text
     expect(screen.getAllByTestId('next-marker')).toHaveLength(1);
     expect(screen.getByRole('button', { name: /^PAPA, Level 3, belum dicoba, berikutnya$/ })).toBeTruthy();
   });
@@ -105,5 +129,17 @@ describe('Jalur kata', () => {
     mockWordId = 'nope';
     await render(<WordPath />);
     expect(screen.getByTestId('word-not-found')).toBeTruthy();
+  });
+});
+
+describe('Jalur kata layout', () => {
+  it('titles the word in lower case with its source and numbers the syllable cards', async () => {
+    await render(<WordPath />);
+    expect(screen.getByRole('header', { name: 'papa' })).toBeTruthy();
+    expect(screen.getByText('Bawaan')).toBeTruthy();
+    expect(screen.getByText('Suku kata 1')).toBeTruthy();
+    expect(screen.getByText('Suku kata 2')).toBeTruthy();
+    expect(screen.getByText('Kata utuh')).toBeTruthy();
+    expect(within(screen.getByTestId('step-l2_pa#1')).getByText('Berikutnya')).toBeTruthy();
   });
 });

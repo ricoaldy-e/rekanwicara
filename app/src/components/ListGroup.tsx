@@ -52,6 +52,8 @@ export interface ListRowProps {
   trailing?: ReactNode;
   /** Makes the row pressable and shows `›`. */
   onPress?: () => void;
+  /** Set false for a pressable row without `›` (Figma Level 1: the status sits at the right). */
+  chevron?: boolean;
   /** Vertical padding of the row; defaults to 12. */
   paddingVertical?: number;
   /** Not available yet: title and subtitle in `textMuted`. */
@@ -60,7 +62,7 @@ export interface ListRowProps {
   testID?: string;
 }
 
-export function ListRow({ title, subtitle, leading, trailing, onPress, paddingVertical = listGroup.rowPaddingVertical, muted = false, accessibilityLabel, testID }: ListRowProps) {
+export function ListRow({ title, subtitle, leading, trailing, onPress, chevron = true, paddingVertical = listGroup.rowPaddingVertical, muted = false, accessibilityLabel, testID }: ListRowProps) {
   const { focusProps, focusStyle } = useFocusRing();
   const content = (
     <>
@@ -70,7 +72,7 @@ export function ListRow({ title, subtitle, leading, trailing, onPress, paddingVe
         {subtitle ? <Text style={[styles.subtitle, textFont()]}>{subtitle}</Text> : null}
       </View>
       {trailing}
-      {onPress ? <Ionicons name="chevron-forward" size={listGroup.chevron} color={colors.textMuted} accessible={false} /> : null}
+      {onPress && chevron ? <Ionicons name="chevron-forward" size={listGroup.chevron} color={colors.textMuted} accessible={false} /> : null}
     </>
   );
   if (!onPress) {

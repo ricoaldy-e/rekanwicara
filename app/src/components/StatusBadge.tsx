@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import type { ResultStatus } from '../api/types';
@@ -39,7 +40,21 @@ export function StatusBadge({ status, label, size = 'md', testID }: StatusBadgeP
   );
 }
 
+/** "Belum dicoba": empty circle + muted text (design.md §5.4). Same metrics as the `md` StatusBadge. */
+export function UntriedBadge({ testID }: { testID?: string }) {
+  const m = statusBadge.md;
+  return (
+    <View testID={testID} accessible accessibilityLabel="Belum dicoba" style={[styles.row, { gap: m.gap }]}>
+      <Ionicons name="ellipse-outline" size={m.glyph} color={colors.textMuted} accessible={false} />
+      <Text accessible={false} maxFontSizeMultiplier={2} style={[styles.untried, textFont(), { fontSize: m.fontSize, lineHeight: 22 }]}>
+        Belum dicoba
+      </Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', paddingVertical: statusBadge.paddingVertical },
   text: { color: colors.text, flexShrink: 1 },
+  untried: { color: colors.textMuted, flexShrink: 1 },
 });

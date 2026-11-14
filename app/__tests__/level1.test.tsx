@@ -31,7 +31,7 @@ it('lists the six Level 1 sounds in catalog order with their last status', async
   const ids = ['l1_a', 'l1_i', 'l1_u', 'l1_o', 'l0_hold_a', 'l0_soft_loud'];
   expect(screen.getAllByTestId(/^item-/).map((el) => el.props.testID)).toEqual(ids.map((id) => `item-${id}`));
   expect(screen.getByRole('button', { name: 'A, terakhir Mendekati' })).toBeTruthy();
-  expect(screen.getByLabelText('Terakhir: Mendekati')).toBeTruthy();
+  expect(screen.getByText('Mendekati')).toBeTruthy(); // the badge shows the status as icon + text (Figma 37:287)
   expect(screen.getByRole('button', { name: 'I, belum dicoba' })).toBeTruthy();
   expect(screen.queryByText(/Terkunci/)).toBeNull();
 });
@@ -40,4 +40,16 @@ it('opens a practice session for the tapped sound', async () => {
   await render(<LevelOne />);
   await fireEvent.press(screen.getByTestId('item-l0_hold_a'));
   expect(mockPush).toHaveBeenCalledWith({ pathname: '/practice/[itemId]', params: { itemId: 'l0_hold_a' } });
+});
+
+it('titles each sound like Figma, shows "Belum dicoba" for untried ones and the progress banner', async () => {
+  mockProfile.attempts = [attempt('l1_a', 'hijau', '2026-11-13T09:00:00.000Z')];
+  await render(<LevelOne />);
+  expect(screen.getByText('Vokal “a”')).toBeTruthy();
+  expect(screen.getByText('Bibir terbuka')).toBeTruthy();
+  expect(screen.getByText('“a” panjang')).toBeTruthy();
+  expect(screen.getByText('Pelan ke keras')).toBeTruthy();
+  expect(screen.getAllByText('Belum dicoba')).toHaveLength(5);
+  expect(screen.getByTestId('level1-progress')).toHaveAccessibleName('Kemajuan vokal. 1 dari 6 bunyi sesuai');
+  expect(screen.getByText('Sesuai')).toBeTruthy();
 });
