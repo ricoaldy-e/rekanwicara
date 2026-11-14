@@ -121,8 +121,11 @@ export const buttonHeight = 52;
 /** Height of a text field (design.md §5.5). */
 export const fieldHeight = 56;
 
-/** Size of one PIN pad key (flow §7.7.2: at least 64 dp). */
-export const pinKey = 64;
+/** PIN pad and dots metrics from Figma "PIN pad" (50:186) and "PIN dots" (50:179), design.md §5.6. */
+export const pin = { key: 76, rowGap: 14, columnGap: 28, digit: 30, dot: 22, dotGap: 20, dotRing: 2.5, dotPaddingVertical: 8 } as const;
+
+/** BottomBar metrics from Figma "BottomBar" (25:88), design.md §5.11. */
+export const bottomBar = { height: 80, padding: 8, circle: 40, icon: 22, gap: 2, inset: 16 } as const;
 
 export interface StatusStyle {
   label: string;

@@ -1,6 +1,6 @@
 import { act, fireEvent, render, renderHook, screen } from '@testing-library/react-native';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type ViewStyle } from 'react-native';
 
 import { Checkbox } from '../src/components/form/Checkbox';
 import { ConfirmDialog } from '../src/components/form/ConfirmDialog';
@@ -10,7 +10,7 @@ import { PinPad } from '../src/components/form/PinPad';
 import { Snackbar, SNACKBAR_MIN_MS } from '../src/components/form/Snackbar';
 import { TextField } from '../src/components/form/TextField';
 import { useFormState, type Rules } from '../src/forms/useFormState';
-import { colors } from '../src/theme';
+import { colors, pin } from '../src/theme';
 import { messageOf } from '../src/forms/messages';
 import * as auth from '../src/forms/validators/auth';
 
@@ -203,6 +203,29 @@ describe('ConfirmDialog', () => {
     expect(props.onCancel).toHaveBeenCalledTimes(1);
     await fireEvent.press(screen.getByRole('button', { name: 'Hapus' }));
     expect(props.onConfirm).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('PinPad and PinDots sizes (Figma)', () => {
+  it('draws round 76 dp keys and 22 dp dots, filled solid and empty as a ring', async () => {
+    await render(
+      <>
+        <PinPad onDigit={jest.fn()} onDelete={jest.fn()} />
+        <PinDots filled={1} />
+      </>,
+    );
+    expect(StyleSheet.flatten(screen.getByTestId('pin-5').props.style)).toMatchObject({
+      width: pin.key,
+      height: pin.key,
+      borderRadius: pin.key / 2,
+      backgroundColor: colors.surface,
+    });
+    expect(pin.key).toBe(76);
+    expect(pin.dot).toBe(22);
+    const dots = screen.getByTestId('pin-dots').children as unknown as { props: { style: ViewStyle } }[];
+    expect(StyleSheet.flatten(dots[0].props.style)).toMatchObject({ width: 22, backgroundColor: colors.primary });
+    expect(StyleSheet.flatten(dots[1].props.style)).toMatchObject({ width: 22, borderColor: colors.border });
+    expect(StyleSheet.flatten(dots[1].props.style)?.backgroundColor).toBeUndefined();
   });
 });
 

@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { fill, UI } from '../../forms/messages';
-import { colors, fontSize, pinKey, radius, spacing, stroke } from '../../theme';
+import { colors, fontSize, pin, textFont } from '../../theme';
 
 const ROWS = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9']] as const;
 
@@ -13,11 +13,11 @@ export interface PinPadProps {
   disabled?: boolean;
 }
 
-/** Digit keys 0-9 and Hapus, each at least 64 dp. Used instead of the system keyboard. */
+/** Round keys 0-9 and Hapus, 76 dp each (design.md §5.6, Figma 50:186). Used instead of the system keyboard. */
 export function PinPad({ onDigit, onDelete, disabled = false }: PinPadProps) {
   const digit = (d: string) => (
     <Key key={d} label={fill(UI.pinDigit, { d })} disabled={disabled} onPress={() => onDigit(d)} testID={`pin-${d}`}>
-      <Text style={[styles.digit, disabled && styles.muted]}>{d}</Text>
+      <Text style={[styles.digit, textFont(), disabled && styles.muted]}>{d}</Text>
     </Key>
   );
   return (
@@ -31,8 +31,8 @@ export function PinPad({ onDigit, onDelete, disabled = false }: PinPadProps) {
         <View style={styles.key} />
         {digit('0')}
         <Key label={UI.delete} disabled={disabled} onPress={onDelete} testID="pin-delete">
-          <Ionicons name="backspace-outline" size={24} color={disabled ? colors.textMuted : colors.text} />
-          <Text style={[styles.deleteText, disabled && styles.muted]}>{UI.delete}</Text>
+          <Ionicons name="backspace-outline" size={22} accessible={false} color={disabled ? colors.textMuted : colors.text} />
+          <Text maxFontSizeMultiplier={2} style={[styles.deleteText, textFont(true), disabled && styles.muted]}>{UI.delete}</Text>
         </Key>
       </View>
     </View>
@@ -40,6 +40,7 @@ export function PinPad({ onDigit, onDelete, disabled = false }: PinPadProps) {
 }
 
 function Key({ label, disabled, onPress, testID, children }: { label: string; disabled: boolean; onPress: () => void; testID: string; children: React.ReactNode }) {
+  const isDelete = testID === 'pin-delete'; // Figma: Hapus has no fill until pressed
   return (
     <Pressable
       testID={testID}
@@ -48,7 +49,7 @@ function Key({ label, disabled, onPress, testID, children }: { label: string; di
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled }}
-      style={({ pressed }) => [styles.key, styles.keyFace, (pressed || disabled) && styles.keyRaised]}
+      style={({ pressed }) => [styles.key, isDelete ? null : styles.keyFace, (pressed || disabled) && styles.keyRaised]}
     >
       {children}
     </Pressable>
@@ -56,12 +57,12 @@ function Key({ label, disabled, onPress, testID, children }: { label: string; di
 }
 
 const styles = StyleSheet.create({
-  pad: { gap: spacing.sm, alignSelf: 'center' },
-  row: { flexDirection: 'row', gap: spacing.sm, justifyContent: 'center' },
-  key: { width: pinKey + spacing.md, height: pinKey, alignItems: 'center', justifyContent: 'center' },
-  keyFace: { borderRadius: radius.tile, backgroundColor: colors.surface, borderWidth: stroke.thick, borderColor: colors.border },
+  pad: { gap: pin.rowGap, alignSelf: 'center' },
+  row: { flexDirection: 'row', gap: pin.columnGap, justifyContent: 'center' },
+  key: { width: pin.key, height: pin.key, borderRadius: pin.key / 2, alignItems: 'center', justifyContent: 'center', gap: 2 },
+  keyFace: { backgroundColor: colors.surface },
   keyRaised: { backgroundColor: colors.surfaceRaised },
-  digit: { fontSize: fontSize.title, fontWeight: '700', color: colors.text },
-  deleteText: { fontSize: fontSize.small, color: colors.text },
+  digit: { fontSize: pin.digit, lineHeight: 28, color: colors.text },
+  deleteText: { fontSize: fontSize.small, lineHeight: 20, color: colors.text },
   muted: { color: colors.textMuted },
 });

@@ -2,7 +2,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSize, radius, spacing } from '../theme';
+import { useFocusRing } from '../a11y/useFocusRing';
+import { bottomBar, colors, fontSize, radius, spacing, textFont } from '../theme';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -16,48 +17,52 @@ export interface BottomBarItem {
   onPress: () => void;
 }
 
-const CIRCLE = 48;
-
-/** Capsule bar with icon above an always-visible label (design.md §5.9). The parent Screen supplies the safe area. */
+/** Capsule bar, 80 dp, icon above an always-visible label (design.md §5.11, Figma 25:88). The parent Screen supplies the safe area. */
 export function BottomBar({ items }: { items: BottomBarItem[] }) {
   return (
     <View style={styles.bar}>
       {items.map((it) => (
-        <Pressable
-          key={it.key}
-          onPress={it.onPress}
-          accessibilityRole="button"
-          accessibilityLabel={it.accessibilityLabel ?? it.label}
-          accessibilityState={{ selected: !!it.active }}
-          style={styles.item}
-        >
-          <View style={[styles.circle, it.active && styles.circleActive]}>
-            <Ionicons name={it.icon} size={24} color={it.active ? colors.onAccent : colors.textMuted} />
-          </View>
-          <Text maxFontSizeMultiplier={2} style={[styles.label, it.active && styles.labelActive]}>
-            {it.label}
-          </Text>
-        </Pressable>
+        <Item key={it.key} item={it} />
       ))}
     </View>
   );
 }
 
+function Item({ item: it }: { item: BottomBarItem }) {
+  const { focusProps, focusStyle } = useFocusRing();
+  return (
+    <Pressable
+      onPress={it.onPress}
+      accessibilityRole="button"
+      accessibilityLabel={it.accessibilityLabel ?? it.label}
+      accessibilityState={{ selected: !!it.active }}
+      {...focusProps}
+      style={[styles.item, focusStyle]}
+    >
+      <View testID="bar-circle" style={[styles.circle, it.active && styles.circleActive]}>
+        <Ionicons name={it.icon} size={bottomBar.icon} color={it.active ? colors.onAccent : colors.textMuted} accessible={false} />
+      </View>
+      <Text maxFontSizeMultiplier={2} style={[styles.label, textFont(!!it.active), it.active && styles.labelActive]}>
+        {it.label}
+      </Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   bar: {
-    minHeight: 64,
+    height: bottomBar.height,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
-    marginHorizontal: spacing.md,
+    marginHorizontal: bottomBar.inset,
     marginBottom: spacing.sm,
-    paddingVertical: spacing.xs,
+    padding: bottomBar.padding,
     borderRadius: radius.pill,
     backgroundColor: colors.surface,
   },
-  item: { flex: 1, alignItems: 'center', minHeight: 48 },
-  circle: { width: CIRCLE, height: CIRCLE, borderRadius: CIRCLE / 2, alignItems: 'center', justifyContent: 'center' },
+  item: { flex: 1, minWidth: 1, alignItems: 'center', justifyContent: 'center', gap: bottomBar.gap, height: '100%' },
+  circle: { width: bottomBar.circle, height: bottomBar.circle, borderRadius: bottomBar.circle / 2, alignItems: 'center', justifyContent: 'center' },
   circleActive: { backgroundColor: colors.accent },
-  label: { fontSize: fontSize.small, color: colors.textMuted },
-  labelActive: { fontWeight: '700', color: colors.text },
+  label: { fontSize: fontSize.small, lineHeight: 22, color: colors.textMuted },
+  labelActive: { lineHeight: 20, color: colors.text },
 });

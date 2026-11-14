@@ -759,3 +759,16 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   - Skill `figma-design-to-code` dan `interfaces:better-ui` dimuat lewat Skill tool. Saran `better-ui` yang ditolak (bertentangan dengan design.md/CLAUDE.md): bayangan berlapis untuk kedalaman (tanpa bayangan, §3 dan §11);
     skala tekan 0,96 (design.md §5.1: 0,98); animasi masuk/keluar dialog dengan blur dan translate (design.md §8: gerak hanya efek tekan, cincin, transisi bawaan; dialog tetap `animationType="none"`).
   - Belum diverifikasi di perangkat: tampilan dialog di layar 360 dp dan skala teks 200%, fokus pembaca layar ke Batal, isi `surfaceRaised` baris yang ditekan di dalam padding kartu (Figma tidak menggambar state tekan baris), kepekatan scrim (0,45 dari kode lama; Figma tidak diperiksa).
+- FG-5 (14 Nov 2026): bar bawah dan PIN, mengikuti Figma: "BottomBar" (25:88), "PIN pad" (50:186), "PIN dots" (50:179).
+  - `BottomBar`: tinggi 80, padding 8, lingkaran aksen 40, ikon 22, jarak ikon-label 2, label 15 (aktif Bold lineHeight 20 warna `text`, tidak aktif Regular lineHeight 22 `textMuted`, lewat `textFont`).
+    Tiap item sekarang komponen kecil dengan cincin fokus (`useFocusRing`). Props, `accessibilityLabel`/`State` dan `onPress` tidak berubah. Tanpa garis `hairline` karena Figma tidak menggambarnya.
+  - `PinPad`: kunci lingkaran 76 (radius 38), isi `surface`, tanpa garis tepi (dulu 2 dp), angka 30 Regular, jarak baris 14 dan kolom 28. Kunci "Hapus" tanpa isi sampai ditekan (Figma): ikon 22 + label 15 Bold.
+    `testID`, label, `onDigit`/`onDelete`/`disabled` tidak berubah.
+  - `PinDots`: titik 22, jarak 20, padding vertikal 8; terisi = isi `primary`, kosong = cincin 2,5 `border`. Label, role dan live region tidak berubah.
+  - Token baru `pin` dan `bottomBar` di theme; `pinKey` (64) dihapus (hanya `PinPad` memakainya).
+  - Selisih Figma vs design.md (Figma diikuti; design.md perlu diperbarui): kunci PIN tanpa garis tepi dan angka Regular (design.md §5.6: "berat tipis", jarak sama); ikon bar 22 (design.md menulis 24);
+    titik kosong cincin 2,5 `border`. Ikon bar masih Ionicons milik pemanggil (`_layout.tsx` tidak diubah); Figma memakai ikon garis kustom (play-circle, orang, slider), jadi bentuknya bisa beda.
+  - Tes: `BottomBar.test.tsx` (tinggi 80, lingkaran 40 hanya di item aktif), `formComponents.test.tsx` (kunci 76 bulat, titik 22 terisi/cincin). `npm test` 601 lulus, `npm run typecheck` bersih.
+  - Skill `figma-design-to-code` dan `interfaces:build-design` dimuat lewat Skill tool. Saran skill: tidak ada yang bertentangan; temuan `build-design` (jangan menambah state yang tidak digambar) dipatuhi:
+    state tekan kunci memakai `surfaceRaised` yang sudah ada, bukan desain baru.
+  - Belum diverifikasi di perangkat: tinggi papan PIN 346 dp di layar kecil, label bar di skala teks 200% (item tinggi tetap 64 dp, label bisa terpotong), perbandingan piksel dengan Figma.
