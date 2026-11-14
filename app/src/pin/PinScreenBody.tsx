@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Body, InfoNote, Screen, Title } from '../components';
 import { PinDots } from '../components/form/PinDots';
@@ -38,7 +38,12 @@ export function PinScreenBody({
   onDigit,
   onDelete,
   children,
+  top,
+  contentStyle,
 }: {
+  /** Row above the title (create PIN: back button and step). */
+  top?: React.ReactNode;
+  contentStyle?: StyleProp<ViewStyle>;
   title: string;
   headerless?: boolean;
   instruction?: string;
@@ -50,17 +55,20 @@ export function PinScreenBody({
   children?: React.ReactNode;
 }) {
   return (
-    <Screen edges={headerless ? ['top', 'bottom', 'left', 'right'] : undefined}>
+    <Screen edges={headerless ? ['top', 'bottom', 'left', 'right'] : undefined} contentStyle={[styles.content, contentStyle]}>
+      {top}
       <Title>{title}</Title>
       {instruction ? <Body>{instruction}</Body> : null}
       <View style={styles.dots}>
         <PinDots filled={filled} />
       </View>
       {message ? <InfoNote tone="warning" text={message} testID="pin-message" /> : null}
+      <View style={styles.spacer} />
       <PinPad onDigit={onDigit} onDelete={onDelete} disabled={padDisabled} />
       {children}
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({ dots: { paddingVertical: spacing.md } });
+// The pad sits at the bottom (Figma 29:28, 50:160); the spacer takes the free height.
+const styles = StyleSheet.create({ content: { flexGrow: 1 }, dots: { paddingVertical: spacing.md }, spacer: { flex: 1 } });

@@ -153,6 +153,17 @@ describe('CreatePin', () => {
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/home'));
   });
 
+  it('shows the step, and "Kembali" on step 2 returns to step 1 without saving', async () => {
+    await render(<CreatePin />);
+    expect(screen.getByText('Langkah 1 dari 2')).toBeTruthy();
+    expect(screen.queryByTestId('create-pin-back')).toBeNull(); // nowhere to go back to from step 1
+    await typePin('2580');
+    expect(screen.getByText('Langkah 2 dari 2')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('create-pin-back'));
+    expect(screen.getByText('Buat PIN 4 angka')).toBeTruthy();
+    expect(mockStore.size).toBe(0);
+  });
+
   it('does not claim to be security', async () => {
     await render(<CreatePin />);
     expect(JSON.stringify(screen.toJSON())).not.toMatch(/\b(aman|keamanan)\b/i);

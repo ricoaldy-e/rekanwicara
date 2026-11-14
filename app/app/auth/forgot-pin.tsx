@@ -1,17 +1,20 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { useAuth } from '../../src/auth/AuthProvider';
-import { AuthFrame, errorCountText, failureText } from '../../src/auth/authForm';
+import { AuthFrame, AuthTitle, errorCountText, failureText } from '../../src/auth/authForm';
 import { AuthFailure } from '../../src/auth/errors';
 import { auth } from '../../src/auth/session';
-import { BigButton, Body, FormBanner, InfoNote, PasswordField, Title } from '../../src/components';
+import { BackButton, BigButton, FormBanner, InfoNote, PasswordField } from '../../src/components';
 import { announce } from '../../src/components/form/announce';
 import type { TextFieldRef } from '../../src/components/form/TextField';
 import { MESSAGES } from '../../src/forms/messages';
+import { colors, entry } from '../../src/theme';
 
 /**
- * AUTH-7: a forgotten PIN is reset by entering the account password again, then making a new PIN.
+ * AUTH-7: a forgotten PIN is reset by entering the account password again, then making a new PIN (Figma 29:144).
  * The old PIN is replaced when the new one is saved. The password is only sent to the sign-in call.
  */
 export default function ForgotPin() {
@@ -46,24 +49,32 @@ export default function ForgotPin() {
     }
   };
 
+  const goBack = () => router.back();
+  const top = (
+    <View style={styles.back}>
+      <BackButton label="Kembali" onPress={goBack} testID="forgot-pin-back" />
+    </View>
+  );
+  const lock = <Ionicons name="lock-closed-outline" size={entry.forgotLockIcon} color={colors.text} accessible={false} />;
+
   if (!session?.email) {
     return (
-      <AuthFrame>
-        <Title>Lupa PIN</Title>
+      <AuthFrame headerless top={top}>
+        {lock}
+        <AuthTitle title="Lupa PIN?" body="PIN hanya bisa dibuat ulang dengan akun." />
         <InfoNote text="PIN hanya bisa dibuat ulang dengan akun. Masuk dulu." testID="forgot-pin-no-account" />
-        <BigButton label="Kembali" variant="secondary" onPress={() => router.back()} />
       </AuthFrame>
     );
   }
   return (
-    <AuthFrame>
-      <Title>Lupa PIN</Title>
-      <Body>{MESSAGES.forgotPinIntro}</Body>
+    <AuthFrame headerless top={top}>
+      {lock}
+      <AuthTitle title="Lupa PIN?" body={MESSAGES.forgotPinIntro} />
       {banner ? <FormBanner text={banner} onRetry={submit} testID="forgot-pin-banner" /> : null}
       <PasswordField
         ref={field}
         testID="password"
-        label="Kata sandi"
+        label="Kata sandi akun"
         value={password}
         onChangeText={(t) => {
           setPassword(t);
@@ -75,8 +86,10 @@ export default function ForgotPin() {
         returnKeyType="done"
         onSubmitEditing={submit}
       />
-      <BigButton label={busy ? 'Memeriksa…' : 'Lanjut'} icon="arrow-forward" disabled={busy} onPress={submit} testID="forgot-pin-submit" />
-      <BigButton label="Batal" variant="secondary" disabled={busy} onPress={() => router.back()} />
+      <BigButton label={busy ? 'Memeriksa…' : 'Lanjut'} disabled={busy} onPress={submit} testID="forgot-pin-submit" />
+      <BigButton label="Batal" variant="secondary" disabled={busy} onPress={goBack} testID="forgot-pin-cancel" />
     </AuthFrame>
   );
 }
+
+const styles = StyleSheet.create({ back: { alignItems: 'flex-start' } });
