@@ -1,6 +1,8 @@
-# Rekan Wicara — Flow & SRS UI (rev. 7, 13 Nov 2026 malam)
+# Rekan Wicara — Flow & SRS UI (rev. 8, 14 Nov 2026; rev. 7 = 13 Nov malam)
 
 Pemilik dokumen: Rico (frontend). Backend/LLM/model: teman satu tim. Dokumen ini hanya mengatur **UI, alur layar, dan kontrak data yang UI butuhkan**. Tampilan visual tetap mengikuti `docs/design.md` v6 (Hutan Malam), kecuali yang disebut di bagian 10.
+
+**Rev. 8 (14 Nov 2026):** disesuaikan dengan app yang sudah jadi dan dengan Figma. Perbedaan dari rev. 7 dirangkum di **§14** dan ditandai **[REV 8]** di tempatnya. Yang bertanda **[REV 8]** menggantikan teks rev. 7 di sekitarnya.
 
 Penanda: **[TIM]** = diputuskan tim di brief. **[ASUMSI]** = tafsiran saya, perlu dikonfirmasi. **[BE]** = tanggung jawab teman (backend); UI hanya mengonsumsi.
 
@@ -17,14 +19,14 @@ Untuk Claude Code: dokumen ini menggantikan alur produk lama (misi harian, Level
 | Hal | Sebelum | Sesudah [TIM] |
 |---|---|---|
 | Struktur materi | Level 0–4 (bunyi, ekspresi, suku kata, kata, pasangan) | **Tiga level**: L1 vokal, L2 suku kata (anak dari kata L3), L3 kata |
-| Misi harian | Ada (plan, langkah hari ini, StatTile) | **Dihapus untuk MVP** |
+| Misi harian | Ada (plan, langkah hari ini, StatTile) | **Dihapus untuk MVP.** [REV 8] Beranda punya kartu hero "Lanjutkan latihan" (materi berikutnya yang belum Sesuai), bukan misi harian; lihat §14 D1 |
 | Siapa mengatur isi | Tim saja | Tim (bawaan) + **Pendamping** (tambahan, CRUD) |
 | Akses Pendamping | Tombol biasa | **Dilindungi PIN** |
 | Autentikasi | Tidak ada | **Pendamping masuk/daftar** sebelum app dipakai |
 | Status hasil | Sesuai / Mendekati / Belum sesuai di semua materi | **L1: Belum sesuai / Mendekati / Sesuai (tiga)**. **L2–L3: Belum sesuai / Sesuai (dua)** |
 | Umpan balik | Satu petunjuk | **Umpan balik untuk setiap kesalahan**, tanpa teks hasil pengenalan kata |
 | Grafik (segitiga vokal, gambar mulut) | Level lain ikut | **Hanya L1** |
-| Pengaturan | Tersembunyi (tekan-lama 2 detik) | **Tab Pengaturan**: ganti PIN, keluar |
+| Pengaturan | Tersembunyi (tekan-lama 2 detik) | **Tab Pengaturan**: Getar, Ganti PIN, Tentang, Keluar. [REV 8] Tab **tidak dikunci PIN**; hanya Ganti PIN dan Keluar meminta PIN (§14 D2) |
 | Menu bawah | Ada di home | **Tetap terlihat** di semua layar utama |
 | Teknologi | MediaPipe + Wav2Vec2 | L1: MediaPipe + Parselmouth. L2–L3: MediaPipe + Wav2Vec2 [BE] |
 
@@ -87,7 +89,7 @@ Rute (usulan, expo-router; nama bisa disesuaikan dengan struktur yang ada):
  │   ├─ index                 Daftar kata saya + kata bawaan (terkunci)
  │   ├─ kata/baru             Formulir kata baru
  │   └─ kata/[wordId]/ubah    Formulir ubah
- └─ pengaturan/               TAB 3 — dikunci PIN
+ └─ pengaturan/               TAB 3 — terbuka; Ganti PIN dan Keluar meminta PIN [REV 8]
      ├─ index                 Ganti PIN, Keluar
      └─ ganti-pin
 ```
@@ -101,14 +103,14 @@ Layar pengembang yang sudah ada (dataset, allosaurus, wav2vec2, combined) tetap 
 ### 5.1 Pertama kali membuka app
 
 ```
-Splash (§9)
-  → belum ada sesi?  → Masuk Pendamping ── belum punya akun ──> Daftar
+Splash (§9, dengan animasi pembuka [REV 8])
+  → belum ada sesi?  → Selamat datang (/welcome) [REV 8] → Masuk Pendamping ── belum punya akun ──> Daftar
                                         └─ berhasil ──────────> Buat PIN (pertama kali saja)
   → onboarding (ada)  → kalibrasi (ada)  → Beranda Latihan
   → sudah ada sesi    → Beranda Latihan
 ```
 
-Catatan [ASUMSI]: "autentikasi dari pendamping" = Pendamping mendaftarkan akun di perangkat pengguna Tuli sekali, lalu pengguna Tuli memakai app tanpa masuk lagi. Daftar memakai username, email, dan kata sandi; masuk memakai email atau username + kata sandi [TIM]. Validasi klien: §7.1.1.
+Catatan [ASUMSI]: "autentikasi dari pendamping" = Pendamping mendaftarkan akun di perangkat pengguna Tuli sekali, lalu pengguna Tuli memakai app tanpa masuk lagi. Daftar memakai **nama panggilan**, email, dan kata sandi; **masuk memakai email + kata sandi saja**; nama panggilan hanya dipakai sebagai nama tampilan di Beranda [REV 8, keputusan Rico 14 Nov]. Validasi klien: §7.1.1.
 
 ### 5.2 Menu bawah tetap [TIM]
 
@@ -215,7 +217,7 @@ Format: ID — kebutuhan — kriteria penerimaan. Prioritas: **M** wajib MVP, **
 ### 7.1 Autentikasi dan PIN
 | ID | Kebutuhan | Kriteria | P |
 |---|---|---|---|
-| AUTH-1 | Layar Masuk dan Daftar Pendamping | Daftar: username, email, sandi, ulangi sandi. Masuk: email atau username + sandi. Validasi §7.1.1. Tombol tetap aktif; kolom yang salah ditandai saat dikirim | M |
+| AUTH-1 | Layar Masuk dan Daftar Pendamping | Daftar: nama panggilan, email, sandi, ulangi sandi. Masuk: email + sandi [REV 8]. Validasi §7.1.1. Tombol tetap aktif; kolom yang salah ditandai saat dikirim | M |
 | AUTH-2 | Sesi tersimpan | Setelah masuk, app berikutnya langsung ke Beranda | M |
 | AUTH-3 | Buat PIN pertama kali | Papan angka khusus, dua langkah (buat → ulangi), tolak PIN mudah ditebak. Rinci di §7.7.2 | M |
 | AUTH-4 | Gerbang PIN untuk tab Pendamping dan Pengaturan | §5.5 dan §7.7.2: masuk otomatis di digit terakhir, sisa percobaan terlihat, hitung mundur saat terkunci | M |
@@ -229,25 +231,25 @@ Aturan hidup di satu modul murni `src/forms/validators/auth.ts` dengan tes jest.
 
 | Kolom | Aturan | Pesan (Indonesia) |
 |---|---|---|
-| Username | dipangkas spasi ujung; 3–20 karakter; diawali huruf; hanya huruf, angka, `.`, `_`; regex `^[A-Za-z][A-Za-z0-9._]{2,19}$` | kosong: "Isi username." · pendek: "Username minimal 3 karakter." · panjang: "Username maksimal 20 karakter." · awal: "Username harus diawali huruf." · karakter: "Gunakan huruf, angka, titik, atau garis bawah." |
+| Nama panggilan [REV 8] | dipangkas spasi ujung, spasi berderet menjadi satu; 2–20 karakter; diawali huruf atau angka; huruf (termasuk beraksen), angka, spasi, `.`, apostrof, `-`; tanpa emoji; tidak unik, tidak dicek ke server | kosong: "Isi nama panggilan." · pendek: "Nama panggilan minimal 2 karakter." · panjang: "Nama panggilan maksimal 20 karakter." · karakter: "Mulai dengan huruf atau angka. Boleh spasi, titik, apostrof, dan tanda hubung." |
 | Email | dipangkas, diubah ke huruf kecil; maks 254; bentuk `^[^\s@]+@[^\s@]+\.[^\s@]{2,}$` (UI hanya cek bentuk) | kosong: "Isi email." · salah: "Email belum benar. Contoh: nama@email.com" |
-| Kata sandi (Daftar) | 8–64 karakter; minimal satu huruf dan satu angka; tidak sama dengan username atau email; tidak berspasi di ujung | kosong: "Isi kata sandi." · pendek: "Kata sandi minimal 8 karakter." · panjang: "Kata sandi maksimal 64 karakter." · komposisi: "Kata sandi harus ada huruf dan angka." · sama: "Kata sandi tidak boleh sama dengan username atau email." |
+| Kata sandi (Daftar) | 8–64 karakter; minimal satu huruf dan satu angka; tidak sama dengan nama panggilan atau email; tidak berspasi di ujung | kosong: "Isi kata sandi." · pendek: "Kata sandi minimal 8 karakter." · panjang: "Kata sandi maksimal 64 karakter." · komposisi: "Kata sandi harus ada huruf dan angka." · sama: "Kata sandi tidak boleh sama dengan nama panggilan atau email." |
 | Ulangi sandi (Daftar) | sama persis | "Kata sandi tidak sama." |
-| Masuk | identitas tidak kosong (berformat email bila ada `@`, selain itu berformat username); sandi tidak kosong. Aturan kekuatan sandi TIDAK dicek di Masuk | "Isi email atau username." · "Isi kata sandi." |
+| Masuk [REV 8] | email tidak kosong dan berformat email; sandi tidak kosong. Aturan kekuatan sandi TIDAK dicek di Masuk | "Isi email." · "Isi kata sandi." |
 
 Perilaku:
 - Validasi saat kolom ditinggalkan (setelah pernah disentuh) dan saat dikirim. Saat mengetik, hanya menghapus error yang sudah teratasi.
 - Saat dikirim dan ada error: fokus ke kolom pertama yang salah dan umumkan ke pembaca layar ("Ada 2 isian yang perlu diperbaiki").
 - Error = ikon + teks di bawah kolom + garis `danger`; tidak mengandalkan warna saja. Teks error mengikuti skala teks sistem.
 - Tombol "Tampilkan sandi" berlabel dan berstatus (`accessibilityState`), bukan ikon mata tanpa nama.
-- Atribut kolom: `autoComplete` (`username`, `email`, `new-password`, `current-password`), `textContentType`, `autoCapitalize="none"`, `returnKeyType="next"`; sandi `secureTextEntry`. Area sentuh ≥ 48 dp.
+- Atribut kolom: `autoComplete` (`name-given` untuk nama panggilan, `email`, `new-password`, `current-password`), `textContentType`, `autoCapitalize="none"`, `returnKeyType="next"`; sandi `secureTextEntry`. Area sentuh ≥ 48 dp.
 - Kirim: tombol menampilkan keadaan memuat dan mencegah kirim ganda.
-- Galat server: `INVALID_CREDENTIALS` → pesan umum satu baris "Email/username atau kata sandi salah." (tidak menyebut mana yang salah). `USERNAME_TAKEN`/`EMAIL_TAKEN` → pesan di kolom terkait. `NETWORK` → banner + "Coba lagi".
+- Galat server: `INVALID_CREDENTIALS` → pesan umum satu baris "Email atau kata sandi salah." (tidak menyebut mana yang salah) [REV 8]. `EMAIL_TAKEN` → pesan di kolom terkait. `NETWORK` → banner + "Coba lagi".
 - Kata sandi tidak masuk log, tidak masuk state yang disimpan, dan tidak ditampilkan di pesan. Penyimpanan token sesi: butuh penyimpanan aman; bila perlu dependensi baru (mis. `expo-secure-store`), **tanya Rico dulu**.
 
 Tambahan Daftar (pola umum di §7.7):
 - **Daftar periksa kata sandi** langsung di bawah kolom, diperbarui saat mengetik: "8 karakter atau lebih", "Ada huruf", "Ada angka". Tiap baris ikon (lingkaran kosong / centang) + teks, bukan warna saja. Ini panduan, bukan "ukuran kekuatan"; tidak ada klaim "sandi kuat".
-- **Ketersediaan username** (S): saat kolom ditinggalkan dan formatnya valid, cek ke server; hasil "Username tersedia" (ikon + teks) atau "Username sudah dipakai." Bila gagal terhubung, diam saja dan biarkan server memutuskan saat kirim. Butuh endpoint [BE].
+- ~~Ketersediaan username~~ [REV 8]: tidak ada. Nama panggilan tidak unik, jadi tidak ada pengecekan ke server dan tidak ada pesan "tersedia".
 - **Persetujuan privasi** (usulan, Q18): kotak centang "Saya setuju dengan kebijakan privasi." berisi tautan ke layar kebijakan (di Tentang). Tanpa centang: "Centang persetujuan untuk melanjutkan."
 - Setelah Daftar berhasil: langsung masuk, lalu Buat PIN.
 
@@ -255,8 +257,8 @@ Tambahan Daftar (pola umum di §7.7):
 | ID | Kebutuhan | Kriteria | P |
 |---|---|---|---|
 | NAV-1 | Bar bawah tetap | Terlihat di semua layar dalam tiga tab, kecuali sesi latihan (§5.2). Di sesi latihan tersedia tombol kembali di header (NAV-6) | M |
-| NAV-2 | Beranda = dua kartu | Kartu "Level 1 — Bunyi vokal" dan "Level 2 dan 3 — Pilih kata"; tiap kartu: ikon, nama, ringkasan progres "x dari N sesuai"; target sentuh ≥ 48 dp | M |
-| NAV-3 | Tanpa misi harian | Hapus HeroCard misi, StatTile "langkah hari ini", `planSession` dari UI. Logika boleh dibiarkan bila tidak dipanggil | M |
+| NAV-2 | Beranda = dua kartu [REV 8: ditambah hero "Lanjutkan latihan", dua StatTile kemajuan, dan "Aktivitas terakhir"; §14 D1] | Kartu "Level 1 — Bunyi vokal" dan "Level 2 dan 3 — Pilih kata"; tiap kartu: ikon, nama, ringkasan progres "x dari N sesuai"; target sentuh ≥ 48 dp | M |
+| NAV-3 | Tanpa misi harian [REV 8: hero "Lanjutkan" bukan misi harian] | Hapus HeroCard misi, StatTile "langkah hari ini", `planSession` dari UI. Logika boleh dibiarkan bila tidak dipanggil | M |
 | NAV-4 | Pengaturan tidak lagi tersembunyi | Hapus tekan-lama 2 detik; ganti dengan tab Pengaturan | M |
 | NAV-5 | Kunci level | Aturan buka/kunci level = Q6. Bila ada kunci: ikon gembok + "Terkunci" + syarat satu kalimat | M |
 | NAV-6 | Keluar dari sesi latihan | Header sesi: tombol kembali berlabel "Keluar latihan" (target ≥ 48 dp). Saat tahap Tiru/Kirim sedang berjalan, menekannya memunculkan dialog "Keluar dari latihan? Rekaman ini tidak disimpan." (Keluar / Lanjut). Di tahap Lihat dan Bandingkan keluar langsung. Tombol kembali sistem Android berperilaku sama | M |
@@ -346,8 +348,8 @@ Prinsip: AI hanya **mengusulkan teks**. Pendamping selalu meninjau dan memutuska
 ### 7.6 Pengaturan
 | ID | Kebutuhan | Kriteria | P |
 |---|---|---|---|
-| SET-1 | Hanya Ganti PIN dan Keluar [TIM #11] | Sakelar Getar/Reduce Motion dari `design.md` UI-10 tetap ada **bila sudah jadi**; tambahkan di sini (Q10) | M |
-| SET-2 | Dilindungi PIN | §5.5 | M |
+| SET-1 | Getar, Ganti PIN, Tentang, dan Keluar [TIM #11, REV 8] | Sakelar Getar/Reduce Motion dari `design.md` UI-10 tetap ada **bila sudah jadi**; tambahkan di sini (Q10) | M |
+| SET-2 | [REV 8] **Tidak dikunci PIN.** Getar dan Tentang terbuka untuk semua. Ganti PIN dan Keluar meminta PIN Pendamping (§5.5). Alasan: Getar adalah preferensi pengguna Tuli dan satu-satunya umpan balik non-visual (§14 D2) | M |
 
 ---
 
@@ -374,7 +376,7 @@ Tujuan: terasa seperti app profesional pada umumnya: jelas, tidak menghukum, tid
 | Keluar saat belum disimpan | Ada perubahan → dialog "Buang perubahan?" (Buang / Lanjut mengisi), juga untuk tombol kembali sistem. Tidak ada perubahan → keluar langsung |
 | Isian bertahan | Memutar layar, membuka pemilih video, atau izin kamera tidak mengosongkan formulir (state di induk) |
 | Aksesibilitas | Label terhubung ke kolom; teks bantu sebagai `accessibilityHint`; error diumumkan (`accessibilityLiveRegion="polite"` di Android, `AccessibilityInfo.announceForAccessibility` di iOS); target ≥ 48 dp; kolom tumbuh, tidak memotong teks pada skala 200%; kontras garis kolom ≥ 3:1 (periksa ulang saat implementasi) |
-| Bahasa pesan | Indonesia baku sederhana, kalimat pendek, menyebut tindakan ("Isi username."), tidak menyalahkan, tanpa istilah teknis dan tanpa kata terlarang (§6) |
+| Bahasa pesan | Indonesia baku sederhana, kalimat pendek, menyebut tindakan ("Isi nama panggilan."), tidak menyalahkan, tanpa istilah teknis dan tanpa kata terlarang (§6) |
 
 **7.7.2 PIN (papan angka khusus, bukan papan ketik sistem)**
 
@@ -447,15 +449,15 @@ type Result =
       feedback: string[] }                 // tanpa grafik, tanpa teks ASR
 
 // Auth
-register({ username, email, password }) -> sesi | galat
-login({ identifier /* email atau username */, password }) -> sesi | galat
-galat: USERNAME_TAKEN | EMAIL_TAKEN | INVALID_CREDENTIALS | NETWORK | SERVER
+register({ nickname, email, password }) -> sesi | galat   // nickname disimpan sebagai display_name
+login({ email, password }) -> sesi | galat
+galat: EMAIL_TAKEN | INVALID_CREDENTIALS | NETWORK | SERVER
 // Instruksi AI (hanya teks yang dikirim)
 generateInstruction({ text, parentWord? }) -> { instructionText } | galat
 galat: TIMEOUT | RATE_LIMIT | NETWORK | SERVER
 ```
 
-Hal yang perlu teman jawab: bentuk sebenarnya; batas ukuran dan durasi video; apakah `feedback` dibuat BE atau dari tabel kalimat; apakah username unik tanpa peka huruf besar/kecil; apakah ada "lupa sandi" (di luar MVP bila tidak).
+Hal yang perlu teman jawab: bentuk sebenarnya; batas ukuran dan durasi video; apakah `feedback` dibuat BE atau dari tabel kalimat; apakah ada "lupa sandi" (di luar MVP bila tidak).
 
 ## 9. Persyaratan tampilan khusus yang baru
 
@@ -502,7 +504,7 @@ Tambahan karena ada video dari Pendamping:
 
 | # | Keputusan |
 |---|---|
-| Q1 | Daftar: username, email, kata sandi. Masuk: email atau username + kata sandi. Validasi klien: §7.1.1 |
+| Q1 | Daftar: nama panggilan, email, kata sandi. Masuk: email + kata sandi [REV 8]. Validasi klien: §7.1.1 |
 | Q9 | Suku kata per kata dibatasi `MAX_SYLLABLES = 6` (usulan; ubah di satu konstanta) |
 | Q12 | Satu kalimat persetujuan di formulir unggah video Pendamping |
 | Q13 | Tidak ada "Suku kata umum" mandiri. Suku kata selalu anak dari sebuah kata (§3) |
@@ -557,3 +559,25 @@ Dikerjakan di cabang baru dari `ui-hutan-malam`. Satu langkah satu sesi, satu co
 Pembagian kerja dengan teman: UI memakai **data tiruan** (modul `src/mock/`) berbentuk §8 sampai BE siap, supaya tidak saling menunggu. Saat BE siap, ganti pemanggil data, bukan layar.
 
 Prioritas bila waktu habis: FL-1, FL-2, FL-3, FL-4 dulu (alur utama Tuli), lalu FL-6/FL-8 (Pendamping), terakhir FL-5/FL-7/FL-9 yang bisa disederhanakan.
+
+---
+
+## 14. Perubahan setelah implementasi Figma (rev. 8, 14 Nov 2026)
+
+Rujukan: `docs/design.md` v7.1 dan Figma `C5mdKAfFngxd8dz1BvAZrO`. Catatan langkah ada di `docs/PROGRESS.md`.
+
+| # | Hal | Rev. 7 | Rev. 8 (diimplementasikan) |
+|---|---|---|---|
+| D1 | Beranda | dua kartu, tanpa hero | hero **"Lanjutkan latihan"** (materi berikutnya yang belum Sesuai, bukan misi harian), dua LevelTile, dua StatTile (vokal dan kata sesuai), "Aktivitas terakhir". Pengguna baru: hero "Latihan pertamamu" dan grup "Langkah awal" |
+| D2 | Tab Pengaturan | seluruh tab dikunci PIN | **tidak dikunci**. Getar (sakelar, dengan teks Aktif/Mati) dan Tentang terbuka. Ganti PIN dan Keluar meminta PIN lewat rute PIN |
+| D11 | Layar pertama untuk yang belum masuk | langsung ke Masuk | layar **Selamat datang** (`/welcome`) dengan "Masuk" dan "Buat akun" |
+| D13 | Nama di Daftar | username | **nama panggilan** (2–20 karakter, tidak unik, hanya tampil di Beranda); masuk memakai **email + kata sandi** |
+| D14 | Pembuka app | splash lalu gerbang | splash native, lalu animasi pembuka (logo naik, nama dan tagline fade in, bilah memuat tak-tentu), sekali per peluncuran; layar tujuan masuk dengan fade; Reduce Motion: tanpa gerak |
+| D15 | Buat PIN | satu layar | dua langkah ("Langkah n dari 2"); tombol Kembali hanya di langkah 2 (langkah 1 tidak punya tujuan kembali); papan angka menempel di bawah |
+| D16 | Kalibrasi | tampil gambar, lalu tekan "Siap, rekam" | satu layar per langkah: header langkah, kartu bentuk bibir, panel kamera langsung; "Kembali" menggantikan "Lewati, ke beranda" (kembali ke layar sebelumnya, atau Beranda bila tidak ada) |
+| D17 | Gambar bibir | digambar dari parameter | gambar tetap dari Figma, **hanya Level 1: a, i, u** (dan bibir rapat untuk kalibrasi); bunyi o dan e tidak ada di Level 1. Level 2–3 memakai video contoh dari backend atau instruksi teks, tanpa gambar bibir |
+| D18 | Judul aktivitas Level 2 | memakai id suku kata | memakai teks materi yang disimpan lokal bersama percobaan (tidak dikirim ke server) |
+| D19 | Daftar kata Pendamping | "n suku kata" | "Suku kata: to · long" dari data lokal Pendamping; tidak butuh perubahan kontrak |
+| D20 | Formulir Kata baru dan Ubah kata | header sistem | header buatan sendiri (Kembali "Daftar kata", judul serif, keterangan), kartu video, kartu suku kata, tombol Naik/Turun/Hapus sebaris |
+
+Yang tetap terbuka dari rev. 7: kartu "Kekerasan suara" butuh nilai target dari backend, dan lencana "Cahaya cukup" tidak dipasang (lihat `design.md` §12 D3 dan D9).
