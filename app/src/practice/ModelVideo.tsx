@@ -124,7 +124,7 @@ function Player({ url, text, onError }: { url: string; text: string; onError: ()
       </Frame>
       <PlayButton
         onPress={() => {
-          player.currentTime = 0;
+          player.replay();
           player.play();
         }}
       />

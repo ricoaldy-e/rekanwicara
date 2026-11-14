@@ -10,6 +10,7 @@ interface MockPlayer {
   loop: boolean;
   muted?: boolean;
   play: jest.Mock;
+  replay: jest.Mock;
   release: jest.Mock;
   listeners: Set<(event: StatusEvent) => void>;
   addListener(name: string, listener: (event: StatusEvent) => void): { remove(): void };
@@ -27,7 +28,7 @@ const item: PracticeItem = {
 function mockCreatePlayer(): MockPlayer {
   const listeners = new Set<(event: StatusEvent) => void>();
   const player: MockPlayer = {
-    status: mockInitialStatus, loop: false, play: jest.fn(), release: jest.fn(), listeners,
+    status: mockInitialStatus, loop: false, play: jest.fn(), replay: jest.fn(), release: jest.fn(), listeners,
     addListener: (_name, listener) => {
       listeners.add(listener);
       return { remove: () => { listeners.delete(listener); } };
