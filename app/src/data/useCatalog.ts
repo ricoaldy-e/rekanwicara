@@ -11,9 +11,12 @@ interface Loaded<T> {
   reload: () => void;
 }
 
-export function useLoad<T>(load: () => Promise<T>): Loaded<T> {
+const lastLoaded = new Map<string, unknown>();
+
+/** `cacheKey`: the last result is shown at once when the screen opens again, and refreshed behind it. */
+export function useLoad<T>(load: () => Promise<T>, cacheKey?: string): Loaded<T> {
   const [state, setState] = useState<{ data: T | null; loading: boolean; error: unknown }>({
-    data: null,
+    data: (cacheKey ? (lastLoaded.get(cacheKey) as T | undefined) : undefined) ?? null,
     loading: true,
     error: null,
   });
@@ -22,13 +25,16 @@ export function useLoad<T>(load: () => Promise<T>): Loaded<T> {
     let alive = true;
     setState((s) => ({ ...s, loading: true, error: null }));
     load().then(
-      (data) => alive && setState({ data, loading: false, error: null }),
+      (data) => {
+        if (cacheKey) lastLoaded.set(cacheKey, data);
+        if (alive) setState({ data, loading: false, error: null });
+      },
       (error: unknown) => alive && setState({ data: null, loading: false, error }),
     );
     return () => {
       alive = false;
     };
-  }, [load, tick]);
+  }, [load, tick, cacheKey]);
   const reload = useCallback(() => setTick((t) => t + 1), []);
   return { ...state, reload };
 }
@@ -40,7 +46,7 @@ export function useCatalog(opts: SourceOptions): Loaded<{ level1: PracticeItem[]
     () => getCatalog({ baseUrl, getToken, refreshSession, onSessionLost, mock }).then((dto) => ({ level1: catalogToL1(dto), words: catalogToWords(dto) })),
     [baseUrl, getToken, refreshSession, onSessionLost, mock],
   );
-  return useLoad(load);
+  return useLoad(load, `catalog:${baseUrl}`);
 }
 
 /** One word with its Level 2 steps and the whole word (Jalur kata). */

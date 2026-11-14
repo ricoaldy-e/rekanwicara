@@ -34,7 +34,7 @@ export function ModelVideo({ item, source = ANALYZE_API }: { item: PracticeItem;
   }, [api, fromV1, item.itemId, attempt]);
 
   const instruction = <Instruction item={item} />;
-  if (state === 'loading') return <><Loading />{instruction}</>;
+  if (state === 'loading') return <><Loading text={item.text} />{instruction}</>;
   if (state === 'available') return (
     <>
       <VideoCard>
@@ -77,12 +77,31 @@ function Instruction({ item }: { item: PracticeItem }) {
   );
 }
 
-function Loading() {
+/** The video frame: portrait 3:4 (our recordings), fixed from the first moment. The spinner sits inside it. */
+function Frame({ loading, label, children }: { loading: boolean; label: string; children?: ReactNode }) {
+  const { height } = useWindowDimensions();
   return (
-    <View style={styles.center} accessible accessibilityLabel="Memuat video contoh" accessibilityLiveRegion="polite">
-      <ActivityIndicator size="large" color={colors.text} />
-      <Body>Memuat video contoh…</Body>
+    <View style={[styles.media, styles.videoFrame, { aspectRatio: session.videoRatio, maxHeight: height * session.videoMaxHeight }]} accessible={!loading} accessibilityLabel={label}>
+      {children}
+      {loading ? (
+        <View style={styles.overlay} accessible accessibilityLabel="Memuat video contoh" accessibilityLiveRegion="polite">
+          <ActivityIndicator size="large" color={colors.text} />
+        </View>
+      ) : null}
     </View>
+  );
+}
+
+function PlayButton({ onPress }: { onPress?: () => void }) {
+  return <BigButton label="Putar contoh" icon="play-outline" variant="secondary" disabled={!onPress} onPress={onPress ?? (() => undefined)} />;
+}
+
+function Loading({ text }: { text: string }) {
+  return (
+    <VideoCard>
+      <Frame loading label={`Video contoh mengucapkan ${text}`} />
+      <PlayButton />
+    </VideoCard>
   );
 }
 
@@ -93,23 +112,15 @@ function Player({ url, text, onError }: { url: string; text: string; onError: ()
     p.play();
   });
   const { status } = useEvent(player, 'statusChange', { status: player.status });
-  const { height } = useWindowDimensions();
-  const track = player.videoTrack?.size;
-  // shortcut: the ratio is read once the video is ready; before that a portrait 3:4 frame, the shape of our recordings.
-  const ratio = track && track.width > 0 && track.height > 0 ? track.width / track.height : session.videoRatio;
   useEffect(() => {
     if (status === 'error') onError();
   }, [status, onError]);
   return (
     <>
-      {status !== 'readyToPlay' ? <Loading /> : null}
-      <View style={[styles.media, styles.videoFrame, { aspectRatio: ratio, maxHeight: height * session.videoMaxHeight }]} accessible accessibilityLabel={`Video contoh mengucapkan ${text}`}>
+      <Frame loading={status !== 'readyToPlay'} label={`Video contoh mengucapkan ${text}`}>
         <VideoView player={player} style={styles.video} nativeControls contentFit="contain" />
-      </View>
-      <BigButton
-        label="Putar contoh"
-        icon="play-outline"
-        variant="secondary"
+      </Frame>
+      <PlayButton
         onPress={() => {
           player.currentTime = 0;
           player.play();
@@ -161,6 +172,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceRaised,
   },
   video: { width: '100%', height: '100%' },
+  overlay: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
   videoFrame: { height: undefined, alignSelf: 'center', width: '100%' },
   instruction: { gap: spacing.sm },
   instructionTitle: { fontSize: fontSize.label, lineHeight: lineHeight.label, color: colors.text },
