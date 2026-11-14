@@ -88,4 +88,19 @@ cermin-wicara/
 - Dataset rekaman (`data/raw`) hanya untuk pengembangan, dengan persetujuan tertulis penutur,
   dan tidak pernah diunggah ke layanan cloud publik.
 
-Sebelum mengubah UI apa pun di app/, baca @docs/design.md dan ikuti aturannya.
+Sebelum mengubah UI apa pun di app/, lihat figma dan @docs/design.md dan ikuti aturannya.
+
+## Implementasi Figma (14 Nov 2026)
+Sumber visual: file Figma C5mdKAfFngxd8dz1BvAZrO, halaman "Rekan Wicara · UI Final" (node 24:2).
+- Tiap langkah: create_session, muat skill yang disebut di prompt langkah itu (lewat Skill tool, SEBELUM
+  menulis kode), lalu get_design_context + get_screenshot untuk node yang disebut. Keluaran Figma hanya
+  referensi: terjemahkan ke StyleSheet, token, dan komponen yang sudah ada. Jangan salin kode web/Tailwind.
+- Skill hanya memberi saran. Bila saran skill bertentangan dengan docs/design.md atau batas produk di
+  CLAUDE.md, design.md dan CLAUDE.md menang: tanpa bayangan/glow, tanpa miring, teks ≥ 15, target ≥ 48 dp,
+  status bukan hanya warna, tanpa gradasi. Catat saran yang ditolak di docs/PROGRESS.md.
+- Hanya tata letak dan gaya. Logika, data, rute, testID, accessibilityLabel tidak berubah.
+- Bila Figma bertentangan dengan batas produk atau design.md, ikuti batas produk dan catat selisihnya.
+- Tanpa dependensi baru tanpa bertanya. Tanpa hex/ukuran literal di layar; semua lewat app/src/theme.
+- Satu langkah = satu komit "phase FG-n: ...". Jalankan npm test dan npm run typecheck.
+  Alur rekam→hasil rusak dan tidak beres ±20 menit = git revert.
+- Intinya desgin figma adalah sumber design yang saya inginkan
