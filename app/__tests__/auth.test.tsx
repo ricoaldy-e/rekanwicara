@@ -71,9 +71,9 @@ describe('createSupabaseAuth', () => {
   const user = { id: 'u1', email: 'a@b.co', user_metadata: { display_name: 'rico' } };
   const make = (auth: Record<string, unknown>) => createSupabaseAuth(() => ({ auth }) as never);
 
-  it('signs up with the username as display_name and returns a session without tokens', async () => {
+  it('signs up with the nickname as display_name and returns a session without tokens', async () => {
     const signUp = jest.fn().mockResolvedValue({ data: { session: { user, access_token: 'secret' } }, error: null });
-    const res = await make({ signUp }).signUp({ username: 'rico', email: 'a@b.co', password: 'abcdefg1' });
+    const res = await make({ signUp }).signUp({ nickname: 'rico', email: 'a@b.co', password: 'abcdefg1' });
     expect(signUp).toHaveBeenCalledWith({ email: 'a@b.co', password: 'abcdefg1', options: { data: { display_name: 'rico' } } });
     expect(res).toEqual({ uid: 'u1', email: 'a@b.co', displayName: 'rico' });
     expect(JSON.stringify(res)).not.toMatch(/secret|abcdefg1/);
@@ -81,7 +81,7 @@ describe('createSupabaseAuth', () => {
 
   it('returns null when the email must be confirmed first', async () => {
     const signUp = jest.fn().mockResolvedValue({ data: { session: null, user }, error: null });
-    expect(await make({ signUp }).signUp({ username: 'rico', email: 'a@b.co', password: 'abcdefg1' })).toBeNull();
+    expect(await make({ signUp }).signUp({ nickname: 'rico', email: 'a@b.co', password: 'abcdefg1' })).toBeNull();
   });
 
   it('turns SDK errors into AuthFailure codes, without the SDK message or the password', async () => {
@@ -108,9 +108,9 @@ describe('createSupabaseAuth', () => {
 describe('mock accounts', () => {
   it('follow the documented special emails and never keep a password', async () => {
     await expect(mockAuth.signIn({ email: 'salah@contoh.id', password: 'x' })).rejects.toMatchObject({ code: 'INVALID_CREDENTIALS' });
-    await expect(mockAuth.signUp({ username: 'rico', email: 'dipakai@contoh.id', password: 'abcdefg1' })).rejects.toMatchObject({ code: 'EMAIL_TAKEN' });
-    expect(await mockAuth.signUp({ username: 'rico', email: 'cek@contoh.id', password: 'abcdefg1' })).toBeNull();
-    const session = await mockAuth.signUp({ username: 'rico', email: 'a@b.co', password: 'abcdefg1' });
+    await expect(mockAuth.signUp({ nickname: 'rico', email: 'dipakai@contoh.id', password: 'abcdefg1' })).rejects.toMatchObject({ code: 'EMAIL_TAKEN' });
+    expect(await mockAuth.signUp({ nickname: 'rico', email: 'cek@contoh.id', password: 'abcdefg1' })).toBeNull();
+    const session = await mockAuth.signUp({ nickname: 'rico', email: 'a@b.co', password: 'abcdefg1' });
     expect(session).toEqual({ uid: 'mock-user', email: 'a@b.co', displayName: 'rico' });
     expect(await mockAuth.getSession()).toEqual(session);
     const AsyncStorage = require('@react-native-async-storage/async-storage');
@@ -178,8 +178,8 @@ describe('SignIn', () => {
 });
 
 describe('SignUp', () => {
-  const fill = async (over: Partial<Record<'username' | 'email' | 'password' | 'repeat', string>> = {}) => {
-    const v = { username: 'rico', email: 'a@b.co', password: 'abcdefg1', repeat: 'abcdefg1', ...over };
+  const fill = async (over: Partial<Record<'nickname' | 'email' | 'password' | 'repeat', string>> = {}) => {
+    const v = { nickname: 'rico', email: 'a@b.co', password: 'abcdefg1', repeat: 'abcdefg1', ...over };
     for (const [k, t] of Object.entries(v)) await fireEvent.changeText(screen.getByTestId(k), t);
   };
 
@@ -211,7 +211,7 @@ describe('SignUp', () => {
     await fireEvent.press(screen.getByRole('checkbox'));
     await fireEvent.press(screen.getByTestId('sign-up-submit'));
     await waitFor(() => expect(screen.getByTestId('email-error')).toHaveAccessibleName('Email ini sudah terdaftar. Coba masuk.'));
-    expect(screen.getByTestId('username').props.value).toBe('rico');
+    expect(screen.getByTestId('nickname').props.value).toBe('rico');
     expect(mockReplace).not.toHaveBeenCalled();
   });
 
@@ -222,7 +222,7 @@ describe('SignUp', () => {
     await fireEvent.press(screen.getByRole('checkbox'));
     await fireEvent.press(screen.getByTestId('sign-up-submit'));
     await waitFor(() => expect(mockReplace).toHaveBeenLastCalledWith('/'));
-    expect(mockSignUp).toHaveBeenCalledWith({ username: 'rico', email: 'a@b.co', password: 'abcdefg1' });
+    expect(mockSignUp).toHaveBeenCalledWith({ nickname: 'rico', email: 'a@b.co', password: 'abcdefg1' });
     await fireEvent.press(screen.getByTestId('sign-up-submit'));
     await waitFor(() => expect(mockReplace).toHaveBeenLastCalledWith('/auth/check-email'));
   });

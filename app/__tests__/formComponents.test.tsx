@@ -14,28 +14,28 @@ import { colors, pin } from '../src/theme';
 import { messageOf } from '../src/forms/messages';
 import * as auth from '../src/forms/validators/auth';
 
-type Values = { username: string; email: string };
-const INITIAL: Values = { username: '', email: '' };
-const RULES: Rules<Values> = { username: (v) => auth.username(v), email: (v) => auth.email(v) };
+type Values = { nickname: string; email: string };
+const INITIAL: Values = { nickname: '', email: '' };
+const RULES: Rules<Values> = { nickname: (v) => auth.nickname(v), email: (v) => auth.email(v) };
 
 describe('useFormState', () => {
   it('validates a field when it is left, not while typing', async () => {
     const { result } = await renderHook(() => useFormState(INITIAL, RULES));
-    await act(async () => result.current.setValue('username', 'a'));
-    expect(result.current.errors.username).toBeUndefined();
-    await act(async () => result.current.blur('username'));
-    expect(result.current.errors.username).toBe('usernameShort');
-    expect(result.current.touched.username).toBe(true);
+    await act(async () => result.current.setValue('nickname', 'a'));
+    expect(result.current.errors.nickname).toBeUndefined();
+    await act(async () => result.current.blur('nickname'));
+    expect(result.current.errors.nickname).toBe('nicknameShort');
+    expect(result.current.touched.nickname).toBe(true);
   });
 
   it('typing clears an error only once it is fixed', async () => {
     const { result } = await renderHook(() => useFormState(INITIAL, RULES));
-    await act(async () => result.current.blur('username'));
-    expect(result.current.errors.username).toBe('usernameEmpty');
-    await act(async () => result.current.setValue('username', 'ab'));
-    expect(result.current.errors.username).toBe('usernameEmpty'); // still wrong: kept
-    await act(async () => result.current.setValue('username', 'abc'));
-    expect(result.current.errors.username).toBeUndefined();
+    await act(async () => result.current.blur('nickname'));
+    expect(result.current.errors.nickname).toBe('nicknameEmpty');
+    await act(async () => result.current.setValue('nickname', 'a'));
+    expect(result.current.errors.nickname).toBe('nicknameEmpty'); // still wrong: kept
+    await act(async () => result.current.setValue('nickname', 'ab'));
+    expect(result.current.errors.nickname).toBeUndefined();
   });
 
   it('submit reports the first wrong field in the order of the form, and the count', async () => {
@@ -44,11 +44,11 @@ describe('useFormState', () => {
     await act(async () => {
       out = result.current.submit();
     });
-    expect(out).toEqual({ ok: false, firstInvalid: 'username', count: 2 });
-    expect(result.current.errors).toEqual({ username: 'usernameEmpty', email: 'emailEmpty' });
+    expect(out).toEqual({ ok: false, firstInvalid: 'nickname', count: 2 });
+    expect(result.current.errors).toEqual({ nickname: 'nicknameEmpty', email: 'emailEmpty' });
     expect(messageOf({ key: 'errorCount', vars: { n: out.count } })).toBe('Ada 2 isian yang perlu diperbaiki.');
 
-    await act(async () => result.current.setValue('username', 'rico'));
+    await act(async () => result.current.setValue('nickname', 'rico'));
     await act(async () => {
       out = result.current.submit();
     });
@@ -56,7 +56,7 @@ describe('useFormState', () => {
   });
 
   it('submit is ok when every field fits', async () => {
-    const { result } = await renderHook(() => useFormState({ username: 'rico', email: 'a@b.co' }, RULES));
+    const { result } = await renderHook(() => useFormState({ nickname: 'rico', email: 'a@b.co' }, RULES));
     let out!: ReturnType<typeof result.current.submit>;
     await act(async () => {
       out = result.current.submit();
@@ -83,13 +83,13 @@ function Demo({ onSubmit }: { onSubmit?: (r: { count: number; firstInvalid: stri
   return (
     <View>
       <TextField
-        testID="username"
-        label="Username"
+        testID="nickname"
+        label="Nama panggilan"
         hint="3–20 karakter."
-        value={form.values.username}
-        onChangeText={(t) => form.setValue('username', t)}
-        onBlur={() => form.blur('username')}
-        error={form.errors.username ? messageOf(form.errors.username) : null}
+        value={form.values.nickname}
+        onChangeText={(t) => form.setValue('nickname', t)}
+        onBlur={() => form.blur('nickname')}
+        error={form.errors.nickname ? messageOf(form.errors.nickname) : null}
         maxLength={20}
       />
       <TextField testID="email" label="Email" optional value={form.values.email} onChangeText={(t) => form.setValue('email', t)} />
@@ -103,28 +103,28 @@ describe('TextField', () => {
   it('shows an error with icon and text when left, hides the hint, and clears it when fixed', async () => {
     await render(<Demo />);
     expect(screen.getByText('3–20 karakter.')).toBeTruthy();
-    await fireEvent(screen.getByTestId('username'), 'blur');
-    expect(screen.getByTestId('username-error')).toHaveAccessibleName('Isi username.');
+    await fireEvent(screen.getByTestId('nickname'), 'blur');
+    expect(screen.getByTestId('nickname-error')).toHaveAccessibleName('Isi nama panggilan.');
     expect(screen.getByText('icon:alert-circle', { includeHiddenElements: true })).toBeTruthy(); // not colour alone
     expect(screen.queryByText('3–20 karakter.')).toBeNull(); // the error replaces the hint
-    await fireEvent.changeText(screen.getByTestId('username'), 'rico');
-    expect(screen.queryByTestId('username-error')).toBeNull();
+    await fireEvent.changeText(screen.getByTestId('nickname'), 'rico');
+    expect(screen.queryByTestId('nickname-error')).toBeNull();
     expect(screen.getByText('3–20 karakter.')).toBeTruthy();
   });
 
   it('labels the field, marks optional ones, and gives the hint to the screen reader', async () => {
     await render(<Demo />);
-    expect(screen.getByTestId('username').props.accessibilityLabel).toBe('Username');
-    expect(screen.getByTestId('username').props.accessibilityHint).toBe('3–20 karakter.');
+    expect(screen.getByTestId('nickname').props.accessibilityLabel).toBe('Nama panggilan');
+    expect(screen.getByTestId('nickname').props.accessibilityHint).toBe('3–20 karakter.');
     expect(screen.getByText('Email (opsional)')).toBeTruthy();
     expect(screen.getByTestId('email').props.accessibilityLabel).toBe('Email (opsional)');
   });
 
   it('shows the counter only from 80% of the limit', async () => {
     await render(<Demo />);
-    await fireEvent.changeText(screen.getByTestId('username'), 'a'.repeat(15));
+    await fireEvent.changeText(screen.getByTestId('nickname'), 'a'.repeat(15));
     expect(screen.queryByText('15 / 20')).toBeNull();
-    await fireEvent.changeText(screen.getByTestId('username'), 'a'.repeat(16));
+    await fireEvent.changeText(screen.getByTestId('nickname'), 'a'.repeat(16));
     expect(screen.getByText('16 / 20')).toBeTruthy();
   });
 });

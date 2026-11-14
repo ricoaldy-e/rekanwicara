@@ -5,12 +5,11 @@ const MAX_VIDEO_MB = Math.round(VIDEO_LIMITS.maxBytes / (1024 * 1024));
 const MAX_VIDEO_SECONDS = Math.round(VIDEO_LIMITS.maxDurationMs / 1000);
 
 export const MESSAGES = {
-  // Username
-  usernameEmpty: 'Isi username.',
-  usernameShort: `Username minimal ${LIMITS.username.min} karakter.`,
-  usernameLong: `Username maksimal ${LIMITS.username.max} karakter.`,
-  usernameStart: 'Username harus diawali huruf.',
-  usernameChars: 'Gunakan huruf, angka, titik, atau garis bawah.',
+  // Nickname (shown on Beranda; not used to sign in)
+  nicknameEmpty: 'Isi nama panggilan.',
+  nicknameShort: `Nama panggilan minimal ${LIMITS.nickname.min} karakter.`,
+  nicknameLong: `Nama panggilan maksimal ${LIMITS.nickname.max} karakter.`,
+  nicknameChars: 'Mulai dengan huruf atau angka. Boleh spasi, titik, apostrof, dan tanda hubung.',
   // Email (sign-in takes the email only: kontrak FE §1 #4)
   emailEmpty: 'Isi email.',
   emailInvalid: 'Email belum benar. Contoh: nama@email.com',
@@ -20,7 +19,7 @@ export const MESSAGES = {
   passwordShort: `Kata sandi minimal ${LIMITS.password.min} karakter.`,
   passwordLong: `Kata sandi maksimal ${LIMITS.password.max} karakter.`,
   passwordComposition: 'Kata sandi harus ada huruf dan angka.',
-  passwordSameAsIdentity: 'Kata sandi tidak boleh sama dengan username atau email.',
+  passwordSameAsIdentity: 'Kata sandi tidak boleh sama dengan nama panggilan atau email.',
   passwordMismatch: 'Kata sandi tidak sama.',
   passwordWrong: 'Kata sandi salah.',
   forgotPinIntro: 'Masukkan kata sandi akunmu untuk membuat PIN baru. PIN lama diganti.',

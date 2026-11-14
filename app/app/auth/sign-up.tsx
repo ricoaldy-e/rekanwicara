@@ -14,24 +14,24 @@ import { useFormState, type Rules } from '../../src/forms/useFormState';
 import { colors, fontSize, spacing, textFont, touchTarget } from '../../src/theme';
 import * as validate from '../../src/forms/validators/auth';
 
-type Values = { username: string; email: string; password: string; repeat: string; consent: boolean };
-const INITIAL: Values = { username: '', email: '', password: '', repeat: '', consent: false };
+type Values = { nickname: string; email: string; password: string; repeat: string; consent: boolean };
+const INITIAL: Values = { nickname: '', email: '', password: '', repeat: '', consent: false };
 const RULES: Rules<Values> = {
-  username: (v) => validate.username(v),
+  nickname: (v) => validate.nickname(v),
   email: (v) => validate.email(v),
-  password: (v, all) => validate.newPassword(v, { username: all.username, email: all.email }),
+  password: (v, all) => validate.newPassword(v, { nickname: all.nickname, email: all.email }),
   repeat: (v, all) => validate.repeatPassword(all.password, v),
   consent: (v) => (v ? null : 'privacyConsent'),
 };
 
-/** Daftar: username (display name, not unique), email, password. Consent to the privacy note is required. */
+/** Daftar: nickname (display name, not unique), email, password. Consent to the privacy note is required. */
 export default function SignUp() {
   const router = useRouter();
   const form = useFormState<Values>(INITIAL, RULES);
   const [busy, setBusy] = useState(false);
   const [banner, setBanner] = useState<string | null>(null);
   const refs = {
-    username: useRef<TextFieldRef>(null),
+    nickname: useRef<TextFieldRef>(null),
     email: useRef<TextFieldRef>(null),
     password: useRef<TextFieldRef>(null),
     repeat: useRef<TextFieldRef>(null),
@@ -51,7 +51,7 @@ export default function SignUp() {
     setBusy(true);
     try {
       const session = await auth.signUp({
-        username: validate.normalizeUsername(form.values.username),
+        nickname: validate.normalizeNickname(form.values.nickname),
         email: validate.normalizeEmail(form.values.email),
         password: form.values.password,
       });
@@ -81,19 +81,19 @@ export default function SignUp() {
       <AuthTitle title="Buat akun Pendamping" body="Akun ini dipakai Pendamping untuk menambah kata dan mengatur app." />
       {banner ? <FormBanner text={banner} onRetry={submit} testID="sign-up-banner" /> : null}
       <TextField
-        ref={refs.username}
-        testID="username"
-        label="Username"
-        hint={`Nama yang tampil. ${LIMITS.username.min}–${LIMITS.username.max} karakter, diawali huruf.`}
-        value={form.values.username}
-        onChangeText={(t) => form.setValue('username', t)}
-        onBlur={() => form.blur('username')}
-        error={err('username')}
-        maxLength={LIMITS.username.max}
-        autoCapitalize="none"
+        ref={refs.nickname}
+        testID="nickname"
+        label="Nama panggilan"
+        hint={`Tampil di Beranda. ${LIMITS.nickname.min}–${LIMITS.nickname.max} karakter.`}
+        value={form.values.nickname}
+        onChangeText={(t) => form.setValue('nickname', t)}
+        onBlur={() => form.blur('nickname')}
+        error={err('nickname')}
+        maxLength={LIMITS.nickname.max}
+        autoCapitalize="words"
         autoCorrect={false}
-        autoComplete="username-new"
-        textContentType="username"
+        autoComplete="name-given"
+        textContentType="nickname"
         returnKeyType="next"
         onSubmitEditing={() => refs.email.current?.focus()}
         blurOnSubmit={false}

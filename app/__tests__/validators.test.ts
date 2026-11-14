@@ -5,29 +5,33 @@ import { isFourDigits, isWeakPin, sameAsOld } from '../src/forms/validators/pin'
 import { videoFile } from '../src/forms/validators/video';
 import * as word from '../src/forms/validators/word';
 
-describe('username', () => {
+describe('nickname', () => {
   it.each([
-    ['', 'usernameEmpty'],
-    ['   ', 'usernameEmpty'],
-    ['ab', 'usernameShort'],
-    ['abc', null],
+    ['', 'nicknameEmpty'],
+    ['   ', 'nicknameEmpty'],
+    ['a', 'nicknameShort'],
+    ['ab', null],
     ['a'.repeat(20), null],
-    ['a'.repeat(21), 'usernameLong'],
-    ['1abc', 'usernameStart'],
-    ['_abc', 'usernameStart'],
-    ['ab c', 'usernameChars'],
-    ['abç', 'usernameChars'],
-    ['abc😀', 'usernameChars'],
-    ['Rico_a.b', null],
+    ['a'.repeat(21), 'nicknameLong'],
+    ['Dina Putri', null],
+    ["Nur'aini", null],
+    ['Budi-Santoso', null],
+    ['1abc', null],
+    ['_abc', 'nicknameChars'],
+    [' .abc', 'nicknameChars'],
+    ['abç', null],
+    ['abc😀', 'nicknameChars'],
     ['  rico  ', null], // trimmed
-  ])('%j → %s', (value, expected) => expect(auth.username(value)).toBe(expected));
+  ])('%j → %s', (value, expected) => expect(auth.nickname(value)).toBe(expected));
+
+  it('collapses runs of spaces', () => expect(auth.normalizeNickname('  Dina   Putri ')).toBe('Dina Putri'));
 
   it('counts an emoji as one character', () => {
-    expect(auth.username('a😀')).toBe('usernameShort');
-    expect(auth.username('😀'.repeat(21))).toBe('usernameLong');
+    expect(auth.nickname('a😀')).toBe('nicknameChars');
+    expect(auth.nickname('😀'.repeat(21))).toBe('nicknameLong');
   });
 
-  it('survives a very long paste', () => expect(auth.username('x'.repeat(100_000))).toBe('usernameLong'));
+  it('survives a very long paste', () => expect(auth.nickname('x'.repeat(100_000))).toBe('nicknameLong'));
 });
 
 describe('email', () => {
@@ -53,7 +57,7 @@ describe('email', () => {
 });
 
 describe('newPassword', () => {
-  const who = { username: 'Rico', email: 'rico@email.com' };
+  const who = { nickname: 'Rico', email: 'rico@email.com' };
   it.each([
     ['', 'passwordEmpty'],
     ['abc123', 'passwordShort'],
@@ -71,10 +75,10 @@ describe('newPassword', () => {
     ['pass😀word1', null],
   ])('%j → %s', (value, expected) => expect(auth.newPassword(value, who)).toBe(expected));
 
-  it('refuses the username or email, ignoring case', () => {
-    expect(auth.newPassword('Rico1234', { username: 'rico1234' })).toBe('passwordSameAsIdentity');
+  it('refuses the nickname or email, ignoring case', () => {
+    expect(auth.newPassword('Rico1234', { nickname: 'rico1234' })).toBe('passwordSameAsIdentity');
     expect(auth.newPassword('rico@email.com1', { email: 'rico@email.com1' })).toBe('passwordSameAsIdentity');
-    expect(auth.newPassword('Rico1234', { username: 'someone' })).toBeNull();
+    expect(auth.newPassword('Rico1234', { nickname: 'someone' })).toBeNull();
   });
 
   it('never changes what was typed', () => {

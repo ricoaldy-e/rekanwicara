@@ -213,6 +213,7 @@ export const entry = {
   welcomeLogo: 176,
   welcomeLogoArea: 330,
   splashLogo: 120,
+  checkEmail: { circle: 96, icon: 56 },
   splashBar: { width: 96, height: 3, fill: 38 },
   check: { box: 28, radius: 8, icon: 20, gap: 12 },
   stepBarGap: 8,

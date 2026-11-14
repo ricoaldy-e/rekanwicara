@@ -30,11 +30,11 @@ async function read(): Promise<AuthSession | null> {
 }
 
 export const mockAuth: AuthApi = {
-  async signUp({ username, email }) {
+  async signUp({ nickname, email }) {
     if (email === 'dipakai@contoh.id') throw new AuthFailure('EMAIL_TAKEN');
     if (email === 'mati@contoh.id') throw new AuthFailure('NETWORK');
     if (email === 'cek@contoh.id') return null; // email confirmation is on: no session yet
-    const session = { uid: MOCK_UID, email, displayName: username };
+    const session = { uid: MOCK_UID, email, displayName: nickname };
     await save(session);
     return session;
   },

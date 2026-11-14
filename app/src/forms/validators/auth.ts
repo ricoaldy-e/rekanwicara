@@ -2,23 +2,22 @@
 import { LIMITS } from '../limits';
 import type { MessageKey } from '../messages';
 
-const USERNAME_START = /^[A-Za-z]/;
-const USERNAME_CHARS = /^[A-Za-z0-9._]+$/;
+const NICKNAME_CHARS = /^[\p{L}\p{N}][\p{L}\p{N} .'-]*$/u;
 const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 /** Length in characters people see (an emoji counts once). */
 const length = (s: string) => [...s].length;
 
-export const normalizeUsername = (s: string) => s.trim();
+/** Trimmed, with runs of spaces collapsed to one. */
+export const normalizeNickname = (s: string) => s.trim().replace(/ {2,}/g, ' ');
 export const normalizeEmail = (s: string) => s.trim().toLowerCase();
 
-export function username(value: string): MessageKey | null {
-  const v = normalizeUsername(value);
-  if (v === '') return 'usernameEmpty';
-  if (length(v) < LIMITS.username.min) return 'usernameShort';
-  if (length(v) > LIMITS.username.max) return 'usernameLong';
-  if (!USERNAME_START.test(v)) return 'usernameStart';
-  if (!USERNAME_CHARS.test(v)) return 'usernameChars';
+export function nickname(value: string): MessageKey | null {
+  const v = normalizeNickname(value);
+  if (v === '') return 'nicknameEmpty';
+  if (length(v) < LIMITS.nickname.min) return 'nicknameShort';
+  if (length(v) > LIMITS.nickname.max) return 'nicknameLong';
+  if (!NICKNAME_CHARS.test(v)) return 'nicknameChars';
   return null;
 }
 
@@ -34,14 +33,14 @@ export function email(value: string): MessageKey | null {
  * Sign-up password. It is never trimmed or changed (pasting is allowed), so a space at either end is refused.
  * "Letter" is any Unicode letter; "digit" is 0-9.
  */
-export function newPassword(value: string, who: { username?: string; email?: string } = {}): MessageKey | null {
+export function newPassword(value: string, who: { nickname?: string; email?: string } = {}): MessageKey | null {
   if (value === '') return 'passwordEmpty';
   if (value !== value.trim()) return 'passwordEdgeSpace';
   if (length(value) < LIMITS.password.min) return 'passwordShort';
   if (length(value) > LIMITS.password.max) return 'passwordLong';
   if (!/\p{L}/u.test(value) || !/[0-9]/.test(value)) return 'passwordComposition';
   const lower = value.toLowerCase();
-  const sameAs = [who.username && normalizeUsername(who.username), who.email && normalizeEmail(who.email)];
+  const sameAs = [who.nickname && normalizeNickname(who.nickname), who.email && normalizeEmail(who.email)];
   if (sameAs.some((x) => x && x.toLowerCase() === lower)) return 'passwordSameAsIdentity';
   return null;
 }

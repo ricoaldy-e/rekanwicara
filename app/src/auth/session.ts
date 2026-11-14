@@ -12,7 +12,7 @@ import { getClient } from './supabase';
 export interface AuthSession {
   uid: string;
   email: string | null;
-  /** The username given at sign-up (not unique, not used to sign in). */
+  /** The nickname given at sign-up (shown on Beranda; not unique, not used to sign in). */
   displayName: string | null;
 }
 
@@ -23,7 +23,7 @@ export interface Credentials {
 
 export interface AuthApi {
   /** `null` = the account was made but needs the email to be confirmed first. */
-  signUp(input: Credentials & { username: string }): Promise<AuthSession | null>;
+  signUp(input: Credentials & { nickname: string }): Promise<AuthSession | null>;
   signIn(input: Credentials): Promise<AuthSession>;
   signOut(): Promise<void>;
   getSession(): Promise<AuthSession | null>;
@@ -48,9 +48,9 @@ const toSession = (s: Session | null): AuthSession | null =>
 
 export function createSupabaseAuth(client: () => SupabaseClient): AuthApi {
   return {
-    async signUp({ username, email, password }) {
+    async signUp({ nickname, email, password }) {
       try {
-        const { data, error } = await client().auth.signUp({ email, password, options: { data: { display_name: username } } });
+        const { data, error } = await client().auth.signUp({ email, password, options: { data: { display_name: nickname } } });
         if (error) throw error;
         return toSession(data.session);
       } catch (e) {

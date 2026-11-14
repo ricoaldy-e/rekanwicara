@@ -10,7 +10,7 @@ export const VIDEO_LIMITS = {
 } as const;
 
 export const LIMITS = {
-  username: { min: 3, max: 20 },
+  nickname: { min: 2, max: 20 },
   email: { max: 254 },
   password: { min: 8, max: 64 },
   word: { max: 30 },
