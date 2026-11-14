@@ -58,6 +58,7 @@ export interface CustomSyllableWrite {
   instruction: string;
   position: number;
   video: boolean;
+  video_path?: string | null;
 }
 
 export interface CustomWordWrite {
@@ -66,6 +67,7 @@ export interface CustomWordWrite {
   instruction: string;
   status: 'draft' | 'published';
   video: boolean;
+  video_path?: string | null;
   syllables: CustomSyllableWrite[];
   revision?: number;
 }
@@ -323,16 +325,6 @@ export interface DatasetUploadResponse {
   clip_id: string;
 }
 
-// ---------- Development-only POST /v1/experiments/allosaurus ----------
-
-export interface AllosaurusResponse {
-  status: 'success';
-  model: 'uni2005';
-  /** Raw IPA from the restricted Indonesian inventory; the screen formats readable labels. */
-  phonetic_prediction: string;
-  inference_ms: number;
-}
-
 // ---------- Errors (all endpoints) ----------
 
 export interface Wav2Vec2Response {
@@ -398,3 +390,42 @@ export interface UploadFile {
   name: string;
   type: string; // e.g. "video/mp4"
 }
+
+// ---------- v2 (docs/kontrak-fe-final.md) ----------
+// §4–§5 copied as-is. `ResultStatus` is the contract's `Status` (renamed to avoid the v1 `Status`).
+// `visuals` reuses the v1 `Visuals` shape that the result charts already draw.
+
+export type Level = 1 | 2 | 3;
+export type Source = 'default' | 'custom';
+/** `mendekati` only at Level 1. */
+export type ResultStatus = 'sesuai' | 'mendekati' | 'belum_sesuai';
+export type VideoRef = { bucket: string; path: string; position: number };
+
+export type CatalogDTO = {
+  level_1: Array<{ id: string; text: string; instruction: string; videos: VideoRef[] }>;
+  words: Array<{ id: string; text: string; source: Source; has_level_2: boolean }>;
+};
+
+export type WordDTO = {
+  id: string;
+  text: string;
+  source: Source;
+  level_2: Array<{ id: string; text: string; position: number; instruction: string; videos: VideoRef[] }>;
+  level_3: { instruction: string; videos: VideoRef[] };
+};
+
+export type AnalyzeResponseV2 = {
+  status: 'evaluated' | 'retry';
+  item_id: string;
+  level: Level;
+  result: ResultStatus | null; // summary; null on retry
+  lip_result: ResultStatus | null; // Bibir
+  voice_result: ResultStatus | null; // Suara
+  lip_feedback: string | null;
+  voice_feedback: string | null;
+  feedback: { code: string; message: string };
+  quality_flags: string[];
+  visuals: Visuals | null; // Level 1 only
+  engine: string;
+  processing_ms: number;
+};

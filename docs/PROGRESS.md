@@ -4,6 +4,8 @@ Perbarui tabel ini di akhir setiap fase (status: belum / berjalan / selesai / di
 
 | Fase | Track | Isi | Target hari | Status | Catatan |
 |---|---|---|---|---|---|
+| Merge Beranda desain + katalog v2 | App / integrasi parsial | Beranda tab FE dengan katalog BE dan isolasi akun | Sabtu 14 Nov | konflik Beranda selesai; merge keseluruhan masih konflik | Pengguna meminta melanjutkan khusus Beranda. Rute lama app/app/home.tsx dihapus sesuai fe/design agar tidak bertabrakan dengan app/app/(tabs)/home/index.tsx; tes Home dipadukan mengikuti desain tab existing. Tata letak FE dipertahankan: sapaan nama, Lanjutkan/Latihan pertama, dua jalur, Kemajuanmu, aktivitas terakhir; akses dev Rekam Tutorial dari BE tetap tersedia. Riwayat hanya dari profil dengan UID sesi yang sama (atau demo eksplisit), tidak memakai profil akun lama. Tombol vokal di hero dan daftar Level 1 mengirim v2=1 untuk adapter latihan BE existing; konflik halaman latihan sendiri tidak dikerjakan. Lima vokal A/I/U/E/O mengikuti filter FE; materi BE lain tidak dihapus dari server. Katalog nyata tetap melalui GET /v2/catalog dengan JWT dan validator response BE existing; tidak mengunduh video, tidak mengganti error dengan data mock. Hook cache dibatasi UID/server/sumber mock-live, snapshot juga terikat loader/revisi; respons setelah unmount/pergantian scope tidak menulis state/cache. Token/refresh diperiksa terhadap UID sebelum-sesudah; respons 401 lama tidak me-logout akun baru. Katalog dimuat ulang saat layar mendapat fokus kembali. Empty/error/retry memakai komponen existing. Tes Home memakai 8 ID kp_ terbaru, bukan sembilan kata lama; ini fixture lokal, bukan pembacaan Cloud fase ini. 373 Jest/28 suite gabungan auth/Home/data/regresi lulus; setelah perapihan hook, 35 tes/6 suite terdampak diulang dan lulus. Typecheck dependency Home lulus; lint 9 file perubahan 0 error/0 warning. Deklarasi rute .expo dibangkitkan ulang memakai generator Expo terpasang setelah perubahan struktur rute; cache watcher Windows lama sempat memuat /home/index sampai regenerasi. Typecheck global dijalankan dan masih ditolak marker pada practice, RecordPanel, demo/rekaman tests; tidak dinyatakan siap dijalankan secara utuh. Dua konflik Beranda ditandai resolved, delapan konflik lain dibiarkan. Tidak mengubah schema/RLS/backend/AI/dependency, melakukan operasi Cloud, commit merge, push atau deploy. HP dan alur latihan sampai selesai belum diuji setelah merge parsial. |
+| Merge autentikasi desain + logic akun | Auth / integrasi parsial | Tampilan fe/design dengan aturan akun be/core-feature | Sabtu 14 Nov | bagian auth terverifikasi; merge keseluruhan masih konflik | Pengguna meminta mulai menyelesaikan autentikasi terlebih dahulu. Delapan konflik shared auth diselesaikan: root layout, onboarding, client API, Supabase data adapter, sync, UserProvider, pure state, storage. Tampilan Masuk/Daftar/Cek email/Buat PIN/Ganti PIN/Lupa PIN dari FE dipertahankan tanpa redesain. Satu Supabase client canonical di auth/supabase, re-export untuk pemanggil backend existing; processLock, persistence AsyncStorage, foreground refresh dan larangan sesi anonim dipertahankan. Mutasi credential UI/logic companion memakai satu lock; role akun dan UID diperiksa sebelum sync. AuthProvider tidak menerima restore lama setelah event baru, dan mengganti key subtree ketika pemilik berubah agar PIN-unlocked tidak terbawa. Profil dibuat idempoten ignoreDuplicates setelah pemilik diverifikasi, tanpa menimpa nama existing. PIN tetap SecureStore cw.companionPin per auth.uid; tidak memigrasikan/menghapus PIN legacy bersama. Buat PIN menolak overwrite, Ganti PIN memeriksa ulang PIN lama saat simpan; Lupa PIN memverifikasi password dan memberi izin reset sekali pakai yang hanya di memori, terikat UID/token sesi baru. Pergantian akun/token membatalkan izin. Logout scope local dan kegagalan SDK tidak ditampilkan sebagai sukses. Onboarding hanya persetujuan, PIN terpisah sesuai desain. Shared pure state mempertahankan null score/engineVersion v2, label aktivitas FE, dan isolasi legacy progression; deklarasi tipe duplikat hasil auto-merge dihilangkan tanpa mengubah wire API. Dependency yang sudah tercantum lock FE dipasang lokal; metadata lock hasil npm dikembalikan ke versi merge, tidak menambah dependency/versi. 296 Jest/17 suite dan 2 pytest keselamatan harness lulus, typecheck khusus dependency auth lulus; lint cakupan auth 0 error/16 warning. Typecheck global dijalankan tetapi terhalang marker konflik pada latihan, rekaman, home/demo tests yang sengaja belum diselesaikan; seluruh app belum bisa dinyatakan siap berjalan. Tidak menjalankan migrasi/schema/RLS Cloud, tidak mengulang operasi akun Cloud atau uji HP pada fase ini, tidak commit merge/push/deploy. Mock/offline PIN bukan cakupan uji fase akun nyata ini. |
 | Snapshot core-feature | Git / validasi | Simpan fitur Level 1 v2 dan uji persistensi pada branch baru | Sabtu 14 Nov | validasi lulus; siap commit/push atas permintaan pengguna | Branch be/core-feature diminta pengguna untuk fitur yang sudah dikembangkan. Mencakup rekam tutorial vokal, evaluator v2 lima vokal, integrasi Beranda dan latihan Level 1 v2, mapping/antrean attempts serta harness dan laporan uji Supabase Cloud. Validasi workspace gabungan: 717 pytest lulus di sandbox; 35 tes SQL awalnya gagal setup initdb akibat token sandbox Windows, lalu seluruh 35 lulus saat dijalankan pada PostgreSQL lokal dengan izin eksekusi sesuai (752 tes unik lulus). Tidak menjalankan migrasi Cloud. 414 Jest/43 suite dan tsc lulus; Ruff check serta format 110 berkas lulus; node syntax lulus. Expo lint lulus setelah akses cache lokal diizinkan, 0 error/8 warning lama. Pemindaian 41 berkas perubahan tidak menemukan JWT/kunci rahasia/rekaman; env dan data tidak disertakan. Tidak menggabungkan main atau deploy. Uji HP/akurasi vokal manusia dan perhitungan progress otomatis v2 tetap di luar validasi ini. |
 | Persistensi SDK v2 Cloud | Backend / uji integrasi | Payload null, replay idempotent, RLS dua akun | Sabtu 14 Nov | uji Cloud dan pemeriksaan lokal lulus; seluruh data uji bersih | Supabase JS SDK 2.119.0 terpasang, operasi Cloud tanpa mock; loader menjalankan attemptFromV2Response dan syncPending asli tanpa mengubah app/. Uji akhir 52 pemeriksaan lulus; run awal 50 juga lulus. Tiga attempt metadata sintetis terisolasi (2 akun A, 1 akun B), status ok dan mapping sesuai/mendekati/belum_sesuai ke hijau/kuning/merah; score dan engine_version SQL NULL tetap utuh. Upsert awal 201, replay UUID sama 200 tanpa duplikasi; acknowledgment mencegah kirim ulang. Seluruh field payload dibaca balik dan cocok. Dua fixture progress via SDK: upsert 201 lalu 200, tetap satu baris per akun dan field cocok. Ini membuktikan DB/RLS progress, bukan perhitungan progres otomatis v2; antrean v2 tetap tidak menebak kelulusan. Retry tidak menjadi attempt. RLS dua arah: baca/update/delete data akun lain 200 tetapi nol baris, upsert lintas pemilik 403/42501; snapshot pemilik tetap. Anon ditolak 401/42501; enum v2 mentah tanpa mapping ditolak 400/23514. Role authenticated dan kecocokan sub diverifikasi pada setiap request data akun A/B; service key tidak digunakan untuk simulasi pengguna. Karena JWT DELETE tidak menghapus baris sesuai policy existing, pengguna secara eksplisit mengizinkan operator hanya cleanup: 3 attempts dan 2 progress uji akhir dihapus dengan UUID/marker/pemilik terbatas; kedua run diverifikasi sisa 0. Sesi uji logout local 204 tanpa memutus sesi HP. Dua pytest keselamatan harness, Ruff check/format dan node syntax lulus; warning deprecation Starlette lama serta cache pytest tidak dapat ditulis oleh sandbox. Laporan tersanitasi docs/supabase/v2_persistence_cloud_test_results.json. Tidak membaca rekaman, mengubah Storage, endpoint, schema, RLS, privilege, kontrak, FE atau AI; tanpa dependency baru, commit/push/merge/deploy. Uji Node bukan validasi penyimpanan native Expo Go, kamera, atau evaluasi manusia. |
 | Beranda dan latihan Level 1 v2 | App | Tampilkan katalog aktual dan hubungkan tutorial/rekam/hasil | Sabtu 14 Nov | aktif di workspace; kode/tes lulus; uji HP manusia menunggu | Dikerjakan pada worktree phase-home-level-one terisolasi selama teman pengguna merekam, tanpa memicu reload atau menghentikan Metro/backend. Pengguna menyetujui sekaligus menghubungkan latihan ke v2, kemudian mengonfirmasi rekaman selesai dan mengizinkan aktivasi. Beranda akun login menampilkan LevelOneList dari GET /v2/catalog, refresh saat fokus, loading/error/retry dan state terikat UID/API; tidak menduplikasi grup Level 0/1 lama atau misi harian. Lima vokal A/I/U/E/O beserta MMM/AAA/pelan-ke-keras mengikuti katalog delapan materi server. Klik membuka detail v2, instruksi, signed URL tutorial privat saat diputar dengan pemulihan akses, rekam -> analyze v2 -> hasil -> Ulangi/Selesai. Video kosong memakai panduan teks, tidak mengganti video target. Sesi diperiksa sebelum/sesudah HTTP/Storage; respons lama/unmount/pergantian akun tidak menulis hasil. Error analisis mempertahankan klip untuk retry; sukses dan unmount membersihkan rekaman lokal. Result/feedback/visuals v2 ditampilkan dengan komponen existing; retry tidak dihitung. Hanya evaluated masuk antrean SDK attempts existing dengan UUID, mapping warna schema; score dan engine_version null karena tidak ada pada DTO, parser lokal diperluas hanya untuk engine v2. Hasil v2 dikecualikan dari aturan kelulusan/progress legacy 8/10, tanpa syarat lulus baru atau perubahan schema; metadata progress v2 belum dihitung sampai aturan produk disepakati. Beranda menampilkan hasil terakhir dari riwayat lokal akun. Level 2/3 dan mode demo mempertahankan alur lama. Validator API menolak response malformed, item tertukar dan retry yang mengandung skor. 413 Jest/43 suite lulus di worktree, tsc lulus di worktree dan workspace utama; Expo lint 0 error/8 warning lama. Tambahan satu tes native upload juga lulus (29 tes pada berkas target), memeriksa JWT serta hanya item_id/session_id tanpa user_id/target; total 414 tes unik telah lulus, dengan 413 pada regresi penuh sebelumnya dan satu tambahan pada tes target. Detector UI tidak menemukan pelanggaran. Aktivasi 18 berkas dengan pemeriksaan hash baseline (0 konflik); penolakan tulis sandbox pada sync.ts diselesaikan dengan eksekusi berizin tanpa menimpa perubahan lain. Bundle iOS workspace utama 200, memuat LevelOneList/LevelOnePractice, 7847817 byte, manifest username rekanwicara. Supabase asli dengan JWT akun uji: katalog 200 berisi 8 L1, seluruh 5 detail vokal 200, referensi tersedia dan tepat di default/level-1; signed URL dan HEAD video 5/5 HTTP 200, tanpa mengunduh isi video. Logout hanya sesi uji local 204. Tidak ada mutasi Cloud oleh tes fase ini. Tidak mengubah evaluator/CRUD/backend, schema, RLS, dependency atau 24 video Kata Penting; tidak commit/push/merge/deploy. Backend 750 pytest lulus pada fase sebelumnya, tidak diulang karena source Backend tidak berubah. Alur kamera, evaluasi ucapan manusia dan persistensi SDK di perangkat belum diuji agen; akurasi vokal/ASR masih perlu validasi nyata. |
@@ -566,6 +568,248 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
 - Senin 9 Nov (A0): saat `status:"retry"`, `indicators` juga `null` (selain overall/score/units).
 - Senin 9 Nov (A0): format error `{"detail":{"code","message"}}`; daftar kode di `server/README.md`.
 
+## Perubahan UI (design v6)
+- Perbaikan setelah audit 13 Nov malam (di luar PROMPT_UI, atas permintaan pemilik proyek):
+  - Ikon app dan splash diwarnai ulang (garis krem, latar `#08110B`); latar ikon adaptif Android `#08110B`. Sebelumnya `icon.png`
+    berlatar putih penuh sehingga tampil sebagai kotak putih saat app dibuka.
+  - Skala teks dikecilkan: body/label 16 (baris 24, token `lineHeight.body`), large 20, title 24, display 34; small tetap 15.
+  - `practice`: judul header "Ucapkan “kata”"; StepHeader "dari 3" (Ulangi adalah tombol, bukan layar).
+  - Ikon barbel diganti `mic-outline` (bar bawah) dan `mic` (`StageBadge` Berlatih).
+  - Pengaturan bisa dibuka dari layar Tentang (tombol "Pengaturan"); tekan-lama "Misi hari ini" tetap ada. Isi Pengaturan:
+    Getar dan keterangan ukuran teks di atas, bagian "Untuk operator demo" (alamat server, profil demo, uji eksperimen) di bawah.
+    Alasan: sakelar Getar sebelumnya hanya ada di layar tersembunyi, bertentangan dengan §2 (getar bisa dimatikan).
+  - Getar hasil (§8) ditambahkan: Sesuai = notifikasi berhasil, Mendekati/Belum sesuai = impact ringan, berdasarkan `overall`;
+    tidak bergetar saat hasil disembunyikan (mode `hidden`). Tes di `__tests__/haptics.test.ts`.
+  - `home` diurutkan ulang: catatan (demo, kalibrasi, server), Misi hari ini + kartu utama, langkah hari ini, kemajuan,
+    lalu "Semua materi" dengan ubin level tepat di atas daftar materinya. Tidak ada isi yang dihapus.
+  - Onboarding langkah PIN menjelaskan fungsi PIN (mengunci Mode Pendamping) dan bahwa PIN tidak dikirim ke server.
+  - Typecheck kini lulus penuh setelah `npx expo start` membuat ulang tipe rute.
+- Fase UI (13 Nov 2026, cabang `design`): UI-1 sampai UI-10 selesai dan di-commit; UI-11 audit. Langkah opsional 0.2 kemudian dikerjakan
+  (UI-12): Playfair Display Bold dimuat di `app/_layout.tsx` (cadangan serif sistem bila gagal) dan cincin fokus di `BigButton`/`Card`;
+  keduanya **belum diverifikasi di perangkat** (design.md §14). (Diperbarui FL-10; kalimat lama "tidak dikerjakan" usang.)
+- `npm run typecheck` lulus (FL-10, cabang `flow-v2`). Bila tipe rute usang setelah menambah layar, jalankan `npx expo start` sekali di `app/`
+  agar `.expo/types/router.d.ts` dibuat ulang. (Kalimat lama "typecheck masih gagal" usang.)
+- Keputusan di luar design.md:
+  - `colors.success` = `#7FD1A0` (hijau status) untuk teks/ikon "tersimpan/terkirim"; §3 tidak menyebut nilainya.
+  - Token baru: `overlay.scrim` (lapisan hitung mundur), `buttonHeight` 52, `chart.userFill`. Token `lip` dihapus (gambar bibir hanya garis).
+  - `InfoNote` netral tetap bergaris `border`; tanpa garis `infoBg` hampir tak terlihat di `background`.
+  - `HeroCard` saat sesi selesai berjudul "Latihan hari ini" (§6.2.1 hanya menulis "judul tetap").
+  - Teks "Sesi hari ini selesai. Terima kasih sudah berlatih!" menjadi "Sesi hari ini selesai." (§7: tanpa tanda seru, tanpa pujian).
+  - Kartu target di Hasil memakai gabungan `units[].target` sebagai kata; testID baru `result-target`.
+  - `testID` `mission` pindah ke kartu "Langkah hari ini". Ikon bar bawah: `barbell-outline`, `people-outline`, `information-circle-outline`.
+  - `BottomBar` tidak melayang: `Screen` punya prop `footer` di bawah area gulir (di dalam area aman), jadi konten tidak tertutup.
+  - Bobot `OptionGroup` tak terpilih 600 → 400 (UI-11, §4 hanya 400/700).
+- Temuan audit UI-11 yang tidak diperbaiki (butuh keputusan):
+  - Angka ukuran literal tersisa: hitung mundur 140/160 (dipertahankan §9), kata target 56 di layar dataset (layar pengembang),
+    padding 20 (`HeroCard`, kartu petunjuk) dan 12 (`StatTile` lewat `spacing.sm + spacing.xs`) karena skala jarak tidak punya 12/20,
+    ukuran teks SVG grafik (satuan viewBox).
+  - Simbol ✓/✕ di teks status izin (`PermissionGate`) dan "✓ Terkirim"; §5.3 menghindari tanda silang untuk status hasil, bukan izin.
+  - Kata "gagal"/"salah" muncul di pesan kesalahan teknis (PIN, simpan, perekaman), bukan di hasil latihan.
+  - `ProgressBar` tak tentu memakai opacity 0,4 (larangan opacity hanya untuk tombol).
+  - `TextFallback` di `ModelVideo` adalah `Card` di dalam `Card` saat video 404 (padding dobel).
+- UI-5: `__tests__/StatusBadge.test.tsx` diubah. Uji ikon Ionicons (`icon:checkmark-circle` dst.) diganti uji bentuk SVG
+  (`status-shape-circle/triangle/square`); uji latar `background` diganti uji batang kiri `borderLeftColor`; uji "ikon berbeda"
+  di `statusStyles` dihapus karena `statusStyles` kini hanya `{label, foreground}` (bentuk dibuktikan oleh uji bentuk).
+  Garis bagian dalam ikon (centang, ≈, panah) 2 dp, bukan 3,5 dp, agar muat di 22 dp. Belum diuji di perangkat.
+
+- UI-10: `settings.vibration` (default true; profil lama tanpa field terbaca true). `__tests__/sync.test.ts` diubah:
+  nilai pengaturan di uji round-trip dan uji default kini memuat `vibration`. Getar rekam dimulai kini impact Medium (sebelumnya Heavy), sesuai §8.
+  Reduce Motion: satu-satunya animasi app adalah skala tombol (sudah mengikuti `useReduceMotion`); cincin kemajuan dan hitung mundur tidak beranimasi.
+
+## Alur v2
+- FL-D (13 Nov 2026, cabang `flow-v2`): lapisan data v2 tanpa mengubah layar. Berkas baru: `src/api/v2.ts`, `src/data/{types,mappers,catalog,analyze,useCatalog}.ts`,
+  `src/mock/` (`catalog.json`, `words/*.json`, `index.ts`). Diubah: `src/config.ts` (`USE_MOCK`, `ANALYZE_API`), `.env.example`,
+  `src/api/types.ts` (bagian v2 di bawah; v1 tidak berubah), `src/api/upload.ts` (field `headers` opsional untuk Bearer; v1 tidak mengirimnya).
+  Tes: `__tests__/mappers.test.ts`, `__tests__/analyzeSource.test.ts`; 30 suite / 316 tes lulus, typecheck lulus.
+- Penyimpangan dari kontrak FE §4–§5 (disetujui Rico):
+  - Id suku kata bawaan di tiruan = id v1 (`l2_ma`, `l2_pa`) agar `ANALYZE_API=v1` bisa menilainya.
+  - Berkas tiruan kata Pendamping bernama `custom_1111.json`/`custom_2222.json` (Windows melarang `:`); id di dalamnya tetap id kontrak.
+    Id suku kata TO/LONG (`custom_syllable:…`) dikarang; kontrak tidak menyebutnya.
+  - `visuals` memakai tipe `Visuals` v1 (anchor boleh `null`, `loudness` bertipe) alih-alih bentuk dalam kontrak (`loudness: unknown`).
+  - `fromV1`: petunjuk tunggal v1 masuk `lip_feedback` bila Bibir belum sesuai, selain itu `voice_feedback` bila Suara belum sesuai;
+    keduanya `null` bila keduanya Sesuai (kontrak §5 aturan 5). `feedback` = `{ code: hint_id, message: teks hint }`; `engine` = `engine_version`.
+  - Galat v2 tanpa kode di body diberi kode dari status (§9: 401 `UNAUTHENTICATED`, 404 `ITEM_NOT_FOUND`, dst.).
+  - Kata `source: 'custom'` dengan `ANALYZE_API=v1` melempar `NotSupportedError` (`code: 'NOT_SUPPORTED_V1'`); pesan diputuskan di FL-4 (K10).
+- Belum teruji: klien v2 belum pernah memanggil server sungguhan (server lokal hanya punya `/v1`). Hasil `ANALYZE_API=mock` ditandai `sample: true`;
+  layar wajib memberi label "Hasil contoh" (K10).
+
+- FL-1 (13 Nov 2026): verifikasi aset, tanpa perubahan kode. `splash-icon.png`, `android-icon-foreground.png`, `favicon.png`: PNG RGBA, sudut transparan
+  (RGB krem `#FAFCF9`, alfa 0), tanpa piksel tepi putih/abu di area transparan. `android-icon-monochrome.png`: RGBA, sudut transparan.
+  `icon.png` dan `android-icon-background.png`: PNG RGB tanpa alfa (latar penuh `#08110B`, piksel pertama (8,17,11), bukan putih). `splash-wordmark.png` belum ada:
+  splash tetap memakai ikon; wordmark menunggu aset dari Rico. Belum diuji: splash di build sungguhan (Expo Go memakai splash sendiri).
+  Pengingat FL-2: setiap layout baru (`(tabs)/_layout`, Stack bersarang) wajib memakai `contentStyle`/`sceneStyle` berlatar `colors.background`.
+- FL-2 (13 Nov 2026): tiga tab tetap. `app/(tabs)/_layout.tsx` (Tabs, `tabBar` = `BottomBar`, `sceneStyle` berlatar `background`, area aman dari `insets` milik `tabBar`),
+  masing-masing tab punya Stack sendiri. `home.tsx`, `companion.tsx`, `settings.tsx` dipindah (git mv) ke `app/(tabs)/<nama>/index.tsx`; isinya tetap, hanya path impor
+  dan footer `BottomBar` di Beranda dibuang. URL `/home`, `/companion`, `/settings` tidak berubah. `practice/[itemId]` tetap di Stack akar, jadi menutupi tab dan bar tersembunyi.
+  Opsi header gelap dipindah ke `src/navigation/stackOptions.tsx` (dipakai Stack akar dan Stack tiap tab; `DemoIndicator` ikut pindah).
+  Karena bar Beranda hilang, ditambah tombol sekunder "Tentang aplikasi" di kaki Beranda (tautan ke About; sebelumnya item bar).
+  Tes diubah: `home.test.tsx` (impor path baru; langkah menekan tombol "Mode Pendamping" dibuang karena bar bukan lagi bagian Beranda);
+  tes baru `BottomBar.test.tsx` menggantikannya. Belum teruji di perangkat: tombol kembali Android/iOS dari tab, label bar pada skala teks 200%.
+- FL-3 (13 Nov 2026): Beranda dua kartu tanpa misi. `app/(tabs)/home/index.tsx` ditulis ulang: catatan demo, kalibrasi (`calibration-banner`), server mock,
+  galat kesehatan tetap; kartu "Level 1, Bunyi vokal" dan "Level 2 dan 3, Pilih kata" (`Card` dengan `onPress`, ringkasan "x dari N sesuai"), tautan
+  "Tentang aplikasi", "Mode Dataset" bila `DATASET_MODE`. Katalog dari `useCatalog` (alamat server dari `useSettings`); galat katalog = `home-error` + "Coba lagi".
+  Baru: `src/data/progress.ts` (`bestStatus`, `lastStatus`, `summary` per `itemId` unik), `app/(tabs)/home/level-1.tsx` (daftar bunyi L1, `item-<itemId>`,
+  ke `practice/[itemId]`, tanpa kunci), `app/(tabs)/home/words.tsx` (sementara: "Segera hadir"; diganti FL-5).
+  Dihapus dari UI (NAV-3/NAV-4, Q6): tekan-lama "Misi hari ini", `HeroCard` misi, "Langkah hari ini", `StatTile`, ubin Level 0–4, `StageBadge`, kalimat kunci.
+  Berkas logika (`progression.ts`, `homeStats.ts`, `levels.ts`) dibiarkan.
+  Keputusan: badge di daftar L1 memakai status **terakhir** berlabel "Terakhir" (LAT-1), sedangkan ringkasan kartu memakai status **terbaik** (kontrak §8);
+  menampilkan status terbaik dengan label "Terakhir" tidak jujur. Ringkasan kartu L2–3 sementara hanya menghitung kata (Level 3); suku kata ditambah di FL-5.
+  Tes dihapus dari `home.test.tsx` beserta alasannya: "directs the user to Companion when no replacement exists" (×2) dan "does not report missing alternatives"
+  (misi/`needsHelp` dibuang, NAV-3); "opens the hidden Settings with a long press" (Pengaturan kini tab, NAV-4); "lists only the chosen level" (ubin level dibuang);
+  "offers recovery for an empty list" diganti tes galat katalog. Tes baru: `home.test.tsx` (4), `level1.test.tsx` (2), `progress.test.ts` (3).
+  **Penting untuk demo:** server lokal belum punya `/v2/catalog`, jadi `app/.env` harus berisi `EXPO_PUBLIC_USE_MOCK=true`; tanpa itu Beranda menampilkan `home-error`.
+  Risiko: `l1_o` di `server/app/content/items.json` `active: false`, sehingga `practice/[itemId]` (masih membaca `/v1/items`) menampilkan "Materi tidak ditemukan"
+  untuk O sampai FL-4. Progres lama dari Level 0–4 ikut terhitung bila id-nya sama dengan katalog. Belum teruji di perangkat (skala teks 200%, TalkBack).
+- FL-4 (13 Nov 2026): sesi latihan memakai `PracticeItem` dan hasil per level.
+  - `practice/[itemId]` menerima `itemId` + opsional `wordId`, `position`; materi dicari lewat `usePracticeItem` (katalog L1, atau `getWord` → langkah/kata utuh).
+    Tidak ditemukan → "Materi tidak ditemukan." + "Kembali". Kirim lewat `src/data/analyze.ts` (bawaan `/v1/analyze` + `fromV1`). 503/504 → "Penilaian belum bisa dilakukan. Coba lagi."
+  - Kata `source: 'custom'` dengan `ANALYZE_API=v1`: tombol rekam disembunyikan, catatan "Penilaian kata ini belum tersedia di server demo." (usulan K10; menunggu keputusan Rico).
+  - Progres: `attemptFromResult` (baru, `src/user/pure.ts`) menyimpan hanya `evaluated`; `retry` dan **hasil tiruan (`sample`) tidak disimpan** (hasil contoh bukan analisis rekaman).
+    `score` disimpan sebagai cermin status (1 / 0,5 / 0) karena v2 tidak punya skor; bukan skor terukur. `feedbackDetail` (mode `hidden`/`overall`) tidak dipanggil lagi.
+  - `ResultView(result: AnalyzeResult, item: PracticeItem)`: lencana Bibir/Suara hanya bila tidak `null`; kartu umpan balik `result-hint` (maks 2 kalimat, Bibir dulu, tidak dirender bila tidak ada kalimat);
+    grafik hanya `level === 1`; `result-sample` "Hasil contoh, bukan analisis rekaman."; retry: alasan (`result-retry-reason`) + "Rekaman ini tidak dihitung sebagai percobaan." dan tombol "Rekam ulang".
+    Kartu target selalu tampil (L1 dengan gambar bibir bila bunyinya a/i/u).
+  - `statusStyles`, `StatusIcon`, `StatusBadge`, `buzzResult` kini berkunci `sesuai`/`mendekati`/`belum_sesuai` (warna dan bentuk tetap); `CombinedObservations` dan `level-1.tsx` disesuaikan.
+  - Keluar latihan (NAV-6): `headerLeft` "Keluar latihan" (≥ 48 dp); `usePreventRemove` (`@react-navigation/native` 7.5.1, tanda tangan dicek di `.d.ts` terpasang) + `Alert.alert` saat `record`/`send`.
+  - `ModelVideo(item: PracticeItem)`: instruksi selalu tampil; video tim `/v1/model-video/{itemId}` hanya bila `ANALYZE_API=v1`; video dibisukan; label "Instruksi dibuat dengan bantuan AI" bila `instructionSource === 'ai'`.
+    `item.video` (signed URL) belum disambung (FL-8). Gambar bibir per unit dibuang dari fallback (PracticeItem tidak punya `units`); hanya vokal L1 yang bergambar.
+  - Tes diubah: `ResultView.test.tsx` ditulis ulang (HAS-1..4, kontrak §5: L1 tiga status + grafik, L2 dua status tanpa grafik, `mendekati` L2 tidak tampil, umpan balik ≤ 2 urut Bibir-Suara,
+    tanpa kartu bila sesuai, retry, label hasil contoh; tes mode `overall`/`hidden` dihapus karena fiturnya dihapus, kontrak §8); `StatusBadge.test.tsx` dan `haptics.test.ts` (kunci status v2);
+    `ModelVideo.test.tsx` (`PracticeItem`, video dibisukan, instruksi, tanpa v1 = teks saja, label AI). Baru: `practice.test.tsx` (6). 34 suite / 328 tes.
+  - Risiko: `l1_o` tidak aktif di server tetapi diterima `/v1/analyze` (`items_by_id`); aturan e/o belum disetel, jadi hasil O belum dapat dipercaya.
+    Belum teruji: alur di HP, dialog keluar + tombol kembali Android, v2 sungguhan, signed URL.
+- FL-5 (13 Nov 2026): Pilih kata dan Jalur kata. Baru: `src/components/SourceChip.tsx` (ikon + "Bawaan"/"Dari Pendamping", `radius.tile`),
+  `app/(tabs)/home/words/index.tsx` (daftar semua kata, `word-<id>`, kosong = `InfoNote`), `words/[wordId].tsx` (bagian "Level 2 · Suku kata" bila ada, "Level 3 · Kata", penanda "Berikutnya"
+  pada langkah pertama yang status terbaiknya belum sesuai, urut L2 lalu L3; tanpa kunci; ketuk → `practice/[itemId]` dengan `wordId` + `position`; 404 → "Materi tidak ditemukan." + Kembali).
+  Placeholder `words.tsx` FL-3 dihapus. Kata `custom` dengan `ANALYZE_API=v1`: kartu tetap tampil, catatan "Penilaian belum tersedia di server demo." (K10).
+  Keputusan: ringkasan di daftar hanya "Level 3: sesuai/belum" (ringkasan Level 2 butuh `getWord` per kata = N permintaan di v2; ditunda). Status di Jalur kata berlabel "Terbaik" (status terbaik per `itemId` unik).
+  Tes: `words.test.tsx` (7). 35 suite / 335 tes. Belum teruji: di HP, katalog v2 sungguhan, kata Pendamping sungguhan.
+- FL-5b (13 Nov 2026): komponen formulir bersama, belum dipakai layar mana pun. Baru: `src/forms/{limits,messages,useFormState}.ts` (semua teks pesan di `messages.ts`;
+  `Problem` = kunci atau kunci + nilai untuk `{placeholder}`), `src/forms/validators/{auth,pin,word,video}.ts` (fungsi murni), `src/components/form/`
+  (`TextField`, `PasswordField`, `Checkbox` (membungkus `CheckRow`), `FormBanner`, `Snackbar`, `ConfirmDialog`, `PinDots`, `PinPad`, `FieldError`, `announce`),
+  token `pinKey` (64) dan `stroke.focus` (3). Tes: `validators.test.ts` (105), `formComponents.test.tsx` (17). 37 suite / 457 tes.
+  Keputusan aturan yang ambigu:
+  - Sandi tidak pernah dipangkas atau diubah (boleh ditempel). Spasi di awal/akhir **ditolak** (pesan baru `passwordEdgeSpace`, tidak ada di flow §7.1.1); spasi (juga ganda) di tengah boleh.
+  - "Huruf" di sandi = huruf Unicode apa pun; angka hanya 0–9. Username/kata/suku kata hanya ASCII A–Z (sesuai flow). Emoji dihitung satu karakter.
+  - Spasi ganda: kata → satu spasi; instruksi → spasi/tab dirapatkan, baris baru tetap; suku kata dan sandi tidak dinormalisasi selain pangkas (sandi tidak dipangkas).
+  - `isWeakPin`: semua sama atau urutan naik/turun tepat 4 digit (0123, 9876 ikut); tidak melingkar (8901 lolos).
+  - Ukuran video pada pesan dibulatkan ke atas ("51 MB" untuk 50 MiB + 1 byte) agar tidak terbaca sama dengan batas.
+  - `syllablesMatch` hanya peringatan (`Problem` dengan nilai), `maxSyllables(count)` mengembalikan `syllablesFull` saat penuh.
+  - Pesan Masuk: "Isi email." dan galat umum "Email atau kata sandi salah." (kontrak #4); pesan ketersediaan username dibuang.
+  - `Snackbar` absolut di dasar scene (di dalam tab ia berada di atas bar bawah), minimal 5 detik, ketuk untuk menutup, tanpa animasi.
+  - `ConfirmDialog`: fokus pembaca layar awal ke Batal (`setAccessibilityFocus`, belum teruji di perangkat); latar memakai `overlay.scrim`.
+  Belum dikerjakan (bukan bagian prompt): `VideoField`, `SyllableRow` (FL-8). Belum teruji: pengumuman pembaca layar (iOS `announceForAccessibility`, Android live region), fokus garis 3 dp, skala teks 200%.
+- FL-6 (13 Nov 2026): PIN Pendamping per akun. Baru: `src/pin/lock.ts` (murni: `lockState`, `afterFailure`, `parseLock`), `pinStore.ts` (SecureStore: `hasPin`, `savePin`, `verifyPin`,
+  `getLock`, `recordFailure`, `clearFailures`, `attemptPin`; migrasi sekali dari `cw.companionPin`), `PinSession.tsx` (terbuka/terkunci; kunci saat `AppState` bukan `active`, saat tab Latihan tampil,
+  dan 5 menit tanpa sentuhan), `PinScreenBody.tsx` (+ `usePinInput`), `PinGate.tsx`; layar `app/auth/create-pin.tsx` dan `(tabs)/settings/change-pin.tsx`; `src/forms/flash.ts` (snackbar "PIN diganti." di Pengaturan).
+  `PIN_LIMITS` di `src/forms/limits.ts` (5 salah, kunci 30 detik, diam 5 menit). Gerbang ada di `_layout` tab Pendamping dan Pengaturan; tab Latihan dan sesi latihan tidak pernah meminta PIN.
+  `index.tsx`: tanpa PIN → `/auth/create-pin`, lalu `/onboarding` atau `/home`. Onboarding kini 2 langkah; `completeOnboarding()` tanpa argumen dan tidak lagi menyimpan PIN;
+  `savePin`/`verifyPin` lama di `user/storage.ts` dihapus. Pengaturan punya tombol "Ganti PIN". Teks PIN tidak mengklaim keamanan (hanya pengunci tampilan, disimpan di HP ini).
+  Keputusan: (1) kunci SecureStore `rw.companionPin.<uid>` dan `rw.pinLock.<uid>` (tanda `:` dari kontrak §2 ditolak SecureStore: hanya huruf/angka/`.`/`-`/`_`); `uid` = `'local'` sampai FL-7.
+  (2) Setelah kunci 30 detik habis, hitungan salah mulai dari 0 (5 percobaan baru). (3) Getar salah = `buzzLight` (impact ringan, mengikuti sakelar Getar), bukan pola error; tanpa animasi goyang.
+  (4) Pindah ke Latihan memakai `useSegments` di layout tab; membuka sesi latihan (di luar tab) tidak mengunci, tetapi app ke latar mengunci. (5) Berbagi laporan (`Share`) dari Pendamping bisa
+  membuat `AppState` bukan `active` di sebagian perangkat → sesi terkunci; belum dicek di perangkat. (6) "Lupa PIN?" **belum ada** (butuh sandi akun dari FL-7); tautan disembunyikan.
+  Tes diubah: `onboarding.test.tsx` (langkah PIN dan tes keystore dibuang; kini tes dua langkah), `demo.test.tsx` (`completeOnboarding()` tanpa PIN; asersi `savePin` dibuang karena fungsinya pindah),
+  `companion.test.tsx` (tes layar PIN diganti tes "tidak meminta PIN sendiri + Kunci kembali memanggil `lock`"; pembantu `unlock` hanya merender). Baru: `pin.test.tsx` (17). 38 suite / 472 tes.
+  Belum teruji: di perangkat (iOS, TalkBack), `isValidPin` di `user/pure.ts` kini tak dipakai UI (dibiarkan).
+- FL-7 (13 Nov 2026): Masuk, Daftar, Cek email, sesi tersimpan. Baru: `src/auth/{supabase,errors,session,AuthProvider,authForm}`, `src/mock/auth.ts`, layar `auth/{sign-in,sign-up,check-email}`.
+  Klien Supabase dipindah ke `src/auth/supabase.ts` (satu klien; `data/supabase.ts` mengimpornya). `auth` di `session.ts` memilih Supabase atau tiruan lewat `USE_MOCK` di satu tempat;
+  sesi yang sampai ke UI hanya `{uid, email, displayName}` (tanpa token, tanpa sandi). Peta galat (`mapAuthError`) memakai `code` supabase-js v2 (`invalid_credentials`, `email_exists`/`user_already_exists`,
+  `email_not_confirmed`, `AuthRetryableFetchError`), bukan teks pesan. Masuk = email + sandi (kontrak #4); Daftar = username (display_name), email, sandi + daftar periksa + ulangi + persetujuan privasi (tautan ke `/about`).
+  Gerbang awal `index.tsx`: belum ada sesi → `/auth/sign-in`; tanpa PIN → `/auth/create-pin`; belum onboarding → `/onboarding`; selain itu `/home`. PIN kini per akun (`useAuth().uid`).
+  K3: `signInAnonymously()` dihapus; `ensureUser()` kini melempar "Belum masuk" tanpa sesi akun. Baris `profiles` (display_name) dibuat best-effort saat sesi muncul (`ensureProfile`).
+  Tiruan: `salah@contoh.id` → INVALID_CREDENTIALS, `dipakai@contoh.id` → EMAIL_TAKEN (daftar), `cek@contoh.id` → tanpa sesi (layar Cek email), `mati@contoh.id` → NETWORK; uid `mock-user`.
+  `src/api/v2.ts`: 401 `UNAUTHENTICATED` → `refreshSession` sekali, ulang sekali, gagal → `onSessionLost` (belum disambung ke layar: klien v2 belum dipakai layar; tes saja).
+  Keputusan di luar prompt: (1) **Tanpa akun** (tidak ada URL/kunci Supabase dan `USE_MOCK` mati) gerbang melewati Masuk, uid `'local'`; kalau tidak, app tak bisa dibuka di demo server-lokal tanpa Supabase.
+  (2) **`createRemote()` null saat `USE_MOCK=true`**: pengguna tiruan bukan pengguna Supabase, jadi sinkron online mati selama mode tiruan. (3) Sinkron kini hanya jalan bila ada sesi akun; riwayat anonim lama tidak dipindah (K3).
+  (4) Penyimpanan sesi tetap AsyncStorage (K7, usulan audit; bukan SecureStore karena sesi Supabase besar). (5) PIN lama di uid `'local'` tidak otomatis menjadi PIN akun: akun baru membuat PIN baru.
+  Tes: sync/user tidak berubah (memakai Remote palsu; tidak pernah menguji login anonim); `pin.test.tsx` menambah mock `useAuth`. Baru: `auth.test.tsx` (35). 39 suite / 507 tes.
+  Belum teruji: Supabase sungguhan (konfirmasi email aktif atau tidak), iOS, isi otomatis pengelola sandi, 200% teks, papan ketik menutupi tombol. Keluar (signOut) dikerjakan FL-9.
+- FL-9 (13 Nov 2026): Pengaturan disusun ulang: Getar, keterangan ukuran teks dan gerak ("Gerak mengikuti pengaturan HP.", tanpa sakelar baru), Ganti PIN, Tentang aplikasi (keduanya `Card` dengan `›`),
+  Keluar (hanya bila ada sesi akun), lalu "Untuk operator demo" (alamat server, tes koneksi, profil demo, uji eksperimen `__DEV__`; `testID` lama tetap). Keluar memakai `ConfirmDialog` ("Keluar dari akun? ..."),
+  lalu `auth.signOut()` (galat jaringan diabaikan; sesi lokal tetap dibuang), `lock()` sesi PIN, dan `/auth/sign-in`. PIN per akun tidak dihapus.
+  K12 (belum dijawab): **cache akun tidak dihapus** (progres lokal ikut tinggal di HP). Alasan: percobaan yang belum tersinkron akan hilang, dan katalog tidak di-cache. Teks dialog "tetap tersimpan di akun" hanya benar untuk
+  percobaan yang sudah tersinkron. Tes baru `settings.test.tsx` (9); tidak ada tes lama yang diubah. 40 suite / 516 tes. Belum teruji: Keluar luring dengan Supabase sungguhan, di perangkat.
+- FL-8a (13 Nov 2026): data kata Pendamping + daftar + hapus (dipecah atas izin Rico; formulir = FL-8b'). Keputusan Rico: `expo-image-picker` boleh dipasang (di FL-8b'), Supabase **tiruan saja** (K1).
+  Baru: `src/data/words.ts` (tipe baris seperti tabel kontrak, `WordStore`, `createWord`/`updateWord`/`removeWord`/`listMine` dengan kompensasi kontrak §6: unggah → baris kata → suku kata → video;
+  gagal di tahap mana pun menghapus baris dan berkas percobaan itu; ubah = unggah baru → ganti baris → baru hapus berkas lama; hapus = ambil path → hapus baris → hapus berkas, gagal → antrean),
+  `src/mock/words.ts` (AsyncStorage, diisi TOLONG dan MINUM dari `src/mock/words/*.json` dengan path video contoh; injeksi galat untuk tes), `src/data/media.ts` (`getWordStore()` = tiruan bila `USE_MOCK`,
+  selain itu `null`; `videoUrl()`), `src/data/supabaseWords.ts` (**belum dites, belum dinyalakan**: tabel `custom_*` dan bucket tidak ada di `schema.sql`; nama kolom mengikuti `words.ts`).
+  Katalog tiruan kini = kata bawaan JSON + kata dari store yang **lengkap** saja ("Belum lengkap" tidak sampai ke Pilih kata). Q7: riwayat kata terhapus otomatis hilang dari ringkasan karena ringkasan dihitung dari katalog.
+  `app/(tabs)/companion/index.tsx` diganti: "Kata saya" (jumlah suku kata, "Belum lengkap" ikon + teks, tombol "Ubah …"/"Hapus …"), "Tambah kata", "Kata bawaan" (chip Bawaan, tanpa tombol), "Kunci kembali";
+  hapus lewat `ConfirmDialog` dengan nama + jumlah suku kata, lalu snackbar. `BigButton` mendapat prop opsional `accessibilityLabel`. Rute sementara `companion/words/new` dan `words/[wordId]/edit` (diganti FL-8b').
+  Dibuang dari UI (Q11): ringkasan mingguan, Uji Dengar, lama sesi, laporan teks, status sinkron di layar Pendamping (berkas logikanya dibiarkan). `__tests__/companion.test.tsx` dihapus karena layarnya diganti.
+  Tes baru: `wordsData.test.ts` (12), `companionList.test.tsx` (7). 41 suite / 526 tes.
+  **K1 untuk FL-10:** `about.tsx` masih menulis Supabase menyimpan "tanpa video atau audio"; dengan kata Pendamping sungguhan (bukan tiruan) kalimat itu tidak benar lagi. Tidak diubah di sini.
+- FL-8b' (13 Nov 2026): formulir kata Pendamping. Dependensi baru atas izin Rico: `expo-image-picker ~58.0.10` (`npx expo install`; plugin di `app.json` dengan teks izin Indonesia untuk galeri, kamera, mikrofon).
+  Baru: `src/data/pickVideo.ts` (`launchImageLibraryAsync`/`launchCameraAsync`; `duration` dalam **milidetik**, `fileSize` byte, dicek di tipe SDK 58; kamera dibatasi `videoMaxDuration` 30 dtk),
+  `src/components/form/{VideoField,SyllableRow,WordForm}.tsx`, `src/forms/keys.ts`, layar `companion/words/new.tsx` dan `words/[wordId]/edit.tsx`; `createWord`/`updateWord` menerima `AbortSignal` (Batalkan memutus di antara unggahan; file yang sudah naik dibersihkan).
+  `VideoField`: pilih galeri/rekam, pratinjau **dibisukan tanpa autoplay**, ganti, hapus; video salah (format, ukuran, durasi) ditolak dengan alasan dan nilai lama tetap; izin kamera ditolak → kalimat + "Buka pengaturan" (`Linking.openSettings`).
+  `SyllableRow`: Naik/Turun/Hapus berlabel (bukan seret), hapus baris berisi minta konfirmasi. `WordForm`: blok Kata + 0–6 suku kata, peringatan kecocokan (bukan penghalang), duplikat (termasuk kata bawaan), persetujuan video wajib tiap simpan,
+  validasi semua saat kirim + fokus ke kolom teks/instruksi pertama yang salah + umumkan jumlah, progres unggah (teks + bar + Batalkan), galat → `FormBanner` + "Coba lagi" dengan isian utuh, "Buang perubahan?" lewat `usePreventRemove`
+  (tombol Batal, header, tombol kembali Android), sukses → snackbar "Kata “…” disimpan.". Instruksi diketik manual (tombol AI = FL-8b).
+  Keputusan: (1) kata dan suku kata **disimpan HURUF BESAR** (kontrak/katalog memakai TOLONG, MAMA; flow §7.7.3 menulis huruf kecil — duplikat tetap tanpa peka huruf). (2) `WordForm`, `VideoField`, `SyllableRow` **tidak diekspor lewat `components/index.ts`**
+  karena menarik modul native (image-picker, video) ke setiap tes layar. (3) Picker tanpa `fileSize` → 0 (ukuran tak bisa dicek di app; server 413 jadi pengaman). (4) Jumlah galat yang diumumkan: tiap kolom salah dihitung, baris suku kata dihitung per kolom.
+  Tes: `wordForm.test.tsx` (19), `wordScreens.test.tsx` (4). 43 suite / 549 tes. Belum teruji: di perangkat (galeri/kamera, izin, iOS, TalkBack, 200% teks), Supabase Storage sungguhan.
+- FL-10 (13 Nov 2026): pemeriksaan akhir alur v2 (tanpa fitur baru).
+  - **Tes:** 43 suite / 549 tes lulus; `npm run typecheck` lulus. Baseline cabang 296 → 549 (+253). Tes yang dihapus/diubah tercatat per langkah di atas
+    (FL-2 home, FL-3 home ×5, FL-4 ResultView/StatusBadge/haptics/ModelVideo, FL-6 onboarding/demo/companion, FL-7 pin, FL-8a `companion.test.tsx` dihapus).
+  - **Pindaian (app/app, app/src):** kata terlarang: hanya nama fungsi `normalize…` (kode, bukan teks UI); tidak ada "Cermin Wicara"/"RekanWicara"; tidak ada hex literal di
+    `app/app` dan `app/src/components`; tidak ada `fontStyle: 'italic'`, `shadow`, `elevation`.
+  - **Langkah dilewati / belum:** FL-8b (tombol AI) belum dikerjakan; "Lupa PIN?" (AUTH-7) disembunyikan; lupa sandi (Q15) tidak ada; wordmark splash (FL-1) menunggu aset;
+    ringkasan Level 2 di Pilih kata; kata Pendamping hanya tiruan (Supabase `custom_*` + bucket belum ada, K1); klien v2 belum menerima token dari layar
+    (`getToken`/`refreshSession` belum disambung) dan belum pernah memanggil server sungguhan; Keluar tidak menghapus cache akun (K12).
+  - **Teks klaim yang tidak benar lagi menurut kode — usulan, BELUM diubah** (perubahan langsung ditolak; menunggu keputusan Rico):
+    1. `app/app/about.tsx` "Materi mencakup vokal a, i, u dan konsonan m, p, b." → "Penilaian disetel untuk vokal a, i, u dan konsonan m, p, b. Bunyi O belum disetel,
+       jadi hasilnya belum dapat dipercaya. Kata dari Pendamping belum bisa dinilai di server demo." (K11; O kini bisa dilatih dari katalog).
+    2. `about.tsx` "Supabase menyimpan hasil dan progres, tanpa video atau audio." → tambah "Bila akun dipakai, Supabase menyimpan email, username, hasil dan progres,
+       tanpa video atau audio. PIN Pendamping disimpan di HP ini saja. Video contoh dari Pendamping tidak dikirim ke server pada versi ini." (K1; FL-7 menambah akun email).
+    3. `app/app/onboarding.tsx` "Angka hasil latihan juga disimpan online tanpa namamu" → "Bila terhubung ke akun, angka hasil latihan juga disimpan online supaya
+       kemajuanmu tidak hilang." (akun kini punya email dan username/display_name).
+    4. `README.md`: judul dan tim "Cermin Wicara" → "Rekan Wicara" (design.md §1); "teman Tuli/tunarungu" → "teman Tuli" (design.md §7); "autentikasi anonim" →
+       "akun email (Pendamping)"; "Aktifkan Anonymous Sign-Ins" → "Aktifkan login Email"; "Tekan lama Misi hari ini" → "tab Pengaturan (setelah PIN), bagian Untuk operator
+       demo"; Alur demo → "Masuk/Daftar → Buat PIN → onboarding → kalibrasi → Beranda; Level 1 A; Pilih kata → PAPA → PA → PAPA; Pendamping/Pengaturan dengan PIN; materi
+       tidak dikunci"; "pengaturan tersembunyi" → "tab Pengaturan"; tambah `EXPO_PUBLIC_USE_MOCK` dan `EXPO_PUBLIC_ANALYZE_API`; "MVP mencakup Level 0–3" → struktur L1–L3 (K11).
+    5. `app/README.md`: "aktifkan Anonymous Sign-Ins" → login Email; "Tekan lama judul Misi hari ini" → tab Pengaturan; "PIN yang dibuat saat onboarding" → layar Buat PIN
+       sebelum onboarding, per akun; "Buka semua materi" → materi tidak dikunci; "pengaturan tersembunyi" → tab Pengaturan.
+    6. `docs/MODEL_CARD.md` §cakupan menyebut Level 0–3, kemajuan/macet (SPEC §8.4) dan Mode Pendamping lama: perlu disesuaikan (K8, K11).
+    7. README "Batasan": tambahkan daftar langkah dilewati di atas (AI, Lupa PIN, lupa sandi, wordmark, kata Pendamping tiruan, v2).
+    Teks yang **masih benar**: "Rekaman latihan dihapus setelah diproses" (kode menghapus setelah hasil dan saat keluar layar); "tanpa video atau audio" untuk Supabase
+    (kata Pendamping tiruan menyimpan video di HP saja); "Mode demo tidak mengirim hasil ke Supabase".
+  - **Usulan perubahan dokumen (belum diubah):** design.md §0 dan §6.2.1 (tekan-lama "Misi hari ini" dihapus; Pengaturan kini tab), §5.9 (bar: Latihan/Pendamping/Pengaturan,
+    di semua layar tab, tersembunyi di sesi latihan), §6 tabel layar (Beranda dua kartu, Level 1, Pilih kata, Jalur kata, Pendamping CRUD, auth/*, change-pin), §6.2.1
+    (sketsa dua kartu + tautan Tentang), §6.2.3 (hasil per level: dua lencana, umpan balik ≤ 2 kalimat, grafik hanya L1; mode overall/hidden dihapus), §5.3 (L2–L3 dua status);
+    flow-srs-ui §10 ("tiga kartu" → dua kartu). Konflik c.2 yang belum diperbaiki di dokumen: kontrak FE "lima poin" (isinya tujuh); flow §7.1.1 Masuk "email atau username"
+    (kode: email saja); flow `source: 'companion'` (kode: `custom`); flow `belum` (kode: `belum_sesuai`); kontrak `EXPO_PUBLIC_API_BASE_URL` (kode: `EXPO_PUBLIC_API_URL`, K6);
+    kontrak §2 kunci `rw.companionPin:<uid>` (SecureStore menolak `:`; kode: `rw.companionPin.<uid>`); flow §7.7.3 kata "huruf kecil" (kode: HURUF BESAR seperti katalog).
+  - **Daftar periksa design.md §12** (layar diubah: Beranda, Level 1, Pilih kata, Jalur kata, Latihan/Hasil, Pendamping, formulir kata, Pengaturan, Ganti PIN, Buat PIN, Masuk, Daftar, Cek email):
+    terbukti lewat kode/tes: tidak ada hex literal di layar/komponen, tidak ada bayangan/miring, tombol `BigButton` dan item bar punya `accessibilityLabel`, status = ikon + label + warna
+    (tes StatusBadge), teks tanpa kata terlarang (tes ResultView/settings/messages). **Hanya bisa dicek di HP (belum):** hitam-putih, skala 200%, perangkat dibisukan + getar mati,
+    target sentuh ≥ 48 dp dan jarak 12 dp, Reduce Motion, efek tekan, keadaan "Merekam", cahaya terang, TalkBack.
+  - **Kriteria kontrak §10:** [ ] alur penuh `USE_MOCK=true` di HP (bagian-bagiannya dites: auth, PIN, Pilih kata, Jalur kata, latihan, hasil, retry; belum dicoba utuh di HP);
+    [x] hasil L1 tiga status + grafik, L2–L3 dua status tanpa grafik (`ResultView.test.tsx`); [ ] bar tampil di layar tab dan tersembunyi di sesi (struktur rute; belum dicek di HP);
+    [x] Pendamping tambah tanpa/dengan suku kata, ubah, hapus, kata bawaan tanpa jalur ubah/hapus (tiruan: `wordsData`, `wordScreens`, `companionList`); [ ] tombol AI (FL-8b belum);
+    [~] PIN: buat, masuk, salah, terkunci dites (`pin.test.tsx`); ganti PIN belum punya tes layar; [ ] `USE_MOCK=false` tidak mengubah layar (belum dibuktikan; v2 tidak ada di server lokal);
+    [x] tes jest validator, pemetaan DTO, status per level.
+  - **Keputusan Rico yang masih terbuka:** K1 (video wajah Pendamping di Supabase + teks Tentang/README), K2 (AI pihak ketiga; FL-8b), K3 (login anonim dihapus — usulan dipakai,
+    mohon konfirmasi; riwayat anonim lama tidak dipindah), K4 (catatan "v2 diatur kontrak FE" di SPEC §5), K6 (nama env API), K7 (sesi di AsyncStorage), K8 (README/MODEL_CARD
+    tanpa misi/Uji Dengar/laporan), K9 (Getar di balik PIN), K10 (kata Pendamping di v1: catatan "belum tersedia" — usulan dipakai), K11 (teks cakupan materi), K12 (Keluar:
+    hapus cache atau tidak; teks dialog), K13 (persetujuan privasi di Daftar — sudah dibuat), kata disimpan HURUF BESAR, flow-srs-ui rev. 9 (berkas yang ada rev. 7), semua usulan
+    teks di atas, usulan perubahan design.md/flow.
+  - **Belum teruji sama sekali di perangkat:** seluruh alur v2 (FL-2 … FL-8b'), Supabase sungguhan (akun email, sinkron tanpa login anonim, Keluar luring), server v2, iOS,
+    galeri/kamera untuk video Pendamping, pengumuman pembaca layar, Playfair dan cincin fokus.
+- Tambahan setelah FL-10 (13 Nov 2026): tiga celah ditutup (yang lain tetap seperti daftar FL-10).
+  (1) **Token v2:** `src/auth/v2Auth.ts` (`getToken`, `refreshSession`, `onSessionLost`) dan `withAccount()` mengisi bawaan akun di `getCatalog`/`getWord`/`analyze` (v2); 401 → refresh sekali → ulang sekali → gagal = `signOut`.
+  `SignedOutRedirect` (root layout) mengantar ke Masuk saat sesi hilang di dalam app. Belum pernah memanggil `/v2` sungguhan. (2) **Lupa PIN:** tautan di gerbang PIN (hanya bila ada akun), layar `auth/forgot-pin`
+  (verifikasi kata sandi akun lewat `signIn`, lalu `create-pin`; PIN lama diganti saat PIN baru disimpan). Di mode tiruan sandi apa pun diterima kecuali `salah@contoh.id`. Lupa sandi (Q15) tetap tidak ada.
+  (3) **Ringkasan Level 2** di kartu Pilih kata ("Level 2: x dari N sesuai · Level 3: …"), diambil per kartu lewat `useWordPath` (di v2 = satu permintaan per kata; saat memuat/gagal hanya Level 3 yang disebut).
+  Catatan: kartu "Level 2 dan 3" di Beranda masih menghitung kata (Level 3) saja. Panduan: `docs/PANDUAN_JALANKAN_DAN_CEK.md`. Tes baru: `forgotPin.test.tsx` (5), `v2Auth.test.tsx` (9), tambahan di `words.test.tsx` dan `pin.test.tsx`. 45 suite / 566 tes.
+- Perbaikan 14 Nov 2026 (temuan di HP, iOS): layar latihan (`practice/[itemId]`) jatuh dengan "Couldn't find a navigation object" saat dibuka (dari Level 1 maupun Jalur kata). Sebabnya
+  `usePreventRemove` diimpor dari `@react-navigation/native`, paket terpisah dari salinan react-navigation milik expo-router, sehingga tidak menemukan konteks navigasinya. Berlaku sejak FL-4;
+  `WordForm` (FL-8b') punya kesalahan yang sama. Diperbaiki: keduanya memakai `usePreventRemove` dari `expo-router`. Tes tidak menangkapnya karena modulnya di-mock; ditambah
+  `navigationImports.test.ts` yang menggagalkan impor `@react-navigation/*` langsung. **Pelajaran:** alur rekam → hasil FL-4 belum pernah benar-benar jalan di HP sebelum ini; semua klaim
+  "alur v2" tetap belum teruji di perangkat sampai daftar periksa `docs/PANDUAN_JALANKAN_DAN_CEK.md` dijalankan. 46 suite / 567 tes.
+
 ## Masalah terbuka
 - A1: aturan clipping SPEC §6.2 (> 1% sampel |x| ≥ 0,99) bisa jarang terpicu pada rekaman HP. Setelah
   encode AAC, sinyal yang di-clip keras hanya punya 0,04% sampel ≥ 0,99 (31% ≥ 0,9). Fixture tes memakai
@@ -582,3 +826,270 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
 - Lisensi model `face_landmarker.task` belum terverifikasi (lihat `docs/THIRD_PARTY.md`).
 - Drive C: laptop server tinggal ±9 GB; arahkan cache pip ke D: sebelum memasang MediaPipe.
 - Starlette memberi peringatan bahwa `httpx` untuk TestClient sudah usang (disarankan `httpx2`); tes tetap lolos.
+
+## Implementasi Figma (design v7)
+- FG-1 (14 Nov 2026, cabang `fe/design`): token v7 tanpa perubahan tata letak.
+  - `app/src/theme/index.ts`: palet netral §3.1; token baru `hairline`, `dangerPressed`, `warning`, `segment`; `radius.sheet` 28 dan `radius.dialog` 24;
+    `statusStyles` memakai token (tidak ada hex literal lagi di luar `theme/`). Nama token lama tidak berubah, jadi layar otomatis berganti warna.
+  - Inter 400 dan 700 (`@expo-google-fonts/inter`, disetujui D4) dimuat di `app/_layout.tsx` bersama Playfair. `fontFamily.text` dan `textFont(bold)`
+    memberi Inter bila termuat, selain itu font sistem. **Belum dipakai di layar**: penerapan per layar dikerjakan langkah FG berikutnya
+    (Inter 400/700 adalah dua family terpisah, jadi patch global `Text` akan mengubah tampilan semua layar sekaligus).
+  - `__tests__/theme.contrast.test.ts`: menghitung kontras pasangan kunci §3.1 (teks 4,5:1, garis dan fokus 3:1); gagal bila di bawah batas.
+  - Belum diubah: `app.json` (`backgroundColor` ikon/splash `#08110B`) karena gambar ikon dan splash masih berlatar lama; ganti bersama aset.
+  - Belum ditambah: token `titleLarge` 28 dan `pinKey` 76 (di luar daftar FG-1; ikut langkah layar terkait).
+  - Belum diverifikasi di perangkat: Inter dan cadangan font sistem.
+- Saran skill `interfaces:better-colors` yang ditolak (bertentangan dengan design.md): ganti nama `primary` menjadi `accent` (design.md memakai `primary` untuk tombol
+  dan `accent` untuk koral); tier primitif/semantik dan ramp 50–950 (design.md §3.1 menetapkan satu tier token datar); `prefers-color-scheme` (hanya tema gelap, §3.2).
+- FG-2 (14 Nov 2026): komponen dasar, mengikuti Figma ("Button", "Field", "Back" di "Komponen · Interaksi", node 55:500, 55:515, 55:538, 65:621).
+  - `BigButton`: tipe `danger` baru; ditekan mengubah isi (primaryPressed, dangerPressed, surfaceRaised); nonaktif = isi `surfaceRaised`, tanpa garis, tanpa opacity;
+    secondary tinggi 48 dengan garis 2 dp, primary dan danger 52 tanpa garis. Ikon 24 dp dan jarak ikon-label 10 mengikuti Figma (design.md §5.1 menulis 20).
+  - `Card`: garis `hairline` 1 dp. `TextField`/`PasswordField`: garis 1 dp, fokus 2 dp (`stroke.focus` dihapus; hanya TextField memakainya), jarak label-kolom-pesan 6, tinggi 56 (`fieldHeight`), label 15 Bold,
+    area teks panjang 104. Figma menggambar garis 1 dp di semua state; yang dipakai 1 dp (diperbaiki setelah FG-2: sebelumnya 2 dp mengikuti design.md, itu keliru karena Figma sumber utama).
+  - `BackButton` baru (kapsul 48, chevron + keterangan tujuan). Dipasang sebagai `headerLeft` bawaan di `darkStackOptions` (`label` = judul layar sebelumnya, cadangan "Kembali";
+    tidak tampil di layar pertama stack) dan sebagai tombol "Keluar latihan" di layar latihan (label dan aksi sama). `headerBackTitle` dihapus. `sign-in`, `check-email`, `create-pin`
+    diberi `headerLeft: () => null` agar tetap tanpa tombol kembali. Teks kapsul memakai `textFont()` (Inter bila termuat).
+  - Tes: `BackButton.test.tsx` baru; `BigButton.test.tsx` menambah kasus danger. Skill `figma-design-to-code` dimuat dari MCP resource `skill://figma/figma-design-to-code/SKILL.md` (tidak ada di Skill tool); `get_design_context` dipanggil dengan `skillNames: resource:figma-design-to-code`.
+  - Saran skill `interfaces:better-ui` yang ditolak: skala tekan 0,96 (design.md §5.1: 0,98), pengganti garis dengan bayangan (design.md: tanpa bayangan), transisi kustom (efek tekan hanya perubahan isi).
+  - Belum diverifikasi di perangkat: bentuk kapsul `headerLeft` di iOS dan Android (tinggi header), keterangan tujuan yang panjang di skala teks 200%.
+- FG-3 (14 Nov 2026): StatusBadge baru, mengikuti Figma ("StatusBadge" di "Komponen", node 25:86; glyph `status-glyph/*`).
+  - `StatusBadge`: tanpa wadah (latar, `borderLeft`, padding, radius dihapus). Isinya glyph + label `text` bobot 700 (`textFont(true)`), padding vertikal 2, jarak glyph-label 6 (md) atau 10 (lg).
+    Ukuran teks dan lineHeight md 15/20, lg 16/22. `accessibilityLabel`, `testID` (`<id>-icon`), prop `status`/`label`/`size` tidak berubah. Metrik masuk token baru `statusBadge` di theme.
+  - `StatusIcon`: tiga simbol lingkaran dengan react-native-svg, path disalin dari aset SVG Figma (digambar dalam kotak 18, diskalakan; garis tetap dalam dp):
+    lingkaran penuh + centang (centang `colors.background`), lingkaran garis + setengah terisi, lingkaran garis + panah ulang. `testID` bentuk: `status-shape-full`, `-half`, `-retry` (dulu `-circle`, `-triangle`, `-square`).
+  - Ukuran glyph md 18 dan lg 26 mengikuti Figma (design.md §5.4 menulis 24 untuk lg; Figma menang, design.md perlu diperbarui). `CombinedObservations` memakai `StatusIcon size={28}` dan tetap jalan (tampilan lama, di luar FG-3).
+  - "Mendekati" di Level 2–3 dipetakan ke "belum sesuai" oleh `data/mappers.ts` sejak sebelum FG-3; tidak diubah.
+  - Tes `StatusBadge.test.tsx` diubah: testID bentuk baru, assert tanpa wadah (tanpa `backgroundColor`, `borderLeftWidth`, `borderRadius`) dan label berwarna `text` (bukan lagi `borderLeftColor`),
+    ditambah tes ukuran glyph/teks md dan lg. `npm test` 595 lulus, `npm run typecheck` bersih.
+  - Skill `figma-design-to-code` dan `interfaces:better-accessibility` dimuat lewat Skill tool sebelum kode. Saran skill: tidak ada yang bertentangan dengan design.md. Catatan a11y skill yang dipakai:
+    glyph disembunyikan dari pembaca layar (`accessible={false}`), label teks membawa arti, status tidak hanya warna (bentuk glyph berbeda; 1.4.1).
+  - Belum diverifikasi di perangkat: tampilan glyph di HP Android (Expo Go), skala teks 200% (label panjang "Suara: Belum sesuai" membungkus karena `flexShrink`), kecocokan piksel dengan Figma.
+- FG-4 (14 Nov 2026): dialog dan daftar, hanya komponen (tidak ada layar yang diubah). Mengikuti Figma: "Dialog" (63:584), "Segmented control" (37:399), "Grup · Kata saya" (50:421).
+  - `ConfirmDialog`: kartu di tengah (lebar layar − 24 di tiap sisi), padding 24/20/20, jarak 16, radius `dialog` 24. Batal jadi tombol krem (`primary`) di atas dan tetap penerima fokus awal pembaca layar;
+    aksi `danger` jadi tombol `danger` di bawah dengan ikon + teks. Tanpa `danger`, konfirmasi tetap `secondary` (satu tombol krem saja). Prop baru `confirmIcon` (bawaan `trash-outline`;
+    Figma memakai ikon keluar untuk "Keluar"). Props lain, `testID` (`confirm-dialog`, `confirm-cancel`, `confirm-ok`) dan tombol kembali Android tidak berubah.
+    Ikon peringatan di judul dihapus karena Figma tidak memilikinya (aksi berbahaya tetap bukan warna saja: ikon + teks).
+  - `SegmentedControl` baru: wadah `surface` + `hairline`, padding 4, jarak 2, radius 12; segmen tinggi 40, radius 9, teks 15; terpilih = isi `primary` + teks `onPrimary`. `accessibilityRole` radiogroup/radio dengan state `selected`.
+  - `ListGroup` dan `ListRow` baru: satu kartu `surface` + `hairline` (padding kiri 16, kanan 12, atas-bawah 2, radius 20), baris padding vertikal 12 dan jarak 12, pemisah `hairline` 1 dp menjorok 56 (sejajar teks);
+    `›` hanya bila `onPress`. Judul bagian (label 16 Bold) bersifat opsional. Token baru di theme: `dialog`, `segmented`, `listGroup`. Ekspor di `components/index.ts`.
+  - Selisih Figma vs design.md (Figma diikuti; design.md perlu diperbarui): kartu dialog berisi `surface` + garis `hairline` (design.md §5.12: `surfaceRaised`); teks segmen 15 (design.md §5.7 tidak menyebut ukuran);
+    Figma memakai Inter Semi Bold di segmen, app memakai Inter Bold (hanya 400 dan 700 yang dimuat, design.md §4).
+  - Tes: `formComponents.test.tsx` (urutan dan isi tombol dialog, kasus tanpa `danger`), `SegmentedControl.test.tsx` dan `ListGroup.test.tsx` baru. `npm test` 599 lulus, `npm run typecheck` bersih.
+  - Skill `figma-design-to-code` dan `interfaces:better-ui` dimuat lewat Skill tool. Saran `better-ui` yang ditolak (bertentangan dengan design.md/CLAUDE.md): bayangan berlapis untuk kedalaman (tanpa bayangan, §3 dan §11);
+    skala tekan 0,96 (design.md §5.1: 0,98); animasi masuk/keluar dialog dengan blur dan translate (design.md §8: gerak hanya efek tekan, cincin, transisi bawaan; dialog tetap `animationType="none"`).
+  - Belum diverifikasi di perangkat: tampilan dialog di layar 360 dp dan skala teks 200%, fokus pembaca layar ke Batal, isi `surfaceRaised` baris yang ditekan di dalam padding kartu (Figma tidak menggambar state tekan baris), kepekatan scrim (0,45 dari kode lama; Figma tidak diperiksa).
+- FG-5 (14 Nov 2026): bar bawah dan PIN, mengikuti Figma: "BottomBar" (25:88), "PIN pad" (50:186), "PIN dots" (50:179).
+  - `BottomBar`: tinggi 80, padding 8, lingkaran aksen 40, ikon 22, jarak ikon-label 2, label 15 (aktif Bold lineHeight 20 warna `text`, tidak aktif Regular lineHeight 22 `textMuted`, lewat `textFont`).
+    Tiap item sekarang komponen kecil dengan cincin fokus (`useFocusRing`). Props, `accessibilityLabel`/`State` dan `onPress` tidak berubah. Tanpa garis `hairline` karena Figma tidak menggambarnya.
+  - `PinPad`: kunci lingkaran 76 (radius 38), isi `surface`, tanpa garis tepi (dulu 2 dp), angka 30 Regular, jarak baris 14 dan kolom 28. Kunci "Hapus" tanpa isi sampai ditekan (Figma): ikon 22 + label 15 Bold.
+    `testID`, label, `onDigit`/`onDelete`/`disabled` tidak berubah.
+  - `PinDots`: titik 22, jarak 20, padding vertikal 8; terisi = isi `primary`, kosong = cincin 2,5 `border`. Label, role dan live region tidak berubah.
+  - Token baru `pin` dan `bottomBar` di theme; `pinKey` (64) dihapus (hanya `PinPad` memakainya).
+  - Selisih Figma vs design.md (Figma diikuti; design.md perlu diperbarui): kunci PIN tanpa garis tepi dan angka Regular (design.md §5.6: "berat tipis", jarak sama); ikon bar 22 (design.md menulis 24);
+    titik kosong cincin 2,5 `border`. Ikon bar masih Ionicons milik pemanggil (`_layout.tsx` tidak diubah); Figma memakai ikon garis kustom (play-circle, orang, slider), jadi bentuknya bisa beda.
+  - Tes: `BottomBar.test.tsx` (tinggi 80, lingkaran 40 hanya di item aktif), `formComponents.test.tsx` (kunci 76 bulat, titik 22 terisi/cincin). `npm test` 601 lulus, `npm run typecheck` bersih.
+  - Skill `figma-design-to-code` dan `interfaces:build-design` dimuat lewat Skill tool. Saran skill: tidak ada yang bertentangan; temuan `build-design` (jangan menambah state yang tidak digambar) dipatuhi:
+    state tekan kunci memakai `surfaceRaised` yang sudah ada, bukan desain baru.
+  - Belum diverifikasi di perangkat: tinggi papan PIN 346 dp di layar kecil, label bar di skala teks 200% (item tinggi tetap 64 dp, label bisa terpotong), perbandingan piksel dengan Figma.
+- FG-6 (14 Nov 2026): Beranda, mengikuti Figma "Beranda Latihan" (57:385) dan "Beranda · Pengguna baru" (64:585). Hanya tata letak dan gaya; rute, `useCatalog`, `useUser`, dan `testID` lama (`card-level-1`, `card-words`, `calibration-banner`, `home-error`) tidak berubah.
+  - `data/progress.ts`: fungsi murni baru `nextItem(attempts, items)` (materi pertama menurut urutan katalog yang belum Sesuai; `null` bila belum ada riwayat atau semuanya Sesuai),
+    `recentActivity(attempts, limit = 3)` (percobaan terakhir per materi, terbaru dulu) dan `describeItem(level, itemId, text?)` (judul + huruf ubin: Vokal “a”, Suku kata “ma”, kata huruf kecil). Tes di `progress.test.ts`.
+  - `home/index.tsx`: header (avatar inisial `hero`, "Halo," + nama serif, wordmark), HeroCard "Lanjutkan latihan", "Pilih level" (2 `LevelTile`), "Kemajuanmu" (2 `StatTile`), "Aktivitas terakhir" (`ListGroup`).
+    Pengguna baru (belum ada percobaan): HeroCard "Latihan pertamamu" (materi Level 1 pertama) + grup "Langkah awal (n dari 3)" + kartu "Belum ada latihan" dengan cincin putus-putus, tanpa tile berangka 0.
+    Nama dari `useAuth().session.displayName`; bila kosong dipakai "Teman". Hero Level 3 membuka Jalur kata, hero Level 1 membuka sesi latihan. Banner kalibrasi, InfoNote demo/mock/galat, kartu "Tentang aplikasi" dan tombol Dataset tetap ada (Figma tidak menggambarnya).
+  - Komponen: `HeroCard` (eyebrow, ilustrasi, judul 28 serif, padding lewat token), `LevelTile` dan `StatTile` ditulis ulang (belum dipakai layar mana pun sebelumnya, jadi API baru aman), `ProgressRing` 40 dp dengan ikon di tengah dan mode `dashed`,
+    `LipIllustration` prop `tone="hero"` (garis krem di atas hijau), `Screen` prop `contentStyle`, `ListGroup`/`ListRow` prop `titleTrailing`, `inset`, `paddingVertical`, `paddingRight`, `muted` (variasi Figma untuk aktivitas dan langkah awal).
+    Token baru: `layout`, `levelTile`, `statTile`, `homeList`, `fontSize.titleLarge` 28, `lineHeight` diperluas.
+  - Dihilangkan karena tidak ada sumber datanya (design.md §11): "sekitar 1 menit" pada langkah 2 (Figma) → hanya "Berikutnya". Hero tidak tampil bila semua materi sudah Sesuai (Figma tidak menggambar keadaan itu).
+  - Selisih Figma vs design.md/flow: hero "Lanjutkan" bertentangan dengan flow NAV-2/NAV-3 (keputusan D1 di design.md §12; Figma diikuti sesuai CLAUDE.md). Gutter 20 dan jarak antar kelompok 24 hanya untuk Beranda (`Screen` lain tetap 16).
+    Figma menggambar judul aktivitas Level 2 dengan nama kata ("mama"); data percobaan hanya menyimpan id suku kata, jadi judulnya "Suku kata “ma”". Daftar aktivitas dibatasi 3 baris (Figma contoh 2).
+  - Tes: `home.test.tsx` (mock `useAuth`; kasus sapaan, pengguna baru, hero berikutnya, StatTile dan aktivitas), `progress.test.ts`. `npm test` 611 lulus, `npm run typecheck` bersih.
+  - Skill `figma-design-to-code`, `interfaces:build-design`, `interfaces:better-layout` dimuat lewat Skill tool. Saran `better-layout` yang ditolak: "pisahkan grup dengan ruang saja, tanpa garis" (design.md §5.3 menetapkan pemisah `hairline` di grup daftar);
+    "mulai tombol penuh dengan inset 16" (gutter Beranda 20 sesuai Figma); logical properties (`marginInlineStart`) tidak dipakai karena app hanya LTR dan komponen lain memakai properti fisik.
+  - Belum diverifikasi di perangkat: tata letak di 360 dp dan skala teks 200% (judul hero panjang, dua `LevelTile` berdampingan, nama panjang di header), ilustrasi bibir "u" di hero (masih kasar), cincin putus-putus, perbandingan piksel dengan Figma, dan jarak ke bar bawah.
+- FG-7 (14 Nov 2026): sesi latihan, mengikuti Figma "Latihan · Lihat" (46:135), "Latihan · Tiru" (46:177), "Latihan · Merekam" (46:217), "Latihan · Menganalisis" (46:253). Alur rekam, unggah (`send`, `useUpload`, `analyze`), `usePreventRemove`, penghapusan rekaman, dan `ResultView` tidak berubah.
+  - `SessionHeader` baru (`components/SessionHeader.tsx`): kapsul `BackButton` "Keluar latihan" + "Langkah n dari 4" di kanan, batang bersegmen (tinggi 6, jarak 6, terisi `text`, sisanya `surfaceRaised`), judul serif 28 "Ucapkan “a”" (huruf kecil). Header Stack disembunyikan di layar ini (`headerShown: false`); `Screen` mendapat prop `edges` (inset atas dipakai layar ini).
+    `StepHeader` lama tidak diubah karena masih dipakai kalibrasi, onboarding dan dataset.
+  - Langkah menjadi 4: Lihat, Tiru (termasuk merekam), Menganalisis, Hasil (dulu 3 langkah: Lihat, Tiru, Bandingkan). Hanya tampilan; urutan tahap sama.
+  - Lihat: `ModelVideo` ditata ulang menjadi kartu video (`surface` + `hairline`, media 200 dp `surfaceRaised`, ilustrasi bibir 180) + tombol "Putar contoh" + "Cara mengucapkan" + isi instruksi. "Mulai rekam" menempel di bawah lewat `footer` Screen.
+    Tombol "Putar contoh" hanya ada bila video tersedia (memutar ulang dari awal); tanpa video tidak ada tombol yang tidak berfungsi. `testID` `model-instruction`, `model-fallback`, `model-video-*` tetap.
+  - `RecordPanel` (dipakai juga kalibrasi, dataset, allosaurus; props lama kompatibel, prop baru `footer`): oval panduan 150 × 200 di tengah (putus-putus krem saat menunggu, garis penuh `danger` saat merekam, digambar dengan SVG), angka hitung mundur 140 di tengah oval,
+    saat merekam lencana "MEREKAM" (titik putih, `surface` + `hairline`, kiri atas) dan batang waktu 6 dp di dasar panel, tombol "Merekam…" nonaktif + keterangan "Tahan bunyi sampai hitungan selesai." Saat merekam angka menampilkan sisa detik (hanya tampilan, dari `elapsedMs`).
+    Hint bawaan menjadi "Posisikan wajah di dalam oval" (di dalam panel). Halaman memberi "Lihat contoh lagi" lewat `footer`, tampil hanya saat tidak sibuk. Kata target besar di atas panel dihapus (Figma hanya memakai judul).
+  - `AnalyzingView` baru: "Menganalisis…", batang 6 dp dari kemajuan unggahan, tiga tahap (Mengirim/Rekaman terkirim, Menilai bentuk bibir, Menilai suara), catatan privasi. Hanya unggahan yang punya sinyal nyata; setelah terkirim, "bibir" ditampilkan berjalan dan "suara" menunggu,
+    padahal server tidak melaporkan tahap per tahap (tampilan indikatif, tertulis di catatan risiko). Cincin tahap aktif statis (tanpa putar; Reduce Motion). Galat unggahan tetap memakai `UploadStatus` + "Rekam ulang".
+  - "Batalkan" (Figma): memakai `discard()` yang sudah ada (membatalkan unggahan lewat AbortController, menghapus berkas) lalu kembali ke Tiru; penjaga `sendId` mengabaikan hasil yang datang setelah dibatalkan. Ini satu-satunya perilaku baru.
+  - Token baru `session` di theme. Tes: `SessionHeader.test.tsx`, `AnalyzingView.test.tsx` baru; `practice.test.tsx` (langkah 1–4, Batalkan dan hasil terlambat; tes tombol keluar kini memeriksa kapsul di isi layar), `RecordPanel.test.tsx` (angka, MEREKAM, footer). `npm test` 619 lulus, `npm run typecheck` bersih.
+  - Tidak dipasang (konflik dengan prinsip jujur design.md §2.9, domain: build-design): lencana "Cahaya cukup" di Figma dan §5.14. App tidak punya cek pencahayaan di sisi klien (kualitas dinilai server), jadi lencana itu mengklaim pemeriksaan yang tidak dilakukan.
+  - Dialog konfirmasi keluar masih `Alert.alert` bawaan sistem (`usePreventRemove`), bukan `ConfirmDialog` FG-4; menggantinya mengubah mekanisme keluar, jadi ditunda.
+  - Skill `figma-design-to-code` dan `interfaces:build-design` dimuat lewat Skill tool. Saran build-design yang dipatuhi: tidak menambah state yang tidak digambar Figma, tidak menambah token baru hanya untuk membulatkan angka. Tidak ada saran yang bertentangan dengan design.md.
+  - Belum diverifikasi di perangkat: pratinjau kamera di dalam panel dengan oval SVG, angka 140 di dalam oval 150 × 200 (angka tiga digit tidak ada, tetapi skala teks 200% tidak diuji), tata letak 360 dp (tombol "Mulai rekam" menempel di bawah), perilaku `player.currentTime = 0` di expo-video, dan bahwa menekan "Batalkan" benar-benar menghentikan permintaan unggah di jaringan.
+- FG-8 (14 Nov 2026): Hasil, mengikuti Figma "Hasil · Level 1" (48:135) dan "Hasil · Level 2 dan 3" (48:221). Kontrak API, `visuals`/`Loudness`, mapper, `analyze`, dan grafik di `charts.tsx` tidak diubah.
+  - `ResultView`: urutan §6.5: kartu target → dua kartu indikator → kartu petunjuk → InfoNote kalibrasi → Peta vokal, Cermin bibir, Kekerasan suara → disclaimer persis. Kartu target Level 1: ilustrasi bibir 110 + "Bentuk bibir target" + "Vokal “a”"; Level 2/3: "Suku kata target"/"Kata target" + kata serif 34 huruf kecil.
+    Kartu Bibir dan Suara (berdampingan, tumpuk di layar sempit atau teks besar): label "Bibir"/"Suara" + `StatusBadge` `lg` yang hanya menampilkan status; kartu itu satu elemen untuk pembaca layar dengan nama "Bibir: Sesuai" (nama dan `testID` `result-bibir`/`result-suara` tetap).
+    Kartu petunjuk `hero` tetap hanya bila ada kalimat (maksimal dua, Bibir dulu). Tiap grafik di kartu dengan judul bagian 16 Bold dan legenda teks ("Garis putus: target", "Titik tebal: kamu", "Garis putus: contoh", "Garis tebal: kamu"). Semua `testID` hasil tetap.
+  - Kartu "Kekerasan suara": hanya dirender bila `visuals.loudness` ada di respons (Level 1); tidak ada data tiruan. Kontrak tidak memuat nilai target kekerasan, jadi kartu hanya berisi garis kekerasan pengguna.
+    Batang "Target", batang "Kamu", dan kalimat "Batang kamu masih di bawah zona target." dari Figma TIDAK dipasang (D3 tetap terbuka: butuh data target di kontrak/backend). Legenda kartu: "Garis: suaramu selama rekaman".
+  - `ActionBar` baru: bar menempel di bawah lewat `footer` Screen, isi `background`, garis `hairline` 1 dp di atas, padding 12/20/24. Isi: "Ulangi" (atau "Rekam ulang" pada retry) primer, "Lihat contoh" dan "Selesai" sekunder berdampingan (tumpuk bila sempit/teks besar). Label tombol "Lihat contoh" mengikuti Figma;
+    nama aksesibilitas tetap "Lihat contoh lagi". Judul tahap Hasil sekarang "Bandingkan" (Figma), bukan "Ucapkan …". Logika tombol tidak berubah. Token baru `result` dan `actionBar`; `lineHeight.display` 42.
+  - Tes: `ResultView.test.tsx` (teks "Bibir" dan status kini terpisah di kartu, bukan "Bibir: Sesuai"; target kata kini huruf kecil; kasus Kekerasan suara bersyarat dan tanpa batang target; kartu target Level 1 dan 3), `practice.test.tsx` (bar aksi dengan garis, nama aksesibilitas lama). `npm test` 625 lulus, `npm run typecheck` bersih.
+  - Tidak dicek ke Figma: keadaan "Hasil · Semua sesuai" (48:280) dan "Rekaman tidak dihitung" (48:335); keduanya memakai kode yang sama (kartu petunjuk tidak dirender bila kosong, retry dengan InfoNote) dan perlu dibandingkan nanti.
+  - Skill `figma-design-to-code`, `interfaces:build-design`, `interfaces:better-accessibility` dimuat lewat Skill tool. Saran `better-accessibility` yang dipatuhi: status tidak hanya warna (badge ikon + teks), grafik punya alternatif teks, target ≥ 48 dp, kartu indikator satu nama untuk pembaca layar. Tidak ada saran yang bertentangan dengan design.md.
+  - Belum diverifikasi di perangkat: bar menempel di 360 dp dan skala teks 200% (bar bisa menutup banyak layar; konten tetap menggulir), kartu indikator berdampingan dengan "Belum sesuai" (teks panjang membungkus), dan perbandingan piksel dengan Figma.
+- FG-9 (14 Nov 2026): Level 1, Pilih kata, Jalur kata, mengikuti Figma "Level 1 · Bunyi vokal" (37:260), "Pilih kata" (37:379), "Jalur kata · mama" (31:317). Hanya tata letak dan gaya; `useCatalog`/`useWordPath`, `progress.ts` (kecuali judul), rute, aturan "Berikutnya", `testID` (`item-<id>`, `word-<id>`, `step-<key>`, `next-marker`, `level1-error`, `words-error`, dan seterusnya) dan nama aksesibilitas baris/kartu tidak berubah.
+  - Level 1: judul serif 28, banner "Kemajuan vokal" (cincin 44 dari `summary()`, tanpa angka tanpa sumber), grup "Pilih Bunyi Latihan" (`ListGroup`): ubin huruf serif 24, "Vokal “a”", keterangan, badge status di kanan, atau "Belum dicoba"; tanpa `›` (Figma). Keterangan ("Bibir terbuka", "Tahan suara", "Atur volume", dst.) adalah teks statis per id materi bawaan di `level-1.tsx`; id lain tampil tanpa keterangan.
+  - Pilih kata: judul + kalimat pengantar, `SegmentedControl` (Semua kata / Bawaan / Pendamping) yang hanya menyaring tampilan menurut `source` (state lokal, tanpa mengubah data), grup "Daftar Kata Latihan": ubin huruf, kata huruf kecil 20 Bold + badge status terbaik (atau "Belum dicoba"), "Suku kata: ma · ma", chip sumber, `›`. Filter kosong menampilkan InfoNote (`words-filter-empty`).
+    Teks "Level 2: x dari y sesuai · Level 3: …" tidak lagi tampil (Figma tidak menggambarnya) tetapi tetap ada di nama aksesibilitas baris.
+  - Jalur kata: judul kata serif 34 huruf kecil + chip sumber, kalimat "Urutan hanya saran.", "Level 2 · Suku kata" dan "Level 3 · Kata" (20 Bold), kartu per langkah (ubin 56 berisi teks, "Suku kata n"/"Kata utuh", status, chip hijau "Berikutnya", garis `hero` pada kartu berikutnya, `›`). Kartu masih dapat ditekan semuanya; urutan tidak dikunci.
+  - Komponen baru/diubah: `LetterTile` (ubin huruf bersama; dipakai juga Beranda), `UntriedBadge` ("Belum dicoba"), `SourceChip` (chip `surfaceRaised`, ikon + teks Bold; prop `tall`; ikut berubah di daftar Pendamping), `ListRow` prop `chevron`, `ProgressRing` prop `size`. `describeItem` mengubah "A panjang" menjadi “a” panjang. Token baru `wordList`, `pathCard`, `lineHeight.title`.
+  - Selisih Figma vs data: badge tidak lagi diawali "Terakhir:"/"Terbaik:" (Figma menampilkan status saja); tes yang mencari label itu diganti pencarian teks status. Kata dan suku kata ditampilkan huruf kecil seperti Figma; data tetap huruf kapital (mock).
+  - Tes: `level1.test.tsx`, `words.test.tsx` (filter, baris, Jalur kata), `progress.test.ts`. `npm test` 629 lulus, `npm run typecheck` bersih.
+  - Skill `figma-design-to-code` dan `interfaces:build-design` dimuat lewat Skill tool; tidak ada saran yang bertentangan dengan design.md. Header Stack (tombol kembali berketerangan dari FG-2) tidak diubah.
+  - Belum diverifikasi di perangkat: 360 dp dan skala teks 200% (judul baris + badge berdampingan membungkus karena `flexShrink`), chip sumber dengan "Dari Pendamping", banner kemajuan, dan perbandingan piksel dengan Figma. Tampilan keadaan lain Level 1 ("Belum dicoba" untuk semua) hanya diperiksa lewat tes.
+- FG-10 (14 Nov 2026): Pendamping dan Pengaturan, mengikuti Figma "Pendamping · Daftar kata" (50:402), tombol "Hapus kata" (61:833) dan "Pengaturan" (51:268). Disetujui Rico sebelum mengubah perilaku.
+  - Perilaku 1, Pengaturan tidak dikunci PIN (design.md §6.7, D2): `settings/_layout.tsx` tidak lagi membungkus tab dengan `PinGate`. Getar, Tentang dan bagian operator demo terbuka. Ganti PIN tetap aman karena layarnya meminta PIN lama sendiri (tidak diubah).
+    Keluar sekarang membuka rute baru `/settings/sign-out` yang dibungkus `PinGate`; setelah PIN benar muncul dialog yang sama ("Keluar dari akun?", Batal di atas, Keluar merah di bawah; Batal kembali). Logika `signOut` (keluar meski offline, `lock()`, ke `/auth/sign-in`) dipindah tanpa perubahan. `PinSession.tsx` dan `PinGate.tsx` tidak diubah.
+  - Perilaku 2, Hapus di layar Ubah (design.md §6.6): tombol "Ubah" dan "Hapus" per baris di daftar Pendamping dihapus; baris kata saya membuka Ubah kata. Ubah kata punya tombol "Hapus kata" di bawah formulir (slot baru `footer` di `WordForm`, disembunyikan saat menyimpan) yang membuka `ConfirmDialog` danger dengan judul `MESSAGES.deleteWord`/`deleteWordNoSyllables` yang sama,
+    lalu `removeWord` (fungsi yang sama), flash "Kata … dihapus.", muat ulang katalog, kembali ke daftar. Gagal: `MESSAGES.deleteFailed`. Nama aksesibilitas baris tetap "Ubah TOLONG"; tombol hapus bernama "Hapus TOLONG" (`testID` `word-delete`).
+  - Tampilan Pendamping: judul serif "Pendamping", pengantar, "Ketuk kata untuk mengubah atau menghapus.", "Tambah kata" krem, grup "Kata saya" (`LetterTile`, kata huruf kecil, "n suku kata" atau "Tanpa suku kata", tanda "Belum lengkap" dengan ikon peringatan + teks, `›`), grup "Kata bawaan" (kunci + "Bawaan", tanpa aksi). "Kunci kembali" tetap (tidak ada di Figma, perilaku lama).
+    Figma menulis "Suku kata: to · long"; `MyWord` hanya menyimpan jumlah suku kata, jadi teksnya tetap "2 suku kata" (tidak membuat data).
+  - Tampilan Pengaturan: judul serif, kartu akun (avatar `hero` 48, nama tampilan, email; hanya bila ada sesi akun), grup "Umum" (Getar + "Aktif/Mati" + sakelar `success` dengan ibu jari krem; dulu `hero`), catatan ukuran teks, grup "Akun dan aplikasi" (Ganti PIN "Meminta PIN Pendamping" + ikon kunci, Tentang Rekan Wicara), "Keluar" sekunder, catatan siapa yang meminta PIN, versi dari `expo-constants` (`app.json`).
+    `testID` (`vibration-toggle`, `vibration-state`, `change-pin-link`, `about-link`, `sign-out`, `settings-url`, `demo-toggle`) dan nama aksesibilitas ("Getar", "Ganti PIN", "Tentang aplikasi") tetap. Bagian operator demo tidak diubah.
+  - Tombol "Hapus kata" mengikuti Figma: kotak `surface` + garis `hairline`, radius 14, ikon tong sampah + teks `danger` (design.md §6.6 menulis "bergaris merah"; Figma diikuti, design.md perlu diperbarui). Tidak ada varian `BigButton` baru.
+  - Token baru `companion`. Tes: `settings.test.tsx` (urutan baru, Keluar membuka rute PIN, catatan PIN, kartu akun), `signOut.test.tsx` baru (di balik PinGate, konfirmasi, Batal, offline), `companionList.test.tsx` (tanpa tombol hapus per baris, tanda belum lengkap), `wordScreens.test.tsx` (Hapus di Ubah dengan konfirmasi). `npm test` 632 lulus, `npm run typecheck` bersih.
+  - Catatan pengembang: rute baru membuat `.expo/types/router.d.ts` (tidak dikomit) perlu dibuat ulang; jalankan `npx expo start` sekali sebelum `npm run typecheck` setelah menarik komit ini.
+  - Skill `figma-design-to-code` dan `interfaces:build-design` dimuat lewat Skill tool; tidak ada saran yang bertentangan dengan design.md. Formulir Kata baru/Ubah (50:506, 61:716) tidak di-restyle di langkah ini selain tombol Hapus.
+  - Belum diverifikasi di perangkat: alur Keluar lewat PIN dari tab Pengaturan, sesi PIN yang terbuka setelah Keluar dibatalkan (tetap terbuka sampai ke tab Latihan/latar belakang/5 menit, sama seperti Pendamping), sakelar Getar warna `success`, dan 360 dp/skala teks 200%.
+- FG-11 (14 Nov 2026): Splash, Selamat datang, Masuk/Daftar, onboarding, mengikuti Figma "Splash · Native" (106:613), "Splash · Memuat" (106:627), "Selamat datang" (106:646), "Masuk" (27:38), "Daftar" (27:146), "Onboarding · Langkah 1/2" (29:182, 29:235). Rute baru `/welcome` disetujui Rico; logo diambil dari Figma ("Logo/Mark", PNG 1024 × 1024 dengan kanal alfa, `app/assets/images/logo-mark.png`).
+  - Rute baru `app/welcome.tsx` ("Selamat datang"): logo 176, judul serif "Berlatih bicara dengan melihat.", kalimat pendukung, tombol "Masuk" (krem) dan "Buat akun" (sekunder) menempel di bawah, dan "Alat bantu latihan, bukan pengganti terapis wicara." Gerbang awal (`app/index.tsx`) dan `SignedOutRedirect` kini mengirim pengguna yang belum masuk ke `/welcome` (dulu `/auth/sign-in`); `welcome` ditambahkan ke rute yang ditangani gerbang. Keluar (FG-10) tetap `router.replace('/auth/sign-in')`.
+  - Splash: "Memuat" (`Loading` di `app/index.tsx`): logo 120, "Rekan Wicara" serif 34, "Latihan bicara dengan bantuan visual", batang diam 96 × 3 (dekoratif, tidak melaporkan kemajuan; nama aksesibilitas "Memuat"), dan catatan batas produk. Splash native (`app.json`): gambar `logo-mark.png` lebar 120 di atas latar `#141414` (dulu `splash-icon.png`, `#08110B`). Berlaku di build native, bukan Expo Go.
+  - Komponen: `LogoMark` (Image, dekoratif); `CheckRow` ditulis ulang (kotak 28 radius 8, krem + centang bila dipilih, garis 2 dp bila tidak; tanpa kartu/garis tepi lagi, jadi daftar persetujuan Daftar dan Mode demo ikut berubah; `accessibilityRole`/`State`/label tetap); `AuthFrame` (prop `headerless`, `top`), `BrandRow`, `AuthTitle`, `AuthLinkRow`; daftar syarat sandi: ikon `success` bila terpenuhi, muted bila belum (nama aksesibilitas "…, terpenuhi/belum" tetap). Token `entry`.
+  - Masuk: header Stack disembunyikan; logo 56 + "Rekan Wicara", judul + "Masuk dengan akun Pendamping. Pendamping hanya perlu masuk sekali di HP ini.", kolom, tombol, "Belum punya akun? Daftar", dan catatan batas produk. Daftar: header Stack disembunyikan; kapsul "Kembali" di isi, judul "Buat akun Pendamping" + kalimat, "Sudah punya akun? Masuk" (kini `replace` ke Masuk), tautan "Baca kebijakan privasi" tetap. `testID` (`email`, `password`, `sign-in-submit`, `sign-up-submit`, `consent`, dan seterusnya) dan nama aksesibilitas tautan ("Belum punya akun? Daftar", "Sudah punya akun? Masuk") tetap. Kalimat "Semua isian wajib diisi." diganti kalimat Figma.
+  - Onboarding: dua batang langkah di atas, "Langkah n dari 2", judul serif; langkah 1: empat kartu siklus (ikon garis 24) + InfoNote, "Lanjut" menempel di bawah; langkah 2: kartu `hero` berikon perisai, dua persetujuan dalam kartu, teks "Centang kedua persetujuan untuk lanjut." selama belum lengkap, "Lanjut ke kalibrasi" (nonaktif sampai keduanya dicentang) dan "Kembali". Teks privasi memakai kalimat yang sudah ada (menyebut penyimpanan hasil online tanpa nama), bukan versi pendek Figma, supaya persetujuan tetap memuat fakta itu (batas produk CLAUDE.md didahulukan).
+  - Tidak dipasang: pesan "Username tersedia." di Daftar (tidak ada pengecekan ketersediaan, dan username tidak unik); ikon centang di kolom username. Belum disentuh (di luar daftar yang diminta atau tanpa pengecekan Figma): Cek email (27:234), Masuk · Galat (27:84; galat tetap lewat `InfoNote`/`FormBanner` yang ada), Buat PIN, Lupa PIN, Kalibrasi.
+  - Tes: `welcome.test.tsx` baru, `auth.test.tsx` (gerbang ke `/welcome`, tata letak Masuk/Daftar), `v2Auth.test.tsx` (SignedOutRedirect ke `/welcome`, tidak bertindak di `welcome`), `onboarding.test.tsx` (tata letak, alasan tombol nonaktif, Kembali). `npm test` 641 lulus, `npm run typecheck` bersih.
+  - Catatan pengembang: rute baru perlu `npx expo start` sekali agar `.expo/types/router.d.ts` dibuat ulang sebelum `npm run typecheck` (sama seperti FG-10).
+  - Skill `figma-design-to-code` dan `interfaces:build-design` dimuat lewat Skill tool; tidak ada saran yang bertentangan dengan design.md. Aset logo dari Figma dipakai apa adanya (tanpa menggambar ulang). Kemiripan logo dengan produk lain belum diperiksa (design.md §14).
+  - Belum diverifikasi di perangkat: splash native (butuh build), margin transparan di sekitar tile logo (logo tampak sedikit lebih kecil dari Figma karena PNG punya tepi transparan ±4%), keyboard di Masuk/Daftar dengan header tersembunyi, 360 dp dan skala teks 200%, dan perilaku Android back dari Daftar (kembali ke Selamat datang).
+
+## FG-12 (14 Nov 2026): pemeriksaan akhir dan ringkasan seri FG-1 sampai FG-12
+
+Hasil akhir: `npm test` 55 suite lulus (644 tes), `npm run typecheck` bersih. Penelusuran literal: tidak ada hex atau `rgba` di luar `src/theme`; 24 ukuran literal (ikon, `fontSize: 56` layar dataset, lingkaran `PermissionGate`, label grafik, tinggi `StepHeader`, padding `LetterTile`) dipindah ke token (`iconSize`, `fontSize.hero`, `gate`, `stepHeaderBar`, `spacing`) tanpa mengubah ukuran. Tes baru `theme.literals.test.ts` menjaga agar hex dan ukuran literal tidak masuk lagi. design.md diperbarui ke v7.1 (nilai Figma dan implementasi; bagian 12 berisi D1 sampai D12). Daftar periksa manual: `docs/CHECKLIST_360_200.md`.
+
+### Ringkasan per langkah (satu baris)
+- FG-1: token v7 netral, Inter dimuat, tes kontras.
+- FG-2: Button (danger, tekan mengubah isi), Card `hairline`, Field 1 dp, `BackButton` kapsul berketerangan.
+- FG-3: `StatusBadge` tanpa wadah, tiga simbol lingkaran (md 18, lg 26).
+- FG-4: `ConfirmDialog` tengah (aman di atas), `SegmentedControl`, `ListGroup`/`ListRow`.
+- FG-5: `BottomBar` 80 dp, kunci PIN bulat 76, titik 22.
+- FG-6: Beranda (hero Lanjutkan, `LevelTile`, `StatTile`, aktivitas, pengguna baru); `nextItem`, `recentActivity`, `describeItem`.
+- FG-7: sesi latihan (`SessionHeader`, panel rekam baru, Lihat, Menganalisis, Batalkan).
+- FG-8: Hasil (kartu indikator, `ActionBar` menempel, Kekerasan suara bersyarat).
+- FG-9: Level 1, Pilih kata (filter), Jalur kata.
+- FG-10: Pendamping dan Pengaturan; Pengaturan tidak dikunci PIN, Keluar lewat `/settings/sign-out` (PIN), Hapus kata di layar Ubah.
+- FG-11: Splash, Selamat datang (`/welcome`), Masuk/Daftar, onboarding; logo dari Figma.
+- FG-12: pemeriksaan literal, token ikon, design.md v7.1, daftar periksa, ringkasan ini.
+
+### Perubahan perilaku yang disetujui Rico
+Pengaturan tidak dikunci PIN dan Keluar meminta PIN (rute baru `/settings/sign-out`); Hapus kata pindah ke layar Ubah; rute baru `/welcome`; "Batalkan" di Menganalisis membatalkan unggahan (penjaga hasil terlambat `sendId`). Logika lain (API, progresi, sinkronisasi, aturan penilaian) tidak diubah.
+
+### Saran skill yang ditolak (bertentangan dengan design.md atau CLAUDE.md)
+- `interfaces:better-colors` (FG-1): ganti nama `primary` menjadi `accent`; tier primitif/semantik dan ramp 50–950; `prefers-color-scheme` (hanya tema gelap).
+- `interfaces:better-ui` (FG-2, FG-4): skala tekan 0,96 (design.md: 0,98); pengganti garis dengan bayangan berlapis (tanpa bayangan); animasi masuk/keluar dialog dengan blur dan translate (gerak hanya efek tekan, cincin, transisi bawaan).
+- `interfaces:better-layout` (FG-6): "pisahkan grup dengan ruang saja, tanpa garis" (grup daftar memakai pemisah `hairline`, design.md §5.3); tombol penuh dengan inset 16 (gutter Figma 20/24); properti logis (`marginInlineStart`) tidak dipakai karena app hanya LTR.
+- `interfaces:better-interface` (FG-12): tidak ada saran yang bertentangan. Skill ini berorientasi tinjauan baca-saja; dipakai sebagai kerangka daftar periksa, bukan untuk membuat laporan temuan penuh.
+- Selisih Figma vs design.md lain (Figma diikuti dan design.md diperbarui): ikon bar 22, simbol badge lg 26, dialog `surface` + `hairline`, tombol Hapus kata berupa kotak (bukan tombol merah), teks segmen 15 Bold (Semi Bold tidak dimuat), kunci PIN tanpa garis.
+
+### Tes yang berubah atau ditambah (seri FG)
+- Diubah: `StatusBadge.test` (testID bentuk, tanpa wadah), `formComponents.test` (dialog: tombol krem/merah, tanpa `danger`, PinPad/PinDots), `BottomBar.test`, `home.test` (mock `useAuth`, hero, pengguna baru, aktivitas), `practice.test` (langkah 1–4, Batalkan, bar aksi, tombol keluar di isi layar), `RecordPanel.test`, `ResultView.test` (teks status terpisah, kata target huruf kecil), `level1.test`, `words.test` (badge tanpa "Terakhir:/Terbaik:", filter, Jalur kata), `settings.test` (Keluar lewat rute PIN), `companionList.test` (tanpa hapus per baris), `wordScreens.test` (Hapus di Ubah), `auth.test` dan `v2Auth.test` (gerbang ke `/welcome`), `onboarding.test`, `progress.test`.
+- Ditambah: `SegmentedControl.test`, `ListGroup.test`, `SessionHeader.test`, `AnalyzingView.test`, `signOut.test`, `welcome.test`, `theme.literals.test`.
+
+### Yang masih kurang / terbuka
+1. **Belum diuji di perangkat sama sekali:** semua tampilan, 360 dp, skala 200%, TalkBack, kamera dengan oval SVG, splash native, keyboard di Masuk/Daftar (daftar periksa di `docs/CHECKLIST_360_200.md`).
+2. **D3:** batang target "Kekerasan suara" butuh nilai target dari backend dan perubahan kontrak API (SPEC §5).
+3. **D9:** lencana "Cahaya cukup" tidak dipasang (tidak ada cek pencahayaan di klien).
+4. **D12:** dialog keluar sesi latihan masih `Alert` sistem.
+5. Layar yang tidak di-restyle: Cek email, Masuk · Galat, Buat PIN, Lupa PIN, Kalibrasi, Tentang, formulir Kata baru/Ubah (selain tombol Hapus), layar Dataset/eksperimen. Keadaan Hasil "semua sesuai" (48:280) dan "rekaman tidak dihitung" (48:335) belum dibandingkan dengan Figma.
+6. Judul aktivitas Level 2 memakai id suku kata (riwayat tidak menyimpan kata induk); daftar kata Pendamping hanya menampilkan jumlah suku kata (data tidak menyimpan teksnya).
+7. flow-srs-ui.md belum diperbarui (D1, D2, D11 berbeda dari flow); logo belum diperiksa kemiripannya; ilustrasi bibir "u" masih kasar; penggunaan AI untuk desain dan kode wajib dicatat di dokumentasi lomba.
+8. Dev: setelah menarik komit dengan rute baru, jalankan `npx expo start` sekali agar `.expo/types/router.d.ts` dibuat ulang sebelum `npm run typecheck`.
+
+### Perbaikan setelah uji di iPhone (14 Nov 2026)
+- Header native diganti `AppHeader` (JS): iOS 26 membungkus item header native dalam gelembung kaca (bulatan kosong, kapsul bertumpuk, judul terpotong). Layar tab (Beranda, Pendamping, Pengaturan) dan Onboarding tanpa header, sesuai Figma; gerbang PIN Pendamping memberi jarak status bar sendiri. Label kapsul kembali = judul layar sebelumnya (Latihan, Pendamping, Pengaturan, Pilih kata); Tentang dibuka dari dua tempat, jadi labelnya tetap "Kembali".
+- Badge status di baris daftar kini di tengah (tanpa `alignSelf`), oval rekam proporsional (62% lebar panel), video contoh mengikuti rasio asli (maks 45% tinggi layar), spinner `LoadingView` di tengah area, Getar: status dan sakelar satu grup rata tengah.
+- Bentuk bibir: ditambah "o" (`LipShape`), dan `soundShape()` untuk "A panjang" (hero Beranda, Lihat, Hasil). Bentuk "o" digambar dari parameter superelips, belum ditinjau visual.
+- "Buat dengan AI" untuk kata dan tiap suku kata (kontrak §7, flow §7.5.2): `generateInstruction` di klien v2 (POST, 20 detik, batal), `src/data/instructions.ts` (tiruan bila `USE_MOCK`), komponen `AiInstruction` (konfirmasi ganti, memuat + Batal, Buat ulang, undo satu tingkat, label, pesan galat/offline/429 dengan jeda 30 detik, teks pengungkapan, peringatan). `instruction_source` belum disimpan ke penyimpanan (hanya label di formulir). Backend nyata belum diuji; `/v2` belum ada di server lokal.
+- Tentang disamakan dengan Figma 51:558 (judul, catatan, bagian berpemisah garis tipis, kartu versi Aplikasi/Mesin). Tombol "Pengaturan" di Tentang dihapus (tidak ada di Figma).
+- Putaran perbaikan berikutnya: efek tekan baris daftar kini penuh sampai tepi kartu (baris memegang padding kartu lewat konteks `ListGroup`; juga item bar bawah), kolom sandi "Tampilkan" di dalam kotak (aksesori `TextField`, Figma 27:70), "Rekan Wicara adalah alat bantu…" menempel di bawah layar Masuk, Tentang tetap terbuka saat belum masuk (tautan privasi dari Daftar sebelumnya dialihkan ke Selamat datang) dan kapsul kembalinya bernama asal layar lewat parameter `from` (nama rute "(tabs)" tidak pernah tampil), ikon aplikasi dan favicon dari logo Figma (iOS penuh, Android adaptif + monokrom), teks produk: tanpa LOGICODIX, tim, "mode demo" atau "mock" ("Profil contoh", "data contoh", "Lanjutan").
+
+## FG-13 (14 Nov 2026): animasi pembuka
+
+- `SplashIntro` (`app/src/components/SplashIntro.tsx`) menggantikan layar Memuat yang diam di `app/index.tsx`. `Animated` bawaan React Native, tanpa dependensi baru. Token di `splashMotion` (`src/theme`).
+- Urutan: logo muncul di posisi logo splash native (tengah layar), naik ke posisi Figma 106:627 (700 ms), nama, tagline, lalu catatan batas produk fade in; jeda 600 ms; fade out 300 ms; pindah ke tujuan gerbang. Logo tidak diberi skala agar sambungan dari splash native mulus.
+- Gerbang tidak berubah (urutan masuk, PIN, onboarding sama). Yang baru: pindah layar menunggu animasi selesai **dan** gerbang siap. Bila gerbang lebih lambat, layar tetap di keadaan akhir. Animasi hanya sekali per peluncuran (kembali ke gerbang setelah keluar/daftar tanpa animasi).
+- Reduce Motion: semua tampil sekaligus, jeda 600 ms, tanpa fade.
+- Layar tujuan (`welcome`, `auth/create-pin`, `onboarding`, `(tabs)`) memakai `animation: 'fade'` di `_layout.tsx`.
+- Bilah di Memuat tetap diam dan dekoratif (Figma menggambar bilah terisi sebagian; animasi pengisian akan mengklaim kemajuan yang tidak ada).
+- Figma hanya punya satu bingkai statis untuk splash (tanpa prototype); urutan gerak ini keputusan implementasi. design.md §8 dan §6.8 diperbarui.
+- Saran skill yang ditolak: tidak ada yang dipakai (tidak ada skill UI dimuat di langkah ini selain figma-design-to-code).
+- Tes: `SplashIntro.test` (baru); `auth.test` memakai tiruan `SplashIntro` agar tes gerbang tidak menunggu animasi.
+- **Belum diuji di perangkat:** kelancaran 60 fps, kesesuaian posisi logo dengan splash native di Android/iOS (ada kemungkinan lompatan kecil), dan fade ke layar tujuan.
+
+- FG-13b: bilah di Memuat menjadi indikator tak-tentu (isi 38 dp bergeser, `splashMotion.bar`) selama animasi pembuka dan selama gerbang belum siap; diam bila Reduce Motion. Tidak menampilkan persentase karena gerbang tidak melaporkan kemajuan. Belum diuji di perangkat.
+
+## FG-14 sampai FG-19 (14 Nov 2026): layar yang belum disesuaikan, nama panggilan, gambar bibir
+
+Skill yang dimuat: `figma-design-to-code` (membaca konteks), `figma-use` dan `figma-generate-design` (hanya untuk mengubah teks dan menambah frame di Figma). Tidak ada saran skill yang ditolak pada langkah ini.
+
+- **FG-14** (`21d4225`): Cek email per Figma 27:234 (kapsul "Ke Masuk", ikon surat, catatan, dua tombol di bawah). "Username" menjadi **Nama panggilan** di Daftar: 2–20 karakter, boleh huruf (termasuk beraksen), angka, spasi, titik, apostrof, tanda hubung; spasi berderet dirapatkan; `display_name` di Supabase tidak berubah. Masuk memakai email + kata sandi saja. Figma diperbarui (Masuk, Masuk · Galat, Daftar, Pengaturan, dialog Keluar): "Email atau username" menjadi "Email", "Username" menjadi "Nama panggilan", pesan "Username tersedia." dan ikon centang dihapus (tidak pernah ada pengecekan). Tes: `checkEmail.test` baru; `validators`, `formComponents`, `auth` disesuaikan.
+- **FG-15** (`5eb2d2c`): Buat PIN (29:28, 29:86): "Langkah n dari 2", kapsul Kembali di langkah 2, papan angka menempel di bawah (`PinScreenBody` mendapat `top`, `contentStyle`, dan spacer; Gerbang PIN dan Ganti PIN ikut menempelkan papan di bawah, sesuai Figma 50:160). Lupa PIN (29:144): kapsul Kembali, ikon gembok, "Lupa PIN?", kolom "Kata sandi akun", "Lanjut", "Batal". **Selisih dari Figma:** Kembali tidak ada di langkah 1 (tidak ada layar tujuan; PIN wajib), instruksi langkah 1 memakai teks lama yang lebih lengkap (disimpan di HP, tidak dikirim).
+- **FG-16** (`4eaa7b8`): Kalibrasi (29:274): `SessionHeader`, kartu bentuk bibir, panel kamera langsung, "Rekam (3 detik)". Tahap "Siap, rekam" dihapus (alur satu tap lebih pendek); "Lewati, ke beranda" diganti kapsul "Kembali" (`router.back()` atau Beranda). Judul langkah memakai tanda kutip lengkung. Instruksi per langkah dipertahankan (Figma hanya punya kalimat umum). Cek email tidak lagi menampilkan header Stack. `FaceGuide` tidak dipakai lagi dan dihapus.
+- **FG-17** (`bbf9341`): Kata baru dan Ubah kata (50:506, 61:716): `WordFormScreen` (kapsul "Daftar kata", judul serif, keterangan), kartu video (`videoMeta.ts` memformat "0:03 · 2,1 MB"), kartu suku kata dengan ringkasan video dan tombol `compact` Naik/Turun/Hapus sebaris, label "Video contoh", teks AI dan label "Dibuat dengan AI" diurutkan seperti Figma, Simpan dan Batal tanpa ikon, "Maksimal 6 suku kata." selalu tampil. Header Stack disembunyikan untuk kedua layar. **Selisih:** pratinjau video muted dipertahankan untuk video kata; tombol "Rekam video baru" tetap ada selain "Ganti dari galeri" (Figma hanya "Ganti video"); teks bantu kata tetap "Huruf saja. Spasi atau tanda hubung boleh…" karena sesuai aturan.
+- **FG-18** (`4486536`): judul aktivitas Level 2 memakai `label` yang disimpan bersama percobaan (lokal saja; `sync.ts` memetakan kolom satu per satu sehingga `label` tidak terkirim). Daftar Pendamping menampilkan "Suku kata: to · long" dari data Pendamping sendiri (`MyWord.syllables`). **Koreksi:** sebelumnya saya menulis daftar hanya tahu jumlah suku kata dan butuh perubahan kontrak; yang benar hanya daftar katalog v2 (`WordSummary`) yang tidak memuat teks suku kata. Daftar Pendamping tidak butuh perubahan backend, jadi usulan `syllables` di kontrak **tidak** diajukan.
+- **FG-19** (`9f88ec8`): gambar bibir tetap dari Figma (frame baru "Ilustrasi bibir": a, i, u, closed; 130 × 82) di `src/results/lipArt.ts`; `LipIllustration` menggambar jalur itu. Hanya Level 1 a, i, u (+ rapat untuk Kalibrasi). Bunyi **o dihapus** dari Level 1: tipe `LipShape`, `soundShape`, `targetShape`, `unitShapes`, regex judul, katalog tiruan `l1_o`, teks bantu `l1_o`, dan tes. Hitungan Level 1 menjadi 5 materi (a, i, u, "a panjang", "pelan ke keras"). `lipShapes.ts` tetap menyediakan cincin 20 titik untuk grafik "Cermin bibir". Di Figma, "u" lama di kartu hero Beranda Latihan (57:516) diganti gambar baru. Server `items.json` masih memuat `l1_e` dan `l1_o` dengan `active: false`; tidak diubah (di luar app).
+- **Dokumen:** `flow-srs-ui.md` menjadi rev. 8 (bagian §14 merangkum D1, D2, D11, dan keputusan baru); `design.md` §5.9, §6.6, §6.8, §14 diperbarui.
+- **Belum diuji di perangkat:** semua layar di atas; terutama tiga tombol sebaris di kartu suku kata pada layar 360 dp dan skala teks 200%, alur Kalibrasi satu layar (kamera langsung), dan bentuk gambar "i" dan "u" (digambar tim, belum ditinjau). Alur email konfirmasi Supabase sengaja tidak diuji (tahap FE).
+- Tes: 682 lulus (jest), typecheck bersih.
+
+## FG-20 (14 Nov 2026): Level 1 menjadi vokal a, i, u, e, o
+
+- Keputusan Rico 14 Nov: Level 1 memuat **a, i, u, e, o** dan teknologi Level 1 ditambah **Wav2Vec2** (dikerjakan backend; app hanya menampilkan hasilnya).
+- Gambar bibir **e** dan **o** digambar di Figma (frame "Ilustrasi bibir", urutan a, i, u, e, o, rapat), lalu dipasang di `src/results/lipArt.ts`. Gambar tampil otomatis di sesi latihan, Hasil, **kartu hero Beranda** (lewat `soundShape`), dan Kalibrasi tidak berubah (diam, a, i, u).
+- Kembali: tipe `LipShape`, `LIP_LABELS`, cincin grafik "Cermin bibir" (`lipShapes.ts`), `soundShape`/`targetShape`/`unitShapes`, regex judul Level 1, katalog tiruan (`l1_e`, `l1_o`), teks bantu daftar Level 1 ("Bibir setengah terbuka", "Bibir bulat"). Hitungan Level 1 menjadi 7 materi (5 vokal + "a panjang" + "pelan ke keras").
+- `CLAUDE.md` (cakupan dan Wav2Vec2) dan `flow-srs-ui.md` (§1 teknologi, D17) diperbarui.
+- **Perlu backend:** `server/app/content/items.json` masih memuat `l1_e` dan `l1_o` dengan `active: false`; aktifkan, beserta aturan penilaian dan scorer Wav2Vec2 untuk e dan o, supaya `/v1/analyze` menerimanya. Sampai itu, penilaian e dan o hanya jalan dengan `EXPO_PUBLIC_ANALYZE_API=mock` atau v2. Kontrak API tidak diubah oleh app.
+- Belum diuji di perangkat; bentuk e dan o digambar tim dan belum ditinjau.
+
+- FG-20b: Level 1 hanya vokal a, i, u, e, o. "A panjang" dan "Pelan ke keras" tidak lagi tampil (katalog tiruan, teks bantu, dan `catalogToL1` menyaring `l1_[aiueo]`, jadi server yang masih mengirim item l0_* tidak memunculkannya). Hitungan Level 1 menjadi 5 materi. Logika lama l0_* (progresi, dataset, hasil) tidak diubah.
+
+- FG-21: Figma Kata baru (50:506) dan Ubah kata (61:716) kini menggambar tombol "Buat dengan AI" dan catatan pengiriman di tiap kartu suku kata (di bawah kolom instruksi, di atas Naik/Turun/Hapus). Kode sudah memilikinya sejak formulir dibuat (`AiInstruction` di `SyllableRow`, konteks kata induk dikirim sesuai kontrak §7, tes `aiInstruction.test`); tidak ada perubahan kode.
+
+- FG-21b: Figma Kata baru dan Ubah kata kini menggambar tombol video (Ganti video, Hapus) di tiap kartu suku kata, di bawah ringkasan video; kode sudah punya `VideoField` per suku kata. Tidak ada perubahan kode.
+
+- FG-21c: video suku kata memakai kartu video yang sama dengan video kata (ubin 64, nama berkas, "0:02 · 1,2 MB", pratinjau muted); varian `compact` di `VideoField` dihapus. Figma Kata baru dan Ubah kata disamakan. Kontrol video (Ganti, Hapus, Rekam) tetap di bawah kartu.
+
+- FG-21d: kartu suku kata punya keterangan yang sama dengan kata: teks bantu di bawah kolom suku kata ("Huruf saja, tanpa spasi. Maksimal 10 huruf."), label "Video contoh" di atas kartu video (nama untuk pembaca layar tetap "Suku kata n: video"), teks bantu instruksi, tombol AI dan catatannya. Figma disamakan.
+
+## FG-22 (14 Nov 2026): Kebijakan privasi dan Tentang
+
+- Halaman baru **Kebijakan Privasi** (`app/privacy.tsx`, isi di `src/content/privacy.ts`, 10 bagian: ringkasan, rekaman latihan, data akun, hasil dan kalibrasi, kata dan video Pendamping, instruksi AI, data di HP, pilihan, batas penggunaan, perubahan). Dapat dibaca sebelum masuk (rute `privacy` ditambahkan ke daftar `SignedOutRedirect`). Tautan dari Tentang (baris "Baca kebijakan privasi") dan dari Daftar (menggantikan tautan ke Tentang). Figma: frame baru "Kebijakan privasi" di sebelah Tentang.
+- Teks **Tentang** diperbarui (Level 1 a, i, u, e, o; Level 2 suku kata; Level 3 kata; evaluasi awal tiga anggota tim; layanan online menyimpan hasil tanpa video atau audio). Figma 51:558 disamakan. Wav2Vec2 sengaja tidak disebut di teks produk karena belum ada di server lokal (prinsip jujur); tambahkan setelah backend siap.
+- Komponen bersama `InfoSection` dipakai Tentang dan Kebijakan privasi.
+- **Perlu keputusan tim:** kebijakan menyatakan penghapusan akun dan data online belum tersedia dan meminta menghubungi tim pengembang, tetapi belum ada kontak. Tambahkan kontak (email) di `src/content/privacy.ts` bagian "Pilihanmu". Isi kebijakan ditulis dari perilaku kode, bukan nasihat hukum; tinjau sebelum submission.
+- Selisih Figma lama: kartu versi di Figma Tentang hanya satu baris (Aplikasi); app punya dua (Aplikasi, Mesin).
+
+## FG-23 (14 Nov 2026): Wav2Vec2 dipakai, Allosaurus dibuang
+
+- Keputusan Rico: backend sudah berjalan dengan **Wav2Vec2**; **Allosaurus tidak dipakai**.
+- Teks produk: Tentang punya bagian "Cara kerja" (MediaPipe, Parselmouth, Wav2Vec2; semua di server latihan); Kebijakan privasi menyebut ketiganya dan memuat kontak `rekanwicara@gmail.com`; README (diagram dan keterangan model), `CLAUDE.md`, `CONTEXT.md`, `MODEL_CARD.md` diperbarui. Figma Tentang dan Kebijakan privasi disamakan.
+- Dihapus dari app: layar `Uji Allosaurus`, tombolnya di Pengaturan (versi dev), metode klien `allosaurus`, tipe `AllosaurusResponse`, dan dua berkas tesnya. Layar `Uji Wav2Vec2` dan `Uji Gabungan` (dev) tetap ada.
+- Belum diubah (di luar app): `server/` masih memuat route eksperimen Allosaurus, `ml/requirements-allosaurus.txt`, dan `docs/ALLOSAURUS_POC.md`; hapus bila backend setuju. SPEC.md masih mencatat eksperimen itu.
+
+## FG-24 sampai FG-26 (14 Nov 2026): instruksi bertahap
+
+- Ide Rico: instruksi tidak panjang ke bawah; dibaca per langkah sambil menonton video. **Skema tidak berubah**: satu kolom `instruction`, langkah = baris (`\n`). Keputusan: pilihan A (satu kolom per langkah di formulir); batas 1–5 langkah, tiap langkah 5–120 karakter, total 10–500.
+- **FG-24** (`e801fb8`): `src/forms/instructionSteps.ts` (`editRows`, `cleanInstruction`, `splitSteps`, `fromAi`), validator baru (`stepEmpty`, `stepShort`, `stepLong`, `stepsMany`), komponen `InstructionSteps` (kata dan suku kata), kartu suku kata **bisa dilipat** (`summarize`, satu terbuka pada satu waktu, kartu baru terbuka, kartu bermasalah terbuka saat Simpan), **bar Simpan dan Batal menempel** (`WordFormScreen.footer`). Instruksi lama satu paragraf dimuat sebagai langkah (dipecah per kalimat bila lebih dari 120 karakter). Hasil AI dirapikan lewat `fromAi` di `data/instructions.ts`. `TextField` mendapat `spokenLabel`. Tes baru: `instructionSteps.test`, kasus formulir, validator.
+- **FG-25** (`951e9bf`): carousel instruksi di layar Lihat (`InstructionCarousel`): kartu per langkah, "Langkah n dari N" (live region), tombol Sebelumnya/Berikutnya (BigButton `compact` + `iconAfter`), titik dekoratif, geser opsional, Reduce Motion mematikan animasi gulir. Data tiruan: kata MAMA dan TOLONG punya beberapa langkah.
+- **FG-26**: `docs/AI_INSTRUCTION_BRIEF.md` untuk backend (format baris, batas, yang boleh dan dilarang, contoh prompt, pemeriksaan server); kontrak §7, `design.md`, `flow-srs-ui.md` (D21) diperbarui. Figma: kolom langkah, kartu suku kata terlipat dan terbuka, bar aksi, dan carousel di "Latihan · Lihat".
+- **Perlu backend:** prompt `/v2/instructions/generate` mengikuti brief. App sudah menjaga hasil yang meleset (pangkas, buang nomor), tetapi jawaban satu paragraf panjang hanya dipecah per kalimat.
+- **Keputusan terbuka:** instruksi bawaan tim (Level 1, mis. "Buka mulut lebar dan ucapkan A.") tetap satu langkah; pecah bila tim ingin.
+- **Belum diuji di perangkat:** gulir geser di carousel, tinggi kartu pada layar 360 dp dan skala teks 200%, dan perilaku fokus saat kartu suku kata terbuka atau terlipat.

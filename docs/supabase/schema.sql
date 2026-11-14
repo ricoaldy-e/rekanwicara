@@ -1,4 +1,4 @@
--- Cermin Wicara: Supabase schema (SPEC §9). Numbers only: no video or audio is ever stored here.
+-- Rekan Wicara: Supabase schema (SPEC §9). Numbers only: no video or audio is ever stored here.
 --
 -- HOW TO RUN (once per project)
 --   1. supabase.com -> New project.

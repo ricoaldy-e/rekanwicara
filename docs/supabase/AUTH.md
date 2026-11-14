@@ -190,3 +190,25 @@ Dokumentasi resmi yang diperiksa:
 [verifyOtp](https://supabase.com/docs/reference/javascript/auth-verifyotp),
 [updateUser](https://supabase.com/docs/reference/javascript/auth-updateuser),
 [Admin deleteUser](https://supabase.com/docs/reference/javascript/auth-admin-deleteuser).
+
+
+## Integrasi desain saat merge (14 Nov 2026)
+
+Tampilan autentikasi dari fe/design menggunakan auth/session.ts dan AuthProvider.
+Seluruh pemanggil data dan companion memakai singleton auth/supabase.ts yang sama;
+credential mutations memakai lock bersama. Sesi anonim tidak diterima sebagai akun.
+Profil existing tidak ditimpa saat login atau sinkronisasi.
+
+PIN dibuat pada layar tersendiri sebelum onboarding persetujuan. pin/pinStore.ts
+meneruskan operasi ke user/storage.ts dengan expected UID, memakai key akun existing.
+PIN bersama lama tetap utuh dan tidak diklaim oleh akun mana pun. Ganti PIN memakai
+PIN lama pada saat commit; membuka create-pin tidak mengizinkan overwrite. Lupa PIN
+memanggil authorizePinReset(password, expectedUid), lalu resetPin(nextPin, expectedUid)
+melalui adapter FE. Izin hanya sekali pakai, hanya di memori dan terikat token sesi
+hasil verifikasi password. Pergantian akun/token mengharuskan verifikasi lagi.
+PIN tidak dikirim ke FastAPI atau database.
+
+Validasi fase ini: 296 Jest/17 suite, 2 pytest harness, typecheck dependency autentikasi
+lulus; lint auth 0 error/16 warning. Ini pengujian lokal dengan SDK/keystore sintetis,
+bukan pengulangan login/register Cloud atau pengujian iPhone. Typecheck global masih
+terhalang konflik halaman latihan dan rekaman; merge keseluruhan belum selesai.

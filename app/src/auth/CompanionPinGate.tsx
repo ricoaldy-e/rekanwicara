@@ -64,6 +64,6 @@ export function CompanionPinGate({ children, onCreated }: { children: ReactNode;
 }
 
 const styles = StyleSheet.create({
-  input: { minHeight: touchTarget, borderWidth: 3, borderColor: colors.border, borderRadius: radius.lg,
+  input: { minHeight: touchTarget, borderWidth: 3, borderColor: colors.border, borderRadius: radius.card,
     paddingHorizontal: spacing.md, fontSize: fontSize.large, color: colors.text, letterSpacing: 6 },
 });

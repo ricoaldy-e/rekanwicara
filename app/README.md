@@ -1,4 +1,4 @@
-# Cermin Wicara — aplikasi Expo
+# Rekan Wicara — aplikasi Expo
 
 Latihan pelafalan melalui indikator bibir dan suara. Gunakan Node ≥22.13 dan Expo Go SDK 58.
 Server Python harus berjalan di laptop dalam jaringan lokal yang bisa dijangkau HP.

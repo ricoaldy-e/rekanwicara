@@ -1,6 +1,6 @@
 import { act, render, waitFor } from '@testing-library/react-native';
 import type { Session } from '@supabase/supabase-js';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { UserProvider, useUser } from '../src/state/user';
 import { newProfile, type Profile } from '../src/user/pure';
@@ -44,7 +44,8 @@ jest.mock('../src/user/storage', () => ({
 }));
 
 function Capture() {
-  latest = useUser();
+  const user = useUser();
+  useEffect(() => { latest = user; }, [user]);
   return null;
 }
 
@@ -136,8 +137,10 @@ it('drops a child PIN-unlocked state on account changes but keeps it during same
   let unlock!: () => void;
   function Gate() {
     const [value, setValue] = useState(false);
-    unlocked = value;
-    unlock = () => setValue(true);
+    useEffect(() => {
+      unlocked = value;
+      unlock = () => setValue(true);
+    }, [value]);
     return null;
   }
   await render(<UserProvider><Capture /><Gate /></UserProvider>);
@@ -154,11 +157,11 @@ it('drops a child PIN-unlocked state on account changes but keeps it during same
   expect(unlocked).toBe(false);
 });
 
-it('can finish onboarding with the verified existing account PIN without overwriting it', async () => {
+it('finishes consent onboarding without rewriting the PIN created on the separate screen', async () => {
   mockVerifyPin.mockResolvedValueOnce(true);
   await render(<UserProvider><Capture /></UserProvider>);
   await waitFor(() => expect(latest.ready).toBe(true));
-  await act(async () => latest.completeOnboarding('1234'));
+  await act(async () => latest.completeOnboarding());
   expect(latest.profile.onboarded).toBe(true);
   expect(mockSavePin).not.toHaveBeenCalled();
   expect(mockSave).toHaveBeenCalledWith(expect.objectContaining({ userId: A, onboarded: true }));

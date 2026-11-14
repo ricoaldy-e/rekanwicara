@@ -9,7 +9,7 @@ import { radius } from '../theme';
 import { manualError, signedVideo } from './service';
 
 function RemotePlayer({ uri, onError }: { uri: string; onError(): void }) {
-  const player = useVideoPlayer(uri, (value) => { value.loop = false; });
+  const player = useVideoPlayer(uri, (value) => { value.loop = false; value.muted = true; });
   useEffect(() => {
     const listener = player.addListener('statusChange', (event) => {
       if (event.status === 'error') onError();
@@ -49,4 +49,4 @@ export function VideoPreview({ video, localUri, ownerId }: { video: VideoReferen
   </View>;
 }
 
-const styles = StyleSheet.create({ video: { width: '100%', aspectRatio: 3 / 4, borderRadius: radius.lg } });
+const styles = StyleSheet.create({ video: { width: '100%', aspectRatio: 3 / 4, borderRadius: radius.card } });

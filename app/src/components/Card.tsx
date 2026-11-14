@@ -1,7 +1,9 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { colors, radius, spacing, touchTarget } from '../theme';
+import { useFocusRing } from '../a11y/useFocusRing';
+import { colors, iconSize, radius, spacing, stroke, touchTarget } from '../theme';
 
 export interface CardProps {
   children: ReactNode;
@@ -14,6 +16,7 @@ export interface CardProps {
 }
 
 export function Card({ children, onPress, accessibilityLabel, accessibilityHint, style, testID }: CardProps) {
+  const { focusProps, focusStyle } = useFocusRing();
   if (!onPress) {
     return (
       <View testID={testID} style={[styles.card, style]}>
@@ -28,9 +31,13 @@ export function Card({ children, onPress, accessibilityLabel, accessibilityHint,
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
-      style={({ pressed }) => [styles.card, styles.pressable, pressed && styles.pressed, style]}
+      {...focusProps}
+      style={({ pressed }) => [styles.card, styles.pressable, pressed && styles.pressed, style, focusStyle]}
     >
-      {children}
+      <View style={styles.row}>
+        <View style={styles.content}>{children}</View>
+        <Ionicons name="chevron-forward" size={iconSize.base} color={colors.textMuted} accessible={false} />
+      </View>
     </Pressable>
   );
 }
@@ -38,11 +45,13 @@ export function Card({ children, onPress, accessibilityLabel, accessibilityHint,
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderWidth: 2,
-    borderRadius: radius.lg,
+    borderRadius: radius.card,
+    borderWidth: stroke.hairline,
+    borderColor: colors.hairline,
     padding: spacing.md,
   },
   pressable: { minHeight: touchTarget, justifyContent: 'center' },
-  pressed: { backgroundColor: colors.infoBg },
+  pressed: { backgroundColor: colors.surfaceRaised },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  content: { flex: 1 },
 });

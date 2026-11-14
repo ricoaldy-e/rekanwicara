@@ -44,7 +44,7 @@ export const CONSULT_ADVICE =
 export function reportText(w: Weekly, name: (itemId: string) => string): string {
   const list = (ids: string[]) => (ids.length > 0 ? ids.map(name).join(', ') : '-');
   const lines = [
-    'Laporan latihan Cermin Wicara (7 hari terakhir)',
+    'Laporan latihan Rekan Wicara (7 hari terakhir)',
     `Sesi latihan: ${w.sessions}`,
     `Percobaan: ${w.attempts}` + (w.attempts > 0 ? `, ${w.green} sesuai` : ''),
     `Materi lulus: ${list(w.passed)}`,

@@ -1,4 +1,4 @@
-# CONTEXT — Cermin Wicara (serah terima ke agen AI lain / laptop lain)
+# CONTEXT — Rekan Wicara (serah terima ke agen AI lain / laptop lain)
 
 Pembaruan Auth 13 Nov: logic pendamping kini memakai email/password Supabase, tanpa
 login anonim otomatis. Profil/antrean/PIN baru diisolasi per auth.uid(); data lama tetap
@@ -23,14 +23,14 @@ pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks 
 
 ## 1. Ringkasan proyek
 
-- **Cermin Wicara**: aplikasi latihan pelafalan untuk penyandang Tuli/tunarungu yang **memilih** berlatih bicara.
+- **Rekan Wicara**: aplikasi latihan pelafalan untuk penyandang Tuli/tunarungu yang **memilih** berlatih bicara.
   Pengguna merekam 2–3 detik video wajah + suara; server menilai **bentuk bibir** (MediaPipe Face Landmarker)
   dan **suara** (Parselmouth/Praat) dengan **aturan berambang**; app menampilkan dua indikator (Bibir, Suara)
   dan satu petunjuk.
 - Lomba **LOGICODIX 2026**, subtema Inclusive Health. **Kunci fitur: Jumat 13 Nov 2026 malam.
   Submission: Sabtu 14 Nov 2026.** Source code tidak boleh diubah setelah submission.
 - **Tidak ada training model.** Data tim (3 perekam, 81 klip + 16 video model) hanya dipakai untuk menyetel
-  ambang dan menguji. Wav2Vec2 ditunda ke roadmap.
+  ambang dan menguji. Wav2Vec2 (model terlatih, tidak dilatih tim) dipakai di server untuk Level 1 sejak 14 Nov 2026; Allosaurus tidak dipakai.
 - **Batas produk (wajib di semua kode dan teks UI):** alat bantu latihan, bukan diagnosis atau terapi; jangan pakai
   kata "normal", "abnormal", "gangguan", "diagnosis" (ada tes jest yang memindai `app/app` dan `app/src`);
   status **Sesuai / Mendekati / Belum sesuai** selalu warna + ikon + teks; UI tanpa isyarat suara (visual + getar);
@@ -49,7 +49,7 @@ pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks 
 | A4 | proses dataset, halaman `/labeler`, fold LOSO, laporan | selesai; cek label manusia selesai (162 penilaian) |
 | A6 | penyetelan ambang, evaluasi LOSO, model card | selesai |
 | B3 | Supabase, aturan kemajuan §8.4, Mode Pendamping | kode selesai; sinkronisasi nyata dan antrean diuji saat I1 (rincian manual tersisa di checklist I1) |
-| A5 | scorer Wav2Vec2 | dilewati (roadmap) |
+| A5 | scorer Wav2Vec2 | [14 Nov] dipakai di server untuk Level 1; dikerjakan backend |
 | **I1** | **integrasi ujung ke ujung di HP** | selesai dengan keterbatasan uji; iPhone, p90 manual 3,91 s; pemulihan antrean video diuji dengan simulasi koneksi Supabase gagal |
 | **B4** | polish, layar "Tentang", mode demo, ikon, (APK bila perlu) | selesai untuk Expo Go; Tentang/demo/pemulihan profil dikonfirmasi di iPhone. APK belum diminta/disiapkan; splash release dan VoiceOver penuh belum diuji |
 | **F** | kunci fitur, README root, tag `v1.0-submission` | snapshot awal selesai; freeze dibuka atas persetujuan pengguna untuk F-fix1–F-fix4. Tag lama tetap menunjuk `1c930f9`, tanpa keempat perbaikan ini |

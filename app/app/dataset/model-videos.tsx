@@ -17,7 +17,7 @@ import { deleteLocalFile, videoUpload } from '../../src/recording/localFile';
 import { RecordPanel } from '../../src/recording/RecordPanel';
 import { useUpload } from '../../src/recording/useUpload';
 import { useSettings } from '../../src/state/settings';
-import { colors, fontSize, spacing } from '../../src/theme';
+import { colors, fontSize, iconSize, spacing } from '../../src/theme';
 
 type Presence = 'yes' | 'no' | 'unknown';
 
@@ -160,8 +160,8 @@ export default function ModelVideosScreen() {
             <View style={styles.row}>
               <Ionicons
                 name={p === 'yes' ? 'checkmark-circle' : p === 'no' ? 'ellipse-outline' : 'help-circle-outline'}
-                size={34}
-                color={p === 'yes' ? '#1B5E20' : colors.textMuted}
+                size={iconSize.status}
+                color={p === 'yes' ? colors.success : colors.textMuted}
               />
               <Text style={styles.item}>{m.text}</Text>
               <Text style={styles.status}>{p === 'yes' ? 'Sudah ada' : p === 'no' ? 'Belum' : '?'}</Text>
@@ -174,10 +174,10 @@ export default function ModelVideosScreen() {
 }
 
 const styles = StyleSheet.create({
-  target: { fontSize: 56, fontWeight: '900', color: colors.text, textAlign: 'center' },
+  target: { fontSize: fontSize.hero, fontWeight: '700', color: colors.text, textAlign: 'center' },
   meta: { fontSize: fontSize.body, color: colors.textMuted, textAlign: 'center' },
   gap: { gap: spacing.sm },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  item: { flex: 1, fontSize: fontSize.large, fontWeight: '800', color: colors.text },
+  item: { flex: 1, fontSize: fontSize.large, fontWeight: '700', color: colors.text },
   status: { fontSize: fontSize.body, fontWeight: '700', color: colors.text },
 });

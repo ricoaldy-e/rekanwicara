@@ -1,4 +1,4 @@
-# Cermin Wicara — konteks proyek untuk Claude Code
+# Rekan Wicara — konteks proyek untuk Claude Code
 
 ## Ringkas
 Aplikasi latihan pelafalan untuk penyandang Tuli/tunarungu yang **memilih** berlatih bicara.
@@ -18,7 +18,7 @@ aplikasi menampilkan dua indikator (Bibir, Suara) dan satu petunjuk.
 - Tidak ada pengenalan identitas wajah. Wajah hanya dipakai untuk geometri mulut.
 - UI tidak boleh bergantung pada suara: semua isyarat visual (+ getar). Tidak ada bunyi beep.
 - Status tidak boleh dibedakan dengan warna saja: selalu warna + ikon + teks.
-- Cakupan MVP: Level 0–3, bunyi Tahap A (vokal a, i, u [+ e, o bonus]; konsonan m, p, b).
+- Cakupan MVP: Level 0–3. Level 1 = vokal a, i, u, e, o (diputuskan 14 Nov 2026; sebelumnya e, o bonus); konsonan m, p, b di Level 2–3.
   Level 4 (pasangan minimal) adalah bonus.
 
 ## Stack
@@ -27,7 +27,7 @@ aplikasi menampilkan dua indikator (Bibir, Suara) dan satu petunjuk.
   jangan menambah modul native custom.
 - `server/`: Python 3.11, FastAPI, MediaPipe Face Landmarker (Python Tasks API), praat-parselmouth,
   FFmpeg/ffprobe (binary sistem), numpy/scipy, scikit-learn (hanya untuk metrik evaluasi).
-  Wav2Vec2 DITUNDA ke roadmap: jangan memasang torch/transformers di MVP.
+  Wav2Vec2 dipakai untuk Level 1 (diputuskan 14 Nov 2026) dan berjalan di server (CPU, lokal) yang dikerjakan tim backend; jangan memasang torch/transformers di `app/`. Allosaurus tidak dipakai.
 - Data tim: 3 perekam, maksimal 100 video. Tidak ada training model; data hanya untuk menyetel ambang dan menguji.
 - `ml/`: skrip dataset, pelabelan, penyetelan ambang, evaluasi. Wajib memakai ulang modul `server/app/pipeline`.
 - Supabase: profil, riwayat latihan, progres. Server menyimpan kalibrasi di disk lokal (angka saja).
@@ -35,7 +35,7 @@ aplikasi menampilkan dua indikator (Bibir, Suara) dan satu petunjuk.
 
 ## Struktur repo
 ```
-cermin-wicara/
+rekanwicara/
 ├── CLAUDE.md
 ├── docs/            SPEC.md, PROGRESS.md, EVAL_REPORT.md, MODEL_CARD.md, supabase/
 ├── app/             Expo app
@@ -87,3 +87,20 @@ cermin-wicara/
 - Kunci Supabase: app di `app/.env` (`EXPO_PUBLIC_...`), server di `server/.env`.
 - Dataset rekaman (`data/raw`) hanya untuk pengembangan, dengan persetujuan tertulis penutur,
   dan tidak pernah diunggah ke layanan cloud publik.
+
+Sebelum mengubah UI apa pun di app/, lihat figma dan @docs/design.md dan ikuti aturannya.
+
+## Implementasi Figma (14 Nov 2026)
+Sumber visual: file Figma C5mdKAfFngxd8dz1BvAZrO, halaman "Rekan Wicara · UI Final" (node 24:2).
+- Tiap langkah: create_session, muat skill yang disebut di prompt langkah itu (lewat Skill tool, SEBELUM
+  menulis kode), lalu get_design_context + get_screenshot untuk node yang disebut. Keluaran Figma hanya
+  referensi: terjemahkan ke StyleSheet, token, dan komponen yang sudah ada. Jangan salin kode web/Tailwind.
+- Skill hanya memberi saran. Bila saran skill bertentangan dengan docs/design.md atau batas produk di
+  CLAUDE.md, design.md dan CLAUDE.md menang: tanpa bayangan/glow, tanpa miring, teks ≥ 15, target ≥ 48 dp,
+  status bukan hanya warna, tanpa gradasi. Catat saran yang ditolak di docs/PROGRESS.md.
+- Hanya tata letak dan gaya. Logika, data, rute, testID, accessibilityLabel tidak berubah.
+- Bila Figma bertentangan dengan batas produk atau design.md, ikuti batas produk dan catat selisihnya.
+- Tanpa dependensi baru tanpa bertanya. Tanpa hex/ukuran literal di layar; semua lewat app/src/theme.
+- Satu langkah = satu komit "phase FG-n: ...". Jalankan npm test dan npm run typecheck.
+  Alur rekam→hasil rusak dan tidak beres ±20 menit = git revert.
+- Intinya desgin figma adalah sumber design yang saya inginkan

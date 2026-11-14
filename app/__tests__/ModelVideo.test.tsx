@@ -1,13 +1,14 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import type { VideoPlayerStatus } from 'expo-video';
 
-import type { Item } from '../src/api/types';
+import type { PracticeItem } from '../src/data/types';
 import { ModelVideo } from '../src/practice/ModelVideo';
 
 type StatusEvent = { status: VideoPlayerStatus; error?: { message: string } };
 interface MockPlayer {
   status: VideoPlayerStatus;
   loop: boolean;
+  muted?: boolean;
   play: jest.Mock;
   release: jest.Mock;
   listeners: Set<(event: StatusEvent) => void>;
@@ -18,7 +19,7 @@ const mockHasVideo = jest.fn();
 const mockApi = { baseUrl: 'http://example.test', hasModelVideo: mockHasVideo };
 const mockPlayers: MockPlayer[] = [];
 let mockInitialStatus: VideoPlayerStatus = 'loading';
-const item: Item = { item_id: 'l1_a', level: 1, text: 'a', units: ['a'], priority: 'required', emoji: null, active: true };
+const item: PracticeItem = { key: 'l1_a', itemId: 'l1_a', level: 1, text: 'a', instruction: 'Buka mulut lebar dan ucapkan A.', source: 'default' };
 
 function mockCreatePlayer(): MockPlayer {
   const listeners = new Set<(event: StatusEvent) => void>();
@@ -79,6 +80,8 @@ it('shows loading during the check and native buffering, then plays and cleans u
   expect(screen.queryByLabelText('Memuat video contoh')).toBeNull();
   expect(screen.getByTestId('synthetic-video')).toBeTruthy();
   expect(mockPlayers[0].loop).toBe(true);
+  expect(mockPlayers[0].muted).toBe(true);
+  expect(screen.getByTestId('model-instruction')).toHaveTextContent('Buka mulut lebar dan ucapkan A.');
   expect(mockPlayers[0].play).toHaveBeenCalledTimes(1);
   await view.unmount();
   expect(mockPlayers[0].listeners.size).toBe(0);
@@ -144,4 +147,17 @@ it('ignores a completed availability check after unmount', async () => {
   await view.unmount();
   await act(async () => finish(true));
   expect(mockPlayers).toHaveLength(0);
+});
+
+it('shows text only, without a video check, when not analysing with v1', async () => {
+  await render(<ModelVideo item={item} source="mock" />);
+  expect(mockHasVideo).not.toHaveBeenCalled();
+  expect(screen.getByTestId('model-video-missing')).toBeTruthy();
+  expect(screen.getByTestId('model-instruction')).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Coba muat video lagi' })).toBeNull();
+});
+
+it('labels an AI-written instruction', async () => {
+  await render(<ModelVideo item={{ ...item, instructionSource: 'ai' }} source="mock" />);
+  expect(screen.getByText('Instruksi dibuat dengan bantuan AI')).toBeTruthy();
 });

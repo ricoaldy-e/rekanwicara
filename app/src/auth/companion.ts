@@ -3,24 +3,12 @@ import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 import { createApiClient } from '../api/client';
 import { getClient, isSupabaseConfigured } from '../data/supabase';
 import { removeAccountData } from '../user/storage';
+import { withAuthChange as changeAuth } from './supabase';
 
 export interface CompanionProfile {
   user_id: string;
   display_name: string | null;
   created_at: string;
-}
-
-let changingAuth = false;
-
-/** Prevent a second login/logout from changing the owner during credential mutations. */
-async function changeAuth<T>(operation: () => Promise<T>): Promise<T> {
-  if (changingAuth) throw new Error('Tunggu proses akun yang sedang berjalan.');
-  changingAuth = true;
-  try {
-    return await operation();
-  } finally {
-    changingAuth = false;
-  }
 }
 
 function emailAddress(email: string): string {

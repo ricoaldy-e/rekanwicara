@@ -5,7 +5,7 @@ import { ActivityIndicator, Linking, StyleSheet, Text, View } from 'react-native
 
 import { BigButton } from '../components/BigButton';
 import { Card } from '../components/Card';
-import { colors, fontSize, spacing } from '../theme';
+import { colors, fontSize, gate, iconSize, lineHeight, spacing } from '../theme';
 
 export interface PermissionGateProps {
   children: ReactNode;
@@ -24,7 +24,7 @@ export function PermissionGate({ children, purpose = DEFAULT_PURPOSE }: Permissi
   if (!camera || !mic) {
     return (
       <View style={styles.center} accessible accessibilityLabel="Memeriksa izin">
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={colors.text} />
       </View>
     );
   }
@@ -41,7 +41,7 @@ export function PermissionGate({ children, purpose = DEFAULT_PURPOSE }: Permissi
     <Card>
       <View style={styles.icons} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
         <PermissionIcon name="camera" granted={camera.granted} />
-        <Ionicons name="add" size={32} color={colors.textMuted} />
+        <Ionicons name="add" size={iconSize.add} color={colors.textMuted} />
         <PermissionIcon name="mic" granted={mic.granted} />
       </View>
       <Text accessibilityRole="header" style={styles.title}>
@@ -69,7 +69,7 @@ export function PermissionGate({ children, purpose = DEFAULT_PURPOSE }: Permissi
 function PermissionIcon({ name, granted }: { name: 'camera' | 'mic'; granted: boolean }) {
   return (
     <View style={[styles.iconBox, granted && styles.iconGranted]}>
-      <Ionicons name={name} size={48} color={granted ? '#FFFFFF' : colors.primary} />
+      <Ionicons name={name} size={iconSize.gate} color={granted ? colors.onPrimary : colors.text} />
     </View>
   );
 }
@@ -78,17 +78,17 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', padding: spacing.lg },
   icons: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.md, marginBottom: spacing.md },
   iconBox: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    borderWidth: 3,
-    borderColor: colors.primary,
+    width: gate.badge,
+    height: gate.badge,
+    borderRadius: gate.badge / 2,
+    borderWidth: gate.badgeBorder,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.background,
   },
-  iconGranted: { backgroundColor: '#1B5E20', borderColor: '#1B5E20' },
-  title: { fontSize: fontSize.large, fontWeight: '800', color: colors.text, marginBottom: spacing.sm },
-  body: { fontSize: fontSize.body, color: colors.text, lineHeight: 28, marginBottom: spacing.sm },
+  iconGranted: { backgroundColor: colors.success, borderColor: colors.success },
+  title: { fontSize: fontSize.large, fontWeight: '700', color: colors.text, marginBottom: spacing.sm },
+  body: { fontSize: fontSize.body, color: colors.text, lineHeight: lineHeight.body, marginBottom: spacing.sm },
   status: { marginVertical: spacing.sm },
 });

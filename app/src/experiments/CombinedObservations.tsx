@@ -1,16 +1,16 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 
-import type { CombinedResponse, Status } from '../api/types';
+import type { CombinedResponse, ResultStatus } from '../api/types';
 import { Body, InfoNote, Title } from '../components';
-import { colors, fontSize, radius, spacing, statusStyles } from '../theme';
+import { StatusIcon } from '../components/StatusIcon';
+import { colors, fontSize, iconSize, radius, spacing, statusStyles } from '../theme';
 
 const OUTCOMES = {
-  berhasil: { label: 'Berhasil', status: 'hijau' },
-  mendekati: { label: 'Mendekati', status: 'kuning' },
-  coba_lagi: { label: 'Coba lagi', status: 'merah' },
-} satisfies Record<string, { label: string; status: Status }>;
+  berhasil: { label: 'Berhasil', status: 'sesuai' },
+  mendekati: { label: 'Mendekati', status: 'mendekati' },
+  coba_lagi: { label: 'Coba lagi', status: 'belum_sesuai' },
+} satisfies Record<string, { label: string; status: ResultStatus }>;
 const REASONS = {
   matched: 'Teks cocok dengan target dan indikasi berbicara terdeteksi.',
   near_match: 'Teks yang terbaca mendekati target. Coba ulangi kata atau frasa ini.',
@@ -30,8 +30,8 @@ export function CombinedObservations({ result }: { result: CombinedResponse }) {
     <>
       <Title>Hasil latihan</Title>
       {outcome && style ? (
-        <View accessible accessibilityLabel={`Hasil latihan: ${outcome.label}`} accessibilityLiveRegion="polite" style={{ backgroundColor: style.background, borderRadius: radius.md, padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Ionicons name={style.icon} size={32} color={style.foreground} />
+        <View accessible accessibilityLabel={`Hasil latihan: ${outcome.label}`} accessibilityLiveRegion="polite" style={{ backgroundColor: colors.surface, borderLeftWidth: 4, borderLeftColor: style.foreground, borderRadius: radius.tile, padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <StatusIcon status={outcome.status} size={iconSize.note} />
           <Text style={{ color: style.foreground, fontSize: fontSize.large, fontWeight: '700' }}>{outcome.label}</Text>
         </View>
       ) : <InfoNote tone="warning" text="Penilaian belum tersedia" />}
@@ -48,7 +48,7 @@ export function CombinedObservations({ result }: { result: CombinedResponse }) {
           {visual.lip_contour ? (
             <>
               <Svg width="100%" viewBox="0 0 320 140" style={{ aspectRatio: 320 / 140 }} accessible accessibilityRole="image" accessibilityLabel="Kontur bibir dari satu cuplikan rekaman, tanpa bentuk target atau penilaian ketepatan.">
-                <Polygon points={visual.lip_contour.points.map(([x, y]) => `${30 + x * 260},${20 + y * 100}`).join(' ')} fill={colors.infoBg} stroke={colors.primary} strokeWidth={4} strokeLinejoin="round" />
+                <Polygon points={visual.lip_contour.points.map(([x, y]) => `${30 + x * 260},${20 + y * 100}`).join(' ')} fill={colors.infoBg} stroke={colors.text} strokeWidth={4} strokeLinejoin="round" />
               </Svg>
               <Body muted>Kontur satu cuplikan, diskalakan untuk tampilan. Pemeriksaan gerak memakai rangkaian cuplikan.</Body>
             </>

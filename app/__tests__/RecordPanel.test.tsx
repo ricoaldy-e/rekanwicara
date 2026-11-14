@@ -119,6 +119,7 @@ it('still deletes a late recording when stopping the camera throws', async () =>
   expect(jest.getTimerCount()).toBe(0);
 });
 
+<<<<<<< HEAD
 it('allows manual tutorial stop without the short practice timer', async () => {
   await render(<RecordPanel durationMs={120_000} manualStop videoQuality="1080p" onRecorded={mockOnRecorded} />);
   await fireEvent(screen.getByTestId('synthetic-camera'), 'cameraReady');
@@ -132,4 +133,26 @@ it('allows manual tutorial stop without the short practice timer', async () => {
   await act(async () => finish({ uri: clipUri }));
   expect(mockOnRecorded).toHaveBeenCalledWith(clipUri);
   expect(jest.getTimerCount()).toBe(0);
+=======
+it('shows the countdown number in the oval, then MEREKAM with the remaining seconds, and a note under the button', async () => {
+  await startCountdown();
+  expect(screen.getByLabelText('Mulai dalam 3')).toBeTruthy();
+  expect(screen.queryByLabelText('Sedang merekam')).toBeNull();
+  for (let tick = 0; tick < 3; tick++) {
+    await act(async () => { jest.advanceTimersByTime(1000); });
+  }
+  expect(screen.getByLabelText('Sedang merekam')).toBeTruthy();
+  expect(screen.getByText('MEREKAM')).toBeTruthy();
+  expect(screen.getByText('Tahan bunyi sampai hitungan selesai.')).toBeTruthy();
+  expect(screen.getByTestId('record-button')).toHaveAccessibleName('Merekam…');
+});
+
+it('shows the footer only while idle', async () => {
+  const { Text } = require('react-native');
+  await render(<RecordPanel onRecorded={mockOnRecorded} footer={<Text>footer-slot</Text>} />);
+  expect(screen.getByText('footer-slot')).toBeTruthy();
+  await fireEvent(screen.getByTestId('synthetic-camera'), 'cameraReady');
+  await fireEvent.press(screen.getByTestId('record-button'));
+  expect(screen.queryByText('footer-slot')).toBeNull();
+>>>>>>> fe/design
 });

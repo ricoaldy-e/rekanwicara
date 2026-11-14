@@ -1,4 +1,4 @@
-# Cermin Wicara: every scoring and quality threshold lives here (CLAUDE.md: never hard-coded).
+# Rekan Wicara: every scoring and quality threshold lives here (CLAUDE.md: never hard-coded).
 # Values are INITIAL values from docs/SPEC.md; they are re-tuned from data in phase A6.
 # Comments say where each value comes from. "asumsi A1" = not in SPEC, chosen in phase A1 (disetel di A6).
 #

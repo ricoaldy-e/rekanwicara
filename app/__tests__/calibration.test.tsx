@@ -13,7 +13,10 @@ const response: CalibrateResponse = {
   calibration_complete: false, engine_version: 'test',
 };
 
-jest.mock('expo-router', () => ({ useRouter: () => ({ replace: jest.fn() }) }));
+const mockBack = jest.fn();
+const mockReplace = jest.fn();
+let mockCanGoBack = true;
+jest.mock('expo-router', () => ({ useRouter: () => ({ replace: mockReplace, back: mockBack, canGoBack: () => mockCanGoBack }) }));
 jest.mock('../src/state/settings', () => ({ useSettings: () => ({ api: { calibrate: mockCalibrate } }) }));
 jest.mock('../src/state/user', () => ({ useUser: () => ({
   profile: { userId: 'synthetic-user' }, markCalibrated: mockMarkCalibrated,
@@ -32,12 +35,12 @@ jest.mock('../src/recording/RecordPanel', () => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockCanGoBack = true;
   mockCalibrate.mockReset().mockResolvedValue(response);
 });
 
 async function recordRest() {
   await render(<Calibration />);
-  await fireEvent.press(screen.getByRole('button', { name: 'Siap, rekam' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Rekam sintetis' }));
 }
 
@@ -55,8 +58,8 @@ it('deletes the submitted file after success, then advances to the next step', a
   expect(mockDelete).not.toHaveBeenCalled();
 
   await act(async () => finish(response));
-  await waitFor(() => expect(screen.getByRole('button', { name: 'Siap, rekam' })).toBeTruthy());
-  expect(screen.getByText('Ucapkan "a"')).toBeTruthy();
+  await waitFor(() => expect(screen.getByText('Ucapkan “a”')).toBeTruthy());
+  expect(screen.getByText('Langkah 2 dari 4')).toBeTruthy();
   expect(mockDelete).toHaveBeenCalledWith(mockClipUri);
 });
 
@@ -79,7 +82,7 @@ it('resends the retained file and deletes it after the retry succeeds', async ()
   await failUpload();
   expect(mockDelete).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Coba kirim lagi' }));
-  await waitFor(() => expect(screen.getByText('Ucapkan "a"')).toBeTruthy());
+  await waitFor(() => expect(screen.getByText('Ucapkan “a”')).toBeTruthy());
   expect(mockCalibrate).toHaveBeenCalledTimes(2);
   expect(mockCalibrate.mock.calls[1][0]).toMatchObject({ file: { uri: mockClipUri }, step: 'rest' });
   expect(mockDelete).toHaveBeenCalledWith(mockClipUri);
@@ -91,4 +94,16 @@ it('deletes the retained file when the user chooses to record again', async () =
   expect(screen.getByRole('button', { name: 'Rekam sintetis' })).toBeTruthy();
   expect(mockCalibrate).toHaveBeenCalledTimes(1);
   expect(mockDelete).toHaveBeenCalledWith(mockClipUri);
+});
+
+it('shows the lip shape card for the step, and "Kembali" leaves (home when there is no screen behind)', async () => {
+  await render(<Calibration />);
+  expect(screen.getByText('Diam dan rileks')).toBeTruthy();
+  expect(screen.getByText('Bentuk bibir')).toBeTruthy();
+  expect(screen.getByText('Rapat rileks')).toBeTruthy();
+  await fireEvent.press(screen.getByTestId('session-back'));
+  expect(mockBack).toHaveBeenCalledTimes(1);
+  mockCanGoBack = false;
+  await fireEvent.press(screen.getByTestId('session-back'));
+  expect(mockReplace).toHaveBeenCalledWith('/home');
 });

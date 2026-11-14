@@ -135,7 +135,7 @@ export default function DatasetSessionScreen() {
   if (stage === 'loading') {
     return (
       <Screen>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={colors.text} />
       </Screen>
     );
   }
@@ -240,8 +240,8 @@ export default function DatasetSessionScreen() {
 }
 
 const styles = StyleSheet.create({
-  target: { fontSize: 56, fontWeight: '900', color: colors.text, textAlign: 'center' },
+  target: { fontSize: fontSize.hero, fontWeight: '700', color: colors.text, textAlign: 'center' },
   meta: { fontSize: fontSize.body, color: colors.textMuted, textAlign: 'center', marginTop: spacing.xs },
-  saved: { fontSize: fontSize.body, fontWeight: '700', color: '#1B5E20' },
+  saved: { fontSize: fontSize.body, fontWeight: '700', color: colors.success },
   gap: { gap: spacing.sm },
 });

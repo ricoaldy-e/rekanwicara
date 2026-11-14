@@ -45,5 +45,5 @@ const styles = StyleSheet.create({
   wrap: { gap: spacing.sm },
   text: { fontSize: fontSize.body, fontWeight: '700', color: colors.text },
   muted: { fontSize: fontSize.small, color: colors.textMuted },
-  ok: { color: '#1B5E20' },
+  ok: { color: colors.success },
 });

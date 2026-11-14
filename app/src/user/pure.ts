@@ -1,6 +1,7 @@
 /** Local user state without any storage or UI: ids, PIN rule, attempts, settings, sync bookkeeping. */
 
 import type { AnalyzeResponse, Status, V2AnalyzeResponse, V2Result } from '../api/types';
+import type { AnalyzeResult } from '../data/types';
 
 /** Oldest attempts are dropped beyond this; AsyncStorage holds one JSON string (small, not a database). */
 export const MAX_ATTEMPTS = 2000;
@@ -15,9 +16,11 @@ export interface Settings {
   /** SPEC §8.4: Level 3 also needs one "jelas" Uji Dengar to pass. */
   listenCheckRequired: boolean;
   unlockAll: boolean;
+  /** Haptic feedback (design.md §8). Profiles saved before this field existed read as true. */
+  vibration: boolean;
 }
 
-export const DEFAULT_SETTINGS: Settings = { sessionMinutes: 10, listenCheckRequired: false, unlockAll: false };
+export const DEFAULT_SETTINGS: Settings = { sessionMinutes: 10, listenCheckRequired: false, unlockAll: false, vibration: true };
 
 /** One scored attempt (SPEC §9 `attempts`). Retry results are never stored. */
 export interface Attempt {
@@ -34,6 +37,8 @@ export interface Attempt {
   hintId: string;
   scorer: string;
   engineVersion: string | null;
+  /** Local activity label, never sent to Supabase. */
+  label?: string;
   synced: boolean;
 }
 
@@ -128,6 +133,7 @@ export function parseAttempt(raw: unknown): Attempt | null {
     scorer: a.scorer,
     engineVersion: a.engineVersion,
     synced: a.synced === true,
+    ...(isText(a.label) && a.label.length <= 30 ? { label: a.label } : {}),
   };
 }
 
@@ -148,6 +154,7 @@ function parseSettings(raw: unknown): Settings {
       : DEFAULT_SETTINGS.sessionMinutes,
     listenCheckRequired: s.listenCheckRequired === true,
     unlockAll: s.unlockAll === true,
+    vibration: s.vibration !== false,
   };
 }
 
@@ -196,6 +203,32 @@ export function attemptFromResponse(res: AnalyzeResponse, sessionId: string, now
     scorer: res.scorer,
     engineVersion: res.engine_version,
     synced: false,
+  };
+}
+
+/**
+ * The attempt to store for a v2 result (kontrak §8), or null when nothing may be stored:
+ * a retry, or a mock sample (a sample is not an analysis of the user's recording).
+ */
+export function attemptFromResult(res: AnalyzeResult, sessionId: string, now = new Date(), label?: string): Attempt | null {
+  if (res.status !== 'evaluated' || res.sample || !res.result) return null;
+  return {
+    id: makeUuid(),
+    itemId: res.item_id,
+    level: res.level,
+    sessionId,
+    at: now.toISOString(),
+    overall: resultStatus[res.result],
+    score: null,
+    indicators: {
+      bibir: res.lip_result ? resultStatus[res.lip_result] : null,
+      suara: resultStatus[res.voice_result ?? res.result],
+    },
+    hintId: res.feedback.code,
+    scorer: res.engine,
+    engineVersion: null,
+    synced: false,
+    ...(label ? { label } : {}),
   };
 }
 

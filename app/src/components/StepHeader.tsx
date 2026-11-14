@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSize, radius, spacing } from '../theme';
+import { colors, displayFont, fontSize, radius, spacing, stepHeaderBar } from '../theme';
 
 export interface StepHeaderProps {
   step: number;
@@ -16,7 +16,7 @@ export function StepHeader({ step, total, title }: StepHeaderProps) {
       <Text style={styles.step}>
         Langkah {step} dari {total}
       </Text>
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, displayFont()]}>{title}</Text>
       <View style={styles.track}>
         <View style={[styles.fill, { width: `${progress * 100}%` }]} />
       </View>
@@ -26,15 +26,13 @@ export function StepHeader({ step, total, title }: StepHeaderProps) {
 
 const styles = StyleSheet.create({
   wrap: { gap: spacing.sm, marginBottom: spacing.md },
-  step: { fontSize: fontSize.body, fontWeight: '700', color: colors.primary },
-  title: { fontSize: fontSize.title, fontWeight: '800', color: colors.text },
+  step: { fontSize: fontSize.small, color: colors.textMuted },
+  title: { fontSize: fontSize.title, color: colors.text },
   track: {
-    height: 12,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.border,
+    height: stepHeaderBar,
+    borderRadius: radius.tile,
+    backgroundColor: colors.surfaceRaised,
     overflow: 'hidden',
   },
-  fill: { height: '100%', backgroundColor: colors.primary },
+  fill: { height: '100%', backgroundColor: colors.text },
 });

@@ -1,8 +1,8 @@
-# Panduan Prompt Claude Code — Cermin Wicara MVP
+# Panduan Prompt Claude Code — Rekan Wicara MVP
 
 ## Cara pakai (baca dulu)
 
-1. Buat folder repo `cermin-wicara/`, lalu salin isi paket `cermin-wicara-starter/` ke dalamnya
+1. Buat folder repo `rekanwicara/`, lalu salin isi paket `rekanwicara-starter/` ke dalamnya
    (`CLAUDE.md`, `docs/SPEC.md`, `docs/PROGRESS.md`).
 2. Buka terminal di root repo dan jalankan Claude Code. `CLAUDE.md` di root otomatis dibaca setiap sesi,
    jadi prompt fase di bawah tidak perlu mengulang konteks proyek.

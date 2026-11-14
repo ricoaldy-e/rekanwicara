@@ -1,4 +1,4 @@
-# RUNBOOK RINGKAS — Cermin Wicara MVP (tim 3 orang, ≤ 100 video)
+# RUNBOOK RINGKAS — Rekan Wicara MVP (tim 3 orang, ≤ 100 video)
 
 Tidak ada model yang dilatih. AI-nya adalah MediaPipe (model pralatih) + aturan.
 Rekaman hanya dipakai untuk menyetel ambang dan menguji.

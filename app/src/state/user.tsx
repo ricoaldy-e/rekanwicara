@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { AppState } from 'react-native';
 import type { Session } from '@supabase/supabase-js';
 
+import { setHapticsEnabled } from '../a11y/haptics';
 import { onCompanionAuthChange } from '../auth/companion';
 import { createRemote } from '../data/supabase';
 import { syncPending } from '../data/sync';
@@ -19,7 +20,7 @@ import {
   type Profile,
   type Settings,
 } from '../user/pure';
-import { loadProfile, savePin, saveProfile, verifyPin } from '../user/storage';
+import { loadProfile, saveProfile } from '../user/storage';
 import { createDemoProfile } from '../user/demo';
 import { useContent } from './content';
 import { buildProgress, type ItemProgress } from './progression';
@@ -48,8 +49,8 @@ interface UserValue {
   /** Progress per item (SPEC §8.4), recomputed when attempts or settings change. */
   progress: ReadonlyMap<string, ItemProgress>;
   sync: SyncStatus;
-  /** Stores consent and the companion PIN (keystore), then marks onboarding done. */
-  completeOnboarding(pin: string): Promise<void>;
+  /** Stores consent and marks onboarding done (the PIN is made earlier, on its own screen). */
+  completeOnboarding(): void;
   markCalibrated(): void;
   /** Records a scored attempt and starts a sync. Retry results are not attempts; callers skip them. */
   addAttempt(attempt: Attempt): void;
@@ -173,12 +174,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [ready, demo, remote, syncNow, items, account.uid]);
 
   const completeOnboarding = useCallback(
-    async (pin: string) => {
+    () => {
       if (!mounted.current || demoRef.current || !ready || generation.current !== account.version) return;
-      if (!await verifyPin(pin)) {
-        if (!mounted.current || generation.current !== account.version) return;
-        await savePin(pin);
-      }
       update((p) => ({ ...p, onboarded: true, consentUser: true, consentCompanion: true }));
     },
     [update, ready, account.version],
@@ -214,6 +211,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       ),
     [items, profile.attempts, profile.listenChecks, profile.settings.listenCheckRequired, profile.settings.unlockAll],
   );
+
+  useEffect(() => setHapticsEnabled(profile.settings.vibration), [profile.settings.vibration]);
 
   const value = useMemo<UserValue>(
     () => ({

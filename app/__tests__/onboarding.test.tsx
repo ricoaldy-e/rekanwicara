@@ -6,13 +6,14 @@ const mockReplace = jest.fn();
 const mockComplete = jest.fn();
 let mockSession: object | null = { user: { id: 'fixture-account' } };
 
-jest.mock('expo-router', () => ({ useRouter: () => ({ replace: mockReplace }) }));
+jest.mock('expo-router', () => ({ useRouter: () => ({ replace: mockReplace }), Redirect: ({ href }: { href: string }) => { mockReplace(href); return null; } }));
+jest.mock('../src/auth/AuthProvider', () => ({ useAuth: () => ({ ready: true, required: true, session: mockSession }) }));
 jest.mock('../src/state/user', () => ({ useUser: () => ({ session: mockSession, completeOnboarding: mockComplete }) }));
 
 beforeEach(() => {
   mockSession = { user: { id: 'fixture-account' } };
   mockReplace.mockClear();
-  mockComplete.mockReset().mockResolvedValue(undefined);
+  mockComplete.mockReset();
 });
 
 async function toConsent() {
@@ -24,7 +25,7 @@ describe('Onboarding', () => {
   it('requires account login before offering PIN onboarding', async () => {
     mockSession = null;
     await render(<Onboarding />);
-    expect(screen.getByText('Login pendamping')).toBeTruthy();
+    expect(mockReplace).toHaveBeenCalledWith('/auth/sign-in');
     expect(screen.queryByTestId('pin-input')).toBeNull();
     expect(mockComplete).not.toHaveBeenCalled();
   });
@@ -35,7 +36,7 @@ describe('Onboarding', () => {
 
   it('needs both consents before continuing', async () => {
     await toConsent();
-    const next = () => screen.getByRole('button', { name: 'Lanjut' });
+    const next = () => screen.getByRole('button', { name: 'Lanjut ke kalibrasi' });
     expect(next()).toBeDisabled();
     await fireEvent.press(screen.getByRole('checkbox', { name: /Saya mengerti/ }));
     expect(next()).toBeDisabled();
@@ -43,41 +44,40 @@ describe('Onboarding', () => {
     expect(next()).toBeEnabled();
   });
 
-  async function toPin() {
+  it('has two steps and finishes at the consent: no PIN here any more', async () => {
     await toConsent();
+    expect(screen.getByLabelText(/^Langkah 2 dari 2/)).toBeTruthy();
     await fireEvent.press(screen.getByRole('checkbox', { name: /Saya mengerti/ }));
     await fireEvent.press(screen.getByRole('checkbox', { name: /Pendamping/ }));
-    await fireEvent.press(screen.getByRole('button', { name: 'Lanjut' }));
-  }
-
-  it('rejects a PIN that is too short or does not match, and keeps digits only', async () => {
-    await toPin();
-    const save = () => screen.getByRole('button', { name: /Simpan/ });
-    await fireEvent.changeText(screen.getByTestId('pin-input'), '12a4');
-    expect(screen.getByTestId('pin-input').props.value).toBe('124');
-    expect(save()).toBeDisabled();
-    await fireEvent.changeText(screen.getByTestId('pin-input'), '1234');
-    await fireEvent.changeText(screen.getByTestId('pin-again-input'), '1235');
-    expect(save()).toBeDisabled();
-    expect(screen.getByLabelText('Kedua PIN belum sama.')).toBeTruthy();
-  });
-
-  it('stores the PIN and goes to calibration', async () => {
-    await toPin();
-    await fireEvent.changeText(screen.getByTestId('pin-input'), '4821');
-    await fireEvent.changeText(screen.getByTestId('pin-again-input'), '4821');
-    await fireEvent.press(screen.getByRole('button', { name: /Simpan/ }));
+    expect(screen.queryByTestId('pin-input')).toBeNull();
+    await fireEvent.press(screen.getByRole('button', { name: 'Lanjut ke kalibrasi' }));
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/calibration'));
-    expect(mockComplete).toHaveBeenCalledWith('4821');
+    expect(mockComplete).toHaveBeenCalledWith();
+  });
+});
+
+describe('Onboarding layout (Figma 29:182, 29:235)', () => {
+  it('step 1 shows the cycle and the sticky "Lanjut" button', async () => {
+    await render(<Onboarding />);
+    expect(screen.getByLabelText(/^Langkah 1 dari 2/)).toBeTruthy();
+    for (const t of ['Lihat contoh bentuk bibir.', 'Tiru dan rekam wajah dan suaramu.', 'Bandingkan hasilnya.', 'Ulangi sampai terasa pas.']) {
+      expect(screen.getByText(t)).toBeTruthy();
+    }
+    expect(screen.getByRole('button', { name: 'Lanjut' })).toBeTruthy();
   });
 
-  it('stays on the PIN step when the keystore refuses the PIN', async () => {
-    mockComplete.mockRejectedValue(new Error('keystore'));
-    await toPin();
-    await fireEvent.changeText(screen.getByTestId('pin-input'), '4821');
-    await fireEvent.changeText(screen.getByTestId('pin-again-input'), '4821');
-    await fireEvent.press(screen.getByRole('button', { name: /Simpan/ }));
-    await waitFor(() => expect(screen.getByLabelText('PIN belum bisa disimpan. Coba lagi.')).toBeTruthy());
-    expect(mockReplace).not.toHaveBeenCalled();
+  it('step 2 says why "Lanjut ke kalibrasi" is off, until both consents are ticked', async () => {
+    await toConsent();
+    expect(screen.getByText('Centang kedua persetujuan untuk lanjut.')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('checkbox', { name: /Saya mengerti/ }));
+    await fireEvent.press(screen.getByRole('checkbox', { name: /Pendamping/ }));
+    expect(screen.queryByText('Centang kedua persetujuan untuk lanjut.')).toBeNull();
+    expect(screen.getByRole('checkbox', { name: /Saya mengerti/ })).toBeChecked();
+  });
+
+  it('"Kembali" returns to step 1', async () => {
+    await toConsent();
+    await fireEvent.press(screen.getByRole('button', { name: 'Kembali' }));
+    expect(screen.getByLabelText(/^Langkah 1 dari 2/)).toBeTruthy();
   });
 });

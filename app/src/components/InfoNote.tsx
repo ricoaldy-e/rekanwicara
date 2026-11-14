@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSize, radius, spacing } from '../theme';
+import { colors, fontSize, iconSize, lineHeight, radius, spacing } from '../theme';
 
 export interface InfoNoteProps {
   text: string;
@@ -21,8 +21,8 @@ export function InfoNote({ text, tone = 'info', testID }: InfoNoteProps) {
     >
       <Ionicons
         name={warning ? 'warning' : 'information-circle'}
-        size={28}
-        color={warning ? colors.danger : colors.primary}
+        size={iconSize.note}
+        color={warning ? colors.danger : colors.text}
       />
       <Text style={styles.text}>{text}</Text>
     </View>
@@ -35,11 +35,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: spacing.sm,
     padding: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: radius.tile,
     borderWidth: 2,
-    borderColor: colors.infoBorder,
+    borderColor: colors.border,
     backgroundColor: colors.infoBg,
   },
-  warning: { borderColor: colors.danger, backgroundColor: '#FDECEA' },
-  text: { flex: 1, fontSize: fontSize.body, color: colors.text, lineHeight: 28 },
+  warning: { borderColor: colors.danger, backgroundColor: colors.warningBg },
+  text: { flex: 1, fontSize: fontSize.body, color: colors.text, lineHeight: lineHeight.body },
 });

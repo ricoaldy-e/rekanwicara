@@ -10,7 +10,7 @@ import {
 import { newProfile } from '../src/user/pure';
 import { readResume, writeResume } from '../src/home/resume';
 import {
-  changePin, hasPin, loadProfile, PIN_KEY, PROFILE_KEY, savePin, saveProfile, verifyPin,
+  authorizePinReset, changePin, hasPin, loadProfile, PIN_KEY, PROFILE_KEY, resetPin, savePin, saveProfile, verifyPin,
 } from '../src/user/storage';
 
 const UID = '11111111-1111-4111-8111-111111111111';
@@ -278,4 +278,41 @@ it('reports completed deletion accurately even if local session cleanup reports 
   mockAuth.signOut.mockResolvedValueOnce({ error: new Error('Network unavailable') });
   await expect(deleteCompanionAccount('valid-password', 'https://api.example.test')).rejects.toThrow(/Akun sudah dihapus/);
   expect(await AsyncStorage.getItem(`${PROFILE_KEY}.${UID}`)).toBeNull();
+});
+
+it('requires password reauthentication and consumes the PIN reset authorization once', async () => {
+  await savePin('2580');
+  await expect(resetPin('1357', UID)).rejects.toThrow(/Verifikasi password/);
+  await authorizePinReset('valid-password', UID);
+  expect(mockAuth.signInWithPassword).toHaveBeenCalledWith({ email: 'companion@example.test', password: 'valid-password' });
+  await resetPin('1357', UID);
+  expect(await verifyPin('1357')).toBe(true);
+  await expect(resetPin('2468', UID)).rejects.toThrow(/Verifikasi password/);
+});
+
+it('rejects PIN reset after the account or password session changes', async () => {
+  await savePin('2580');
+  await authorizePinReset('valid-password', UID);
+  mockSession!.access_token = 'different-fixture-session';
+  await expect(resetPin('1357', UID)).rejects.toThrow(/Verifikasi password/);
+  mockSession!.user.id = OTHER;
+  await expect(resetPin('1357', UID)).rejects.toThrow(/Akun berubah/);
+  expect(mockSecure.get(`${PIN_KEY}.${UID}`)).toBe('2580');
+  expect(mockSecure.has(`${PIN_KEY}.${OTHER}`)).toBe(false);
+});
+
+it('does not grant a PIN reset on a wrong password or a different reauthenticated owner', async () => {
+  mockAuth.signInWithPassword.mockResolvedValueOnce({ data: { session: null }, error: new Error('invalid-credentials') });
+  await expect(authorizePinReset('wrong-fixture-password', UID)).rejects.toThrow();
+  await expect(resetPin('1357', UID)).rejects.toThrow(/Verifikasi password/);
+  mockAuth.signInWithPassword.mockResolvedValueOnce({ data: { session: { ...mockSession, user: { ...mockSession!.user, id: OTHER } } }, error: null });
+  await expect(authorizePinReset('valid-password', UID)).rejects.toThrow(/Akun berubah/);
+  expect(mockSecure.size).toBe(0);
+});
+
+it('refuses a stale screen owner before creating or changing another account PIN', async () => {
+  mockSession!.user.id = OTHER;
+  await expect(savePin('2580', UID)).rejects.toThrow(/Akun berubah/);
+  await expect(changePin('2580', '1357', UID)).rejects.toThrow(/Akun berubah/);
+  expect(mockSecure.size).toBe(0);
 });
