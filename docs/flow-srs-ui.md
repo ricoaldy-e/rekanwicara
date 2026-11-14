@@ -578,6 +578,7 @@ Rujukan: `docs/design.md` v7.1 dan Figma `C5mdKAfFngxd8dz1BvAZrO`. Catatan langk
 | D17 | Gambar bibir | digambar dari parameter | gambar tetap dari Figma, **hanya Level 1: vokal a, i, u, e, o** (dan bibir rapat untuk kalibrasi). Level 2–3 memakai video contoh dari backend atau instruksi teks, tanpa gambar bibir |
 | D18 | Judul aktivitas Level 2 | memakai id suku kata | memakai teks materi yang disimpan lokal bersama percobaan (tidak dikirim ke server) |
 | D19 | Daftar kata Pendamping | "n suku kata" | "Suku kata: to · long" dari data lokal Pendamping; tidak butuh perubahan kontrak |
+| D21 | Instruksi | satu kolom teks | **langkah-langkah**: satu kolom per langkah di formulir (1–5, tiap 5–120 karakter), satu kartu per langkah di layar Lihat; data tetap satu string, langkah dipisah baris baru. Kartu suku kata bisa dilipat; Simpan dan Batal menempel di bawah. Hasil AI dirapikan menjadi langkah (`docs/AI_INSTRUCTION_BRIEF.md`) |
 | D20 | Formulir Kata baru dan Ubah kata | header sistem | header buatan sendiri (Kembali "Daftar kata", judul serif, keterangan), kartu video, kartu suku kata, tombol Naik/Turun/Hapus sebaris |
 
 Yang tetap terbuka dari rev. 7: kartu "Kekerasan suara" butuh nilai target dari backend, dan lencana "Cahaya cukup" tidak dipasang (lihat `design.md` §12 D3 dan D9).

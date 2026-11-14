@@ -194,7 +194,7 @@ Batas unggah awal: MP4/MOV, 50 MiB (sesuai skema bucket); durasi maksimum 30 det
 → 200 { "instruction": "…" }
 ```
 
-FE mengisi kolom **instruksi pelafalan** dan tidak menyimpan otomatis. Perilaku tombol, timeout 20 detik, dan pesan: `flow-srs-ui.md` §7.5.2. Kolom dikunci selama memuat, jadi hasil tidak menimpa ketikan baru.
+**Isi `instruction` adalah langkah-langkah, satu langkah per baris (`\n`)**: 1–5 langkah, tiap langkah 5–120 karakter, total maksimal 500. Brief lengkap untuk LLM: `docs/AI_INSTRUCTION_BRIEF.md`. FE mengisi kolom **instruksi pelafalan** (satu kolom per langkah) dan tidak menyimpan otomatis. Perilaku tombol, timeout 20 detik, dan pesan: `flow-srs-ui.md` §7.5.2. Kolom dikunci selama memuat, jadi hasil tidak menimpa ketikan baru.
 
 ---
 
