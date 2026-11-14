@@ -179,7 +179,6 @@ export default function Settings() {
         <>
           <BigButton label="Uji Wav2Vec2" icon="chatbox-ellipses" variant="secondary" onPress={() => router.push('/wav2vec2')} />
           <BigButton label="Uji Gabungan" icon="layers" variant="secondary" onPress={() => router.push('/combined')} />
-          <BigButton label="Uji Allosaurus" icon="flask" variant="secondary" onPress={() => router.push('/allosaurus')} />
         </>
       ) : null}
       <Title>Profil contoh</Title>

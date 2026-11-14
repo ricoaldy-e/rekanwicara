@@ -169,16 +169,6 @@ export interface DatasetUploadResponse {
   clip_id: string;
 }
 
-// ---------- Development-only POST /v1/experiments/allosaurus ----------
-
-export interface AllosaurusResponse {
-  status: 'success';
-  model: 'uni2005';
-  /** Raw IPA from the restricted Indonesian inventory; the screen formats readable labels. */
-  phonetic_prediction: string;
-  inference_ms: number;
-}
-
 // ---------- Errors (all endpoints) ----------
 
 export interface Wav2Vec2Response {

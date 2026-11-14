@@ -23,6 +23,8 @@ describe('Kebijakan privasi', () => {
     expect(all).toMatch(/dihapus segera setelah dinilai/);
     expect(all).toMatch(/Tidak ada pengenalan identitas wajah/);
     expect(all).toMatch(/tanpa video atau audio/);
+    expect(all).toMatch(/Wav2Vec2/);
+    expect(all).toMatch(/rekanwicara@gmail\.com/);
   });
 
   it('uses no word the product forbids (CLAUDE.md)', () => {

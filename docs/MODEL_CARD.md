@@ -89,5 +89,5 @@ Ini **bukti awal dari 3 penutur dewasa**, bukan akurasi sistem.
 1. Evaluasi ulang dengan kalibrasi pengguna (rest + a/i/u).
 2. Data mitra dengan persetujuan tertulis (sekolah luar biasa, komunitas Tuli, terapis wicara), termasuk
    penilaian oleh ahli, sebelum dipakai lebih luas.
-3. Scorer Wav2Vec2 untuk penilaian suara yang lebih kaya (ditunda di MVP karena data terlalu kecil).
+3. Scorer Wav2Vec2 untuk penilaian suara yang lebih kaya (dipakai di server untuk Level 1 sejak 14 Nov 2026; evaluasi di dokumen ini belum mencakupnya).
 4. Vokal e/o, pasangan minimal (Level 4), kamera Android, perekaman 30 fps.

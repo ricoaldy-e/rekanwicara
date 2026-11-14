@@ -23,6 +23,7 @@ export const PRIVACY_SECTIONS: PolicySection[] = [
     title: 'Rekaman latihan',
     paragraphs: [
       'Saat kamu merekam, video wajah dan suara dikirim ke server latihan hanya untuk dinilai. Wajah dipakai untuk mengukur bentuk mulut. Tidak ada pengenalan identitas wajah.',
+      'Server menilai rekaman dengan MediaPipe (bentuk mulut), Parselmouth (ciri suara), dan Wav2Vec2 (mengenali bunyi yang diucapkan). Semuanya berjalan di server latihan, tidak di layanan lain.',
       'Rekaman dihapus segera setelah dinilai, juga saat terjadi galat. Rekaman yang gagal terkirim tetap di HP sampai dikirim ulang, sampai kamu merekam ulang, atau sampai kamu meninggalkan layar, lalu dibuang. Catatan log server hanya berisi angka dan kode status.',
     ],
   },
@@ -61,7 +62,7 @@ export const PRIVACY_SECTIONS: PolicySection[] = [
     title: 'Pilihanmu',
     paragraphs: [
       'Kamu bisa keluar dari akun kapan saja di Pengaturan. Pendamping bisa menghapus kata beserta videonya. Rekaman latihan tidak perlu dihapus karena tidak disimpan.',
-      'Penghapusan akun dan data online belum tersedia di app. Hubungi tim pengembang untuk itu.',
+      'Penghapusan akun dan data online belum tersedia di app. Hubungi tim pengembang di rekanwicara@gmail.com untuk itu.',
     ],
   },
   {

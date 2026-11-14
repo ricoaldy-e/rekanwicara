@@ -36,14 +36,16 @@ HP (Expo Go)                              Laptop (server lokal)
 │ Kamera: satu rekaman  │ ──────────────▶ │ FFmpeg: ambil frame dan audio │
 │ Hasil: Bibir + Suara  │ ◀────────────── │ MediaPipe: geometri mulut     │
 └───────────────────────┘   JSON angka    │ Parselmouth: ciri suara       │
+                                          │ Wav2Vec2: bunyi yang diucapkan│
                                           │ Aturan berambang: status      │
                                           └──────────────────────────────┘
 ```
 
 Rekaman latihan dihapus segera setelah dianalisis, termasuk ketika terjadi galat. Log
 hanya memuat angka dan kode status. Wajah dipakai semata-mata untuk mengukur bentuk mulut;
-tidak ada pengenalan identitas. Penilaian memakai aturan berambang yang disetel dari data
-tim, bukan model yang dilatih.
+tidak ada pengenalan identitas. Status ditentukan aturan berambang yang disetel dari data
+tim. Tim tidak melatih model: Wav2Vec2 adalah model terlatih yang dipakai sebagaimana adanya.
+Allosaurus tidak dipakai.
 
 ## Struktur repositori
 

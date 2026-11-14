@@ -34,6 +34,11 @@ export default function About() {
             Penilaian kata masih lebih lemah daripada penilaian bunyi. Evaluasi awal berasal dari tiga anggota tim dan belum diuji pada pengguna Tuli. Hasil bukan ukuran kemampuan seseorang.
           </Text>
         </InfoSection>
+        <InfoSection title="Cara kerja">
+          <Text maxFontSizeMultiplier={2} style={[styles.body, textFont()]}>
+            Bentuk bibir diukur dengan MediaPipe, ciri suara dengan Parselmouth, dan bunyi yang diucapkan dikenali dengan Wav2Vec2. Semuanya berjalan di server latihan, bukan di HP.
+          </Text>
+        </InfoSection>
         <InfoSection title="Privasi">
           <Text maxFontSizeMultiplier={2} style={[styles.body, textFont()]}>
             Wajah dipakai untuk mengukur bentuk bibir, tanpa pengenalan identitas. Rekaman latihan dihapus setelah diproses. Yang disimpan hanya hasil latihan dan angka kalibrasi; layanan online menyimpan hasil dan kemajuan, tanpa video atau audio.

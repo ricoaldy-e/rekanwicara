@@ -958,3 +958,10 @@ Skill yang dimuat: `figma-design-to-code` (membaca konteks), `figma-use` dan `fi
 - Komponen bersama `InfoSection` dipakai Tentang dan Kebijakan privasi.
 - **Perlu keputusan tim:** kebijakan menyatakan penghapusan akun dan data online belum tersedia dan meminta menghubungi tim pengembang, tetapi belum ada kontak. Tambahkan kontak (email) di `src/content/privacy.ts` bagian "Pilihanmu". Isi kebijakan ditulis dari perilaku kode, bukan nasihat hukum; tinjau sebelum submission.
 - Selisih Figma lama: kartu versi di Figma Tentang hanya satu baris (Aplikasi); app punya dua (Aplikasi, Mesin).
+
+## FG-23 (14 Nov 2026): Wav2Vec2 dipakai, Allosaurus dibuang
+
+- Keputusan Rico: backend sudah berjalan dengan **Wav2Vec2**; **Allosaurus tidak dipakai**.
+- Teks produk: Tentang punya bagian "Cara kerja" (MediaPipe, Parselmouth, Wav2Vec2; semua di server latihan); Kebijakan privasi menyebut ketiganya dan memuat kontak `rekanwicara@gmail.com`; README (diagram dan keterangan model), `CLAUDE.md`, `CONTEXT.md`, `MODEL_CARD.md` diperbarui. Figma Tentang dan Kebijakan privasi disamakan.
+- Dihapus dari app: layar `Uji Allosaurus`, tombolnya di Pengaturan (versi dev), metode klien `allosaurus`, tipe `AllosaurusResponse`, dan dua berkas tesnya. Layar `Uji Wav2Vec2` dan `Uji Gabungan` (dev) tetap ada.
+- Belum diubah (di luar app): `server/` masih memuat route eksperimen Allosaurus, `ml/requirements-allosaurus.txt`, dan `docs/ALLOSAURUS_POC.md`; hapus bila backend setuju. SPEC.md masih mencatat eksperimen itu.

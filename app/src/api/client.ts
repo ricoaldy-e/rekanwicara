@@ -1,5 +1,4 @@
 import type {
-  AllosaurusResponse,
   Wav2Vec2Response,
   CombinedResponse,
   AnalyzeRequest,
@@ -44,7 +43,6 @@ export interface ApiClient {
   analyze(req: AnalyzeRequest, options?: AnalysisCallOptions): Promise<AnalyzeResponse>;
   calibrate(req: CalibrateRequest, options?: AnalysisCallOptions): Promise<CalibrateResponse>;
   datasetUpload(req: DatasetUploadRequest, options?: UploadCallOptions): Promise<DatasetUploadResponse>;
-  allosaurus(file: UploadFile, options?: UploadCallOptions): Promise<AllosaurusResponse>;
   wav2vec2(file: UploadFile, options?: UploadCallOptions): Promise<Wav2Vec2Response>;
   combined(file: UploadFile, target: CombinedResponse['target'], options?: UploadCallOptions): Promise<CombinedResponse>;
   /** True when GET /v1/model-video/{itemId} exists (asks for 1 byte only), false on 404. */
@@ -121,19 +119,6 @@ export function createApiClient(baseUrl: string, options: ApiClientOptions = {})
 
     datasetUpload: ({ file, ...fields }, opts) =>
       upload<DatasetUploadResponse>('/v1/dataset/upload', fields, file, opts),
-
-    async allosaurus(file, opts) {
-      const body = await uploadNative(`${base}/v1/experiments/allosaurus`, file, opts);
-      if (typeof body !== 'object' || body === null ||
-          !('status' in body) || body.status !== 'success' ||
-          !('model' in body) || body.model !== 'uni2005' ||
-          !('phonetic_prediction' in body) || typeof body.phonetic_prediction !== 'string' ||
-          !('inference_ms' in body) || typeof body.inference_ms !== 'number' ||
-          !Number.isFinite(body.inference_ms) || body.inference_ms < 0) {
-        throw new ApiError('parse', 'Invalid Allosaurus result');
-      }
-      return body as AllosaurusResponse;
-    },
 
     async wav2vec2(file, opts) {
       const body = await uploadNative(`${base}/v1/experiments/wav2vec2`, file, opts);
