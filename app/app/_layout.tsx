@@ -47,7 +47,7 @@ export default function RootLayout() {
             <Stack.Screen name="auth/check-email" options={{ title: 'Cek email', headerBackVisible: false, headerLeft: () => null }} />
             <Stack.Screen name="auth/forgot-pin" options={{ title: 'Lupa PIN' }} />
             <Stack.Screen name="auth/create-pin" options={{ title: 'Buat PIN', headerBackVisible: false, headerLeft: () => null }} />
-            <Stack.Screen name="onboarding" options={{ title: 'Selamat datang' }} />
+            <Stack.Screen name="onboarding" options={{ title: 'Selamat datang', headerShown: false }} />
             <Stack.Screen name="calibration" options={{ title: 'Kalibrasi' }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="practice/[itemId]" options={{ title: 'Latihan' }} />

@@ -30,6 +30,7 @@ export function usePinInput(onComplete: (pin: string) => void, disabled = false)
 /** One instruction, four dots, an optional message and the pad: shared by create, gate and change PIN. */
 export function PinScreenBody({
   title,
+  headerless = false,
   instruction,
   filled,
   message,
@@ -39,6 +40,7 @@ export function PinScreenBody({
   children,
 }: {
   title: string;
+  headerless?: boolean;
   instruction?: string;
   filled: number;
   message?: string | null;
@@ -48,7 +50,7 @@ export function PinScreenBody({
   children?: React.ReactNode;
 }) {
   return (
-    <Screen>
+    <Screen edges={headerless ? ['top', 'bottom', 'left', 'right'] : undefined}>
       <Title>{title}</Title>
       {instruction ? <Body>{instruction}</Body> : null}
       <View style={styles.dots}>

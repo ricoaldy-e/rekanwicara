@@ -123,7 +123,7 @@ export default function Home() {
   const stepsDone = steps.filter((s) => s.state === 'done').length;
 
   return (
-    <Screen contentStyle={styles.content}>
+    <Screen edges={['top', 'bottom', 'left', 'right']} contentStyle={styles.content}>
       <View style={styles.header}>
         <View accessible accessibilityLabel={`Halo, ${name}`} style={styles.greeting}>
           <View style={styles.avatar}>

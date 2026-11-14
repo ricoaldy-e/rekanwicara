@@ -73,7 +73,7 @@ export default function Settings() {
   const name = session?.displayName?.trim() || null;
 
   return (
-    <Screen footer={<Snackbar message={flash} onDismiss={clearFlash} />} contentStyle={styles.content}>
+    <Screen edges={['top', 'bottom', 'left', 'right']} footer={<Snackbar message={flash} onDismiss={clearFlash} />} contentStyle={styles.content}>
       <Text accessibilityRole="header" maxFontSizeMultiplier={2} style={[styles.pageTitle, displayFont()]}>Pengaturan</Text>
 
       {session ? (

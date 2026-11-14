@@ -42,7 +42,7 @@ export default function Companion() {
   const builtIn = catalog.data?.words.filter((w) => w.source === 'default') ?? [];
 
   return (
-    <Screen footer={<Snackbar message={flash} onDismiss={clearFlash} />} contentStyle={styles.content}>
+    <Screen edges={['top', 'bottom', 'left', 'right']} footer={<Snackbar message={flash} onDismiss={clearFlash} />} contentStyle={styles.content}>
       <View style={styles.header}>
         <Text accessibilityRole="header" maxFontSizeMultiplier={2} style={[styles.title, displayFont()]}>Pendamping</Text>
         <Text maxFontSizeMultiplier={2} style={[styles.intro, textFont()]}>Tambah kata untuk dilatih. Kata bawaan tidak bisa diubah.</Text>

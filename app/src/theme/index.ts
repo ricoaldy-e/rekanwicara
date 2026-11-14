@@ -182,8 +182,10 @@ export const homeList = { avatar: 44, letterTile: 44, marker: 32, markerInset: 4
 export const session = {
   stepBar: { height: 6, gap: 6 },
   media: 200,
+  videoRatio: 3 / 4,
+  videoMaxHeight: 0.45,
   illustration: 180,
-  recordPanel: { ovalWidth: 150, ovalHeight: 200, ovalStroke: 3, ovalDash: 10, ovalGap: 8, countdown: 140, badgeInset: 10, badgeDot: 10, barInset: 14, barHeight: 6 },
+  recordPanel: { ovalWidth: 150, ovalHeight: 200, ovalPercent: '62%', ovalStroke: 3, ovalDash: 10, ovalGap: 8, countdown: 140, badgeInset: 10, badgeDot: 10, barInset: 14, barHeight: 6 },
   stage: { icon: 24, gap: 14, ring: 3 },
 } as const;
 

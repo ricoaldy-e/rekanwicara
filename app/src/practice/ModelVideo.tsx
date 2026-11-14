@@ -1,7 +1,7 @@
 import { useEvent } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useEffect, useState, type ReactNode } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { BigButton, Body, InfoNote, LipIllustration } from '../components';
 import { ANALYZE_API, type AnalyzeApi } from '../config';
@@ -93,13 +93,17 @@ function Player({ url, text, onError }: { url: string; text: string; onError: ()
     p.play();
   });
   const { status } = useEvent(player, 'statusChange', { status: player.status });
+  const { height } = useWindowDimensions();
+  const track = player.videoTrack?.size;
+  // shortcut: the ratio is read once the video is ready; before that a portrait 3:4 frame, the shape of our recordings.
+  const ratio = track && track.width > 0 && track.height > 0 ? track.width / track.height : session.videoRatio;
   useEffect(() => {
     if (status === 'error') onError();
   }, [status, onError]);
   return (
     <>
       {status !== 'readyToPlay' ? <Loading /> : null}
-      <View style={styles.media} accessible accessibilityLabel={`Video contoh mengucapkan ${text}`}>
+      <View style={[styles.media, styles.videoFrame, { aspectRatio: ratio, maxHeight: height * session.videoMaxHeight }]} accessible accessibilityLabel={`Video contoh mengucapkan ${text}`}>
         <VideoView player={player} style={styles.video} nativeControls contentFit="contain" />
       </View>
       <BigButton
@@ -157,6 +161,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceRaised,
   },
   video: { width: '100%', height: '100%' },
+  videoFrame: { height: undefined, alignSelf: 'center', width: '100%' },
   instruction: { gap: spacing.sm },
   instructionTitle: { fontSize: fontSize.label, lineHeight: lineHeight.label, color: colors.text },
   word: { fontSize: fontSize.display, color: colors.text },

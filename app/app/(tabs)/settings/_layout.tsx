@@ -9,7 +9,7 @@ import { darkStackOptions } from '../../../src/navigation/stackOptions';
 export default function Layout() {
   return (
     <Stack screenOptions={darkStackOptions}>
-      <Stack.Screen name="index" options={{ title: 'Pengaturan' }} />
+      <Stack.Screen name="index" options={{ title: 'Pengaturan', headerShown: false }} />
       <Stack.Screen name="change-pin" options={{ title: 'Ganti PIN' }} />
       <Stack.Screen name="sign-out" options={{ title: 'Keluar' }} />
     </Stack>

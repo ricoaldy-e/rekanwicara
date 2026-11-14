@@ -164,7 +164,7 @@ function RecorderCamera({
         />
         {/* Oval face guide (Figma 46:202): dashed cream while waiting, solid danger while recording. */}
         <View pointerEvents="none" style={styles.ovalBox}>
-          <Svg width={OVAL_W} height={OVAL_H} accessible={false} style={StyleSheet.absoluteFill}>
+          <Svg width="100%" height="100%" viewBox={`0 0 ${OVAL_W} ${OVAL_H}`} accessible={false} style={StyleSheet.absoluteFill}>
             <Ellipse
               cx={OVAL_W / 2}
               cy={OVAL_H / 2}
@@ -226,6 +226,7 @@ function RecorderCamera({
 }
 
 const OVAL = session.recordPanel;
+// The oval keeps the 150 : 200 shape and fills 62% of the panel width (Figma 46:202 at 390 dp is 150 wide).
 const OVAL_W = OVAL.ovalWidth;
 const OVAL_H = OVAL.ovalHeight;
 
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
     borderWidth: stroke.thick,
     borderColor: colors.border,
   },
-  ovalBox: { width: OVAL_W, height: OVAL_H, alignItems: 'center', justifyContent: 'center' },
+  ovalBox: { width: OVAL.ovalPercent, aspectRatio: OVAL_W / OVAL_H, alignItems: 'center', justifyContent: 'center' },
   count: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
   countText: { fontSize: OVAL.countdown, lineHeight: OVAL.countdown, includeFontPadding: false, fontWeight: '700', color: overlay.text, textAlign: 'center' },
   badge: {

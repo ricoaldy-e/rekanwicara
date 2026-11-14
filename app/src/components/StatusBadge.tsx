@@ -54,7 +54,7 @@ export function UntriedBadge({ testID }: { testID?: string }) {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', paddingVertical: statusBadge.paddingVertical },
+  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: statusBadge.paddingVertical },
   text: { color: colors.text, flexShrink: 1 },
   untried: { color: colors.textMuted, flexShrink: 1 },
 });

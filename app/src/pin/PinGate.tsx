@@ -14,7 +14,7 @@ import type { LockState } from './lock';
 const FREE: LockState = { locked: false, secondsLeft: 0, triesLeft: 0 };
 
 /** Shows `children` once the companion PIN has been entered; until then only the PIN pad (flow §7.7.2). */
-export function PinGate({ children }: { children: ReactNode }) {
+export function PinGate({ children, headerless = false }: { children: ReactNode; /** True when no stack header sits above (the Pendamping tab): the pad pads the status bar itself. */ headerless?: boolean }) {
   const { uid, session } = useAuth();
   const router = useRouter();
   const { unlocked, unlock } = usePinSession();
@@ -84,6 +84,7 @@ export function PinGate({ children }: { children: ReactNode }) {
       : null;
   return (
     <PinScreenBody
+      headerless={headerless}
       title="Masukkan PIN Pendamping"
       filled={pad.digits.length}
       message={message}
