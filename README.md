@@ -80,7 +80,8 @@ tidak mengklaim menggantikan tenaga profesional dan tidak memberi diagnosis.
 - **Hasil yang bisa dibandingkan.** Level 1 menampilkan "Cermin bibir" (bentuk target dan milik pengguna pada grafik yang sama), "Peta vokal", dan grafik kekerasan suara.
 - **Instruksi bertahap.** Cara mengucapkan dipecah menjadi langkah pendek, satu kartu per langkah, dengan video contoh.
 - **Mode Pendamping.** Setelah memasukkan PIN, pendamping menambah, mengubah, dan menghapus kata latihan sendiri (video, instruksi, suku kata). Instruksi bisa disarankan oleh LLM lalu diedit.
-- **Kalibrasi.** Posisi bibir diam dan vokal a, i, u direkam sekali agar penilaian menyesuaikan wajah pengguna.
+- **Kalibrasi (opsional).** Dari Pengaturan, pengguna bisa merekam posisi bibir diam dan vokal a, i, u agar penilaian menyesuaikan
+  wajah dan suaranya. Tanpa kalibrasi, server memakai nilai rata-rata populasi.
 - **Akun dan kemajuan.** Masuk dengan email dan kata sandi; riwayat dan kemajuan numerik tersimpan di Supabase, antrean lokal menahan data saat koneksi putus.
 - **Aksesibilitas sebagai syarat.** Teks ≥ 15, target sentuh ≥ 48 dp, kontras diukur, mengikuti pengaturan Reduce Motion, tidak ada bunyi beep, getar bisa dimatikan.
 - **Privasi.** Rekaman latihan dihapus segera setelah dianalisis, termasuk saat galat. Log hanya berisi angka dan kode status. Wajah hanya dipakai untuk geometri mulut; tidak ada pengenalan identitas.
@@ -201,7 +202,25 @@ ml/wav2vec2/.venv/Scripts/python.exe -B ml/tools/download_wav2vec2.py
 ```
 
 Unduhan berukuran sekitar 1,2 GB dan diverifikasi dengan SHA-256. Setelah itu inferensi berjalan offline di CPU.
-Tanpa langkah ini server mengembalikan galat `wav2vec2_unavailable` untuk penilaian v2.
+Tanpa langkah ini server mengembalikan galat `wav2vec2_unavailable` untuk penilaian v2. Server memanggil
+`ml/wav2vec2/.venv/Scripts/python.exe` lewat path relatif repositori, jadi jangan memindahkan folder ini.
+Satu penilaian memuat model ulang (sekitar 8 detik di laptop uji), masih di bawah batas 60 detik.
+
+### Saran instruksi AI (opsional)
+
+Tombol "Buat dengan AI" di layar kata Pendamping memakai Google Gemini lewat endpoint kompatibel Chat Completions.
+Buat kunci API di Google AI Studio, lalu isi `server/.env`:
+
+```dotenv
+LLM_API_URL=https://generativelanguage.googleapis.com/v1beta/openai/chat/completions
+LLM_API_KEY=<kunci dari Google AI Studio>
+LLM_MODEL=gemini-3.5-flash-lite
+```
+
+Model ini yang diuji tim pada 14 November 2026 (sekitar 1–2 detik per saran). Google bisa menghentikan model lama;
+bila itu terjadi, ganti `LLM_MODEL` dengan model *flash* yang tersedia. Prompt sistem ada di
+[server/app/content/instruction_prompt.txt](server/app/content/instruction_prompt.txt) dan bisa disunting tanpa mengubah kode.
+Tanpa ketiga variabel ini, tombol AI menampilkan "Instruksi belum bisa dibuat"; fitur lain tidak terpengaruh.
 
 ### Server: menjalankan
 
@@ -212,7 +231,8 @@ cd server
 
 Buka `http://<IP-laptop>:8000/v1/health` dari browser HP. Respons harus berupa JSON dengan `mock_mode: false`.
 IPv4 Wi-Fi laptop dilihat dengan `ipconfig`. Variabel shell mengalahkan `.env`, jadi pastikan terminal tidak
-mewarisi `DEBUG` atau `MOCK_MODE` dari sesi lain.
+mewarisi `DEBUG` atau `MOCK_MODE` dari sesi lain. Server membaca `server/.env` hanya saat dijalankan
+(`--reload` tidak memantau `.env`), jadi **jalankan ulang server setiap kali `.env` diubah**.
 
 ### Supabase
 
@@ -274,7 +294,7 @@ Semua variabel `EXPO_PUBLIC_*` ikut terbundel ke aplikasi, jadi hanya nilai publ
 | `SUPABASE_ANON_KEY` | kosong | Dipakai server bersama JWT pemanggil agar RLS tetap berlaku |
 | `SUPABASE_SERVICE_ROLE_KEY` | kosong | Hanya untuk penghapusan akun dan unggah video tim. Jangan taruh di aplikasi |
 | `TUTORIAL_UPLOADER_IDS` | `[]` | Larik JSON UUID akun perekam tim. Kosong menolak semua akses produksi tutorial |
-| `LLM_API_URL`, `LLM_API_KEY`, `LLM_MODEL` | kosong | Gemini lewat endpoint kompatibel Chat Completions untuk tombol "Buat dengan AI"; URL, kunci, dan nama model dari Google AI Studio. Kosong membuat endpoint mengembalikan `AI_UNAVAILABLE`; fitur lain tidak terpengaruh |
+| `LLM_API_URL`, `LLM_API_KEY`, `LLM_MODEL` | kosong | Gemini untuk tombol "Buat dengan AI". Contoh teruji: URL `https://generativelanguage.googleapis.com/v1beta/openai/chat/completions`, model `gemini-3.5-flash-lite`, kunci dari Google AI Studio (bagian 6). Kosong membuat endpoint mengembalikan `AI_UNAVAILABLE`; fitur lain tidak terpengaruh |
 
 ## 8. Akun demonstrasi
 
@@ -287,7 +307,7 @@ EXPO_PUBLIC_USE_MOCK=true
 EXPO_PUBLIC_ANALYZE_API=mock
 ```
 
-Kalibrasi tetap memanggil server, jadi jalankan server dengan `MOCK_MODE=true` di `server/.env`. Di layar Masuk
+Kalibrasi (opsional, dari Pengaturan) tetap memanggil server; untuk mencobanya tanpa analisis, jalankan server dengan `MOCK_MODE=true`. Di layar Masuk
 atau Daftar, gunakan email apa pun dan kata sandi apa pun, misalnya `demo@contoh.id`. Kata sandi tidak disimpan. Buat PIN Pendamping empat angka (`1234` ditolak; pakai misalnya `2580`). Hasil latihan berlabel contoh dan
 bukan penilaian sungguhan. Email khusus untuk menguji galat: `salah@contoh.id` (kredensial salah), `dipakai@contoh.id`
 (email terdaftar, saat daftar), `cek@contoh.id` (layar Cek email), `mati@contoh.id` (tanpa koneksi).
@@ -333,6 +353,8 @@ Angka ini adalah bukti awal pada penutur dewasa non-Tuli, **bukan akurasi pada p
   ucapan penutur Tuli mungkin dinilai berbeda dari yang dimaksud.
 - Pembedaan p/b dan penilaian kata masih lemah pada evaluasi aturan.
 - Vokal e dan o ditambahkan belakangan dan belum masuk evaluasi di atas.
+- Baris "Status kata" diukur pada kata m/p/b (mama, papa, dan lainnya) dengan penilai aturan. Kata itu tidak lagi
+  ada di aplikasi; delapan Kata Penting dinilai Wav2Vec2 dan **belum dievaluasi** dengan rekaman.
 - Antarmuka terbaru belum diuji di perangkat untuk skala teks 200%, layar 360 dp, dan pembaca layar.
 - Petunjuk, gambar bibir, dan instruksi bawaan belum ditinjau ahli terapi wicara.
 
@@ -347,7 +369,7 @@ Rincian ada di [EVAL_REPORT.md](docs/EVAL_REPORT.md) dan [MODEL_CARD.md](docs/MO
 | **MediaPipe Face Landmarker** (Google, `face_landmarker.task` float16) | `server/app/pipeline/face.py`, `lips.py`, `features.py`; ekstraksi di `media.py` | 478 titik wajah dan blendshape per frame untuk mengukur bukaan dan bentuk bibir | Frame dari rekaman (diproses lokal di server) → angka geometri | Model pralatih, tidak dilatih ulang. Apache-2.0. Tidak ada pengenalan identitas |
 | **Wav2Vec2** [`Wikidepia/wav2vec2-xls-r-300m-indonesian`](https://huggingface.co/Wikidepia/wav2vec2-xls-r-300m-indonesian), revisi `8a9d507f…` | `ml/tools/wav2vec2_poc.py` (dipanggil `server/app/api/v1/wav2vec2.py`); dipakai `server/app/api/v2/analysis.py`, `vowels.py`, `server/app/pipeline/combined.py`, `text_match.py` | Mengubah ucapan menjadi teks (greedy CTC, tanpa model bahasa) untuk dibandingkan dengan teks target | Audio WAV 16 kHz (lokal, CPU) → teks | Apache-2.0. Berjalan offline di server, rekaman tidak dikirim ke Hugging Face. Bobot diverifikasi SHA-256. Tidak ada fine-tuning oleh tim. Dokumentasi: [WAV2VEC2_POC.md](docs/WAV2VEC2_POC.md) |
 | **Praat melalui Parselmouth** | `server/app/pipeline/audio.py`, `features.py` | Bukan model pembelajaran mesin; algoritma pengukur intensitas, nada, dan formant | Audio → angka | GPL-3.0-or-later |
-| **Google Gemini** (lewat endpoint kompatibel Chat Completions, dikonfigurasi dengan `LLM_API_URL`, `LLM_API_KEY`, `LLM_MODEL`) | `server/app/api/v2/instructions.py` (`POST /v2/instructions/generate`); tombol "Buat dengan AI" di layar kata Pendamping | Menyarankan instruksi pengucapan berbasis gerakan bibir yang bisa dilihat | Hanya teks target (kata atau suku kata) dan kata induk → teks saran | Layanan cloud Google. Tidak ada rekaman atau data pengguna yang dikirim. Saran selalu ditinjau dan bisa diedit pendamping sebelum disimpan. Prompt sistem melarang klaim medis dan kata yang dilarang produk; keluaran divalidasi server. Kunci API hanya ada di server |
+| **Google Gemini** (`gemini-3.5-flash-lite`, lewat endpoint kompatibel Chat Completions; dikonfigurasi dengan `LLM_API_URL`, `LLM_API_KEY`, `LLM_MODEL`) | `server/app/api/v2/instructions.py` (`POST /v2/instructions/generate`) dengan prompt di `server/app/content/instruction_prompt.txt`; tombol "Buat dengan AI" di layar kata Pendamping | Menyarankan instruksi pengucapan bertahap (satu langkah per baris) dari bank bentuk huruf dan kaidah pemenggalan PUEBI | Hanya teks target (kata atau suku kata) dan kata induk → teks saran | Layanan cloud Google. Tidak ada rekaman atau data pengguna yang dikirim. Saran selalu ditinjau dan bisa diedit pendamping sebelum disimpan. Prompt sistem melarang klaim medis dan kata yang dilarang produk; keluaran divalidasi server. Kunci API hanya ada di server |
 | **Aturan berambang** | `server/app/pipeline/rules.py`, `hints.py`, `server/app/config/thresholds.yaml` | Menentukan status Sesuai / Mendekati / Belum sesuai dan petunjuk | Angka fitur → status | Buatan tim, bukan model AI. Ambang disetel dari data tim (3 perekam, maksimal 100 video) |
 
 Tim tidak melatih atau menyempurnakan model apa pun. Data rekaman tim hanya dipakai untuk menyetel ambang dan menguji.
