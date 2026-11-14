@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import type { ReactNode, Ref } from 'react';
+import { StyleSheet, Text, View, type ScrollViewInstance } from 'react-native';
 
 import { colors, displayFont, fontSize, layout, lineHeight, spacing, textFont } from '../../theme';
 import { BackButton } from '../BackButton';
@@ -8,10 +8,11 @@ import { Screen } from '../Screen';
 /**
  * The frame of Kata baru and Ubah kata (Figma 50:506, 61:716): back capsule, serif title, a muted line, then the form.
  * The stack header is hidden for these screens, so the top inset is ours (the tab bar below handles the bottom inset).
+ * Simpan, Batal (and Hapus kata) are the last part of the form, reached by scrolling to the end; nothing sticks to the bottom.
  */
-export function WordFormScreen({ title, note, onBack, footer, children }: { title: string; note?: string; onBack: () => void; /** Stays at the bottom of the screen while the form scrolls (Simpan, Batal). */ footer?: ReactNode; children: ReactNode }) {
+export function WordFormScreen({ title, note, onBack, scrollRef, children }: { title: string; scrollRef?: Ref<ScrollViewInstance>; note?: string; onBack: () => void; children: ReactNode }) {
   return (
-    <Screen edges={TOP_EDGES} contentStyle={styles.content} footer={footer}>
+    <Screen edges={TOP_EDGES} contentStyle={styles.content} scrollRef={scrollRef}>
       <View style={styles.back}>
         <BackButton label="Daftar kata" onPress={onBack} testID="word-form-back" />
       </View>

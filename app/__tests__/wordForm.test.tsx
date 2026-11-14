@@ -1,3 +1,4 @@
+import { ScrollView } from 'react-native';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 import { WordForm } from '../src/components/form/WordForm';
@@ -66,6 +67,16 @@ describe('WordForm required fields', () => {
     expect(screen.getByTestId('word-video-error')).toHaveAccessibleName('Rekam video contoh.');
     expect(screen.getByTestId('consent-error')).toHaveAccessibleName('Centang persetujuan untuk menyimpan.');
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('scrolls to the first empty block when saving (jest has no layout, so only the call is checked)', async () => {
+    const scrollTo = jest.fn();
+    jest.spyOn(ScrollView.prototype, 'scrollTo' as never).mockImplementation(scrollTo as never);
+    await open();
+    await fireEvent.changeText(screen.getByTestId('word-text'), 'susu');
+    await fireEvent.press(screen.getByTestId('word-save'));
+    await waitFor(() => expect(scrollTo).toHaveBeenCalledTimes(1));
+    expect(screen.getByTestId('word-video-error')).toBeTruthy();
   });
 
   it('a syllable row is required in full once added (text, video, instruction)', async () => {

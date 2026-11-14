@@ -53,7 +53,7 @@ it('opens the optional calibration', async () => {
 it('the vibration switch changes the setting and its state is written out', async () => {
   await render(<Settings />);
   expect(screen.getByTestId('vibration-state')).toHaveTextContent('Aktif');
-  await fireEvent(screen.getByTestId('vibration-toggle'), 'valueChange', false);
+  await fireEvent.press(screen.getByTestId('vibration-toggle'));
   expect(mockUpdate).toHaveBeenCalledWith({ vibration: false });
 });
 

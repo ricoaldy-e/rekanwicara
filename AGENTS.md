@@ -6,10 +6,9 @@ Kunci fitur **Jumat 13 Nov 2026 malam**, submission **Sabtu 14 Nov 2026**.
 ## Baca dulu, berurutan
 
 1. `CLAUDE.md`: aturan kerja per fase dan batas produk. **Berlaku untuk semua agen, bukan hanya Claude.**
-2. `CONTEXT.md`: ringkasan, status, hasil dan keterbatasan, cara menyiapkan laptop.
+2. `README.md`: ringkasan, arsitektur, cara menjalankan, hasil dan keterbatasan.
 3. `docs/PROGRESS.md`: status tiap fase dan semua keputusan beserta alasan.
 4. `docs/SPEC.md`: spesifikasi (§5 = kontrak API, sumber kebenaran).
-5. `docs/NEXT_STEPS.md`: pekerjaan tersisa (I1, B4, F) dengan prompt-nya.
 
 ## Aturan keras
 

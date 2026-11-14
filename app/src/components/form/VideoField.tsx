@@ -70,9 +70,22 @@ export function VideoField({ label, ownerId, shownLabel, value, onChange, error,
       {value?.kind === 'new' ? <Preview uri={value.file.uri} label={label} /> : null}
       {value?.kind === 'kept' && ownerId ? <VideoPreview key={`${ownerId}:${value.path}`} ownerId={ownerId} localUri={null}
         video={{ bucket: 'rekan-wicara-tutorials', path: value.path, position: 1, available: value.available ?? true }} /> : null}
+      {/* Figma 50:534: with a video, "record again" and "delete" sit side by side under the card. */}
       <View style={styles.row}>
         <View style={styles.cell}>
-          {value ? (
+          <BigButton
+            compact
+            label={value ? UI.recordAgain : UI.recordVideo}
+            icon="videocam-outline"
+            variant="secondary"
+            disabled={busy}
+            accessibilityLabel={`${value ? UI.recordAgain : UI.recordVideo}, ${label}`}
+            onPress={() => take(recordWithCamera)}
+            testID={testID ? `${testID}-camera` : undefined}
+          />
+        </View>
+        {value ? (
+          <View style={styles.cell}>
             <BigButton
               compact
               label={UI.removeVideo}
@@ -82,31 +95,9 @@ export function VideoField({ label, ownerId, shownLabel, value, onChange, error,
               onPress={() => onChange(null)}
               testID={testID ? `${testID}-remove` : undefined}
             />
-          ) : (
-            <BigButton
-              compact
-              label={UI.recordVideo}
-              icon="videocam-outline"
-              variant="secondary"
-              disabled={busy}
-              accessibilityLabel={`${UI.recordVideo}, ${label}`}
-              onPress={() => take(recordWithCamera)}
-              testID={testID ? `${testID}-camera` : undefined}
-            />
-          )}
-        </View>
+          </View>
+        ) : null}
       </View>
-      {value ? (
-        <BigButton
-          label={UI.recordAgain}
-          icon="videocam-outline"
-          variant="secondary"
-          disabled={busy}
-          accessibilityLabel={`${UI.recordAgain}, ${label}`}
-          onPress={() => take(recordWithCamera)}
-          testID={testID ? `${testID}-camera` : undefined}
-        />
-      ) : null}
       {denied ? (
         <>
           <InfoNote tone="warning" text={MESSAGES.videoPermissionCamera} testID={testID ? `${testID}-denied` : undefined} />
@@ -157,6 +148,7 @@ const styles = StyleSheet.create({
   cardText: { flex: 1, minWidth: 1, gap: spacing.xs / 2 },
   name: { fontSize: fontSize.body, lineHeight: lineHeight.label, color: colors.text },
   facts: { fontSize: fontSize.small, lineHeight: lineHeight.small, color: colors.textMuted },
-  frame: { width: '100%', aspectRatio: 3 / 4, maxHeight: 280, borderRadius: radius.card, overflow: 'hidden', backgroundColor: colors.surface },
+  // A fixed height with the ratio gives a fixed width; it is centred instead of hugging the left edge.
+  frame: { alignSelf: 'center', height: 280, aspectRatio: 3 / 4, maxWidth: '100%', borderRadius: radius.card, overflow: 'hidden', backgroundColor: colors.surface },
   video: { width: '100%', height: '100%' },
 });

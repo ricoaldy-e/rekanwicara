@@ -1138,3 +1138,12 @@ Skill yang dimuat: `figma-design-to-code` (membaca konteks), `figma-use` dan `fi
 - Kalibrasi tidak lagi di awal: onboarding berakhir ke Beranda ("Mulai latihan"), tanpa banner dan tanpa langkah kalibrasi di "Langkah awal" (kini 2 langkah). Kalibrasi tetap opsional di Pengaturan > Umum > Kalibrasi; layar selesai kembali ke asal.
 - Server, `ml/` dan endpoint dataset/tutorial di server tidak diubah (dipakai tim untuk menyetel ambang dan mengunggah video).
 - `npm test` 746/746, typecheck bersih, lint 0 error.
+
+## FIX-1 (14 Nov 2026): Pengaturan Getar dan formulir kata
+
+- **Getar:** baris tidak punya padding kiri/kanan karena bukan `ListRow` (kini memakai `useRowPadding`). `Switch` bawaan RN diganti `Toggle` (design.md §5.8, 51 × 31, ibu jari 27, area sentuh 48 dp lewat `hitSlop`, token `toggle`). Tes sakelar kini `fireEvent.press`, bukan `valueChange`; `testID` dan `accessibilityLabel` tetap.
+- **Kata baru / Ubah kata:** View pembungkus (dari merge `fa3e62e`) tidak punya `gap`, jadi jarak antar kolom hilang; ditambahkan. Simpan yang gagal kini menggulir ke blok pertama yang salah menurut urutan di layar (kata, video, instruksi, suku kata, persetujuan) dan membuka kartu suku kata yang bermasalah; Reduce Motion mematikan animasi gulir. `Screen` menerima `scrollRef`.
+- **Video:** pratinjau di tengah (tinggi tetap 280, rasio 3:4) dan tombol "Rekam video baru" + "Hapus video" sebaris di bawah kartu berkas (Figma 50:534).
+- Keputusan Rico: Simpan dan Batal (dan Hapus kata di Ubah kata, paling bawah) tidak lagi menempel di bawah layar, tetapi menjadi blok terakhir formulir yang dicapai dengan menggulir sampai mentok; bar bawah tetap ada. Alasan: bar Simpan/Batal yang menempel terlihat menyatu dengan bar bawah. Selisih dari Figma 50:506: design.md D13. Penyembunyian bar saat keyboard terbuka dihapus lagi (tidak perlu karena tombol tidak lagi menempel).
+- Belum: gulir ke kolom tertentu di dalam kartu suku kata (hanya ke kartu), dan belum dicoba di perangkat.
+- `npm test` 748/748, typecheck bersih.

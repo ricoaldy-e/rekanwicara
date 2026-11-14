@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
 import { useNavigation, usePreventRemove } from 'expo-router'; // not from @react-navigation/native (separate context)
-import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, View, type LayoutChangeEvent, type ScrollViewInstance } from 'react-native';
 
+import { useReduceMotion } from '../../a11y/useReduceMotion';
 import { showFlash } from '../../forms/flash';
 import { LIMITS, MAX_SYLLABLES } from '../../forms/limits';
 import { fill, MESSAGES, messageOf, UI, AI } from '../../forms/messages';
@@ -13,7 +14,7 @@ import { makeUuid } from '../../user/pure';
 import { deleteLocalFile } from '../../recording/localFile';
 import { cleanInstruction, splitSteps } from '../../forms/instructionSteps';
 import type { SaveProgress, VideoInput, WordFormData } from '../../data/words';
-import { colors, fontSize, layout, lineHeight, spacing, stroke, textFont } from '../../theme';
+import { colors, fontSize, lineHeight, spacing, stroke, textFont } from '../../theme';
 import { BigButton } from '../BigButton';
 import { AiInstruction } from './AiInstruction';
 import { Body } from '../Typography';
@@ -48,7 +49,7 @@ export interface WordFormProps {
   onSubmit: (data: WordFormData, onProgress: SaveProgress, signal: AbortSignal) => Promise<void>;
   /** Leave the form (after saving, or when the user cancels). */
   onClose: () => void;
-  /** Extra action under Simpan and Batal, e.g. "Hapus kata" on the edit screen (design.md §6.6). */
+  /** Extra action under Simpan and Batal at the end of the form, e.g. "Hapus kata" on the edit screen (design.md §6.6). */
   footer?: ReactNode;
   describeError?: (error: unknown) => string;
   ownerId?: string;
@@ -92,6 +93,11 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
 
   const textRef = useRef<TextFieldRef>(null);
   const instructionRef = useRef<TextFieldRef>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
+  const reduceMotion = useReduceMotion();
+  /** Top of each block (relative to the fields wrapper) and of the wrapper itself, so a wrong block can be scrolled to. */
+  const spots = useRef<Record<string, number>>({});
+  const spot = useCallback((key: string) => (e: LayoutChangeEvent) => { spots.current[key] = e.nativeEvent.layout.y; }, []);
   const [showRows, setShowRows] = useState(false);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
@@ -138,6 +144,15 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
     setSyllables(next);
   };
 
+  /** Moves the page to a block that is wrong or empty, a little below the top so its label shows. */
+  const scrollTo = (key: string) => {
+    // Wait a frame: a folded syllable card opens first and changes the layout.
+    setTimeout(() => {
+      const y = (spots.current.fields ?? 0) + (spots.current[key] ?? 0);
+      scrollRef.current?.scrollTo({ y: Math.max(0, y - spacing.md), animated: !reduceMotion });
+    }, 0);
+  };
+
   const submit = async () => {
     if (busy) return;
     setFailure(null);
@@ -146,12 +161,20 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
     if (!result.ok) {
       const bad = syllableProblems(values.syllables).findIndex((r) => r.text || r.instruction || r.video);
       if (bad >= 0) setOpenKey(values.syllables[bad].key); // a problem must not hide in a folded card
+      // The first wrong block in the order it appears on screen (the form state orders its fields differently).
+      const first =
+        textProblem ? 'text'
+        : !values.video ? 'video'
+        : word.instruction(values.instruction) ? 'instruction'
+        : bad >= 0 ? `syllable-${bad}`
+        : 'consent';
+      scrollTo(first);
       const rows = rowErrorCount(syllableProblems(values.syllables));
       // the syllable rows count as one field in the form state; count every wrong row field instead
       const count = result.count - (rows > 0 ? 1 : 0) + rows;
       announce(fill(MESSAGES.errorCount, { n: count }));
-      if (result.firstInvalid === 'text') textRef.current?.focus();
-      else if (result.firstInvalid === 'instruction') instructionRef.current?.focus();
+      if (first === 'text') textRef.current?.focus();
+      else if (first === 'instruction') instructionRef.current?.focus();
       return;
     }
     const data: WordFormData = {
@@ -188,26 +211,15 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <WordFormScreen
+        scrollRef={scrollRef}
         title={title}
         note={MESSAGES.requiredNote}
         onBack={() => navigation.goBack()}
-        footer={
-          <View style={styles.footer}>
-            {progressText ? (
-              <View style={styles.progress} testID="upload-progress">
-                <Body>{progressText}</Body>
-                <ProgressBar value={pct / 100} accessibilityLabel={progressText} />
-                <BigButton label={UI.cancelUpload} variant="secondary" onPress={() => abort.current?.abort()} testID="cancel-upload" />
-              </View>
-            ) : null}
-            <BigButton label={busy ? 'Menyimpan…' : UI.save} disabled={busy} onPress={submit} testID="word-save" />
-            <BigButton label={UI.cancel} variant="secondary" disabled={busy} onPress={() => navigation.goBack()} testID="word-cancel" />
-          </View>
-        }
       >
         {failure ? <FormBanner text={failure} onRetry={submit} testID="word-form-banner" /> : null}
 
-        <View pointerEvents={busy ? 'none' : 'auto'} accessibilityElementsHidden={busy} importantForAccessibility={busy ? 'no-hide-descendants' : 'auto'}>
+        <View style={styles.fields} onLayout={spot('fields')} pointerEvents={busy ? 'none' : 'auto'} accessibilityElementsHidden={busy} importantForAccessibility={busy ? 'no-hide-descendants' : 'auto'}>
+        <View onLayout={spot('text')}>
         <TextField
           ref={textRef}
           testID="word-text"
@@ -222,7 +234,11 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
           autoCorrect={false}
           editable={!busy}
         />
+        </View>
+        <View onLayout={spot('video')}>
         <VideoField ownerId={ownerId} testID="word-video" label="Video contoh" value={values.video} onChange={(v) => form.setValue('video', v)} error={err('video')} />
+        </View>
+        <View style={styles.instructionBlock} onLayout={spot('instruction')}>
         <InstructionSteps
           ref={instructionRef}
           testID="word-instruction"
@@ -244,12 +260,13 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
           onBusyChange={setAiBusy}
           onFilled={() => instructionRef.current?.focus()}
         />
+        </View>
 
         <Text accessibilityRole="header" maxFontSizeMultiplier={2} style={[styles.section, textFont(true)]}>{UI.sectionSyllables}</Text>
         {values.syllables.map((s, i) => (
+          <View key={s.key} onLayout={spot(`syllable-${i}`)}>
           <SyllableRow
             ownerId={ownerId}
-            key={s.key}
             index={i}
             parentWord={word.normalizeWord(values.text)}
             total={values.syllables.length}
@@ -262,6 +279,7 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
             onMoveDown={() => move(i, 1)}
             onRemove={() => setSyllables(values.syllables.filter((_, j) => j !== i))}
           />
+          </View>
         ))}
         {matchWarning ? <InfoNote text={messageOf(matchWarning)} testID="syllable-match-warning" /> : null}
         <BigButton
@@ -278,6 +296,7 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
         />
         <Text testID="syllables-full" maxFontSizeMultiplier={2} style={[styles.note, textFont()]}>{MESSAGES.syllablesFull}</Text>
 
+        <View style={styles.consentBlock} onLayout={spot('consent')}>
         <Checkbox
           testID="consent"
           checked={values.consent}
@@ -287,8 +306,22 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
         />
         <Text maxFontSizeMultiplier={2} style={[styles.note, textFont()]}>{AI.warning}</Text>
         </View>
+        </View>
 
-        {footer && !busy ? footer : null}
+        {/* The end of the form, reached by scrolling (the tab bar stays below): Simpan, Batal, then the screen's own extra
+            action such as Hapus kata, which comes last because it is the dangerous one (design.md §2.11). */}
+        <View style={styles.actions}>
+          {progressText ? (
+            <View style={styles.progress} testID="upload-progress">
+              <Body>{progressText}</Body>
+              <ProgressBar value={pct / 100} accessibilityLabel={progressText} />
+              <BigButton label={UI.cancelUpload} variant="secondary" onPress={() => abort.current?.abort()} testID="cancel-upload" />
+            </View>
+          ) : null}
+          <BigButton label={busy ? 'Menyimpan…' : UI.save} disabled={busy} onPress={submit} testID="word-save" />
+          <BigButton label={UI.cancel} variant="secondary" disabled={busy} onPress={() => navigation.goBack()} testID="word-cancel" />
+          {footer && !busy ? footer : null}
+        </View>
 
         <ConfirmDialog
           visible={discarding !== null}
@@ -310,8 +343,12 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   progress: { gap: spacing.sm },
-  // Sticks to the bottom of the screen (Figma "Aksi"): a thin line above, the screen colour behind.
-  footer: { gap: spacing.sm + spacing.xs, paddingHorizontal: layout.gutter, paddingTop: spacing.sm + spacing.xs, paddingBottom: spacing.sm, borderTopWidth: stroke.hairline, borderTopColor: colors.hairline, backgroundColor: colors.background },
+  // The wrapper that blocks input while saving also carries the spacing the screen gives its direct children.
+  fields: { gap: spacing.lg - spacing.xs },
+  instructionBlock: { gap: spacing.sm },
+  consentBlock: { gap: spacing.sm },
+  // Last block of the form: a hairline above separates the actions from the fields.
+  actions: { gap: spacing.sm + spacing.xs, paddingTop: spacing.lg - spacing.xs, borderTopWidth: stroke.hairline, borderTopColor: colors.hairline },
   section: { fontSize: fontSize.label, lineHeight: lineHeight.label, color: colors.text },
   note: { fontSize: fontSize.small, lineHeight: lineHeight.small, color: colors.textMuted },
 });

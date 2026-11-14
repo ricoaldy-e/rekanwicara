@@ -17,10 +17,10 @@ Isi `.env` mengikuti [.env.example](.env.example). Jalankan Metro dengan `-c` se
 Masuk ke akun Expo yang sama di CLI dan Expo Go, lalu pindai QR atau buka `exp://<IP-laptop>:8081`. Izinkan jaringan
 lokal, kamera, dan mikrofon. Windows Firewall perlu izin jaringan Private untuk port 8000 dan 8081; jangan mematikannya.
 
-## Pengaturan operator
+## Alamat server
 
-Bagian operator di tab Pengaturan menampilkan alamat server dan tes koneksi. Setelah pindah jaringan, IP laptop bisa
-berubah: perbarui `EXPO_PUBLIC_API_URL` atau pilih Kembalikan ke bawaan bila alamat pernah diganti di sini.
+Alamat server hanya dibaca dari `EXPO_PUBLIC_API_URL`; tidak ada layar untuk mengubahnya. Setelah pindah jaringan,
+IP laptop bisa berubah: perbarui nilainya di `.env`, lalu jalankan ulang Metro dengan `-c`.
 
 ## Pengujian
 

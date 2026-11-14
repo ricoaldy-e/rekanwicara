@@ -212,6 +212,9 @@ export const wordList = { tile: 44, textGap: 4, titleRowGap: 8, chipPaddingHoriz
 export const pathCard = { padding: 14, paddingNext: 12, tileHeight: 56, tileMinWidth: 56, tilePaddingHorizontal: 12, gap: 12, textGap: 6, chevron: 24 } as const;
 
 /** Pendamping (50:402) and Pengaturan (51:268): account avatar, settings rows, the "Hapus kata" button (61:833). */
+/** Switch from design.md §5.8: 51 x 31 track, 27 thumb, 2 dp inset; `hit` widens the touch area to 48 dp. */
+export const toggle = { width: 51, height: 31, thumb: 27, inset: 2, hit: 9 } as const;
+
 export const companion = { avatar: 48, rowPadding: 14, groupPadding: 4, deleteHeight: 52, deleteIcon: 20, deleteGap: 8, wordTileFont: 20 } as const;
 
 /** Entry screens from Figma "Splash · Memuat" (106:627), "Selamat datang" (106:646), "Masuk" (27:38), onboarding (29:182). */

@@ -1,13 +1,33 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Constants from 'expo-constants';
-import { StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { useAuth } from '../../../src/auth/AuthProvider';
-import { BigButton, ListGroup, ListRow, Screen, Snackbar } from '../../../src/components';
+import { BigButton, ListGroup, ListRow, Screen, Snackbar, Toggle } from '../../../src/components';
+import { useRowPadding } from '../../../src/components/ListGroup';
 import { useFlash } from '../../../src/forms/flash';
 import { useUser } from '../../../src/state/user';
 import { colors, companion, displayFont, fontSize, layout, lineHeight, radius, spacing, stroke, textFont, touchTarget } from '../../../src/theme';
+
+/** Getar row: the group gives rows no padding of their own, so it takes it with `useRowPadding` (like ListRow). */
+function VibrationRow({ value, onChange }: { value: boolean; onChange: (value: boolean) => void }) {
+  const padding = useRowPadding(companion.rowPadding);
+  return (
+    <View style={[styles.switchRow, padding]}>
+      <View style={styles.switchText}>
+        <Text maxFontSizeMultiplier={2} style={[styles.rowTitle, textFont(true)]}>Getar</Text>
+        <Text maxFontSizeMultiplier={2} style={[styles.muted, textFont()]}>Saat merekam dan saat hasil muncul.</Text>
+      </View>
+      <View style={styles.switchGroup}>
+        <Text maxFontSizeMultiplier={2} style={[styles.switchState, textFont(true)]} testID="vibration-state">
+          {value ? 'Aktif' : 'Mati'}
+        </Text>
+        <Toggle accessibilityLabel="Getar" testID="vibration-toggle" value={value} onValueChange={onChange} />
+      </View>
+    </View>
+  );
+}
 
 /** Settings (Figma 51:268): account, Getar, Kalibrasi (optional), Ganti PIN, Tentang, Keluar. Not PIN-locked (design.md §6.7). */
 export default function Settings() {
@@ -36,26 +56,7 @@ export default function Settings() {
 
       <View style={styles.group}>
         <ListGroup title="Umum" inset={0} paddingVertical={companion.groupPadding} paddingRight={layout.sectionGap + spacing.xs}>
-          <View style={styles.switchRow}>
-            <View style={styles.switchText}>
-              <Text maxFontSizeMultiplier={2} style={[styles.rowTitle, textFont(true)]}>Getar</Text>
-              <Text maxFontSizeMultiplier={2} style={[styles.muted, textFont()]}>Saat merekam dan saat hasil muncul.</Text>
-            </View>
-            <View style={styles.switchGroup}>
-              <Text maxFontSizeMultiplier={2} style={[styles.switchState, textFont(true)]} testID="vibration-state">
-                {profile.settings.vibration ? 'Aktif' : 'Mati'}
-              </Text>
-              <Switch
-                accessibilityLabel="Getar"
-                testID="vibration-toggle"
-                value={profile.settings.vibration}
-                onValueChange={(vibration) => updateSettings({ vibration })}
-                trackColor={{ false: colors.surfaceRaised, true: colors.success }}
-                thumbColor={colors.primary}
-                ios_backgroundColor={colors.surfaceRaised}
-              />
-            </View>
-          </View>
+          <VibrationRow value={profile.settings.vibration} onChange={(vibration) => updateSettings({ vibration })} />
           <ListRow
             testID="calibration-link"
             title="Kalibrasi"
@@ -134,8 +135,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   section: { fontSize: fontSize.small, color: colors.textMuted, marginTop: spacing.lg, paddingTop: spacing.md, borderTopWidth: stroke.thin, borderTopColor: colors.border },
-  switchRow: { flexDirection: 'row', alignItems: 'center', gap: layout.sectionGap, minHeight: touchTarget, paddingVertical: companion.rowPadding },
-  switchLabel: { flex: 1, fontSize: fontSize.body, color: colors.text },
+  switchRow: { flexDirection: 'row', alignItems: 'center', gap: layout.sectionGap, minHeight: touchTarget },
   switchGroup: { flexDirection: 'row', alignItems: 'center', alignSelf: 'center', gap: spacing.sm + spacing.xs / 2 },
   switchState: { fontSize: fontSize.small, lineHeight: 20, color: colors.text, includeFontPadding: false, textAlignVertical: 'center' },
   inputInvalid: { borderColor: colors.danger },

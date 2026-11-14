@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { ScrollView, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import type { ReactNode, Ref } from 'react';
+import { ScrollView, StyleSheet, type ScrollViewInstance, type StyleProp, type ViewStyle } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
 import { colors, spacing } from '../theme';
@@ -11,16 +11,19 @@ export function Screen({
   footer,
   contentStyle,
   edges = ['bottom', 'left', 'right'],
+  scrollRef,
 }: {
   children: ReactNode;
   footer?: ReactNode;
   contentStyle?: StyleProp<ViewStyle>;
   /** Safe-area edges to pad; add 'top' when the stack header is hidden. */
   edges?: readonly Edge[];
+  /** For screens that scroll to a spot themselves (a form moving to the first empty field). */
+  scrollRef?: Ref<ScrollViewInstance>;
 }) {
   return (
     <SafeAreaView style={styles.safe} edges={edges}>
-      <ScrollView contentContainerStyle={[styles.content, contentStyle]} keyboardShouldPersistTaps="handled">
+      <ScrollView ref={scrollRef} contentContainerStyle={[styles.content, contentStyle]} keyboardShouldPersistTaps="handled">
         {children}
       </ScrollView>
       {footer}

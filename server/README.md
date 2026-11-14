@@ -7,7 +7,7 @@ Analisis `/analyze` dan kalibrasi `/calibrate` sudah memakai pipeline sungguhan 
 
 ## Prasyarat
 
-- **Python 3.11** (versi yang dipakai dan diuji; torch tidak dipasang di MVP)
+- **Python 3.11** (versi yang dipakai dan diuji). Torch dan Transformers tidak masuk `requirements.txt`; keduanya hanya ada di venv Wav2Vec2 terpisah (lihat bagian Wav2Vec2)
 - **FFmpeg + ffprobe** di PATH (`ffmpeg -version`)
   - Windows: `winget install -e --id Gyan.FFmpeg`, lalu buka ulang terminal/VS Code
   - macOS: `brew install ffmpeg`
@@ -60,13 +60,32 @@ Variabel penting di `.env` (lihat `.env.example`):
 | `MOCK_MODE` | `true`: `/analyze` dan `/calibrate` mengembalikan contoh valid tanpa analisis |
 | `DATASET_MODE` | `true`: mengaktifkan `POST /v1/dataset/upload` (hanya saat sesi rekam dataset) |
 | `DATA_DIR` | folder data; relatif terhadap `server/` (default `../data`) |
-| `SCORER_MODE` | MVP selalu `rules` (Wav2Vec2 ditunda; nilai lain ditolak saat start) |
+| `SCORER_MODE` | selalu `rules`; nilai lain ditolak saat start. Wav2Vec2 tidak diatur lewat variabel ini |
 | `MAX_UPLOAD_MB` | batas ukuran upload (default 15) |
 | `DEBUG` | `true`: mengaktifkan `GET/POST /v1/debug/features` (pengembangan saja, matikan saat demo) |
 | `FACE_MODEL_PATH` | model MediaPipe, relatif terhadap `server/` (default `models/face_landmarker.task`) |
 | `TMP_DIR` | folder direktori sementara per request (kosong = temp sistem); selalu dihapus setelah request |
+| `ENGINE_VERSION` | versi mesin pada respons dan riwayat |
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY` | proyek Supabase. Wajib untuk semua endpoint `/v2` (verifikasi token dan akses data dengan RLS) |
+| `SUPABASE_SERVICE_ROLE_KEY` | hanya untuk penghapusan akun dan unggah video tim; jangan taruh di aplikasi |
+| `TUTORIAL_UPLOADER_IDS` | larik JSON UUID akun perekam tim; kosong menolak semua akses produksi tutorial |
+| `LLM_API_URL`, `LLM_API_KEY`, `LLM_MODEL` | endpoint HTTPS kompatibel Chat Completions untuk `POST /v2/instructions/generate`; kosong mengembalikan `AI_UNAVAILABLE` |
 
 Semua ambang penilaian dan kualitas ada di `app/config/thresholds.yaml` (dimuat dan divalidasi saat start).
+
+## Wav2Vec2
+
+Penilaian `/v2/analyze` memanggil Wav2Vec2 lewat subprocess di venv terpisah `ml/wav2vec2/.venv`
+(jangan dipasang ke `server/.venv`). Dari root repositori:
+
+```powershell
+py -3.11 -m venv ml/wav2vec2/.venv
+ml/wav2vec2/.venv/Scripts/python.exe -m pip install -r ml/requirements-wav2vec2.txt
+ml/wav2vec2/.venv/Scripts/python.exe -B ml/tools/download_wav2vec2.py
+```
+
+Model dan revisi: [docs/WAV2VEC2_POC.md](../docs/WAV2VEC2_POC.md). Tanpa venv ini server mengembalikan
+`wav2vec2_unavailable`.
 
 ## Menjalankan
 
