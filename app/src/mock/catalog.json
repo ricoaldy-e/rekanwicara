@@ -4,9 +4,7 @@
     { "id": "l1_i", "text": "I", "instruction": "Lebarkan bibir dan ucapkan I.", "videos": [] },
     { "id": "l1_u", "text": "U", "instruction": "Bulatkan bibir dan ucapkan U.", "videos": [] },
     { "id": "l1_e", "text": "E", "instruction": "Lebarkan bibir sedikit, buka setengah, dan ucapkan E.", "videos": [] },
-    { "id": "l1_o", "text": "O", "instruction": "Bulatkan bibir agak terbuka dan ucapkan O.", "videos": [] },
-    { "id": "l0_hold_a", "text": "A panjang", "instruction": "Tahan bunyi A beberapa detik.", "videos": [] },
-    { "id": "l0_soft_loud", "text": "Pelan ke keras", "instruction": "Mulai pelan, lalu makin keras.", "videos": [] }
+    { "id": "l1_o", "text": "O", "instruction": "Bulatkan bibir agak terbuka dan ucapkan O.", "videos": [] }
   ],
   "words": [
     { "id": "l3_mama", "text": "MAMA", "source": "default", "has_level_2": true },

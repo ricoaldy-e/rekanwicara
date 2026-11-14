@@ -19,8 +19,6 @@ const SOUND: Record<string, { hint: string; tile?: string; icon?: ComponentProps
   l1_u: { hint: 'Bibir membulat' },
   l1_e: { hint: 'Bibir setengah terbuka' },
   l1_o: { hint: 'Bibir bulat' },
-  l0_hold_a: { hint: 'Tahan suara', tile: 'a~' },
-  l0_soft_loud: { hint: 'Atur volume', icon: 'volume-medium-outline' },
 };
 
 export default function LevelOne() {

@@ -29,9 +29,11 @@ export function cleanV2(res: AnalyzeResult): AnalyzeResult {
   };
 }
 
+const VOWEL_ITEM = /^l1_[aiueo]$/;
+
 export function catalogToL1(dto: CatalogDTO): PracticeItem[] {
-  // l0_* items are shown as Level 1 (§4).
-  return dto.level_1.map((m) => ({
+  // Level 1 is only the vowels a, i, u, e, o (decided 14 Nov 2026): held-vowel and loudness items are not listed.
+  return dto.level_1.filter((m) => VOWEL_ITEM.test(m.id)).map((m) => ({
     key: m.id,
     itemId: m.id,
     level: 1,

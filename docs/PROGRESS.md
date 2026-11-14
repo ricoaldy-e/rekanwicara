@@ -940,3 +940,5 @@ Skill yang dimuat: `figma-design-to-code` (membaca konteks), `figma-use` dan `fi
 - `CLAUDE.md` (cakupan dan Wav2Vec2) dan `flow-srs-ui.md` (§1 teknologi, D17) diperbarui.
 - **Perlu backend:** `server/app/content/items.json` masih memuat `l1_e` dan `l1_o` dengan `active: false`; aktifkan, beserta aturan penilaian dan scorer Wav2Vec2 untuk e dan o, supaya `/v1/analyze` menerimanya. Sampai itu, penilaian e dan o hanya jalan dengan `EXPO_PUBLIC_ANALYZE_API=mock` atau v2. Kontrak API tidak diubah oleh app.
 - Belum diuji di perangkat; bentuk e dan o digambar tim dan belum ditinjau.
+
+- FG-20b: Level 1 hanya vokal a, i, u, e, o. "A panjang" dan "Pelan ke keras" tidak lagi tampil (katalog tiruan, teks bantu, dan `catalogToL1` menyaring `l1_[aiueo]`, jadi server yang masih mengirim item l0_* tidak memunculkannya). Hitungan Level 1 menjadi 5 materi. Logika lama l0_* (progresi, dataset, hasil) tidak diubah.

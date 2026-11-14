@@ -96,9 +96,11 @@ describe('clampStatus', () => {
 });
 
 describe('catalog mappers', () => {
-  it('shows l0_* items as Level 1 and takes videos[0]', () => {
+  it('lists only the vowels a, i, u, e, o as Level 1 and takes videos[0]', () => {
     const items = catalogToL1(MOCK_CATALOG);
-    expect(items.find((i) => i.itemId === 'l0_hold_a')?.level).toBe(1);
+    expect(items.map((i) => i.itemId)).toEqual(['l1_a', 'l1_i', 'l1_u', 'l1_e', 'l1_o']);
+    const withHeld = { ...MOCK_CATALOG, level_1: [...MOCK_CATALOG.level_1, { id: 'l0_hold_a', text: 'A panjang', instruction: 'x', videos: [] }] };
+    expect(catalogToL1(withHeld)).toHaveLength(5); // a server that still lists held or loudness items does not show them
     expect(items.every((i) => i.level === 1 && i.video === undefined)).toBe(true);
   });
 

@@ -25,10 +25,10 @@ beforeEach(() => {
   mockProfile = newProfile();
 });
 
-it('lists the six Level 1 sounds in catalog order with their last status', async () => {
+it('lists the five Level 1 vowels in catalog order with their last status', async () => {
   mockProfile.attempts = [attempt('l1_a', 'hijau', '2026-11-13T09:00:00.000Z'), attempt('l1_a', 'kuning', '2026-11-13T10:00:00.000Z')];
   await render(<LevelOne />);
-  const ids = ['l1_a', 'l1_i', 'l1_u', 'l1_e', 'l1_o', 'l0_hold_a', 'l0_soft_loud'];
+  const ids = ['l1_a', 'l1_i', 'l1_u', 'l1_e', 'l1_o'];
   expect(screen.getAllByTestId(/^item-/).map((el) => el.props.testID)).toEqual(ids.map((id) => `item-${id}`));
   expect(screen.getByRole('button', { name: 'A, terakhir Mendekati' })).toBeTruthy();
   expect(screen.getByText('Mendekati')).toBeTruthy(); // the badge shows the status as icon + text (Figma 37:287)
@@ -38,8 +38,8 @@ it('lists the six Level 1 sounds in catalog order with their last status', async
 
 it('opens a practice session for the tapped sound', async () => {
   await render(<LevelOne />);
-  await fireEvent.press(screen.getByTestId('item-l0_hold_a'));
-  expect(mockPush).toHaveBeenCalledWith({ pathname: '/practice/[itemId]', params: { itemId: 'l0_hold_a' } });
+  await fireEvent.press(screen.getByTestId('item-l1_e'));
+  expect(mockPush).toHaveBeenCalledWith({ pathname: '/practice/[itemId]', params: { itemId: 'l1_e' } });
 });
 
 it('titles each sound like Figma, shows "Belum dicoba" for untried ones and the progress banner', async () => {
@@ -47,9 +47,9 @@ it('titles each sound like Figma, shows "Belum dicoba" for untried ones and the 
   await render(<LevelOne />);
   expect(screen.getByText('Vokal “a”')).toBeTruthy();
   expect(screen.getByText('Bibir terbuka')).toBeTruthy();
-  expect(screen.getByText('“a” panjang')).toBeTruthy();
-  expect(screen.getByText('Pelan ke keras')).toBeTruthy();
-  expect(screen.getAllByText('Belum dicoba')).toHaveLength(6);
-  expect(screen.getByTestId('level1-progress')).toHaveAccessibleName('Kemajuan vokal. 1 dari 7 bunyi sesuai');
+  expect(screen.getByText('Bibir setengah terbuka')).toBeTruthy();
+  expect(screen.queryByText('Pelan ke keras')).toBeNull();
+  expect(screen.getAllByText('Belum dicoba')).toHaveLength(4);
+  expect(screen.getByTestId('level1-progress')).toHaveAccessibleName('Kemajuan vokal. 1 dari 5 bunyi sesuai');
   expect(screen.getByText('Sesuai')).toBeTruthy();
 });
