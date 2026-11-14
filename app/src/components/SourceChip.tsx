@@ -6,7 +6,7 @@ import { colors, fontSize, iconSize, radius, textFont, wordList } from '../theme
 
 /**
  * Where a word comes from: the team ("Bawaan", lock) or the companion ("Dari Pendamping", person).
- * Muted icon + cream bold text on a `surfaceRaised` chip (Figma 37:414, icon stroke #ababa7). `tall` is the slightly taller chip of "Jalur kata" (31:337).
+ * Muted icon + cream bold text on a `surfaceRaised` chip (Figma 37:414; the icon uses `textMuted`). `tall` is the slightly taller chip of "Jalur kata" (31:337).
  */
 export function SourceChip({ source, tall = false }: { source: Source; tall?: boolean }) {
   const builtIn = source === 'default';
