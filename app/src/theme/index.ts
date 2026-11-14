@@ -95,7 +95,7 @@ export const fontSize = {
 } as const;
 
 /** Line height for body text (1.5 × body). */
-export const lineHeight = { body: 24, small: 22, label: 22, large: 28, titleLarge: 36 } as const;
+export const lineHeight = { body: 24, small: 22, label: 22, large: 28, titleLarge: 36, display: 42 } as const;
 
 export const spacing = {
   xs: 4,
@@ -184,5 +184,9 @@ export const session = {
   recordPanel: { ovalWidth: 150, ovalHeight: 200, ovalStroke: 3, ovalDash: 10, ovalGap: 8, countdown: 140, badgeInset: 10, badgeDot: 10, barInset: 14, barHeight: 6 },
   stage: { icon: 24, gap: 14, ring: 3 },
 } as const;
+
+/** Result screen from Figma "Hasil · Level 1" (48:135): card paddings, target illustration and the sticky action bar. */
+export const result = { cardPadding: 16, targetPadding: 14, illustration: 110, cardGap: 10, legendGap: 16, hintPadding: 20, hintGap: 6, targetWordGap: 2 } as const;
+export const actionBar = { paddingTop: 12, paddingBottom: 24, gap: 12 } as const;
 
 export const theme = { colors, fontSize, spacing, radius, touchTarget, buttonHeight, statusStyles, overlay, chart, stroke, fontFamily } as const;

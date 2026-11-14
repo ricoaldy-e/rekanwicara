@@ -1,4 +1,5 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, within } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 
 import Practice from '../app/practice/[itemId]';
 import type { AnalyzeResult, PracticeItem } from '../src/data/types';
@@ -152,4 +153,18 @@ it('Batalkan returns to recording, deletes the clip and ignores a result that ar
   expect(screen.queryByTestId('result-ok')).toBeNull();
   expect(mockAddAttempt).not.toHaveBeenCalled();
   expect(screen.getByText('Langkah 2 dari 4')).toBeTruthy();
+});
+
+it('pins the result actions in a bar with a hairline above, keeping the old accessible names', async () => {
+  mockAnalyze.mockResolvedValue(result({}));
+  await render(<Practice />);
+  await recordAndSend();
+  expect(await screen.findByTestId('result-ok')).toBeTruthy();
+  expect(screen.getByRole('header', { name: 'Bandingkan' })).toBeTruthy();
+  const bar = screen.getByTestId('result-actions');
+  expect(StyleSheet.flatten(bar.props.style)).toMatchObject({ borderTopWidth: 1 });
+  expect(within(bar).getByRole('button', { name: 'Ulangi' })).toBeTruthy();
+  expect(within(bar).getByRole('button', { name: 'Lihat contoh lagi' })).toBeTruthy();
+  expect(within(bar).getByText('Lihat contoh')).toBeTruthy();
+  expect(within(bar).getByRole('button', { name: 'Selesai' })).toBeTruthy();
 });

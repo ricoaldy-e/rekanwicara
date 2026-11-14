@@ -7,7 +7,7 @@ import { ActivityIndicator, Alert, PixelRatio, StyleSheet, View, useWindowDimens
 import { buzzResult } from '../../src/a11y/haptics';
 import { ApiError } from '../../src/api/apiError';
 import { errorMessage } from '../../src/api/errors';
-import { AnalyzingView, BackButton, BigButton, InfoNote, Screen, SessionHeader } from '../../src/components';
+import { ActionBar, AnalyzingView, BackButton, BigButton, InfoNote, Screen, SessionHeader } from '../../src/components';
 import { UploadStatus } from '../../src/components/UploadStatus';
 import { analyze, canAnalyze } from '../../src/data/analyze';
 import type { AnalyzeResult } from '../../src/data/types';
@@ -129,6 +129,26 @@ export default function Practice() {
       <View style={styles.footer}>
         <BigButton label="Mulai rekam" icon="videocam-outline" onPress={() => setStage('record')} />
       </View>
+    ) : stage === 'result' && result ? (
+      // Figma 58:782: actions stay at the bottom with a hairline above them while the result scrolls.
+      <ActionBar testID="result-actions">
+        <BigButton
+          label={result.status === 'retry' ? 'Rekam ulang' : 'Ulangi'}
+          icon="refresh"
+          onPress={() => {
+            setResult(null);
+            setStage('record');
+          }}
+        />
+        <View style={sideBySide ? styles.pair : styles.stack}>
+          <View style={sideBySide ? styles.pairItem : undefined}>
+            <BigButton label="Lihat contoh" accessibilityLabel="Lihat contoh lagi" variant="secondary" onPress={() => setStage('look')} />
+          </View>
+          <View style={sideBySide ? styles.pairItem : undefined}>
+            <BigButton label="Selesai" variant="secondary" onPress={exit} />
+          </View>
+        </View>
+      </ActionBar>
     ) : stage === 'send' && upload.status !== 'error' ? (
       <View style={styles.footer}>
         <BigButton
@@ -146,7 +166,12 @@ export default function Practice() {
   return (
     <Screen edges={TOP_EDGES} contentStyle={styles.content} footer={footer}>
       <Stack.Screen options={{ headerShown: false }} />
-      <SessionHeader step={STAGE_STEP[stage]} total={TOTAL_STEPS} title={`Ucapkan “${item.text.toLowerCase()}”`} onBack={exit} />
+      <SessionHeader
+        step={STAGE_STEP[stage]}
+        total={TOTAL_STEPS}
+        title={stage === 'result' ? 'Bandingkan' : `Ucapkan “${item.text.toLowerCase()}”`}
+        onBack={exit}
+      />
 
       {stage === 'look' ? (
         <>
@@ -192,29 +217,7 @@ export default function Practice() {
         )
       ) : null}
 
-      {stage === 'result' && result ? (
-        <>
-          <ResultView result={result} item={item} />
-          <View style={styles.actions}>
-            <BigButton
-              label={result.status === 'retry' ? 'Rekam ulang' : 'Ulangi'}
-              icon="refresh"
-              onPress={() => {
-                setResult(null);
-                setStage('record');
-              }}
-            />
-            <View style={sideBySide ? styles.pair : styles.stack}>
-              <View style={sideBySide ? styles.pairItem : undefined}>
-                <BigButton label="Lihat contoh lagi" variant="secondary" onPress={() => setStage('look')} />
-              </View>
-              <View style={sideBySide ? styles.pairItem : undefined}>
-                <BigButton label="Selesai" variant="secondary" onPress={exit} />
-              </View>
-            </View>
-          </View>
-        </>
-      ) : null}
+      {stage === 'result' && result ? <ResultView result={result} item={item} /> : null}
     </Screen>
   );
 }
@@ -228,7 +231,7 @@ const styles = StyleSheet.create({
   footer: { paddingHorizontal: layout.gutter, paddingBottom: spacing.lg, paddingTop: spacing.sm },
   // Screen already adds spacing.md between children; the extra spacing.sm makes 24 (spacing.lg) before actions.
   actions: { marginTop: spacing.sm, gap: spacing.md },
-  stack: { gap: spacing.md },
-  pair: { flexDirection: 'row', gap: spacing.md },
+  stack: { gap: spacing.sm + spacing.xs },
+  pair: { flexDirection: 'row', gap: spacing.sm + spacing.xs },
   pairItem: { flex: 1 },
 });

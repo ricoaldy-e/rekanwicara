@@ -1,3 +1,4 @@
+export { ActionBar } from './ActionBar';
 export { AnalyzingView } from './AnalyzingView';
 export { BackButton } from './BackButton';
 export { BigButton } from './BigButton';

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { render, screen, within } from '@testing-library/react-native';
 
 import type { AnalyzeResponse, Status, Visuals } from '../src/api/types';
 import { fromV1 } from '../src/data/mappers';
@@ -53,7 +53,9 @@ describe('ResultView Level 1', () => {
     await render(<ResultView result={fromV1(v1(status, status, status), 1)} item={A} />);
     expect(screen.getByTestId('result-bibir')).toHaveAccessibleName(`Bibir: ${label}`);
     expect(screen.getByTestId('result-suara')).toHaveAccessibleName(`Suara: ${label}`);
-    expect(screen.getByText(`Bibir: ${label}`)).toBeTruthy(); // text too, not colour alone
+    // The card shows the indicator name and the status as text too, not colour alone (Figma 48:166).
+    expect(within(screen.getByTestId('result-bibir')).getByText('Bibir')).toBeTruthy();
+    expect(within(screen.getByTestId('result-bibir')).getByText(label)).toBeTruthy();
     expect(screen.getByTestId('vowel-map')).toBeTruthy();
     expect(screen.getByTestId('lip-mirror')).toBeTruthy();
     expect(screen.getByTestId('result-disclaimer')).toHaveTextContent(DISCLAIMER);
@@ -88,7 +90,7 @@ describe('ResultView Level 2–3', () => {
     expect(screen.getByTestId('result-bibir')).toHaveAccessibleName('Bibir: Sesuai');
     expect(screen.getByTestId('result-suara')).toHaveAccessibleName('Suara: Belum sesuai');
     for (const id of ['vowel-map', 'lip-mirror', 'loudness-chart']) expect(screen.queryByTestId(id)).toBeNull();
-    expect(screen.getByTestId('result-target')).toHaveTextContent(/MA/);
+    expect(screen.getByTestId('result-target')).toHaveTextContent(/Suku kata target.*ma/);
   });
 
   it('never shows Mendekati at Level 2, even from a v1 kuning', async () => {
@@ -127,5 +129,41 @@ describe('ResultView feedback', () => {
   it('never uses clinical wording', async () => {
     await render(<ResultView result={fromV1(v1('merah', 'merah', 'merah'), 1)} item={A} />);
     expect(JSON.stringify(screen.toJSON())).not.toMatch(/\b(normal|abnormal|gangguan|diagnosis|terapi)\b/i);
+  });
+});
+
+describe('ResultView Kekerasan suara (only from response data)', () => {
+  const loud = { t_ms: Array.from({ length: 50 }, (_, k) => k * 10), db: Array.from({ length: 50 }, (_, k) => 40 + k / 5) };
+
+  it('is not rendered at Level 1 when the response has no loudness data', async () => {
+    await render(<ResultView result={fromV1(v1('hijau', 'hijau', 'hijau'), 1)} item={A} />);
+    expect(screen.queryByText('Kekerasan suara')).toBeNull();
+    expect(screen.queryByTestId('loudness-chart')).toBeNull();
+  });
+
+  it('is rendered, without a target bar, when the response carries loudness', async () => {
+    const res = v1('hijau', 'hijau', 'hijau', { visuals: { ...VISUALS, loudness: loud } });
+    await render(<ResultView result={fromV1(res, 1)} item={A} />);
+    expect(screen.getByText('Kekerasan suara')).toBeTruthy();
+    expect(screen.getByTestId('loudness-chart')).toBeTruthy();
+    expect(screen.queryByText(/zona target/)).toBeNull();
+  });
+
+  it('is never rendered at Level 2–3 even if loudness arrives', async () => {
+    await render(<ResultView result={v2({ visuals: { ...VISUALS, loudness: loud } })} item={MA} />);
+    expect(screen.queryByTestId('loudness-chart')).toBeNull();
+  });
+});
+
+describe('ResultView layout', () => {
+  it('shows the Level 1 target as a lip drawing with "Bentuk bibir target" and the vowel name', async () => {
+    await render(<ResultView result={fromV1(v1('hijau', 'hijau', 'hijau'), 1)} item={A} />);
+    expect(screen.getByTestId('result-target')).toHaveTextContent(/Bentuk bibir target.*Vokal “a”/);
+  });
+
+  it('uses the word card with "Kata target" at Level 3', async () => {
+    const mama: PracticeItem = { key: 'l3_mama', itemId: 'l3_mama', level: 3, text: 'MAMA', instruction: '', source: 'default' };
+    await render(<ResultView result={v2({ level: 3, item_id: 'l3_mama' })} item={mama} />);
+    expect(screen.getByTestId('result-target')).toHaveTextContent(/Kata target.*mama/);
   });
 });
