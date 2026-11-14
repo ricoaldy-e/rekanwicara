@@ -1,3 +1,5 @@
+import { Inter_400Regular } from '@expo-google-fonts/inter/400Regular';
+import { Inter_700Bold } from '@expo-google-fonts/inter/700Bold';
 import { PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-display/700Bold';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -13,14 +15,16 @@ import { PinSessionProvider } from '../src/pin/PinSession';
 import { ContentProvider } from '../src/state/content';
 import { SettingsProvider } from '../src/state/settings';
 import { UserProvider } from '../src/state/user';
-import { setPlayfairLoaded } from '../src/theme';
+import { setInterLoaded, setPlayfairLoaded } from '../src/theme';
 
 // Keep the splash up until the title font is loaded or has failed (then titles use the system serif).
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function RootLayout() {
-  const [fontLoaded, fontError] = useFonts({ PlayfairDisplay_700Bold });
+  const [fontLoaded, fontError] = useFonts({ PlayfairDisplay_700Bold, Inter_400Regular, Inter_700Bold });
+  // useFonts is all-or-nothing, so one flag per family is set together; on error both fall back to system fonts.
   setPlayfairLoaded(fontLoaded);
+  setInterLoaded(fontLoaded);
   useEffect(() => {
     if (fontLoaded || fontError) void SplashScreen.hideAsync().catch(() => undefined);
   }, [fontLoaded, fontError]);

@@ -708,3 +708,17 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
 - Lisensi model `face_landmarker.task` belum terverifikasi (lihat `docs/THIRD_PARTY.md`).
 - Drive C: laptop server tinggal ±9 GB; arahkan cache pip ke D: sebelum memasang MediaPipe.
 - Starlette memberi peringatan bahwa `httpx` untuk TestClient sudah usang (disarankan `httpx2`); tes tetap lolos.
+
+## Implementasi Figma (design v7)
+- FG-1 (14 Nov 2026, cabang `fe/design`): token v7 tanpa perubahan tata letak.
+  - `app/src/theme/index.ts`: palet netral §3.1; token baru `hairline`, `dangerPressed`, `warning`, `segment`; `radius.sheet` 28 dan `radius.dialog` 24;
+    `statusStyles` memakai token (tidak ada hex literal lagi di luar `theme/`). Nama token lama tidak berubah, jadi layar otomatis berganti warna.
+  - Inter 400 dan 700 (`@expo-google-fonts/inter`, disetujui D4) dimuat di `app/_layout.tsx` bersama Playfair. `fontFamily.text` dan `textFont(bold)`
+    memberi Inter bila termuat, selain itu font sistem. **Belum dipakai di layar**: penerapan per layar dikerjakan langkah FG berikutnya
+    (Inter 400/700 adalah dua family terpisah, jadi patch global `Text` akan mengubah tampilan semua layar sekaligus).
+  - `__tests__/theme.contrast.test.ts`: menghitung kontras pasangan kunci §3.1 (teks 4,5:1, garis dan fokus 3:1); gagal bila di bawah batas.
+  - Belum diubah: `app.json` (`backgroundColor` ikon/splash `#08110B`) karena gambar ikon dan splash masih berlatar lama; ganti bersama aset.
+  - Belum ditambah: token `titleLarge` 28 dan `pinKey` 76 (di luar daftar FG-1; ikut langkah layar terkait).
+  - Belum diverifikasi di perangkat: Inter dan cadangan font sistem.
+- Saran skill `interfaces:better-colors` yang ditolak (bertentangan dengan design.md): ganti nama `primary` menjadi `accent` (design.md memakai `primary` untuk tombol
+  dan `accent` untuk koral); tier primitif/semantik dan ramp 50–950 (design.md §3.1 menetapkan satu tier token datar); `prefers-color-scheme` (hanya tema gelap, §3.2).
