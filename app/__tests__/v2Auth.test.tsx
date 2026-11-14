@@ -82,6 +82,7 @@ describe('SignedOutRedirect', () => {
     ['the session is still loading', { ready: false, required: true, session: null }, ['(tabs)', 'home']],
     ['already on an auth screen', { ready: true, required: true, session: null }, ['auth', 'sign-in']],
     ['reading Tentang while signed out (linked from Daftar)', { ready: true, required: true, session: null }, ['about']],
+    ['reading Kebijakan privasi while signed out (linked from Daftar)', { ready: true, required: true, session: null }, ['privacy']],
     ['already on Selamat datang', { ready: true, required: true, session: null }, ['welcome']],
     ['on the start gate', { ready: true, required: true, session: null }, []],
   ])('does nothing when %s', async (_name, state, segments) => {

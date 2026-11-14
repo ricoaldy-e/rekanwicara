@@ -150,7 +150,7 @@ export default function SignUp() {
         text="Saya setuju dengan kebijakan privasi."
         error={err('consent')}
       />
-      <Pressable onPress={() => router.push({ pathname: '/about', params: { from: 'Daftar' } })} accessibilityRole="link" accessibilityLabel="Baca kebijakan privasi" style={styles.link}>
+      <Pressable onPress={() => router.push({ pathname: '/privacy', params: { from: 'Daftar' } })} accessibilityRole="link" accessibilityLabel="Baca kebijakan privasi" style={styles.link}>
         <Text maxFontSizeMultiplier={2} style={[styles.linkText, textFont(true)]}>Baca kebijakan privasi</Text>
       </Pressable>
       <BigButton label={busy ? 'Mendaftar…' : 'Daftar'} icon="person-add-outline" disabled={busy} onPress={submit} testID="sign-up-submit" />

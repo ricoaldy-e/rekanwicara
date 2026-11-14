@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react-native';
 import About from '../app/about';
 
 let mockHealth: { engine_version: string; mock_mode: boolean } | null = null;
-jest.mock('expo-router', () => ({ Stack: { Screen: () => null }, useLocalSearchParams: () => ({}) }));
+jest.mock('expo-router', () => ({ Stack: { Screen: () => null }, useLocalSearchParams: () => ({}), useRouter: () => ({ push: jest.fn() }) }));
 jest.mock('../src/state/content', () => ({ useContent: () => ({ health: mockHealth }) }));
 jest.mock('expo-constants', () => ({ __esModule: true, default: { expoConfig: { version: '0.1.0' } } }));
 

@@ -56,6 +56,7 @@ export default function RootLayout() {
             <Stack.Screen name="dataset/session" options={{ title: 'Sesi Dataset' }} />
             <Stack.Screen name="dataset/model-videos" options={{ title: 'Rekam Video Model' }} />
             <Stack.Screen name="about" options={{ title: 'Tentang aplikasi' }} />
+            <Stack.Screen name="privacy" options={{ title: 'Kebijakan privasi' }} />
           </Stack>
           </PinSessionProvider>
           </UserProvider>

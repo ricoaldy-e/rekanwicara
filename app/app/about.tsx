@@ -1,15 +1,18 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import Constants from 'expo-constants';
-import type { ReactNode } from 'react';
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { InfoNote, Screen } from '../src/components';
+import { InfoNote, InfoSection, Screen } from '../src/components';
+import { useFocusRing } from '../src/a11y/useFocusRing';
 import { useContent } from '../src/state/content';
-import { colors, displayFont, fontSize, layout, lineHeight, radius, spacing, stroke, textFont } from '../src/theme';
+import { colors, displayFont, fontSize, iconSize, layout, lineHeight, radius, spacing, stroke, textFont, touchTarget } from '../src/theme';
 
 /** Tentang Rekan Wicara (Figma 51:558): intro, product boundary, sections separated by a thin line, and the versions in a card. */
 export default function About() {
   const { health } = useContent();
+  const router = useRouter();
+  const { focusProps, focusStyle } = useFocusRing();
   const { from } = useLocalSearchParams<{ from?: string }>();
   return (
     <Screen edges={['bottom', 'left', 'right']} contentStyle={styles.content}>
@@ -23,41 +26,40 @@ export default function About() {
       <InfoNote text="Hasil adalah perkiraan sistem untuk latihan. Bukan pengganti guru atau terapis wicara, dan bukan penilaian klinis." />
 
       <View>
-        <Section title="Batas penggunaan" first>
+        <InfoSection title="Batas penggunaan" first>
           <Text maxFontSizeMultiplier={2} style={[styles.body, textFont()]}>
-            Materi mencakup vokal a, i, u dan konsonan m, p, b. Bunyi yang mirip masih dapat mendapat hasil sama. Hasil bisa berbeda dari penilaian guru atau terapis.
+            Latihan mencakup vokal a, i, u, e, o (Level 1), suku kata (Level 2), dan kata sederhana (Level 3). Bunyi yang mirip masih dapat mendapat hasil sama, dan hasil bisa berbeda dari penilaian guru atau terapis.
           </Text>
           <Text maxFontSizeMultiplier={2} style={[styles.body, textFont()]}>
-            Deteksi kata belum andal pada semua ucapan. Kalibrasi dan pendamping membantu penggunaan; hasil bukan ukuran kemampuan seseorang.
+            Penilaian kata masih lebih lemah daripada penilaian bunyi. Evaluasi awal berasal dari tiga anggota tim dan belum diuji pada pengguna Tuli. Hasil bukan ukuran kemampuan seseorang.
           </Text>
-        </Section>
-        <Section title="Privasi">
+        </InfoSection>
+        <InfoSection title="Privasi">
           <Text maxFontSizeMultiplier={2} style={[styles.body, textFont()]}>
-            Wajah dipakai untuk mengukur bentuk bibir, tanpa pengenalan identitas. Rekaman latihan dihapus setelah diproses. Rekaman yang gagal dikirim dapat dikirim ulang dan dibuang saat merekam ulang atau meninggalkan layar.
+            Wajah dipakai untuk mengukur bentuk bibir, tanpa pengenalan identitas. Rekaman latihan dihapus setelah diproses. Yang disimpan hanya hasil latihan dan angka kalibrasi; layanan online menyimpan hasil dan kemajuan, tanpa video atau audio.
           </Text>
-          <Text maxFontSizeMultiplier={2} style={[styles.body, textFont()]}>
-            Yang disimpan adalah hasil latihan dan angka kalibrasi. Supabase menyimpan hasil dan progres, tanpa video atau audio. Mode demo memakai profil contoh terpisah dan tidak mengirim hasil ke Supabase.
-          </Text>
-        </Section>
-        <Section title="Versi">
+          <Pressable
+            testID="privacy-link"
+            onPress={() => router.push({ pathname: '/privacy', params: { from: 'Tentang' } })}
+            accessibilityRole="link"
+            accessibilityLabel="Baca kebijakan privasi"
+            {...focusProps}
+            style={[styles.link, focusStyle]}
+          >
+            <Text accessible={false} maxFontSizeMultiplier={2} style={[styles.linkText, textFont(true)]}>Baca kebijakan privasi</Text>
+            <Ionicons name="chevron-forward" size={iconSize.base} color={colors.textMuted} accessible={false} />
+          </Pressable>
+        </InfoSection>
+        <InfoSection title="Versi">
           <View style={styles.card}>
             <VersionRow name="Aplikasi" value={Constants.expoConfig?.version ?? 'Tidak tersedia'} />
             <View style={styles.rowLine} />
             <VersionRow name="Mesin" value={health?.engine_version ?? 'Belum terhubung ke server'} />
           </View>
           {health?.mock_mode ? <InfoNote text="Server sedang memakai data contoh. Hasilnya bukan analisis rekaman." /> : null}
-        </Section>
+        </InfoSection>
       </View>
     </Screen>
-  );
-}
-
-function Section({ title, first = false, children }: { title: string; first?: boolean; children: ReactNode }) {
-  return (
-    <View style={[styles.section, !first && styles.sectionLine]}>
-      <Text accessibilityRole="header" maxFontSizeMultiplier={2} style={[styles.sectionTitle, textFont(true)]}>{title}</Text>
-      {children}
-    </View>
   );
 }
 
@@ -76,10 +78,8 @@ const styles = StyleSheet.create({
   title: { fontSize: fontSize.titleLarge, lineHeight: lineHeight.titleLarge, color: colors.text },
   body: { fontSize: fontSize.body, lineHeight: lineHeight.body, color: colors.text },
   muted: { color: colors.textMuted },
-  section: { gap: spacing.sm, paddingVertical: layout.sectionGap },
-  // The thin line between sections (Figma "Divider", `surfaceRaised`).
-  sectionLine: { borderTopWidth: stroke.hairline, borderTopColor: colors.surfaceRaised },
-  sectionTitle: { fontSize: fontSize.label, lineHeight: lineHeight.label, color: colors.text },
+  link: { minHeight: touchTarget, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
+  linkText: { fontSize: fontSize.body, lineHeight: lineHeight.label, color: colors.text, textDecorationLine: 'underline' },
   card: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,

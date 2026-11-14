@@ -23,6 +23,7 @@ export { StageBadge, stageLabel } from './StageBadge';
 export { StatusBadge, UntriedBadge } from './StatusBadge';
 export { StepHeader } from './StepHeader';
 export { Body, Title } from './Typography';
+export { InfoSection } from './InfoSection';
 export { Checkbox } from './form/Checkbox';
 export { ConfirmDialog } from './form/ConfirmDialog';
 export { FormBanner } from './form/FormBanner';
