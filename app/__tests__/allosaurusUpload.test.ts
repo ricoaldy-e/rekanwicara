@@ -29,6 +29,17 @@ const tutorial: TutorialItem = {
 };
 const verified = { status: 'verified', item_id: tutorial.item_id, bucket: tutorial.bucket,
   storage_path: tutorial.storage_path, size_bytes: 123 };
+it('uploads a Level 1 v2 attempt with JWT and authoritative item/session fields only', async () => {
+  const evaluated = { status: 'evaluated', item_id: 'l1_o', level: 1, result: 'sesuai',
+    lip_result: 'sesuai', voice_result: 'sesuai', feedback: { code: 'MATCHED', message: 'Sesuai.' },
+    quality_flags: [], visuals: null, engine: 'mediapipe_parselmouth_wav2vec2', processing_ms: 10 };
+  mockUpload.mockResolvedValueOnce(response(evaluated));
+  await expect(createApiClient('http://example.test').analyzeV2('l1_o', 'session-1', file, 'fresh-token')).resolves.toEqual(evaluated);
+  expect(UploadTask).toHaveBeenCalledWith(mockRecording, 'http://example.test/v2/analyze', expect.objectContaining({
+    parameters: { item_id: 'l1_o', session_id: 'session-1' },
+    headers: { Accept: 'application/json', Authorization: 'Bearer fresh-token' },
+  }));
+});
 
 it('uploads tutorial with the current bearer and validates the canonical destination', async () => {
   mockUpload.mockResolvedValueOnce(response(verified));

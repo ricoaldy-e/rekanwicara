@@ -1,0 +1,784 @@
+{
+  "tested_on": "2026-11-14",
+  "scope": "Real Supabase Cloud SDK persistence and RLS; no new FastAPI endpoint.",
+  "sdk": "@supabase/supabase-js 2.119.0",
+  "mocked_cloud_operations": false,
+  "payload_source": "app/src/user/pure.ts: attemptFromV2Response",
+  "queue_source": "app/src/data/sync.ts: syncPending",
+  "operator_access": "Explicitly approved cleanup only; authenticated JWTs for every user operation.",
+  "fixtures": {
+    "final_run_attempts": 3,
+    "final_run_progress": 2,
+    "metadata_only": true,
+    "existing_user_rows_or_recordings_modified": false
+  },
+  "previous_run": {
+    "passed": 50,
+    "failed": [],
+    "remaining_rows": 0
+  },
+  "local_checks": {
+    "pytest": "2 passed",
+    "ruff_check": "passed",
+    "ruff_format_check": "passed",
+    "node_syntax_check": "passed",
+    "warnings": [
+      "Existing Starlette httpx deprecation.",
+      "Pytest cache write denied by sandbox; tests passed."
+    ]
+  },
+  "cases": {
+    "public_key_only_for_user_requests": {
+      "passed": true
+    },
+    "login_A": {
+      "error_code": null,
+      "passed": true
+    },
+    "login_B": {
+      "error_code": null,
+      "passed": true
+    },
+    "two_distinct_accounts": {
+      "passed": true
+    },
+    "empty_test_scope_A": {
+      "passed": true
+    },
+    "empty_test_scope_B": {
+      "passed": true
+    },
+    "queue_A_8": {
+      "status": 201,
+      "code": null,
+      "table": "attempts",
+      "passed": true
+    },
+    "actual_queue_first_A": {
+      "passed": true
+    },
+    "queue_A_10": {
+      "status": 200,
+      "code": null,
+      "table": "attempts",
+      "passed": true
+    },
+    "actual_queue_replay_A": {
+      "passed": true
+    },
+    "stored_null_and_no_duplicates_A": {
+      "status": 200,
+      "code": null,
+      "rows": 2,
+      "null_score": true,
+      "passed": true
+    },
+    "mapping_A": {
+      "passed": true
+    },
+    "complete_payload_round_trip_A": {
+      "passed": true
+    },
+    "acknowledged_not_resent_A": {
+      "passed": true
+    },
+    "queue_does_not_guess_progress_A": {
+      "passed": true
+    },
+    "progress_A_first": {
+      "status": 201,
+      "code": null,
+      "passed": true
+    },
+    "progress_A_replay": {
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    "progress_single_owned_row_A": {
+      "status": 200,
+      "code": null,
+      "rows": 1,
+      "passed": true
+    },
+    "queue_B_16": {
+      "status": 201,
+      "code": null,
+      "table": "attempts",
+      "passed": true
+    },
+    "actual_queue_first_B": {
+      "passed": true
+    },
+    "queue_B_18": {
+      "status": 200,
+      "code": null,
+      "table": "attempts",
+      "passed": true
+    },
+    "actual_queue_replay_B": {
+      "passed": true
+    },
+    "stored_null_and_no_duplicates_B": {
+      "status": 200,
+      "code": null,
+      "rows": 1,
+      "null_score": true,
+      "passed": true
+    },
+    "mapping_B": {
+      "passed": true
+    },
+    "complete_payload_round_trip_B": {
+      "passed": true
+    },
+    "acknowledged_not_resent_B": {
+      "passed": true
+    },
+    "queue_does_not_guess_progress_B": {
+      "passed": true
+    },
+    "progress_B_first": {
+      "status": 201,
+      "code": null,
+      "passed": true
+    },
+    "progress_B_replay": {
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    "progress_single_owned_row_B": {
+      "status": 200,
+      "code": null,
+      "rows": 1,
+      "passed": true
+    },
+    "retry_is_not_an_attempt": {
+      "passed": true
+    },
+    "isolation_read_attempts_B": {
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    "isolation_read_progress_B": {
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    "isolation_update_attempts_B": {
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    "isolation_update_progress_B": {
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    "isolation_upsert_attempts_B": {
+      "status": 403,
+      "code": "42501",
+      "passed": true
+    },
+    "isolation_upsert_progress_B": {
+      "status": 403,
+      "code": "42501",
+      "passed": true
+    },
+    "isolation_delete_attempts_B": {
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    "isolation_delete_progress_B": {
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    "isolation_read_attempts_A": {
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    "isolation_read_progress_A": {
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    "isolation_update_attempts_A": {
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    "isolation_update_progress_A": {
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    "isolation_upsert_attempts_A": {
+      "status": 403,
+      "code": "42501",
+      "passed": true
+    },
+    "isolation_upsert_progress_A": {
+      "status": 403,
+      "code": "42501",
+      "passed": true
+    },
+    "isolation_delete_attempts_A": {
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    "isolation_delete_progress_A": {
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    "owners_unchanged_after_isolation": {
+      "passed": true
+    },
+    "unmapped_v2_values_rejected": {
+      "status": 400,
+      "code": "23514",
+      "passed": true
+    },
+    "anon_write_denied": {
+      "status": 401,
+      "code": "42501",
+      "passed": true
+    },
+    "logout_local_A": {
+      "passed": true
+    },
+    "logout_local_B": {
+      "passed": true
+    }
+  },
+  "http": [
+    {
+      "account": "A",
+      "method": "POST",
+      "route": "/auth/v1/token",
+      "status": 200
+    },
+    {
+      "account": "B",
+      "method": "POST",
+      "route": "/auth/v1/token",
+      "status": 200
+    },
+    {
+      "account": "A",
+      "method": "GET",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "GET",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "GET",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "GET",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "GET",
+      "route": "/auth/v1/user",
+      "status": 200
+    },
+    {
+      "account": "A",
+      "method": "POST",
+      "route": "/rest/v1/attempts",
+      "status": 201,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "GET",
+      "route": "/auth/v1/user",
+      "status": 200
+    },
+    {
+      "account": "A",
+      "method": "POST",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "GET",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "POST",
+      "route": "/rest/v1/progress",
+      "status": 201,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "POST",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "GET",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "GET",
+      "route": "/auth/v1/user",
+      "status": 200
+    },
+    {
+      "account": "B",
+      "method": "POST",
+      "route": "/rest/v1/attempts",
+      "status": 201,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "GET",
+      "route": "/auth/v1/user",
+      "status": 200
+    },
+    {
+      "account": "B",
+      "method": "POST",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "GET",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "POST",
+      "route": "/rest/v1/progress",
+      "status": 201,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "POST",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "GET",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "GET",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "GET",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "GET",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "GET",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "GET",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "GET",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "PATCH",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "PATCH",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "POST",
+      "route": "/rest/v1/attempts",
+      "status": 403,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "POST",
+      "route": "/rest/v1/progress",
+      "status": 403,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "DELETE",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "DELETE",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "GET",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "GET",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "PATCH",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "PATCH",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "POST",
+      "route": "/rest/v1/attempts",
+      "status": 403,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "POST",
+      "route": "/rest/v1/progress",
+      "status": 403,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "DELETE",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "DELETE",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "GET",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "GET",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "GET",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "GET",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "POST",
+      "route": "/rest/v1/attempts",
+      "status": 400,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "anon",
+      "method": "POST",
+      "route": "/rest/v1/attempts",
+      "status": 401
+    },
+    {
+      "account": "A",
+      "method": "DELETE",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "DELETE",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "DELETE",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "DELETE",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "GET",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "A",
+      "method": "GET",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "GET",
+      "route": "/rest/v1/attempts",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "B",
+      "method": "GET",
+      "route": "/rest/v1/progress",
+      "status": 200,
+      "jwt_role": "authenticated",
+      "owner_matches": true
+    },
+    {
+      "account": "operator_cleanup_only",
+      "method": "DELETE",
+      "route": "/rest/v1/attempts",
+      "status": 200
+    },
+    {
+      "account": "operator_cleanup_only",
+      "method": "DELETE",
+      "route": "/rest/v1/progress",
+      "status": 200
+    },
+    {
+      "account": "operator_cleanup_only",
+      "method": "GET",
+      "route": "/rest/v1/attempts",
+      "status": 200
+    },
+    {
+      "account": "operator_cleanup_only",
+      "method": "GET",
+      "route": "/rest/v1/progress",
+      "status": 200
+    },
+    {
+      "account": "A",
+      "method": "POST",
+      "route": "/auth/v1/logout",
+      "status": 204
+    },
+    {
+      "account": "B",
+      "method": "POST",
+      "route": "/auth/v1/logout",
+      "status": 204
+    }
+  ],
+  "cleanup": {
+    "authenticated_A": {
+      "attempts": {
+        "status": 200,
+        "code": null
+      },
+      "progress": {
+        "status": 200,
+        "code": null
+      },
+      "attempts_deleted": 0,
+      "progress_deleted": 0
+    },
+    "authenticated_B": {
+      "attempts": {
+        "status": 200,
+        "code": null
+      },
+      "progress": {
+        "status": 200,
+        "code": null
+      },
+      "attempts_deleted": 0,
+      "progress_deleted": 0
+    },
+    "operator_used": true,
+    "operator": {
+      "attempts": {
+        "status": 200,
+        "code": null
+      },
+      "progress": {
+        "status": 200,
+        "code": null
+      },
+      "attempts_deleted": 3,
+      "progress_deleted": 2
+    },
+    "remaining_rows": 0,
+    "all_clean": true,
+    "issues": []
+  },
+  "limitations": [
+    "Synthetic metadata; no pronunciation or camera validation.",
+    "Node Supabase SDK and real application payload/queue functions; not native SDK storage.",
+    "Progress fixture verifies database/RLS only; current v2 queue does not derive progress or graduation."
+  ],
+  "summary": {
+    "passed": 52,
+    "failed": [],
+    "all_clean": true
+  }
+}

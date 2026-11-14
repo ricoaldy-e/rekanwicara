@@ -21,6 +21,7 @@ from app.api.schemas import (
 )
 from app.api.v1.tutorials import catalogue as tutorial_catalogue
 from app.api.v2.store import AccountDep, AccountStore, custom_uuid
+from app.api.v2.vowels import VOWEL_IDS
 from app.content.loader import FORBIDDEN_WORDS, Content
 
 router = APIRouter(prefix="/v2", tags=["catalog-v2"])
@@ -201,7 +202,7 @@ class Catalogue:
         ]
         for item in self.content.items:
             if (
-                not item.active
+                (not item.active and item.item_id not in VOWEL_IDS)
                 or item.item_id in OFFLINE_IDS
                 or item.text.casefold() in OFFLINE_WORDS
             ):
@@ -308,7 +309,7 @@ class Catalogue:
         item = self.content.items_by_id.get(item_id)
         if (
             item
-            and item.active
+            and (item.active or item.item_id in VOWEL_IDS)
             and item.level in (0, 1, 2, 3)
             and item.item_id not in OFFLINE_IDS
             and item.text.casefold() not in OFFLINE_WORDS

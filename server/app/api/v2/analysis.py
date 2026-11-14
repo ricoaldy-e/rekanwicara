@@ -14,6 +14,7 @@ from app.api.v1.analysis import _analysis
 from app.api.v1.wav2vec2 import _recognize
 from app.api.v2.catalog import Catalogue
 from app.api.v2.store import AccountDep
+from app.api.v2.vowels import VOWEL_IDS, evaluate_vowel
 from app.core.experiment_audio import PocError, validate_wav
 from app.pipeline import calibration as calib
 from app.pipeline.combined import observe_audio, observe_visual
@@ -79,6 +80,8 @@ def analyze(
                 calib.lip_rest(calibration, thresholds),
                 calib.noise_floor(calibration),
             )
+            if item_id in VOWEL_IDS:
+                return evaluate_vowel(item, feats, calibration, thresholds, settings, start)
             scored, _ = _analysis(item, feats, calibration, thresholds, settings)
             if scored.status == "retry":
                 return response(

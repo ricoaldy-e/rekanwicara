@@ -7,6 +7,7 @@ import { errorMessage } from '../src/api/errors';
 import { BigButton, Body, Card, InfoNote, Screen, StageBadge, StatusBadge } from '../src/components';
 import { DATASET_MODE } from '../src/config';
 import { groupByLevel, LEVEL_NAMES } from '../src/content/levels';
+import { LevelOneList } from '../src/home/LevelOneList';
 import { useContent } from '../src/state/content';
 import { planSession, seededRng, selectCore, type Role } from '../src/state/progression';
 import { useUser } from '../src/state/user';
@@ -22,7 +23,8 @@ const ROLE_LABEL: Record<Role, string> = {
 export default function Home() {
   const router = useRouter();
   const { health, healthError, items, loading, error, reload } = useContent();
-  const { profile, progress, demo } = useUser();
+  const { profile, progress, demo, session } = useUser();
+  const signedIn = Boolean(session) && !demo;
   const open = (itemId: string) => router.push({ pathname: '/practice/[itemId]', params: { itemId } });
 
   // Today's session (SPEC §8.4): warm-up, reviews, core material, challenge. The day seeds the random
@@ -44,11 +46,11 @@ export default function Home() {
         onLongPress={() => router.push('/settings')}
         delayLongPress={2000}
         accessibilityRole="header"
-        accessibilityLabel="Misi hari ini"
+        accessibilityLabel={signedIn ? 'Beranda' : 'Misi hari ini'}
       >
-        <Text style={styles.title}>Misi hari ini</Text>
+        <Text style={styles.title}>{signedIn ? 'Beranda' : 'Misi hari ini'}</Text>
       </Pressable>
-      {__DEV__ ? <BigButton label="Rekam Tutorial (24 video)" icon="videocam" onPress={() => router.push('/tutorial-videos')} /> : null}
+      {__DEV__ ? <BigButton label="Rekam Tutorial" icon="videocam" onPress={() => router.push('/tutorial-videos')} /> : null}
       {demo ? <InfoNote text="Mode demo: progres contoh. Hasil latihan di mode ini tidak disimpan online." /> : null}
 
       {!profile.calibrated ? (
@@ -58,11 +60,13 @@ export default function Home() {
         </View>
       ) : null}
 
-      {needsHelp ? (
+      {signedIn && session ? <LevelOneList key={session.user.id} ownerId={session.user.id} attempts={profile.attempts} /> : null}
+
+      {!signedIn && needsHelp ? (
         <InfoNote testID="mission-needs-help" text="Belum ada materi pengganti untuk latihan inti. Buka Mode Pendamping untuk memilih langkah berikutnya." />
       ) : null}
 
-      {plan.length > 0 ? (
+      {!signedIn ? plan.length > 0 ? (
         <Card testID="mission">
           <Text style={styles.missionLabel}>Sesi hari ini · ±{profile.settings.sessionMinutes} menit</Text>
           {plan.map((step, k) => {
@@ -92,7 +96,7 @@ export default function Home() {
         </Card>
       ) : needsHelp ? null : (
         <Body muted>Pilih satu materi untuk mulai berlatih.</Body>
-      )}
+      ) : null}
 
       {health?.mock_mode ? <InfoNote text="Server dalam mode contoh (mock). Hasil bukan analisis sebenarnya." /> : null}
       {healthError && !error ? <InfoNote tone="warning" text={errorMessage(healthError)} /> : null}
@@ -118,7 +122,7 @@ export default function Home() {
       ) : null}
 
       {items
-        ? groupByLevel(items).map((group) => (
+        ? groupByLevel(items).filter((group) => !signedIn || group.level > 1).map((group) => (
             <View key={group.level} style={styles.gap}>
               <Text accessibilityRole="header" style={styles.levelTitle}>
                 Level {group.level}: {LEVEL_NAMES[group.level] ?? ''}

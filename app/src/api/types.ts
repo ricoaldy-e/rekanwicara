@@ -120,7 +120,7 @@ export interface V2AnalyzeResponse {
   feedback: { code: string; message: string };
   quality_flags: string[];
   visuals: AnalyzeResponse['visuals'] | null;
-  engine: 'mediapipe_parselmouth' | 'mediapipe_wav2vec2';
+  engine: 'mediapipe_parselmouth' | 'mediapipe_wav2vec2' | 'mediapipe_parselmouth_wav2vec2';
   processing_ms: number;
 }
 
@@ -136,8 +136,8 @@ export interface TutorialItem {
   item_id: string;
   word: string;
   target: string;
-  kind: 'word' | 'syllable';
-  level: 2 | 3;
+  kind: 'word' | 'syllable' | 'vowel';
+  level: 1 | 2 | 3;
   position: number | null;
   bucket: string;
   storage_path: string;

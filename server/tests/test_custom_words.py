@@ -261,7 +261,7 @@ def test_kertas_one_save_reorder_and_delete(manual):
     assert draft["status"] == "published" and draft["video"]["available"] is True
     assert client.get(BASE, headers=HEADERS).json()["words"][0]["id"] == WORD
     catalog = client.get("/v2/catalog", headers=HEADERS).json()
-    assert len(catalog["level_1"]) == 6 and len(catalog["words"]) == 9
+    assert len(catalog["level_1"]) == 8 and len(catalog["words"]) == 9
     assert client.get(f"/v2/words/custom_word:{WORD}", headers=HEADERS).status_code == 200
     state["objects"].update(v["storage_path"] for v in state["custom_videos"])
     body = payload() | {"status": "published", "revision": draft["revision"]}

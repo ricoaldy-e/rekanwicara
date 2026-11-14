@@ -15,6 +15,25 @@ HEADERS = {"Authorization": "Bearer synthetic-token"}
 USER = {"id": UID, "email": "producer@example.test", "is_anonymous": False}
 
 
+def test_vowel_manifest_is_separate_and_uses_exact_safe_paths() -> None:
+    words = tutorials.catalogue()
+    vowels = tutorials.catalogue("level_1")
+    assert len(words) == 24
+    assert [item.item_id for item in vowels] == [f"l1_{vowel}" for vowel in "aiueo"]
+    assert not ({item.storage_path for item in words} & {item.storage_path for item in vowels})
+    for item in vowels:
+        assert item.level == 1 and item.kind == "vowel" and item.steps
+        assert item.bucket == tutorials.BUCKET
+        assert item.storage_path == f"default/level-1/{item.target.lower()}.mp4"
+
+
+def test_list_vowels_only(producer: TestClient, upstream: dict) -> None:
+    response = producer.get("/v1/tutorials?group=level_1", headers=HEADERS)
+    assert response.status_code == 200
+    assert len(response.json()["items"]) == 5
+    assert all(item["level"] == 1 and not item["present"] for item in response.json()["items"])
+
+
 @pytest.fixture
 def producer(make_client: Callable[..., TestClient]) -> TestClient:
     return make_client(
@@ -163,25 +182,31 @@ def test_storage_failure_does_not_claim_all_missing(producer: TestClient, upstre
     assert response.status_code == 503 and "items" not in response.json()
 
 
+@pytest.mark.parametrize(
+    "item_id,path",
+    [
+        ("kp_tolong_to", "default/syllables/tolong/01-to.mp4"),
+        *((f"l1_{vowel}", f"default/level-1/{vowel}.mp4") for vowel in "aiueo"),
+    ],
+)
 def test_upload_converts_full_video_verifies_size_and_cleans_temporary_files(
     producer: TestClient,
     upstream: dict,
     sample_video: bytes,
     tmp_path: Path,
     caplog: pytest.LogCaptureFixture,
+    item_id: str,
+    path: str,
 ) -> None:
     producer.app.state.settings.tmp_dir = tmp_path
     response = producer.post(
-        "/v1/tutorials/kp_tolong_to/video",
+        f"/v1/tutorials/{item_id}/video",
         headers=HEADERS,
         files={"file": ("private-source.mov", sample_video, "video/quicktime")},
     )
     assert response.status_code == 200, response.text
     result = response.json()
-    assert (
-        result["status"] == "verified"
-        and result["storage_path"] == "default/syllables/tolong/01-to.mp4"
-    )
+    assert result["status"] == "verified" and result["storage_path"] == path
     assert result["size_bytes"] == len(upstream["objects"][result["storage_path"]])
     assert list(tmp_path.iterdir()) == []
     assert "synthetic-token" not in caplog.text and "synthetic-secret" not in caplog.text

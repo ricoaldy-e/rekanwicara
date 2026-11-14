@@ -1,5 +1,8 @@
 import type {
   CustomWordDetail,
+  V2Catalog,
+  V2ItemDetail,
+  V2AnalyzeResponse,
   CustomWordWrite,
   CustomWordList,
   CustomWordDeletion,
@@ -24,6 +27,7 @@ import type {
 import { ApiError, httpError } from './apiError';
 import { uploadNative } from './nativeUpload';
 import { isCombinedResponse, isWav2Vec2Response } from './experimentResponses';
+import { isV2AnalyzeResponse, isV2Catalog, isV2Item } from './v2Responses';
 import { uploadMultipart, type UploadCallOptions, type XhrFactory } from './upload';
 
 type MultipartFields = Record<string, string | number | undefined>;
@@ -49,6 +53,9 @@ export interface ApiClient {
   readonly baseUrl: string;
   getHealth(): Promise<HealthResponse>;
   getItems(): Promise<ItemsResponse>;
+  getV2Catalog(accessToken: string): Promise<V2Catalog>;
+  getV2Item(id: string, accessToken: string): Promise<V2ItemDetail>;
+  analyzeV2(itemId: string, sessionId: string, file: UploadFile, accessToken: string, options?: UploadCallOptions): Promise<V2AnalyzeResponse>;
   listCustomWords(accessToken: string): Promise<CustomWordList>;
   getCustomWord(id: string, accessToken: string): Promise<CustomWordDetail>;
   createCustomWord(body: CustomWordWrite, accessToken: string): Promise<CustomWordDetail>;
@@ -56,7 +63,7 @@ export interface ApiClient {
   deleteCustomWord(id: string, revision: number, accessToken: string): Promise<CustomWordDeletion>;
   cleanupCustomWord(id: string, accessToken: string): Promise<CustomWordDetail>;
   deleteAccount(accessToken: string): Promise<AccountDeletionResponse>;
-  getTutorials(accessToken: string): Promise<TutorialsResponse>;
+  getTutorials(accessToken: string, group?: 'important_words' | 'level_1'): Promise<TutorialsResponse>;
   uploadTutorial(item: TutorialItem, accessToken: string, file: UploadFile, options?: UploadCallOptions): Promise<TutorialUploadResponse>;
   analyze(req: AnalyzeRequest, options?: AnalysisCallOptions): Promise<AnalyzeResponse>;
   calibrate(req: CalibrateRequest, options?: AnalysisCallOptions): Promise<CalibrateResponse>;
@@ -135,6 +142,22 @@ export function createApiClient(baseUrl: string, options: ApiClientOptions = {})
 
   return {
     baseUrl: base,
+    getV2Catalog: async (token) => {
+      const body = await request<unknown>('/v2/catalog', { headers: { Authorization: `Bearer ${token}` } });
+      if (!isV2Catalog(body)) throw new ApiError('parse', 'Invalid v2 catalog');
+      return body;
+    },
+    getV2Item: async (id, token) => {
+      const body = await request<unknown>(`/v2/items/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!isV2Item(body) || body.id !== id) throw new ApiError('parse', 'Invalid v2 material');
+      return body;
+    },
+    analyzeV2: async (itemId, sessionId, file, token, opts) => {
+      const body = await uploadNative(`${base}/v2/analyze`, file, opts,
+        { item_id: itemId, session_id: sessionId }, { Authorization: `Bearer ${token}` });
+      if (!isV2AnalyzeResponse(body) || body.item_id !== itemId) throw new ApiError('parse', 'Invalid v2 evaluation');
+      return body;
+    },
     listCustomWords: (token) => custom<CustomWordList>('', token),
     getCustomWord: (id, token) => custom<CustomWordDetail>(`/${encodeURIComponent(id)}`, token),
     createCustomWord: (body, token) => custom<CustomWordDetail>('', token, 'POST', body),
@@ -142,7 +165,7 @@ export function createApiClient(baseUrl: string, options: ApiClientOptions = {})
     deleteCustomWord: (id, revision, token) => custom<CustomWordDeletion>(`/${encodeURIComponent(id)}?revision=${revision}`, token, 'DELETE'),
     cleanupCustomWord: (id, token) => custom<CustomWordDetail>(`/${encodeURIComponent(id)}/cleanup`, token, 'POST'),
     getHealth: () => request<HealthResponse>('/v1/health'),
-    getTutorials: (accessToken) => request<TutorialsResponse>('/v1/tutorials', {
+    getTutorials: (accessToken, group) => request<TutorialsResponse>(`/v1/tutorials${group ? `?group=${group}` : ''}`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     }),
     uploadTutorial: async (item, accessToken, file, opts = {}) => {

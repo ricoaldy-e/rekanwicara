@@ -125,9 +125,34 @@ Tidak mengubah status publikasi/schema atau menyimpan hasil generator.
 Video L1 default boleh `[]` saat belum tersedia. Detail kata/suku kata lama dan custom membutuhkan
 video: bila tidak ada, `404 VIDEO_NOT_FOUND`. Kata dengan suku kata yang belum memiliki
 ID Level 2 yang tersedia (misalnya bagian A pada APA) menghasilkan `422 INVALID_MATERIAL`,
-tidak diam-diam memakai ID Level 1 dengan evaluator berbeda. Item nonaktif seperti O
-belum diaktifkan untuk penilaian; tidak membuat skor pengganti. Custom terpisah
+tidak diam-diam memakai ID Level 1 dengan evaluator berbeda. E/O kini didukung khusus
+pada v2 sesuai keputusan perekaman dan evaluasi lima vokal; v1 tetap mempertahankan status nonaktif E/O. Custom terpisah
 tetap mengikuti kepemilikan dan validasi kelengkapan.
+
+Perekaman lima tutorial vokal menggunakan `GET /v1/tutorials?group=level_1` dan upload
+existing `POST /v1/tutorials/{item_id}/video`. Daftar tanpa query tetap 24 Kata Penting.
+Manifest `server/app/content/level_one_tutorials.json` terpisah dari manifest Kata Penting;
+TutorialItem menambah kind vowel dan level 1. Operator memakai JWT akun pada allowlist
+existing; kredensial operator Storage hanya ada pada backend. Kelima video menggunakan
+bucket privat existing rekan-wicara-tutorials dan path default/level-1/{a,i,u,e,o}.mp4.
+Tidak membuat bucket/policy baru dan tidak memakai video Kata Penting sebagai pengganti.
+FE otomatis mengunggah setelah perekaman selesai, mempertahankan clip untuk retry bila
+gagal, dan membersihkan cache setelah verifikasi. Upload existing memakai upsert:false,
+bukan menimpa file aktif. Rekam ulang sebelum upload tetap tersedia; penggantian file
+yang sudah ada memerlukan proses operator tersendiri. Tidak ada upload galeri.
+
+Integrasi FE Level 1: Beranda akun login membaca katalog v2, menyatukan materi l0_*
+sebagai Level 1 dan tidak menduplikasi grup Level 0/1 lama. Kembali ke Beranda memuat ulang
+katalog agar video hasil perekaman terbaru terbaca. Klik materi membuka detail v2,
+signed URL melalui SDK saat diputar, rekam -> POST v2/analyze -> hasil -> Ulangi/Selesai.
+Sesi diperiksa sebelum/sesudah operasi dan state lama dibuang saat UID berganti.
+Hanya evaluated masuk antrean attempts existing, retry tidak dihitung. Mapping tiga
+hasil ke hijau/kuning/merah mengikuti schema. Score dan engine_version yang tidak
+disediakan v2 disimpan null; parser lokal mempertahankan null untuk engine v2.
+Antrean SDK tetap UUID-idempotent dan terisolasi UID. Hasil v2 tidak dimasukkan ke aturan
+kelulusan/progress legacy 8/10; tidak membuat syarat lulus baru sebelum keputusan produk.
+Selesai berarti menutup latihan, bukan otomatis lulus. Tampilan terakhir per materi
+menggunakan riwayat lokal akun. Layar Level 2/3 legacy tetap pada alur sebelumnya.
 
 #### Katalog Kata Penting dan video — pembaruan 14 November 2026
 
@@ -135,7 +160,7 @@ Perubahan DTO berikut diselaraskan di Pydantic, tipe TypeScript, dan fixture kon
 merupakan tambahan sesuai permintaan pengguna, bukan kutipan file v2.1 yang belum tersedia.
 Tidak mengubah API v1, schema, policy Storage, atau evaluator.
 
-Katalog v2 mempertahankan enam materi Level 1 aktif (`l1_a`, `l1_i`, `l1_u`, `l1_m`,
+Katalog v2 kini memiliki delapan materi Level 1 (`l1_a`, `l1_i`, `l1_u`, `l1_e`, `l1_o`, `l1_m`,
 `l0_hold_a`, `l0_soft_loud`) dan mengganti sembilan ringkasan kata default lama dengan:
 
 | ID | Kata | `syllable_split` | Tahapan Level 2 |
@@ -149,10 +174,9 @@ Katalog v2 mempertahankan enam materi Level 1 aktif (`l1_a`, `l1_i`, `l1_u`, `l1
 | `kp_makan` | MAKAN | `ma-kan` | MA, KAN |
 | `kp_haus` | HAUS | `haus` | `[]` (langsung kata utuh) |
 
-Ketidaksesuaian yang masih terbuka: draft lama menyebut O sebagai materi dasar produk,
-tetapi O masih nonaktif pada konten/evaluator yang tersedia dan MMM aktif. Pembaruan ini
-mempertahankan enam materi aktif existing; tidak mengaktifkan penilaian O atau mengganti
-materi Level 1 di luar scope. Daftar final perlu dicocokkan ketika file v2.1 tersedia.
+Keputusan terbaru 14 November menambahkan E dan O khusus v2; enam materi existing tetap
+dipertahankan. Registry v1 tidak diaktifkan ulang. Kelima vokal memiliki evaluator v2
+khusus sebagaimana dijelaskan di bawah; MMM, A panjang dan pelan-ke-keras tidak berubah.
 
 Seluruh Kata Penting memiliki `source: "default"` dan `automatic_evaluation: false`.
 Instruksi merupakan langkah UI dari dokumen sumber, disalin melalui manifest yang sudah
@@ -311,8 +335,23 @@ Contoh hasil Level 3 (ilustrasi struktur, bukan hasil uji ucapan manusia):
 {"status":"evaluated","item_id":"l3_papa","level":3,"result":"sesuai","lip_result":null,"voice_result":"sesuai","feedback":{"code":"MATCHED","message":"Ucapan sesuai target."},"quality_flags":[],"visuals":null,"engine":"mediapipe_wav2vec2","processing_ms":12}
 ```
 
-Level 1 memakai pipeline MediaPipe/Parselmouth dan aturan yang sudah ada, menghasilkan
-`sesuai|mendekati|belum_sesuai` beserta visual yang relevan. Level 0 lama dipetakan ke
+Lima vokal Level 1 A/I/U/E/O kini memakai MediaPipe, Parselmouth dan Wav2Vec2 dengan
+`engine: "mediapipe_parselmouth_wav2vec2"`, atas pilihan pengguna agar ASR ikut menentukan
+hasil akhir. MediaPipe mengukur geometri bibir; Parselmouth mengukur pitch, intensitas
+dan formant. A/I/U tetap menggunakan aturan formant existing, sedangkan E/O belum
+memiliki acuan formant personal: sinyal akustik dipakai untuk kelayakan/visual saja,
+tanpa mengarang skor akustik E/O. Geometri E/O memakai konfigurasi bibir existing.
+Transkripsi bebas dinormalisasi tanpa target pada decoder. Hanya satu jenis vokal yang
+sesuai target (termasuk pengulangan seperti AAA atau A A) dianggap cocok. Teks berbeda
+menghasilkan suara belum_sesuai; teks kosong meminta retry. Hasil suara A/I/U merupakan
+yang terburuk antara akustik dan ASR; hasil akhir yang terburuk antara bibir dan suara.
+Keluaran tetap `sesuai|mendekati|belum_sesuai`. Missing formant/geometri meminta retry
+dengan hasil dan indikator null, bukan dianggap salah. Model gagal/timeout mengembalikan
+503/504. WAV ASR berada dalam direktori sementara dan dihapus termasuk ketika gagal.
+Transkripsi mentah tidak dikirim ke FE. Keandalan ASR pada vokal tunggal BELUM tervalidasi
+dengan rekaman manusia; kecocokan teks bukan bukti akurasi pengukuran pelafalan.
+Materi MMM, A panjang, pelan-ke-keras tetap memakai evaluator MediaPipe/Parselmouth lama.
+Level 0 lama dipetakan ke
 Level 1 produk, tanpa mengubah ID/v1. Pada latihan suara saja `lip_result` dapat null.
 Level 2/3 memakai gerak/visibilitas wajah MediaPipe sebagai gerbang kualitas, lalu
 Wav2Vec2 bebas dan perbandingan teks target otoritatif yang dinormalisasi. Hanya kecocokan

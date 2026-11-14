@@ -9,6 +9,7 @@
 import type { Item } from '../api/types';
 import { buildProgress, type ItemProgress } from '../state/progression';
 import type { Attempt, ListenCheck, Profile } from '../user/pure';
+import { isV2Attempt } from '../user/pure';
 
 export type Table = 'profiles' | 'attempts' | 'listen_checks' | 'progress';
 
@@ -96,7 +97,7 @@ export async function syncPending(
     // refreshed by the next sync that has something to send, not retried on its own.
     const progress = buildProgress(
       items,
-      profile.attempts,
+      profile.attempts.filter((attempt) => !isV2Attempt(attempt)),
       profile.listenChecks,
       { listenCheckRequired: profile.settings.listenCheckRequired, unlockAll: profile.settings.unlockAll },
       now,

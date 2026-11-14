@@ -55,8 +55,8 @@ class TutorialItem(_Strict):
     item_id: str
     word: str
     target: str
-    kind: Literal["word", "syllable"]
-    level: Literal[2, 3]
+    kind: Literal["word", "syllable", "vowel"]
+    level: Literal[1, 2, 3]
     position: int | None
     bucket: str
     storage_path: str
@@ -317,7 +317,7 @@ class V2AnalyzeResponse(_Strict):
     feedback: V2Feedback
     quality_flags: list[str]
     visuals: Visuals | None
-    engine: Literal["mediapipe_parselmouth", "mediapipe_wav2vec2"]
+    engine: Literal["mediapipe_parselmouth", "mediapipe_wav2vec2", "mediapipe_parselmouth_wav2vec2"]
     processing_ms: int = Field(ge=0)
 
     @model_validator(mode="after")

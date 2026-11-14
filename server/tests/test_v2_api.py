@@ -16,6 +16,7 @@ from app.api.schemas import CombinedVisual, Item, Wav2Vec2Response
 from app.api.v2 import analysis as analysis_v2
 from app.api.v2 import store
 from app.api.v2.catalog import GUIDE_ITEMS
+from app.api.v2.vowels import VOWEL_IDS
 
 UID = "11111111-1111-4111-8111-111111111111"
 OTHER = "22222222-2222-4222-8222-222222222222"
@@ -56,7 +57,11 @@ def upstream(monkeypatch: pytest.MonkeyPatch) -> dict:
         "storage_status": 200,
         "missing_bucket": False,
         "requests": [],
-        "objects": {CUSTOM_PATH, *(item.storage_path for item in GUIDE_ITEMS.values())},
+        "objects": {
+            CUSTOM_PATH,
+            *(item.storage_path for item in GUIDE_ITEMS.values()),
+            *(f"default/level-1/{vowel}.mp4" for vowel in "aiueo"),
+        },
         "custom_words": [
             {
                 "id": WORD,
@@ -128,6 +133,8 @@ def upstream(monkeypatch: pytest.MonkeyPatch) -> dict:
             exists = (
                 state["default_present"] if bucket == "default-videos" else path in state["objects"]
             )
+            if path.startswith("default/level-1/"):
+                exists = exists and state["default_present"]
             return (
                 httpx.Response(200, json={"size": 123, "content_type": "video/mp4"})
                 if exists
@@ -170,7 +177,8 @@ def test_catalog_default_and_only_complete_owned_custom(
     body = response.json()
     assert set(body) == {"level_1", "words"}
     assert {item["id"] for item in body["level_1"]} >= {"l1_a", "l1_i", "l1_u"}
-    assert len(body["level_1"]) == 6
+    assert len(body["level_1"]) == 8
+    assert VOWEL_IDS <= {item["id"] for item in body["level_1"]}
     defaults = [word for word in body["words"] if word["source"] == "default"]
     assert [word["id"] for word in defaults] == [f"kp_{word}" for word in IMPORTANT_WORDS]
     assert all(word["automatic_evaluation"] is False for word in defaults)
@@ -184,7 +192,10 @@ def test_catalog_default_and_only_complete_owned_custom(
         "/object/info/" in r.url.path or r.url.path.startswith(("/auth/", "/rest/"))
         for r in upstream["requests"]
     )
-    assert all("/default/" not in r.url.path for r in upstream["requests"])
+    assert all(
+        "/default/words/" not in r.url.path and "/default/syllables/" not in r.url.path
+        for r in upstream["requests"]
+    )
 
 
 @pytest.mark.parametrize(
@@ -458,7 +469,7 @@ def test_level_one_adapter_uses_real_pipeline_boundary(
     monkeypatch.setattr(analysis_v2, "_analysis", score)
     recognition = Mock(side_effect=AssertionError("Level 1 must not call ASR"))
     monkeypatch.setattr(analysis_v2, "_recognize", recognition)
-    result = send_analysis(v2_client, sample_video, "l1_a", user_id=OTHER)
+    result = send_analysis(v2_client, sample_video, "l1_m", user_id=OTHER)
     assert result.status_code == 200, result.text
     body = result.json()
     assert (
@@ -602,7 +613,7 @@ def test_invalid_upload_and_unsupported_item(
 ) -> None:
     assert send_analysis(v2_client, b"not-a-video", "l1_a").status_code == 415
     assert send_analysis(v2_client, sample_video, "kp_tolong").status_code == 404
-    assert send_analysis(v2_client, sample_video, "l1_o").status_code == 404
+    assert send_analysis(v2_client, sample_video, "l1_unknown").status_code == 404
     assert (
         v2_client.post(
             "/v2/analyze",
@@ -714,7 +725,10 @@ def test_actual_storage_missing_bucket_error_allows_basic_fallback(
     upstream["missing_bucket"] = True
     result = v2_client.get("/v2/catalog", headers=HEADERS)
     assert result.status_code == 200
-    assert all(item["videos"] == [] for item in result.json()["level_1"])
+    assert all(
+        item["videos"] == [] for item in result.json()["level_1"] if item["id"] not in VOWEL_IDS
+    )
+    assert all(item["videos"] for item in result.json()["level_1"] if item["id"] in VOWEL_IDS)
 
 
 def test_word_with_unmapped_level_two_vowel_is_not_given_a_level_one_item(

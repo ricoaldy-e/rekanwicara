@@ -8,7 +8,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Annotated
+from typing import Annotated, Literal
 from urllib.parse import urlsplit
 from uuid import UUID
 
@@ -34,10 +34,15 @@ MANIFEST_PATH = Path(__file__).resolve().parents[2] / "content" / "tutorials.jso
 BUCKET = "rekan-wicara-tutorials"
 
 
-def catalogue() -> list[TutorialItem]:
-    return [
-        TutorialItem.model_validate(item) for item in json.loads(MANIFEST_PATH.read_text("utf-8"))
-    ]
+def catalogue(
+    group: Literal["important_words", "level_1"] = "important_words",
+) -> list[TutorialItem]:
+    path = (
+        MANIFEST_PATH
+        if group == "important_words"
+        else MANIFEST_PATH.with_name("level_one_tutorials.json")
+    )
+    return [TutorialItem.model_validate(item) for item in json.loads(path.read_text("utf-8"))]
 
 
 @contextmanager
@@ -83,9 +88,11 @@ def storage_client(settings: Settings, authorization: str | None) -> Iterator[ht
         ) from exc
 
 
-def stored_paths(client: httpx.Client) -> set[str]:
+def stored_paths(client: httpx.Client, items: list[TutorialItem] | None = None) -> set[str]:
     paths: set[str] = set()
-    prefixes = sorted({item.storage_path.rsplit("/", 1)[0] for item in catalogue()})
+    prefixes = sorted(
+        {item.storage_path.rsplit("/", 1)[0] for item in (catalogue() if items is None else items)}
+    )
     for prefix in prefixes:
         response = client.post(
             f"/storage/v1/object/list/{BUCKET}",
@@ -111,13 +118,15 @@ def list_tutorials(
     settings: SettingsDep,
     thresholds: ThresholdsDep,
     authorization: Annotated[str | None, Header()] = None,
+    group: Literal["important_words", "level_1"] = "important_words",
 ) -> TutorialsResponse:
+    items = catalogue(group)
     with storage_client(settings, authorization) as client:
-        paths = stored_paths(client)
+        paths = stored_paths(client, items)
     return TutorialsResponse(
         items=[
             TutorialPresence(**item.model_dump(), present=item.storage_path in paths)
-            for item in catalogue()
+            for item in items
         ],
         max_duration_s=thresholds.tutorials.max_duration_s,
         max_upload_mb=thresholds.tutorials.max_upload_mb,
@@ -215,7 +224,9 @@ def upload_tutorial(
     file: Annotated[UploadFile, File()],
     authorization: Annotated[str | None, Header()] = None,
 ) -> TutorialUploadResponse:
-    item = next((entry for entry in catalogue() if entry.item_id == item_id), None)
+    item = next(
+        (entry for entry in [*catalogue(), *catalogue("level_1")] if entry.item_id == item_id), None
+    )
     if item is None:
         raise ApiError(404, "tutorial_unknown", "Target tutorial tidak ditemukan.")
     config = thresholds.tutorials

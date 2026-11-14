@@ -1,0 +1,82 @@
+[
+  {
+    "item_id": "l1_a",
+    "word": "A",
+    "target": "A",
+    "kind": "vowel",
+    "level": 1,
+    "position": null,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/level-1/a.mp4",
+    "steps": [
+      "Hadapkan wajah ke kamera; bibir dan rahang terlihat jelas.",
+      "Buka mulut dengan nyaman, lalu ucapkan A.",
+      "Tahan bunyi A sebentar tanpa memaksa, lalu rileks.",
+      "Ulangi A perlahan sekali lagi."
+    ]
+  },
+  {
+    "item_id": "l1_i",
+    "word": "I",
+    "target": "I",
+    "kind": "vowel",
+    "level": 1,
+    "position": null,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/level-1/i.mp4",
+    "steps": [
+      "Hadapkan wajah ke kamera; bibir terlihat jelas.",
+      "Lebarkan bibir dengan nyaman, lalu ucapkan I.",
+      "Tahan bunyi I sebentar tanpa memaksa, lalu rileks.",
+      "Ulangi I perlahan sekali lagi."
+    ]
+  },
+  {
+    "item_id": "l1_u",
+    "word": "U",
+    "target": "U",
+    "kind": "vowel",
+    "level": 1,
+    "position": null,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/level-1/u.mp4",
+    "steps": [
+      "Hadapkan wajah ke kamera; bibir terlihat jelas.",
+      "Bulatkan bibir ke depan dengan nyaman, lalu ucapkan U.",
+      "Tahan bunyi U sebentar tanpa memaksa, lalu rileks.",
+      "Ulangi U perlahan sekali lagi."
+    ]
+  },
+  {
+    "item_id": "l1_e",
+    "word": "E",
+    "target": "E",
+    "kind": "vowel",
+    "level": 1,
+    "position": null,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/level-1/e.mp4",
+    "steps": [
+      "Hadapkan wajah ke kamera; bibir dan rahang terlihat jelas.",
+      "Buka mulut secukupnya dan lebarkan bibir dengan nyaman.",
+      "Peragakan vokal E seperti pada kata ENAK, lalu rileks.",
+      "Ulangi vokal E yang sama perlahan sekali lagi."
+    ]
+  },
+  {
+    "item_id": "l1_o",
+    "word": "O",
+    "target": "O",
+    "kind": "vowel",
+    "level": 1,
+    "position": null,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/level-1/o.mp4",
+    "steps": [
+      "Hadapkan wajah ke kamera; bibir dan rahang terlihat jelas.",
+      "Bulatkan bibir dan buka mulut secukupnya dengan nyaman.",
+      "Ucapkan O, tahan sebentar tanpa memaksa, lalu rileks.",
+      "Ulangi O perlahan sekali lagi."
+    ]
+  }
+]

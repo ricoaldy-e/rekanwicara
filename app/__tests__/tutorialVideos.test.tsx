@@ -3,6 +3,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import TutorialVideos from '../app/tutorial-videos';
 import { ApiError } from '../src/api/apiError';
 import manifest from '../../server/app/content/tutorials.json';
+import vowels from '../../server/app/content/level_one_tutorials.json';
 
 const mockGet = jest.fn();
 const mockUpload = jest.fn();
@@ -39,7 +40,7 @@ jest.mock('../src/recording/RecordPanel', () => ({ RecordPanel: ({ onRecorded, m
 beforeEach(() => {
   jest.clearAllMocks();
   mockLoggedIn = true;
-  mockGet.mockReset().mockResolvedValue({ items: manifest.map((i) => ({ ...i, present: false })), max_duration_s: 120, max_upload_mb: 50 });
+  mockGet.mockReset().mockImplementation(async (_token, group) => ({ items: (group === 'level_1' ? vowels : manifest).map((i) => ({ ...i, present: false })), max_duration_s: 120, max_upload_mb: 50 }));
   mockToken.mockReset().mockResolvedValue({ access_token: 'current-token' });
   mockUpload.mockReset().mockImplementation(async (item) => ({ ...item, status: 'verified', size_bytes: 123 }));
 });
@@ -47,6 +48,7 @@ afterEach(async () => { await cleanup(); });
 
 async function recordFirst() {
   const view = await render(<TutorialVideos />);
+  await fireEvent.press(screen.getByRole('button', { name: 'Kata Penting (24 video)' }));
   await waitFor(() => expect(screen.getByText('0 dari 24 video tersimpan di Storage.')).toBeTruthy());
   await fireEvent.press(screen.getByLabelText('TOLONG, TO, belum direkam'));
   return view;
@@ -120,4 +122,29 @@ it('aborts upload and cleans local media on unmount, ignoring a late response', 
   expect(signal.aborted).toBe(true);
   expect(mockDelete).toHaveBeenCalledWith(clip);
   await act(async () => finish({ status: 'verified' }));
+});
+
+it('opens five vowels by default and uploads a recording automatically', async () => {
+  await render(<TutorialVideos />);
+  await waitFor(() => expect(screen.getByText('0 dari 5 video tersimpan di Storage.')).toBeTruthy());
+  expect(mockGet).toHaveBeenCalledWith('current-token', 'level_1');
+  await fireEvent.press(screen.getByLabelText('A, A, belum direkam'));
+  expect(screen.getByText(vowels[0].steps[0])).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Rekam sintetis' }));
+  await waitFor(() => expect(screen.getByText('1 dari 5 video tersimpan di Storage.')).toBeTruthy());
+  expect(mockUpload).toHaveBeenCalledWith(expect.objectContaining({ item_id: 'l1_a',
+    storage_path: 'default/level-1/a.mp4' }), 'current-token', expect.objectContaining({ uri: clip }), expect.anything());
+  expect(mockDelete).toHaveBeenCalledWith(clip);
+});
+
+it('keeps a failed automatic vowel upload for retry', async () => {
+  mockUpload.mockRejectedValueOnce(new ApiError('http', 'Upload gagal.', 502, 'tutorial_upload_failed'));
+  await render(<TutorialVideos />);
+  await waitFor(() => expect(screen.getByText('0 dari 5 video tersimpan di Storage.')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('E, E, belum direkam'));
+  await fireEvent.press(screen.getByRole('button', { name: 'Rekam sintetis' }));
+  await waitFor(() => expect(screen.getByLabelText('Upload gagal.')).toBeTruthy());
+  expect(mockDelete).not.toHaveBeenCalledWith(clip);
+  await fireEvent.press(screen.getByRole('button', { name: 'Coba kirim lagi' }));
+  await waitFor(() => expect(screen.getByText('1 dari 5 video tersimpan di Storage.')).toBeTruthy());
 });

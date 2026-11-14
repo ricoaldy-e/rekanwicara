@@ -10,18 +10,18 @@
     "position": 1
   },
   "l1_a": {
-    "bucket": "default-videos",
-    "path": "level-1/a.mp4",
+    "bucket": "rekan-wicara-tutorials",
+    "path": "default/level-1/a.mp4",
     "position": 1
   },
   "l1_i": {
-    "bucket": "default-videos",
-    "path": "level-1/i.mp4",
+    "bucket": "rekan-wicara-tutorials",
+    "path": "default/level-1/i.mp4",
     "position": 1
   },
   "l1_u": {
-    "bucket": "default-videos",
-    "path": "level-1/u.mp4",
+    "bucket": "rekan-wicara-tutorials",
+    "path": "default/level-1/u.mp4",
     "position": 1
   },
   "l1_m": {
@@ -30,13 +30,13 @@
     "position": 1
   },
   "l1_e": {
-    "bucket": "default-videos",
-    "path": "level-1/e.mp4",
+    "bucket": "rekan-wicara-tutorials",
+    "path": "default/level-1/e.mp4",
     "position": 1
   },
   "l1_o": {
-    "bucket": "default-videos",
-    "path": "level-1/o.mp4",
+    "bucket": "rekan-wicara-tutorials",
+    "path": "default/level-1/o.mp4",
     "position": 1
   },
   "l2_ma": {

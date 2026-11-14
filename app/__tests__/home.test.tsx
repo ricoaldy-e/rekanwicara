@@ -10,17 +10,36 @@ const mockPush = jest.fn();
 let mockProfile = { ...newProfile(), calibrated: true };
 let mockItems: Item[] = [];
 let mockProgress = new Map<string, ItemProgress>();
+let mockSession: { user: { id: string } } | null = null;
+let mockDemo = true;
+jest.mock('../src/home/LevelOneList', () => ({ LevelOneList: () => {
+  const { Text } = require('react-native'); return <Text>Daftar Level 1 dari v2</Text>;
+} }));
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock('../src/state/content', () => ({ useContent: () => ({
   health: null, items: mockItems, loading: false, error: null, healthError: null, reload: mockReload,
 }) }));
-jest.mock('../src/state/user', () => ({ useUser: () => ({ profile: mockProfile, progress: mockProgress, demo: true }) }));
+jest.mock('../src/state/user', () => ({ useUser: () => ({ profile: mockProfile, progress: mockProgress, demo: mockDemo, session: mockSession }) }));
 
 beforeEach(() => {
   jest.clearAllMocks();
   mockProfile = { ...newProfile(), calibrated: true };
   mockItems = [];
   mockProgress = new Map();
+  mockSession = null;
+  mockDemo = true;
+});
+
+it('shows the v2 Level 1 group after login without duplicating legacy level zero and one', async () => {
+  mockSession = { user: { id: '11111111-1111-4111-8111-111111111111' } };
+  mockDemo = false;
+  mockItems = [material('l0_hold_a', 0), material('l1_a', 1)];
+  await render(<Home />);
+  expect(screen.getByText('Beranda')).toBeTruthy();
+  expect(screen.getByText('Daftar Level 1 dari v2')).toBeTruthy();
+  expect(screen.queryByTestId('item-l1_a')).toBeNull();
+  expect(screen.queryByTestId('item-l0_hold_a')).toBeNull();
+  expect(screen.queryByTestId('mission')).toBeNull();
 });
 
 const material = (id: string, level: number): Item => ({

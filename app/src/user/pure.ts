@@ -1,6 +1,6 @@
 /** Local user state without any storage or UI: ids, PIN rule, attempts, settings, sync bookkeeping. */
 
-import type { AnalyzeResponse, Status } from '../api/types';
+import type { AnalyzeResponse, Status, V2AnalyzeResponse, V2Result } from '../api/types';
 
 /** Oldest attempts are dropped beyond this; AsyncStorage holds one JSON string (small, not a database). */
 export const MAX_ATTEMPTS = 2000;
@@ -29,11 +29,11 @@ export interface Attempt {
   /** ISO time of the analysis. */
   at: string;
   overall: Status;
-  score: number;
+  score: number | null;
   indicators: { bibir: Status | null; suara: Status };
   hintId: string;
   scorer: string;
-  engineVersion: string;
+  engineVersion: string | null;
   synced: boolean;
 }
 
@@ -93,17 +93,25 @@ const isStatus = (v: unknown): v is Status => v === 'hijau' || v === 'kuning' ||
 const isIso = (v: unknown): v is string => typeof v === 'string' && !Number.isNaN(Date.parse(v));
 const isText = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length <= 200;
 
+export const isV2Attempt = (attempt: Pick<Attempt, 'scorer'>): boolean =>
+  ['mediapipe_parselmouth', 'mediapipe_wav2vec2', 'mediapipe_parselmouth_wav2vec2'].includes(attempt.scorer);
+
+export const resultStatus: Record<V2Result, Status> = {
+  sesuai: 'hijau', mendekati: 'kuning', belum_sesuai: 'merah',
+};
+
 /** A stored attempt, or null when the record is damaged (it is dropped, not repaired). */
 export function parseAttempt(raw: unknown): Attempt | null {
   const a = raw as Partial<Attempt> | null;
   if (!a || typeof a !== 'object') return null;
   const ind = a.indicators;
+  const v2 = typeof a.scorer === 'string' && isV2Attempt({ scorer: a.scorer });
   if (
     !isText(a.id) || !isText(a.itemId) || !isText(a.sessionId) || !isIso(a.at) || !isStatus(a.overall) ||
     typeof a.level !== 'number' || !Number.isInteger(a.level) || a.level < 0 || a.level > 4 ||
-    typeof a.score !== 'number' || !(a.score >= 0 && a.score <= 1) ||
+    !(v2 && a.score === null || typeof a.score === 'number' && a.score >= 0 && a.score <= 1) ||
     !ind || !isStatus(ind.suara) || !(ind.bibir === null || isStatus(ind.bibir)) ||
-    !isText(a.hintId) || !isText(a.scorer) || !isText(a.engineVersion)
+    !isText(a.hintId) || !isText(a.scorer) || !(v2 && a.engineVersion === null || isText(a.engineVersion))
   ) {
     return null;
   } // fmt: skip
@@ -193,6 +201,17 @@ export function attemptFromResponse(res: AnalyzeResponse, sessionId: string, now
 
 export function addAttempt(profile: Profile, attempt: Attempt): Profile {
   return { ...profile, attempts: [...profile.attempts, attempt].slice(-MAX_ATTEMPTS) };
+}
+
+/** v2 has no numeric score or engine version; retain null instead of inventing either. */
+export function attemptFromV2Response(res: V2AnalyzeResponse, sessionId: string, now = new Date()): Attempt | null {
+  if (res.status !== 'evaluated' || res.result === null || res.voice_result === null) return null;
+  return {
+    id: makeUuid(), itemId: res.item_id, level: res.level, sessionId, at: now.toISOString(),
+    overall: resultStatus[res.result], score: null,
+    indicators: { bibir: res.lip_result === null ? null : resultStatus[res.lip_result], suara: resultStatus[res.voice_result] },
+    hintId: res.feedback.code, scorer: res.engine, engineVersion: null, synced: false,
+  };
 }
 
 export function addListenCheck(profile: Profile, check: ListenCheck): Profile {

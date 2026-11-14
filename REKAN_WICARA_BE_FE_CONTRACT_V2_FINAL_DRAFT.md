@@ -11,6 +11,32 @@
 
 ## 1. Pembagian sistem dan aturan umum
 
+**Pembaruan 14 November 2026 - perekaman dan evaluasi vokal Level 1:** sesuai keputusan
+pengguna, A/I/U/E/O menggunakan MediaPipe + Parselmouth + Wav2Vec2 dan ASR ikut menentukan
+hasil akhir. `engine` untuk lima vokal adalah `mediapipe_parselmouth_wav2vec2`. Bentuk
+response evaluasi tetap; Result Level 1 mencakup `mendekati`. MMM, A panjang dan
+pelan-ke-keras tetap memakai evaluator lama. E/O hanya diaktifkan pada katalog/evaluator
+v2; perilaku v1 tetap. Total Level 1 v2 menjadi delapan materi karena tiga materi lama
+tersebut tetap dipertahankan.
+
+Perekaman tim memakai `GET /v1/tutorials?group=level_1` (lima vokal) dan endpoint upload
+existing `POST /v1/tutorials/{item_id}/video`, JWT akun operator yang diizinkan. DTO
+TutorialItem menambah `kind: "vowel"`, `level: 1`. Default tanpa query tetap 24 Kata
+Penting. Bucket privat existing `rekan-wicara-tutorials`, path `default/level-1/a.mp4`,
+`i.mp4`, `u.mp4`, `e.mp4`, `o.mp4`. FE merekam langsung, otomatis upload setelah rekam
+selesai, menunggu verifikasi, dan mempertahankan file lokal untuk retry bila gagal.
+File existing tidak ditimpa. Katalog/detail L1 tetap mengirim `videos: []` bila tidak
+tersedia; tidak menambah field `video: null`. Key operator hanya ada di server.
+
+ASR menggunakan transkripsi bebas tanpa target pada decoder. Vokal tunggal dan
+pengulangan vokal yang sama dianggap cocok; teks lain belum_sesuai dan teks kosong retry.
+A/I/U mempertahankan penilaian formant existing; suara merupakan hasil terburuk antara
+akustik dan ASR. E/O menggunakan geometri bibir existing dan ASR untuk hasil suara;
+Parselmouth tetap mengukur kelayakan/visual, tanpa mengarang acuan akustik E/O. Hasil
+akhir merupakan hasil terburuk antara bibir dan suara. Nilai yang tidak dapat diukur
+meminta retry (ketiga hasil null); kegagalan/timeout model 503/504. Transkripsi mentah
+tidak dikirim ke FE. Keandalan vokal tunggal BELUM tervalidasi dengan rekaman manusia.
+
 | Bagian | Implementasi / pemilik | Tanggung jawab |
 |---|---|---|
 | Login, register, logout, sesi | **Supabase Auth SDK** (FE; konfigurasi BE) | Identitas dan JWT |
@@ -18,7 +44,7 @@
 | Baca katalog & detail kata | **FastAPI v2** (BE) | Menggabungkan materi default + materi custom sesuai JWT |
 | Buat/edit/hapus custom kata, suku kata, video | **Supabase SDK + Storage** (FE, aturan RLS BE) | CRUD, upload, hapus file, kepemilikan |
 | Generate instruksi pelafalan | **FastAPI v2** (BE) | Memanggil LLM dengan API key di BE; hanya mengembalikan saran teks |
-| Evaluasi percobaan pelafalan | **FastAPI v2** (BE) | MediaPipe + Parselmouth (L1); MediaPipe + Wav2Vec2 (L2–3) |
+| Evaluasi percobaan pelafalan | **FastAPI v2** (BE) | MediaPipe + Parselmouth + Wav2Vec2 (lima vokal L1); evaluator lama untuk tiga materi dasar lain; MediaPipe + Wav2Vec2 (L2–3) |
 | Riwayat/progres | **Supabase SDK** (FE, aturan penyimpanan BE–FE) | Menyimpan ringkasan latihan per akun |
 
 ### Header & identitas
@@ -39,7 +65,7 @@ Untuk `POST /v2/instructions/generate`, tambah `Content-Type: application/json`.
 ```ts
 type Level = 1 | 2 | 3;
 type Source = 'default' | 'custom';
-type Result = 'sesuai' | 'belum_sesuai';
+type Result = 'sesuai' | 'mendekati' | 'belum_sesuai'; // mendekati hanya Level 1
 type EvaluationStatus = 'evaluated' | 'retry';
 // ID default tetap seperti kode lama: l1_a, l2_pa, l3_papa, l0_hold_a, ...
 // ID custom: custom_word:<uuid> atau custom_syllable:<uuid>
@@ -174,7 +200,7 @@ Tidak ada endpoint HTTP untuk PIN dalam MVP; semua langkah dilakukan di FE.
       "text": "A",
       "instruction": "Buka mulut dan ucapkan A",
       "videos": [
-        { "bucket": "default-videos", "path": "level-1/a.mp4", "position": 1 }
+        { "bucket": "rekan-wicara-tutorials", "path": "default/level-1/a.mp4", "position": 1 }
       ]
     },
     {
@@ -485,7 +511,7 @@ Tidak perlu mengirim `user_id` atau target teks sebagai sumber kepercayaan. BE m
     "lip_contour": { "points": [[0.41, 0.62], [0.45, 0.60]] },
     "loudness": null
   },
-  "engine": "mediapipe_parselmouth",
+  "engine": "mediapipe_parselmouth_wav2vec2",
   "processing_ms": 2100
 }
 ```
@@ -508,7 +534,7 @@ Tidak perlu mengirim `user_id` atau target teks sebagai sumber kepercayaan. BE m
 
 **Aturan wajib:**
 
-1. **Level 1:** MediaPipe + Parselmouth. BE boleh mengirim data numerik untuk segitiga vokal, gambar/garis mulut, atau loudness yang relevan; FE merender visualisasi **hanya untuk Level 1** (tidak semua latihan L1 wajib memiliki semua visual).
+1. **Level 1:** lima vokal A/I/U/E/O memakai MediaPipe + Parselmouth + Wav2Vec2 sesuai pembaruan di awal dokumen; tiga materi dasar lain tetap memakai evaluator lama. BE boleh mengirim data numerik untuk segitiga vokal, gambar/garis mulut, atau loudness yang relevan; FE merender visualisasi **hanya untuk Level 1** (tidak semua latihan L1 wajib memiliki semua visual).
 2. **Level 2 & 3:** MediaPipe + Wav2Vec2; `visuals: null` **selalu**. Tidak menampilkan segitiga vokal atau gambar mulut hasil MediaPipe.
 3. FE menampilkan **`Sesuai`** atau **`Belum Sesuai`** dengan teks arahan. **Jangan tampilkan transkripsi Wav2Vec2 mentah** atau kata yang model dengar sebagai feedback pengguna.
 4. `retry` adalah kualitas rekaman tidak cukup / komponen tidak dapat menilai, **bukan kesalahan pengucapan**. FE menampilkan instruksi rekam ulang, tidak menganggap `Belum Sesuai`.

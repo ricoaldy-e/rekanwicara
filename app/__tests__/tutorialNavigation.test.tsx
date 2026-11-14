@@ -4,10 +4,11 @@ import { Alert, Text } from 'react-native';
 
 import TutorialVideos from '../app/tutorial-videos';
 import manifest from '../../server/app/content/tutorials.json';
+import vowels from '../../server/app/content/level_one_tutorials.json';
 
-const mockApi = { getTutorials: jest.fn().mockResolvedValue({
-  items: manifest.map((item) => ({ ...item, present: false })), max_duration_s: 120, max_upload_mb: 50,
-}) };
+const mockApi = { getTutorials: jest.fn().mockImplementation(async (_token, group) => ({
+  items: (group === 'level_1' ? vowels : manifest).map((item) => ({ ...item, present: false })), max_duration_s: 120, max_upload_mb: 50,
+})) };
 const mockDelete = jest.fn();
 
 jest.mock('../src/state/user', () => ({ useUser: () => ({ session: { user: { id: 'synthetic-producer' } } }) }));
@@ -24,7 +25,7 @@ jest.mock('../src/recording/ClipPreview', () => ({ ClipPreview: () => null }));
 
 it('renders the authenticated tutorial screen inside the actual Expo Router navigator', async () => {
   await renderRouter({ index: TutorialVideos });
-  await waitFor(() => expect(screen.getByText('0 dari 24 video tersimpan di Storage.')).toBeTruthy());
+  await waitFor(() => expect(screen.getByText('0 dari 5 video tersimpan di Storage.')).toBeTruthy());
   expect(screen.getByText('Rekam Tutorial')).toBeTruthy();
 });
 
@@ -33,6 +34,8 @@ it('blocks native back with an unsaved clip and resumes navigation only after co
   try {
     const view = await renderRouter({ index: () => <Text>Beranda sintetis</Text>, 'tutorial-videos': TutorialVideos });
     await act(async () => router.push('/tutorial-videos'));
+    await waitFor(() => expect(screen.getByText('0 dari 5 video tersimpan di Storage.')).toBeTruthy());
+    await fireEvent.press(screen.getByRole('button', { name: 'Kata Penting (24 video)' }));
     await waitFor(() => expect(screen.getByText('0 dari 24 video tersimpan di Storage.')).toBeTruthy());
     await fireEvent.press(screen.getByLabelText('TOLONG, TO, belum direkam'));
     await fireEvent.press(screen.getByRole('button', { name: 'Rekam sintetis' }));

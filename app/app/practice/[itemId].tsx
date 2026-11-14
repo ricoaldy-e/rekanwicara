@@ -17,6 +17,8 @@ import { useSettings } from '../../src/state/settings';
 import { SESSION_ID, useUser } from '../../src/state/user';
 import { colors } from '../../src/theme';
 import { attemptFromResponse } from '../../src/user/pure';
+import { LevelOnePractice } from '../../src/practice/LevelOnePractice';
+import { CompanionLogin } from '../../src/auth/CompanionLogin';
 
 /** SPEC §2 cycle: Lihat → Tiru → Bandingkan → Ulangi ("Ulangi" is the button that loops back to Tiru). */
 type Stage = 'look' | 'record' | 'send' | 'result';
@@ -29,6 +31,15 @@ const STAGE_STEP: Record<Stage, { step: number; title: string }> = {
 const LEVEL0_DURATION_MS = 4000; // SPEC §8.2
 
 export default function Practice() {
+  const { itemId, v2 } = useLocalSearchParams<{ itemId: string; v2?: string }>();
+  const { session } = useUser();
+  if (v2 === '1') return session
+    ? <LevelOnePractice key={`${session.user.id}:${itemId}`} itemId={itemId} ownerId={session.user.id} />
+    : <CompanionLogin />;
+  return <LegacyPractice />;
+}
+
+function LegacyPractice() {
   const router = useRouter();
   const { itemId } = useLocalSearchParams<{ itemId: string }>();
   const { items, loading } = useContent();

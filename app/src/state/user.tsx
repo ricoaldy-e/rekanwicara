@@ -8,6 +8,7 @@ import { syncPending } from '../data/sync';
 import {
   addAttempt as withAttempt,
   addListenCheck,
+  isV2Attempt,
   makeId,
   makeUuid,
   markSynced,
@@ -206,7 +207,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     () =>
       buildProgress(
         items ?? [],
-        profile.attempts,
+        profile.attempts.filter((attempt) => !isV2Attempt(attempt)),
         profile.listenChecks,
         { listenCheckRequired: profile.settings.listenCheckRequired, unlockAll: profile.settings.unlockAll },
         new Date(),
