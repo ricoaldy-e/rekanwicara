@@ -1,6 +1,6 @@
 import { act, fireEvent, render, renderHook, screen } from '@testing-library/react-native';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Checkbox } from '../src/components/form/Checkbox';
 import { ConfirmDialog } from '../src/components/form/ConfirmDialog';
@@ -10,6 +10,7 @@ import { PinPad } from '../src/components/form/PinPad';
 import { Snackbar, SNACKBAR_MIN_MS } from '../src/components/form/Snackbar';
 import { TextField } from '../src/components/form/TextField';
 import { useFormState, type Rules } from '../src/forms/useFormState';
+import { colors } from '../src/theme';
 import { messageOf } from '../src/forms/messages';
 import * as auth from '../src/forms/validators/auth';
 
@@ -189,15 +190,27 @@ describe('ConfirmDialog', () => {
     expect(screen.queryByText('Hapus “mama”?')).toBeNull();
   });
 
-  it('shows both choices, a danger icon with the text, and reports the press', async () => {
+  it('puts the safe cream button above the red danger button (icon + text) and reports the press', async () => {
     await render(<ConfirmDialog {...props} visible danger message="Ini tidak bisa dibatalkan." />);
     expect(screen.getByText('Hapus “mama”?')).toBeTruthy();
-    expect(screen.getByText('icon:warning', { includeHiddenElements: true })).toBeTruthy();
     expect(screen.getByText('icon:trash-outline', { includeHiddenElements: true })).toBeTruthy();
+    const fill = (id: string) => StyleSheet.flatten(screen.getByTestId(id).props.style).backgroundColor;
+    expect(fill('confirm-cancel')).toBe(colors.primary);
+    expect(fill('confirm-ok')).toBe(colors.danger);
+    const ids = screen.getAllByRole('button').map((b) => b.props.testID);
+    expect(ids.indexOf('confirm-cancel')).toBeLessThan(ids.indexOf('confirm-ok'));
     await fireEvent.press(screen.getByRole('button', { name: 'Batal' }));
     expect(props.onCancel).toHaveBeenCalledTimes(1);
     await fireEvent.press(screen.getByRole('button', { name: 'Hapus' }));
     expect(props.onConfirm).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('ConfirmDialog without danger', () => {
+  it('keeps the confirm button outlined so only one button is cream', async () => {
+    await render(<ConfirmDialog title="Keluar?" confirmLabel="Keluar" onConfirm={jest.fn()} onCancel={jest.fn()} visible />);
+    expect(StyleSheet.flatten(screen.getByTestId('confirm-cancel').props.style).backgroundColor).toBe(colors.primary);
+    expect(StyleSheet.flatten(screen.getByTestId('confirm-ok').props.style).backgroundColor).toBe('transparent');
   });
 });
 

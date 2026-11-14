@@ -745,3 +745,17 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
   - Skill `figma-design-to-code` dan `interfaces:better-accessibility` dimuat lewat Skill tool sebelum kode. Saran skill: tidak ada yang bertentangan dengan design.md. Catatan a11y skill yang dipakai:
     glyph disembunyikan dari pembaca layar (`accessible={false}`), label teks membawa arti, status tidak hanya warna (bentuk glyph berbeda; 1.4.1).
   - Belum diverifikasi di perangkat: tampilan glyph di HP Android (Expo Go), skala teks 200% (label panjang "Suara: Belum sesuai" membungkus karena `flexShrink`), kecocokan piksel dengan Figma.
+- FG-4 (14 Nov 2026): dialog dan daftar, hanya komponen (tidak ada layar yang diubah). Mengikuti Figma: "Dialog" (63:584), "Segmented control" (37:399), "Grup · Kata saya" (50:421).
+  - `ConfirmDialog`: kartu di tengah (lebar layar − 24 di tiap sisi), padding 24/20/20, jarak 16, radius `dialog` 24. Batal jadi tombol krem (`primary`) di atas dan tetap penerima fokus awal pembaca layar;
+    aksi `danger` jadi tombol `danger` di bawah dengan ikon + teks. Tanpa `danger`, konfirmasi tetap `secondary` (satu tombol krem saja). Prop baru `confirmIcon` (bawaan `trash-outline`;
+    Figma memakai ikon keluar untuk "Keluar"). Props lain, `testID` (`confirm-dialog`, `confirm-cancel`, `confirm-ok`) dan tombol kembali Android tidak berubah.
+    Ikon peringatan di judul dihapus karena Figma tidak memilikinya (aksi berbahaya tetap bukan warna saja: ikon + teks).
+  - `SegmentedControl` baru: wadah `surface` + `hairline`, padding 4, jarak 2, radius 12; segmen tinggi 40, radius 9, teks 15; terpilih = isi `primary` + teks `onPrimary`. `accessibilityRole` radiogroup/radio dengan state `selected`.
+  - `ListGroup` dan `ListRow` baru: satu kartu `surface` + `hairline` (padding kiri 16, kanan 12, atas-bawah 2, radius 20), baris padding vertikal 12 dan jarak 12, pemisah `hairline` 1 dp menjorok 56 (sejajar teks);
+    `›` hanya bila `onPress`. Judul bagian (label 16 Bold) bersifat opsional. Token baru di theme: `dialog`, `segmented`, `listGroup`. Ekspor di `components/index.ts`.
+  - Selisih Figma vs design.md (Figma diikuti; design.md perlu diperbarui): kartu dialog berisi `surface` + garis `hairline` (design.md §5.12: `surfaceRaised`); teks segmen 15 (design.md §5.7 tidak menyebut ukuran);
+    Figma memakai Inter Semi Bold di segmen, app memakai Inter Bold (hanya 400 dan 700 yang dimuat, design.md §4).
+  - Tes: `formComponents.test.tsx` (urutan dan isi tombol dialog, kasus tanpa `danger`), `SegmentedControl.test.tsx` dan `ListGroup.test.tsx` baru. `npm test` 599 lulus, `npm run typecheck` bersih.
+  - Skill `figma-design-to-code` dan `interfaces:better-ui` dimuat lewat Skill tool. Saran `better-ui` yang ditolak (bertentangan dengan design.md/CLAUDE.md): bayangan berlapis untuk kedalaman (tanpa bayangan, §3 dan §11);
+    skala tekan 0,96 (design.md §5.1: 0,98); animasi masuk/keluar dialog dengan blur dan translate (design.md §8: gerak hanya efek tekan, cincin, transisi bawaan; dialog tetap `animationType="none"`).
+  - Belum diverifikasi di perangkat: tampilan dialog di layar 360 dp dan skala teks 200%, fokus pembaca layar ke Batal, isi `surfaceRaised` baris yang ditekan di dalam padding kartu (Figma tidak menggambar state tekan baris), kepekatan scrim (0,45 dari kode lama; Figma tidak diperiksa).

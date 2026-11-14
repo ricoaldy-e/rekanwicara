@@ -143,4 +143,23 @@ export const statusBadge = {
   paddingVertical: 2,
 } as const;
 
+/** Dialog card metrics from Figma "Dialog" (63:584), design.md §5.12. */
+export const dialog = { paddingTop: 24, paddingHorizontal: 20, paddingBottom: 20, gap: 16, textGap: 6, actionsGap: 10 } as const;
+
+/** Segmented control metrics from Figma 37:399, design.md §5.7. */
+export const segmented = { padding: 4, gap: 2, radius: 12, segmentHeight: 40, segmentRadius: 9, fontSize: fontSize.small, lineHeight: 20 } as const;
+
+/** List group metrics from Figma "Grup · …" (50:421), design.md §5.3. `inset` is the divider's left offset inside the row padding. */
+export const listGroup = {
+  paddingLeft: 16,
+  paddingRight: 12,
+  paddingVertical: 2,
+  rowPaddingVertical: 12,
+  rowGap: 12,
+  inset: 56,
+  textGap: 2,
+  chevron: 20,
+  titleGap: 8,
+} as const;
+
 export const theme = { colors, fontSize, spacing, radius, touchTarget, buttonHeight, statusStyles, overlay, chart, stroke, fontFamily } as const;
