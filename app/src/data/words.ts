@@ -84,6 +84,8 @@ export interface MyWord {
   id: string;
   text: string;
   syllableCount: number;
+  /** The syllable texts in order ("MA", "MA"), for the list line. */
+  syllables: string[];
   complete: boolean;
 }
 
@@ -91,6 +93,7 @@ export const toMyWord = (rows: WordRows): MyWord => ({
   id: rows.word.id,
   text: rows.word.text,
   syllableCount: rows.syllables.length,
+  syllables: [...rows.syllables].sort((a, b) => a.position - b.position).map((s) => s.text),
   complete: isComplete(rows),
 });
 

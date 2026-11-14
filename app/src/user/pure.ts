@@ -38,6 +38,8 @@ export interface Attempt {
   hintId: string;
   scorer: string;
   engineVersion: string;
+  /** Text of the item when it was tried ("ma", "mama"), so the activity list can name a companion word's syllable. Kept on the phone, never sent. */
+  label?: string;
   synced: boolean;
 }
 
@@ -124,6 +126,7 @@ export function parseAttempt(raw: unknown): Attempt | null {
     scorer: a.scorer,
     engineVersion: a.engineVersion,
     synced: a.synced === true,
+    ...(isText(a.label) && a.label.length <= 30 ? { label: a.label } : {}),
   };
 }
 
@@ -203,7 +206,7 @@ const SCORE_OF: Record<ResultStatus, number> = { sesuai: 1, mendekati: 0.5, belu
  * The attempt to store for a v2 result (kontrak §8), or null when nothing may be stored:
  * a retry, or a mock sample (a sample is not an analysis of the user's recording).
  */
-export function attemptFromResult(res: AnalyzeResult, sessionId: string, now = new Date()): Attempt | null {
+export function attemptFromResult(res: AnalyzeResult, sessionId: string, now = new Date(), label?: string): Attempt | null {
   if (res.status !== 'evaluated' || res.sample || !res.result) return null;
   return {
     id: makeUuid(),
@@ -221,6 +224,7 @@ export function attemptFromResult(res: AnalyzeResult, sessionId: string, now = n
     scorer: res.engine,
     engineVersion: res.engine,
     synced: false,
+    ...(label ? { label } : {}),
   };
 }
 

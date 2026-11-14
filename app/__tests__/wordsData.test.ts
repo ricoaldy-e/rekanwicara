@@ -34,6 +34,12 @@ describe('mock word store', () => {
     ]);
   });
 
+  it('lists the syllable texts in order, for the companion list line', async () => {
+    const mine = await listMine(createMockWordStore());
+    expect(mine.find((w) => w.text === 'TOLONG')?.syllables).toEqual(['TO', 'LONG']);
+    expect(mine.find((w) => w.text === 'MINUM')?.syllables).toEqual([]);
+  });
+
   it('creates a word with syllables, one video each, and reports upload progress', async () => {
     const store = createMockWordStore();
     const progress: [number, number][] = [];

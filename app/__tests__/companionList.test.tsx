@@ -36,7 +36,7 @@ it('lists the companion words; a row opens Ubah and the list has no delete butto
   await render(<Companion />);
   await waitFor(() => expect(screen.getByText('tolong')).toBeTruthy());
   expect(screen.queryByRole('button', { name: 'Hapus TOLONG' })).toBeNull();
-  expect(screen.getByText('2 suku kata')).toBeTruthy();
+  expect(screen.getByText('Suku kata: to · long')).toBeTruthy();
   expect(screen.getByText('Tanpa suku kata')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Ubah TOLONG' }));
   expect(mockPush).toHaveBeenCalledWith({

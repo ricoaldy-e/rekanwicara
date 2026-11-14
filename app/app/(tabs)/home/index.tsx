@@ -256,7 +256,7 @@ export default function Home() {
           paddingRight={homeList.groupSidePadding}
         >
           {activity.map((a) => {
-            const d = describeItem(a.level, a.itemId, textById.get(a.itemId));
+            const d = describeItem(a.level, a.itemId, textById.get(a.itemId) ?? a.label);
             const subtitle = `Level ${a.level}`;
             return (
               <ListRow

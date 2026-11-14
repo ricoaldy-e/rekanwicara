@@ -51,6 +51,8 @@ export interface RecentActivity {
   level: number;
   status: ResultStatus;
   at: string;
+  /** Text of the item when it was tried; names a companion word's syllable, which the catalog does not list. */
+  label?: string;
 }
 
 /** Last attempt of each item, newest first (home "Aktivitas terakhir"). */
@@ -63,7 +65,7 @@ export function recentActivity(attempts: readonly Attempt[], limit = 3): RecentA
   return [...latest.values()]
     .sort((x, y) => (x.at < y.at ? 1 : x.at > y.at ? -1 : 0))
     .slice(0, limit)
-    .map((a) => ({ itemId: a.itemId, level: a.level, status: fromStored(a.overall), at: a.at }));
+    .map((a) => ({ itemId: a.itemId, level: a.level, status: fromStored(a.overall), at: a.at, ...(a.label ? { label: a.label } : {}) }));
 }
 
 /**

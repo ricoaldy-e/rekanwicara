@@ -69,7 +69,7 @@ export default function Companion() {
           ) : (
             <ListGroup title="Kata saya">
               {mine.map((w) => {
-                const meta = w.syllableCount > 0 ? `${w.syllableCount} suku kata` : 'Tanpa suku kata';
+                const meta = w.syllableCount > 0 ? `Suku kata: ${w.syllables.map((s) => s.toLowerCase()).join(' · ')}` : 'Tanpa suku kata';
                 return (
                   <ListRow
                     key={w.id}

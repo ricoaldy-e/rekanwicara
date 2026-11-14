@@ -88,7 +88,7 @@ export default function Practice() {
       deleteLocalFile(file);
       setUri(null);
       reset();
-      const attempt = attemptFromResult(res, SESSION_ID); // null for a retry or a sample: not stored (kontrak §8)
+      const attempt = attemptFromResult(res, SESSION_ID, new Date(), item.text); // null for a retry or a sample: not stored (kontrak §8)
       if (attempt) addAttempt(attempt);
       if (res.status === 'evaluated' && res.result) buzzResult(res.result);
       setResult(res);

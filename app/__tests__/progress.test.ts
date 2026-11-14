@@ -1,9 +1,25 @@
 import { bestStatus, describeItem, lastStatus, nextItem, recentActivity, summary } from '../src/data/progress';
-import type { Attempt } from '../src/user/pure';
+import { parseAttempt, type Attempt } from '../src/user/pure';
 
 const a = (itemId: string, overall: Attempt['overall'], at: string): Attempt => ({
   id: `${itemId}-${at}`, itemId, level: 1, sessionId: 's', at, overall, score: 0,
   indicators: { bibir: overall, suara: overall }, hintId: '', scorer: 'rules', engineVersion: 't', synced: false,
+});
+
+describe('attempt label', () => {
+  it('names a companion syllable that the catalog does not list', () => {
+    const attempts: Attempt[] = [{ ...a('custom_syllable:abc', 'hijau', '2026-01-02'), level: 2, label: 'MA' }];
+    const [row] = recentActivity(attempts);
+    expect(row.label).toBe('MA');
+    expect(describeItem(row.level, row.itemId, row.label).title).toBe('Suku kata “ma”');
+  });
+
+  it('is kept when a stored attempt is read back, and dropped when it is not a short text', () => {
+    const stored = { ...a('l2_ma', 'hijau', '2026-01-02'), hintId: 'ok', score: 1, label: 'ma' };
+    expect(parseAttempt(stored)?.label).toBe('ma');
+    expect(parseAttempt({ ...stored, label: 'x'.repeat(31) })?.label).toBeUndefined();
+    expect(parseAttempt({ ...stored, label: 5 })?.label).toBeUndefined();
+  });
 });
 
 it('counts 0 of N without attempts', () => {
