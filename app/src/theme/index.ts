@@ -41,7 +41,8 @@ export const overlay = {
 
 export const chart = { userFill: 'rgba(247,247,244,0.18)' } as const;
 
-export const stroke = { thin: 1.5, thick: 2, focus: 3 } as const;
+/** hairline = card edge and field line (design.md §3.3); focus = focused field line. */
+export const stroke = { hairline: 1, thin: 1.5, thick: 2, focus: 2 } as const;
 
 const SERIF = Platform.select({ ios: 'Georgia', android: 'serif' });
 const PLAYFAIR = 'PlayfairDisplay_700Bold';
@@ -116,6 +117,9 @@ export const touchTarget = 48;
 
 /** Height of the main button (design.md §5.1). */
 export const buttonHeight = 52;
+
+/** Height of a text field (design.md §5.5). */
+export const fieldHeight = 56;
 
 /** Size of one PIN pad key (flow §7.7.2: at least 64 dp). */
 export const pinKey = 64;

@@ -3,7 +3,7 @@ import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-na
 
 import { COUNTER_FROM } from '../../forms/limits';
 import { fill, UI } from '../../forms/messages';
-import { colors, fontSize, radius, spacing, stroke, touchTarget } from '../../theme';
+import { colors, fieldHeight, fontSize, radius, spacing, stroke, textFont, touchTarget } from '../../theme';
 import { FieldError } from './FieldError';
 
 export interface TextFieldProps extends Omit<TextInputProps, 'style' | 'accessibilityLabel' | 'accessibilityHint'> {
@@ -27,13 +27,13 @@ export const TextField = forwardRef<TextFieldRef, TextFieldProps>(function TextF
   const [focused, setFocused] = useState(false);
   const length = [...(value ?? '')].length;
   const showCounter = maxLength !== undefined && length >= maxLength * COUNTER_FROM;
-  // The border is 2 dp (3 dp when focused); the padding compensates so the field does not jump.
-  const width = focused ? stroke.focus : stroke.thick;
+  // The line is 1 dp (2 dp when focused); the padding compensates so the field does not jump.
+  const width = focused ? stroke.focus : stroke.hairline;
   const borderColor = focused ? colors.focus : error ? colors.danger : colors.border;
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.label}>
+      <Text style={[styles.label, textFont(true)]}>
         {label}
         {optional ? ` ${UI.optional}` : ''}
       </Text>
@@ -56,8 +56,9 @@ export const TextField = forwardRef<TextFieldRef, TextFieldProps>(function TextF
         }}
         style={[
           styles.input,
+          textFont(),
           multiline && styles.multiline,
-          { borderWidth: width, borderColor, padding: spacing.md - (width - stroke.thick) },
+          { borderWidth: width, borderColor, padding: spacing.md - (width - stroke.hairline) },
         ]}
         {...input}
       />
@@ -73,15 +74,15 @@ export const TextField = forwardRef<TextFieldRef, TextFieldProps>(function TextF
 
 const styles = StyleSheet.create({
   wrap: { gap: spacing.xs },
-  label: { fontSize: fontSize.label, fontWeight: '700', color: colors.text },
+  label: { fontSize: fontSize.small, color: colors.text },
   input: {
-    minHeight: touchTarget,
+    minHeight: fieldHeight,
     borderRadius: radius.tile,
     backgroundColor: colors.surface,
     fontSize: fontSize.body,
     color: colors.text,
   },
-  multiline: { minHeight: touchTarget * 2, textAlignVertical: 'top' },
+  multiline: { minHeight: fieldHeight + touchTarget, textAlignVertical: 'top' },
   hint: { fontSize: fontSize.small, color: colors.textMuted },
   counter: { fontSize: fontSize.small, color: colors.textMuted, alignSelf: 'flex-end' },
 });

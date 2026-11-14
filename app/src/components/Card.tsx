@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useFocusRing } from '../a11y/useFocusRing';
-import { colors, radius, spacing, touchTarget } from '../theme';
+import { colors, radius, spacing, stroke, touchTarget } from '../theme';
 
 export interface CardProps {
   children: ReactNode;
@@ -46,6 +46,8 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.card,
+    borderWidth: stroke.hairline,
+    borderColor: colors.hairline,
     padding: spacing.md,
   },
   pressable: { minHeight: touchTarget, justifyContent: 'center' },

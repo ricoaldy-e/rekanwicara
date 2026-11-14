@@ -1,3 +1,4 @@
+export { BackButton } from './BackButton';
 export { BigButton } from './BigButton';
 export { BottomBar } from './BottomBar';
 export { Card } from './Card';

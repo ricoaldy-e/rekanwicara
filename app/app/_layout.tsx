@@ -41,11 +41,11 @@ export default function RootLayout() {
           <SignedOutRedirect />
           <Stack screenOptions={darkStackOptions}>
             <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="auth/sign-in" options={{ title: 'Masuk', headerBackVisible: false }} />
+            <Stack.Screen name="auth/sign-in" options={{ title: 'Masuk', headerBackVisible: false, headerLeft: () => null }} />
             <Stack.Screen name="auth/sign-up" options={{ title: 'Daftar' }} />
-            <Stack.Screen name="auth/check-email" options={{ title: 'Cek email', headerBackVisible: false }} />
+            <Stack.Screen name="auth/check-email" options={{ title: 'Cek email', headerBackVisible: false, headerLeft: () => null }} />
             <Stack.Screen name="auth/forgot-pin" options={{ title: 'Lupa PIN' }} />
-            <Stack.Screen name="auth/create-pin" options={{ title: 'Buat PIN', headerBackVisible: false }} />
+            <Stack.Screen name="auth/create-pin" options={{ title: 'Buat PIN', headerBackVisible: false, headerLeft: () => null }} />
             <Stack.Screen name="onboarding" options={{ title: 'Selamat datang' }} />
             <Stack.Screen name="calibration" options={{ title: 'Kalibrasi' }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

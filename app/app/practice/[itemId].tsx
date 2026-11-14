@@ -2,12 +2,12 @@
 // @react-navigation/native would not find expo-router's navigation context ("Couldn't find a navigation object").
 import { Stack, useLocalSearchParams, useNavigation, usePreventRemove, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, PixelRatio, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Alert, PixelRatio, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { buzzResult } from '../../src/a11y/haptics';
 import { ApiError } from '../../src/api/apiError';
 import { errorMessage } from '../../src/api/errors';
-import { BigButton, Body, Card, InfoNote, Screen, StepHeader } from '../../src/components';
+import { BackButton, BigButton, Body, Card, InfoNote, Screen, StepHeader } from '../../src/components';
 import { UploadStatus } from '../../src/components/UploadStatus';
 import { analyze, canAnalyze } from '../../src/data/analyze';
 import type { AnalyzeResult } from '../../src/data/types';
@@ -20,7 +20,7 @@ import { useUpload } from '../../src/recording/useUpload';
 import { ResultView } from '../../src/results/ResultView';
 import { useSettings } from '../../src/state/settings';
 import { SESSION_ID, useUser } from '../../src/state/user';
-import { colors, displayFont, fontSize, spacing, touchTarget } from '../../src/theme';
+import { colors, displayFont, fontSize, spacing } from '../../src/theme';
 import { attemptFromResult } from '../../src/user/pure';
 
 /** SPEC §2 cycle: Lihat → Tiru → Bandingkan → Ulangi. "Ulangi" is the button that loops back to Tiru, so 3 visible steps. */
@@ -98,9 +98,7 @@ export default function Practice() {
   );
 
   const exitButton = () => (
-    <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Keluar latihan" hitSlop={spacing.sm} style={styles.exit}>
-      <Text maxFontSizeMultiplier={2} style={styles.exitText}>Keluar latihan</Text>
-    </Pressable>
+    <BackButton label="Keluar latihan" onPress={() => router.back()} />
   );
 
   if (!item) {
@@ -225,6 +223,4 @@ const styles = StyleSheet.create({
   pairItem: { flex: 1 },
   target: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.md },
   targetWord: { fontSize: fontSize.display, color: colors.text },
-  exit: { minHeight: touchTarget, justifyContent: 'center', paddingRight: spacing.sm },
-  exitText: { fontSize: fontSize.label, fontWeight: '700', color: colors.text },
 });

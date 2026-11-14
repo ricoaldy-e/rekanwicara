@@ -23,4 +23,13 @@ describe('BigButton', () => {
     expect(StyleSheet.flatten(b.props.style).backgroundColor).toBe(colors.surfaceRaised);
     expect(StyleSheet.flatten(b.props.style).opacity).toBeUndefined();
   });
+
+  it('danger is filled with the danger color and dark text, no line when disabled', async () => {
+    await render(<BigButton label="Hapus kata" variant="danger" onPress={() => undefined} testID="d" />);
+    expect(StyleSheet.flatten(screen.getByTestId('d').props.style).backgroundColor).toBe(colors.danger);
+    await render(<BigButton label="Hapus kata" variant="danger" disabled onPress={() => undefined} testID="d2" />);
+    const off = StyleSheet.flatten(screen.getByTestId('d2').props.style);
+    expect(off.backgroundColor).toBe(colors.surfaceRaised);
+    expect(off.borderWidth).toBe(0);
+  });
 });

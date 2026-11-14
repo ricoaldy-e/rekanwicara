@@ -4,9 +4,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useFocusRing } from '../a11y/useFocusRing';
 import { useReduceMotion } from '../a11y/useReduceMotion';
-import { buttonHeight, colors, fontSize, radius, spacing, stroke } from '../theme';
+import { buttonHeight, colors, fontSize, radius, spacing, stroke, textFont, touchTarget } from '../theme';
 
-type Variant = 'primary' | 'secondary';
+type Variant = 'primary' | 'secondary' | 'danger';
 
 export interface BigButtonProps {
   label: string;
@@ -32,7 +32,7 @@ export function BigButton({
 }: BigButtonProps) {
   const reduceMotion = useReduceMotion();
   const { focusProps, focusStyle } = useFocusRing();
-  const fg = disabled ? colors.textMuted : variant === 'primary' ? colors.onPrimary : colors.text;
+  const fg = disabled ? colors.textMuted : variant === 'secondary' ? colors.text : colors.onPrimary;
   return (
     <Pressable
       testID={testID}
@@ -45,16 +45,16 @@ export function BigButton({
       {...focusProps}
       style={({ pressed }) => [
         styles.base,
-        variant === 'primary' ? styles.primary : styles.secondary,
-        pressed && !disabled && (variant === 'primary' ? styles.primaryPressed : styles.secondaryPressed),
+        styles[variant],
+        pressed && !disabled && pressedStyle[variant],
         pressed && !disabled && !reduceMotion && styles.scaled,
         disabled && styles.disabled,
         focusStyle,
       ]}
     >
       <View style={styles.row}>
-        {icon ? <Ionicons name={icon} size={22} color={fg} accessible={false} /> : null}
-        <Text maxFontSizeMultiplier={2} style={[styles.label, { color: fg }]}>{label}</Text>
+        {icon ? <Ionicons name={icon} size={24} color={fg} accessible={false} /> : null}
+        <Text maxFontSizeMultiplier={2} style={[styles.label, textFont(true), { color: fg }]}>{label}</Text>
       </View>
     </Pressable>
   );
@@ -64,19 +64,24 @@ const styles = StyleSheet.create({
   base: {
     minHeight: buttonHeight,
     borderRadius: radius.pill,
-    borderWidth: stroke.thick,
-    borderColor: 'transparent',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     justifyContent: 'center',
     alignItems: 'center',
   },
   primary: { backgroundColor: colors.primary },
-  primaryPressed: { backgroundColor: colors.primaryPressed },
-  secondary: { backgroundColor: 'transparent', borderColor: colors.border },
-  secondaryPressed: { backgroundColor: colors.surfaceRaised },
-  disabled: { backgroundColor: colors.surfaceRaised, borderColor: 'transparent' },
+  danger: { backgroundColor: colors.danger },
+  // Secondary is 48 dp (design.md §5.1); the 2 dp line is its only edge.
+  secondary: { minHeight: touchTarget, backgroundColor: 'transparent', borderWidth: stroke.thick, borderColor: colors.border },
+  // Disabled: fill only, no line, no opacity (design.md §5.1).
+  disabled: { backgroundColor: colors.surfaceRaised, borderWidth: 0 },
   scaled: { transform: [{ scale: 0.98 }] },
-  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  label: { flexShrink: 1, fontSize: fontSize.label, fontWeight: '700', textAlign: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm + spacing.xs / 2 },
+  label: { flexShrink: 1, fontSize: fontSize.label, textAlign: 'center' },
+});
+
+const pressedStyle = StyleSheet.create({
+  primary: { backgroundColor: colors.primaryPressed },
+  danger: { backgroundColor: colors.dangerPressed },
+  secondary: { backgroundColor: colors.surfaceRaised },
 });
