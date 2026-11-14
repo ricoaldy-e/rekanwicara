@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 
 import Practice from '../app/practice/[itemId]';
 import type { AnalyzeResult, PracticeItem } from '../src/data/types';
@@ -107,7 +107,7 @@ it('guards leaving only while recording or sending', async () => {
   expect(mockPreventRemove).toHaveBeenLastCalledWith(false, expect.any(Function));
   await fireEvent.press(screen.getByRole('button', { name: 'Mulai rekam' }));
   expect(mockPreventRemove).toHaveBeenLastCalledWith(true, expect.any(Function));
-  expect(screen.queryByText('Keluar latihan')).toBeNull(); // header is mocked; the label lives in headerLeft
+  expect(screen.getByRole('button', { name: 'Keluar latihan' })).toBeTruthy(); // the back capsule lives in the content (FG-7)
 });
 
 it('hides recording for a custom word the v1 server cannot score', async () => {
@@ -121,4 +121,35 @@ it('says when the material does not exist', async () => {
   mockItem = null;
   await render(<Practice />);
   expect(screen.getByTestId('practice-not-found')).toHaveAccessibleName('Materi tidak ditemukan.');
+});
+
+it('shows "Langkah n dari 4" and walks Lihat → Tiru → Menganalisis → Hasil', async () => {
+  let finish!: (r: AnalyzeResult) => void;
+  mockAnalyze.mockReturnValue(new Promise<AnalyzeResult>((resolve) => { finish = resolve; }));
+  await render(<Practice />);
+  expect(screen.getByText('Langkah 1 dari 4')).toBeTruthy();
+  expect(screen.getByRole('header', { name: 'Ucapkan “a”' })).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Mulai rekam' }));
+  expect(screen.getByText('Langkah 2 dari 4')).toBeTruthy();
+  await fireEvent.press(screen.getByText('synthetic-record'));
+  expect(screen.getByText('Langkah 3 dari 4')).toBeTruthy();
+  expect(screen.getByText('Menganalisis…')).toBeTruthy();
+  await act(async () => finish(result({})));
+  expect(await screen.findByTestId('result-ok')).toBeTruthy();
+  expect(screen.getByText('Langkah 4 dari 4')).toBeTruthy();
+});
+
+it('Batalkan returns to recording, deletes the clip and ignores a result that arrives late', async () => {
+  let finish!: (r: AnalyzeResult) => void;
+  mockAnalyze.mockReturnValue(new Promise<AnalyzeResult>((resolve) => { finish = resolve; }));
+  await render(<Practice />);
+  await recordAndSend();
+  await fireEvent.press(screen.getByRole('button', { name: 'Batalkan' }));
+  expect(screen.getByText('Langkah 2 dari 4')).toBeTruthy();
+  expect(mockDelete).toHaveBeenCalledWith('file:///clip.mp4');
+
+  await act(async () => finish(result({})));
+  expect(screen.queryByTestId('result-ok')).toBeNull();
+  expect(mockAddAttempt).not.toHaveBeenCalled();
+  expect(screen.getByText('Langkah 2 dari 4')).toBeTruthy();
 });

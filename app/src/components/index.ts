@@ -1,3 +1,4 @@
+export { AnalyzingView } from './AnalyzingView';
 export { BackButton } from './BackButton';
 export { BigButton } from './BigButton';
 export { BottomBar } from './BottomBar';
@@ -11,6 +12,7 @@ export { ListGroup, ListRow } from './ListGroup';
 export { ProgressRing } from './ProgressRing';
 export { Screen } from './Screen';
 export { SegmentedControl } from './SegmentedControl';
+export { SessionHeader } from './SessionHeader';
 export { SourceChip } from './SourceChip';
 export { StatTile } from './StatTile';
 export { StageBadge, stageLabel } from './StageBadge';

@@ -176,4 +176,13 @@ export const statTile = { padding: 12, gap: 12, ring: 40, ringWidth: 4, icon: 20
 /** Home header avatar and list tiles from Figma 57:385 / 64:585: letter tile, "Langkah awal" marker and row padding. */
 export const homeList = { avatar: 44, letterTile: 44, marker: 32, markerInset: 44, stepRowPadding: 14, activityGroupPadding: 4, groupSidePadding: 16, emptyGap: 14, checkIcon: 18, heroIllustration: 112 } as const;
 
+/** Practice session from Figma "Latihan · …" (46:135, 46:177, 46:217, 46:253), design.md §5.14, §6.4. */
+export const session = {
+  stepBar: { height: 6, gap: 6 },
+  media: 200,
+  illustration: 180,
+  recordPanel: { ovalWidth: 150, ovalHeight: 200, ovalStroke: 3, ovalDash: 10, ovalGap: 8, countdown: 140, badgeInset: 10, badgeDot: 10, barInset: 14, barHeight: 6 },
+  stage: { icon: 24, gap: 14, ring: 3 },
+} as const;
+
 export const theme = { colors, fontSize, spacing, radius, touchTarget, buttonHeight, statusStyles, overlay, chart, stroke, fontFamily } as const;

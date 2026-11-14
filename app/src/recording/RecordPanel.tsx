@@ -1,12 +1,14 @@
 import { CameraView } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import Svg, { Ellipse } from 'react-native-svg';
 
 import { buzz, buzzDone } from '../a11y/haptics';
 import { BigButton } from '../components/BigButton';
 import { ProgressBar } from '../components/ProgressBar';
-import { colors, fontSize, overlay, radius, spacing, stroke } from '../theme';
+import { colors, fontSize, lineHeight, overlay, radius, session, spacing, stroke, textFont } from '../theme';
 import { deleteLocalFile } from './localFile';
 import { PermissionGate } from './PermissionGate';
 import {
@@ -27,6 +29,8 @@ export interface RecordPanelProps {
   /** Text under the camera; defaults to the face-position hint. */
   hint?: string;
   permissionPurpose?: string;
+  /** Shown under the record button only while idle, e.g. "Lihat contoh lagi". */
+  footer?: ReactNode;
 }
 
 const PROGRESS_INTERVAL_MS = 100;
@@ -45,7 +49,8 @@ function RecorderCamera({
   onRecorded,
   disabled = false,
   recordLabel = 'Rekam',
-  hint = 'Letakkan wajah di dalam oval, lalu tekan Rekam.',
+  hint = 'Posisikan wajah di dalam oval',
+  footer,
 }: RecordPanelProps) {
   const camera = useRef<CameraView>(null);
   const [ready, setReady] = useState(false);
@@ -141,6 +146,10 @@ function RecorderCamera({
   const busy = state.phase === 'countdown' || state.phase === 'recording' || state.phase === 'finishing';
   const seconds = (durationMs / 1000).toLocaleString('id-ID', { maximumFractionDigits: 1 });
 
+  const recording = state.phase === 'recording' || state.phase === 'finishing';
+  const remaining = Math.max(Math.ceil((durationMs - state.elapsedMs) / 1000), 0);
+  const message = mountError ?? state.error;
+
   return (
     <View style={styles.wrap}>
       <View style={styles.frame}>
@@ -153,92 +162,106 @@ function RecorderCamera({
           onCameraReady={() => setReady(true)}
           onMountError={() => setMountError('Kamera tidak dapat dibuka. Tutup aplikasi lain yang memakai kamera.')}
         />
-        {/* Oval face guide: white ring with a dark outline so it shows on any background. */}
-        <View pointerEvents="none" style={styles.ovalOuter}>
-          <View style={[styles.ovalInner, state.phase === 'recording' && styles.ovalRecording]} />
+        {/* Oval face guide (Figma 46:202): dashed cream while waiting, solid danger while recording. */}
+        <View pointerEvents="none" style={styles.ovalBox}>
+          <Svg width={OVAL_W} height={OVAL_H} accessible={false} style={StyleSheet.absoluteFill}>
+            <Ellipse
+              cx={OVAL_W / 2}
+              cy={OVAL_H / 2}
+              rx={(OVAL_W - OVAL.ovalStroke) / 2}
+              ry={(OVAL_H - OVAL.ovalStroke) / 2}
+              fill="none"
+              stroke={recording ? colors.danger : overlay.text}
+              strokeWidth={OVAL.ovalStroke}
+              strokeDasharray={recording ? undefined : `${OVAL.ovalDash} ${OVAL.ovalGap}`}
+            />
+          </Svg>
+          {state.phase === 'countdown' ? (
+            <View accessible accessibilityLiveRegion="assertive" accessibilityLabel={`Mulai dalam ${state.count}`} style={styles.count}>
+              <Text accessible={false} style={styles.countText}>{state.count}</Text>
+            </View>
+          ) : null}
+          {recording ? (
+            <View accessible={false} importantForAccessibility="no-hide-descendants" style={styles.count}>
+              <Text style={styles.countText}>{remaining}</Text>
+            </View>
+          ) : null}
         </View>
 
-        {state.phase === 'countdown' ? (
-          <View pointerEvents="none" style={styles.countOverlay} accessible accessibilityLiveRegion="assertive" accessibilityLabel={`Mulai dalam ${state.count}`}>
-            <Text style={styles.countText}>{state.count}</Text>
-            <Text style={styles.countHint}>Bersiap…</Text>
+        {recording ? (
+          <View pointerEvents="none" style={styles.badge} accessible accessibilityLiveRegion="assertive" accessibilityLabel="Sedang merekam">
+            <View style={styles.badgeDot} />
+            <Text accessible={false} maxFontSizeMultiplier={2} style={[styles.badgeText, textFont(true)]}>MEREKAM</Text>
           </View>
         ) : null}
 
-        {state.phase === 'recording' || state.phase === 'finishing' ? (
-          <View pointerEvents="none" style={styles.recBadge} accessible accessibilityLiveRegion="assertive" accessibilityLabel="Sedang merekam">
-            <View style={styles.recDot} />
-            <Text style={styles.recText}>MEREKAM</Text>
+        {recording ? (
+          <View style={styles.bar}>
+            <ProgressBar value={state.elapsedMs / durationMs} height={OVAL.barHeight} accessibilityLabel="Waktu rekam" />
           </View>
+        ) : message === null && !busy ? (
+          <Text maxFontSizeMultiplier={2} style={[styles.hint, textFont()]}>{hint}</Text>
         ) : null}
       </View>
-
-      {state.phase === 'recording' || state.phase === 'finishing' ? (
-        <ProgressBar value={state.elapsedMs / durationMs} color={overlay.record} height={18} accessibilityLabel="Waktu rekam" />
-      ) : null}
-
-      <Text style={styles.hint}>{mountError ?? state.error ?? hint}</Text>
 
       {!disabled ? (
         <BigButton
           testID="record-button"
           label={busy ? 'Merekam…' : !ready ? 'Menyiapkan kamera…' : `${recordLabel} (${seconds} detik)`}
-          icon="radio-button-on"
+          icon={busy ? undefined : 'videocam-outline'}
           disabled={busy || !ready || mountError !== null}
           onPress={() => dispatch({ type: 'start' })}
         />
       ) : null}
+
+      {message !== null ? (
+        <Text accessibilityRole="alert" maxFontSizeMultiplier={2} style={[styles.note, textFont()]}>{message}</Text>
+      ) : busy ? (
+        <Text maxFontSizeMultiplier={2} style={[styles.note, textFont()]}>Tahan bunyi sampai hitungan selesai.</Text>
+      ) : null}
+
+      {!busy ? footer : null}
     </View>
   );
 }
 
+const OVAL = session.recordPanel;
+const OVAL_W = OVAL.ovalWidth;
+const OVAL_H = OVAL.ovalHeight;
+
 const styles = StyleSheet.create({
-  wrap: { gap: spacing.sm },
+  wrap: { gap: spacing.sm + spacing.xs },
   frame: {
     width: '100%',
     aspectRatio: 3 / 4,
     borderRadius: radius.card,
     overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: overlay.background,
     borderWidth: stroke.thick,
     borderColor: colors.border,
   },
-  ovalOuter: {
+  ovalBox: { width: OVAL_W, height: OVAL_H, alignItems: 'center', justifyContent: 'center' },
+  count: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
+  countText: { fontSize: OVAL.countdown, lineHeight: OVAL.countdown, includeFontPadding: false, fontWeight: '700', color: overlay.text, textAlign: 'center' },
+  badge: {
     position: 'absolute',
-    top: '10%',
-    left: '19%',
-    width: '62%',
-    height: '74%',
-    borderRadius: 1000,
-    borderWidth: 2,
-    borderColor: overlay.background,
-    padding: 0,
-  },
-  ovalInner: { flex: 1, borderRadius: 1000, borderWidth: 5, borderColor: overlay.text },
-  ovalRecording: { borderColor: overlay.record },
-  countOverlay: {
-    ...StyleSheet.absoluteFill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: overlay.scrim,
-  },
-  countText: { fontSize: 140, fontWeight: '700', color: overlay.text, lineHeight: 160 },
-  countHint: { fontSize: fontSize.large, fontWeight: '700', color: overlay.text },
-  recBadge: {
-    position: 'absolute',
-    top: spacing.md,
-    alignSelf: 'center',
+    top: OVAL.badgeInset,
+    left: OVAL.badgeInset,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: overlay.record,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm + spacing.xs,
     paddingVertical: spacing.sm,
     borderRadius: radius.tile,
-    borderWidth: 2,
-    borderColor: overlay.text,
+    borderWidth: stroke.hairline,
+    borderColor: colors.hairline,
+    backgroundColor: colors.surface,
   },
-  recDot: { width: 18, height: 18, borderRadius: 9, backgroundColor: overlay.text },
-  recText: { fontSize: fontSize.large, fontWeight: '700', color: overlay.text, letterSpacing: 1 },
-  hint: { fontSize: fontSize.body, color: colors.text, textAlign: 'center' },
+  badgeDot: { width: OVAL.badgeDot, height: OVAL.badgeDot, borderRadius: OVAL.badgeDot / 2, backgroundColor: colors.text },
+  badgeText: { fontSize: fontSize.small, lineHeight: 20, color: colors.text },
+  bar: { position: 'absolute', left: OVAL.barInset, right: OVAL.barInset, bottom: OVAL.barInset },
+  hint: { position: 'absolute', left: spacing.sm, right: spacing.sm, bottom: OVAL.barInset, fontSize: fontSize.small, lineHeight: lineHeight.small, color: overlay.text, textAlign: 'center' },
+  note: { fontSize: fontSize.small, lineHeight: lineHeight.small, color: colors.textMuted, textAlign: 'center' },
 });

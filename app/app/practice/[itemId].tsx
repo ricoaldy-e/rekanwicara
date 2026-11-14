@@ -2,12 +2,12 @@
 // @react-navigation/native would not find expo-router's navigation context ("Couldn't find a navigation object").
 import { Stack, useLocalSearchParams, useNavigation, usePreventRemove, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, PixelRatio, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Alert, PixelRatio, StyleSheet, View, useWindowDimensions } from 'react-native';
 
 import { buzzResult } from '../../src/a11y/haptics';
 import { ApiError } from '../../src/api/apiError';
 import { errorMessage } from '../../src/api/errors';
-import { BackButton, BigButton, Body, Card, InfoNote, Screen, StepHeader } from '../../src/components';
+import { AnalyzingView, BackButton, BigButton, InfoNote, Screen, SessionHeader } from '../../src/components';
 import { UploadStatus } from '../../src/components/UploadStatus';
 import { analyze, canAnalyze } from '../../src/data/analyze';
 import type { AnalyzeResult } from '../../src/data/types';
@@ -20,17 +20,13 @@ import { useUpload } from '../../src/recording/useUpload';
 import { ResultView } from '../../src/results/ResultView';
 import { useSettings } from '../../src/state/settings';
 import { SESSION_ID, useUser } from '../../src/state/user';
-import { colors, displayFont, fontSize, spacing } from '../../src/theme';
+import { colors, layout, spacing } from '../../src/theme';
 import { attemptFromResult } from '../../src/user/pure';
 
-/** SPEC §2 cycle: Lihat → Tiru → Bandingkan → Ulangi. "Ulangi" is the button that loops back to Tiru, so 3 visible steps. */
+/** SPEC §2 cycle: Lihat → Tiru → Menganalisis → Hasil (design.md §6.4: "Langkah n dari 4"). "Ulangi" loops back to Tiru. */
 type Stage = 'look' | 'record' | 'send' | 'result';
-const STAGE_STEP: Record<Stage, { step: number; title: string }> = {
-  look: { step: 1, title: 'Lihat' },
-  record: { step: 2, title: 'Tiru' },
-  send: { step: 2, title: 'Tiru' },
-  result: { step: 3, title: 'Bandingkan' },
-};
+const STAGE_STEP: Record<Stage, number> = { look: 1, record: 2, send: 3, result: 4 };
+const TOTAL_STEPS = 4;
 const HOLD_DURATION_MS = 4000; // SPEC §8.2: the l0_* sounds (held "a", soft to loud) need longer
 
 /** kontrak §9: a scorer that is down or too slow is not a wrong result. */
@@ -77,14 +73,18 @@ export default function Practice() {
     reset();
   }, [uri, reset]);
 
+  // Bumped by "Batalkan" so a result that arrives after cancelling is ignored.
+  const sendId = useRef(0);
+
   const send = useCallback(
     async (file: string) => {
       if (!item) return;
+      const id = ++sendId.current;
       setStage('send');
       const res = await run((opts) =>
         analyze({ file: videoUpload(file, 'clip.mp4'), item, sessionId: SESSION_ID, userId: profile.userId }, { ...opts, api }),
       );
-      if (!res) return; // network error: UploadStatus offers "Coba kirim lagi", the file stays
+      if (!res || id !== sendId.current) return; // network error: UploadStatus offers "Coba kirim lagi", the file stays; or cancelled
       deleteLocalFile(file);
       setUri(null);
       reset();
@@ -97,14 +97,15 @@ export default function Practice() {
     [api, item, profile.userId, run, reset, addAttempt],
   );
 
-  const exitButton = () => (
-    <BackButton label="Keluar latihan" onPress={() => router.back()} />
-  );
+  const exit = () => router.back();
 
   if (!item) {
     return (
-      <Screen>
-        <Stack.Screen options={{ headerLeft: exitButton, headerBackVisible: false }} />
+      <Screen edges={TOP_EDGES} contentStyle={styles.content}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={styles.backRow}>
+          <BackButton label="Keluar latihan" onPress={exit} testID="session-back" />
+        </View>
         {loading ? (
           <ActivityIndicator size="large" color={colors.text} accessibilityLabel="Memuat materi" />
         ) : error ? (
@@ -115,7 +116,7 @@ export default function Practice() {
         ) : (
           <>
             <InfoNote tone="warning" text="Materi tidak ditemukan." testID="practice-not-found" />
-            <BigButton label="Kembali" variant="secondary" onPress={() => router.back()} />
+            <BigButton label="Kembali" variant="secondary" onPress={exit} />
           </>
         )}
       </Screen>
@@ -123,55 +124,55 @@ export default function Practice() {
   }
 
   const scorable = canAnalyze(item);
-  const { step, title } = STAGE_STEP[stage];
+  const footer =
+    stage === 'look' && scorable ? (
+      <View style={styles.footer}>
+        <BigButton label="Mulai rekam" icon="videocam-outline" onPress={() => setStage('record')} />
+      </View>
+    ) : stage === 'send' && upload.status !== 'error' ? (
+      <View style={styles.footer}>
+        <BigButton
+          label="Batalkan"
+          variant="secondary"
+          onPress={() => {
+            sendId.current += 1;
+            discard();
+            setStage('record');
+          }}
+        />
+      </View>
+    ) : undefined;
+
   return (
-    <Screen>
-      <Stack.Screen options={{ title: `Ucapkan “${item.text}”`, headerLeft: exitButton, headerBackVisible: false }} />
-      <StepHeader step={step} total={3} title={title} />
+    <Screen edges={TOP_EDGES} contentStyle={styles.content} footer={footer}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <SessionHeader step={STAGE_STEP[stage]} total={TOTAL_STEPS} title={`Ucapkan “${item.text.toLowerCase()}”`} onBack={exit} />
 
       {stage === 'look' ? (
         <>
-          <Card>
-            <ModelVideo item={item} />
-          </Card>
+          <ModelVideo item={item} />
           {!profile.calibrated ? (
             <InfoNote text="Hasil lebih tepat setelah kalibrasi. Kalibrasi bisa dilakukan dari beranda." />
           ) : null}
-          {scorable ? (
-            <View style={styles.actions}>
-              <BigButton label="Mulai rekam" icon="videocam" onPress={() => setStage('record')} />
-            </View>
-          ) : (
-            <InfoNote text="Penilaian kata ini belum tersedia di server demo." testID="practice-not-supported" />
-          )}
+          {!scorable ? <InfoNote text="Penilaian kata ini belum tersedia di server demo." testID="practice-not-supported" /> : null}
         </>
       ) : null}
 
       {stage === 'record' ? (
-        <>
-          <View style={styles.target}>
-            <Text accessibilityLabel={`Ucapkan ${item.text}`} maxFontSizeMultiplier={1.5} style={[styles.targetWord, displayFont()]}>
-              {item.text}
-            </Text>
-          </View>
-          <RecordPanel
-            durationMs={item.itemId.startsWith('l0_') ? HOLD_DURATION_MS : DEFAULT_DURATION_MS}
-            onRecorded={(file) => {
-              setUri(file);
-              send(file);
-            }}
-            hint="Wajah di dalam oval. Mulai bicara setelah tulisan MEREKAM muncul."
-          />
-          <View style={styles.actions}>
-            <BigButton label="Lihat contoh lagi" variant="secondary" onPress={() => setStage('look')} />
-          </View>
-        </>
+        <RecordPanel
+          durationMs={item.itemId.startsWith('l0_') ? HOLD_DURATION_MS : DEFAULT_DURATION_MS}
+          onRecorded={(file) => {
+            setUri(file);
+            send(file);
+          }}
+          footer={<BigButton label="Lihat contoh lagi" variant="secondary" onPress={() => setStage('look')} />}
+        />
       ) : null}
 
       {stage === 'send' ? (
-        <>
-          <UploadStatus state={upload} onRetry={() => uri && send(uri)} describeError={describeAnalyzeError} />
-          {upload.status === 'error' ? (
+        upload.status === 'error' ? (
+          <>
+            <UploadStatus state={upload} onRetry={() => uri && send(uri)} describeError={describeAnalyzeError} />
             <View style={styles.actions}>
               <BigButton
                 label="Rekam ulang"
@@ -182,10 +183,13 @@ export default function Practice() {
                 }}
               />
             </View>
-          ) : (
-            <Body muted>Menilai rekamanmu…</Body>
-          )}
-        </>
+          </>
+        ) : (
+          <AnalyzingView
+            fraction={upload.status === 'uploading' ? upload.fraction : upload.status === 'done' ? 1 : null}
+            attempt={upload.status === 'uploading' ? upload.attempt : 1}
+          />
+        )
       ) : null}
 
       {stage === 'result' && result ? (
@@ -205,7 +209,7 @@ export default function Practice() {
                 <BigButton label="Lihat contoh lagi" variant="secondary" onPress={() => setStage('look')} />
               </View>
               <View style={sideBySide ? styles.pairItem : undefined}>
-                <BigButton label="Selesai" variant="secondary" onPress={() => router.back()} />
+                <BigButton label="Selesai" variant="secondary" onPress={exit} />
               </View>
             </View>
           </View>
@@ -215,12 +219,16 @@ export default function Practice() {
   );
 }
 
+// The stack header is hidden (design.md §6.4: the back capsule lives in the content), so the top inset is ours.
+const TOP_EDGES = ['top', 'bottom', 'left', 'right'] as const;
+
 const styles = StyleSheet.create({
+  content: { paddingHorizontal: layout.gutter, paddingTop: spacing.sm, gap: spacing.md },
+  backRow: { alignItems: 'flex-start' },
+  footer: { paddingHorizontal: layout.gutter, paddingBottom: spacing.lg, paddingTop: spacing.sm },
   // Screen already adds spacing.md between children; the extra spacing.sm makes 24 (spacing.lg) before actions.
   actions: { marginTop: spacing.sm, gap: spacing.md },
   stack: { gap: spacing.md },
   pair: { flexDirection: 'row', gap: spacing.md },
   pairItem: { flex: 1 },
-  target: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.md },
-  targetWord: { fontSize: fontSize.display, color: colors.text },
 });

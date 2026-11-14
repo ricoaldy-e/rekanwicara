@@ -1,14 +1,14 @@
 import { useEvent } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-import { BigButton, Body, Card, InfoNote, LipIllustration } from '../components';
+import { BigButton, Body, InfoNote, LipIllustration } from '../components';
 import { ANALYZE_API, type AnalyzeApi } from '../config';
 import type { PracticeItem } from '../data/types';
 import { targetShape } from '../results/lipShapes';
 import { useSettings } from '../state/settings';
-import { colors, fontSize, overlay, radius, spacing } from '../theme';
+import { colors, displayFont, fontSize, lineHeight, radius, session, spacing, stroke, textFont } from '../theme';
 
 /**
  * "Lihat" (LAT-4, LAT-7): the model video with the instruction text always under it.
@@ -37,7 +37,9 @@ export function ModelVideo({ item, source = ANALYZE_API }: { item: PracticeItem;
   if (state === 'loading') return <><Loading />{instruction}</>;
   if (state === 'available') return (
     <>
-      <Player url={`${api.baseUrl}/v1/model-video/${encodeURIComponent(item.itemId)}`} text={item.text} onError={() => setState('error')} />
+      <VideoCard>
+        <Player url={`${api.baseUrl}/v1/model-video/${encodeURIComponent(item.itemId)}`} text={item.text} onError={() => setState('error')} />
+      </VideoCard>
       {instruction}
     </>
   );
@@ -65,9 +67,12 @@ export function ModelVideo({ item, source = ANALYZE_API }: { item: PracticeItem;
 function Instruction({ item }: { item: PracticeItem }) {
   if (!item.instruction) return null;
   return (
-    <View style={styles.instruction} testID="model-instruction">
-      <Body>{item.instruction}</Body>
-      {item.instructionSource === 'ai' ? <Body muted>Instruksi dibuat dengan bantuan AI</Body> : null}
+    <View style={styles.instruction}>
+      <Text accessibilityRole="header" maxFontSizeMultiplier={2} style={[styles.instructionTitle, textFont(true)]}>Cara mengucapkan</Text>
+      <View testID="model-instruction">
+        <Body>{item.instruction}</Body>
+        {item.instructionSource === 'ai' ? <Body muted>Instruksi dibuat dengan bantuan AI</Body> : null}
+      </View>
     </View>
   );
 }
@@ -94,41 +99,65 @@ function Player({ url, text, onError }: { url: string; text: string; onError: ()
   return (
     <>
       {status !== 'readyToPlay' ? <Loading /> : null}
-      <View style={styles.frame} accessible accessibilityLabel={`Video contoh mengucapkan ${text}`}>
+      <View style={styles.media} accessible accessibilityLabel={`Video contoh mengucapkan ${text}`}>
         <VideoView player={player} style={styles.video} nativeControls contentFit="contain" />
       </View>
+      <BigButton
+        label="Putar contoh"
+        icon="play-outline"
+        variant="secondary"
+        onPress={() => {
+          player.currentTime = 0;
+          player.play();
+        }}
+      />
     </>
   );
+}
+
+function VideoCard({ children }: { children: ReactNode }) {
+  return <View style={styles.card}>{children}</View>;
 }
 
 function TextFallback({ item }: { item: PracticeItem }) {
   // A lip drawing only for a single Level 1 vowel; words and syllables show the text.
   const shape = item.level === 1 ? targetShape([item.text.toLowerCase()]) : null;
   return (
-    <Card>
-      <View style={styles.fallback} testID="model-fallback">
-        {shape ? <LipIllustration shape={shape} size={86} /> : null}
-        <Text style={styles.word} accessibilityLabel={`Ucapkan ${item.text}`}>
-          {item.text}
-        </Text>
+    <VideoCard>
+      <View style={styles.media} testID="model-fallback" accessibilityLabel={`Ucapkan ${item.text}`}>
+        {shape ? (
+          <LipIllustration shape={shape} size={session.illustration} />
+        ) : (
+          <Text accessible={false} style={[styles.word, displayFont()]}>
+            {item.text}
+          </Text>
+        )}
       </View>
-    </Card>
+    </VideoCard>
   );
 }
 
 const styles = StyleSheet.create({
   center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
-  frame: {
-    width: '100%',
-    aspectRatio: 3 / 4,
+  // Figma 46:159: card with a 200 dp media area and the play button inside.
+  card: {
+    gap: spacing.sm + spacing.xs,
+    padding: spacing.sm + spacing.xs,
     borderRadius: radius.card,
+    borderWidth: stroke.hairline,
+    borderColor: colors.hairline,
+    backgroundColor: colors.surface,
+  },
+  media: {
+    height: session.media,
+    alignItems: 'center',
+    justifyContent: 'center',
     overflow: 'hidden',
-    backgroundColor: overlay.background,
-    borderWidth: 3,
-    borderColor: colors.border,
+    borderRadius: radius.tile,
+    backgroundColor: colors.surfaceRaised,
   },
   video: { width: '100%', height: '100%' },
-  fallback: { alignItems: 'center', gap: spacing.md },
-  instruction: { gap: spacing.xs },
-  word: { fontSize: fontSize.display, fontWeight: '700', color: colors.text },
+  instruction: { gap: spacing.sm },
+  instructionTitle: { fontSize: fontSize.label, lineHeight: lineHeight.label, color: colors.text },
+  word: { fontSize: fontSize.display, color: colors.text },
 });
