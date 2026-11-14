@@ -6,13 +6,13 @@ import { colors, fontSize, iconSize, radius, textFont, wordList } from '../theme
 
 /**
  * Where a word comes from: the team ("Bawaan", lock) or the companion ("Dari Pendamping", person).
- * Icon + text on a `surfaceRaised` chip (Figma 37:414). `tall` is the slightly taller chip of "Jalur kata" (31:337).
+ * Muted icon + cream bold text on a `surfaceRaised` chip (Figma 37:414, icon stroke #ababa7). `tall` is the slightly taller chip of "Jalur kata" (31:337).
  */
 export function SourceChip({ source, tall = false }: { source: Source; tall?: boolean }) {
   const builtIn = source === 'default';
   return (
     <View style={[styles.chip, tall && styles.tall]}>
-      <Ionicons name={builtIn ? 'lock-closed-outline' : 'person-outline'} size={iconSize.chip} color={colors.text} accessible={false} />
+      <Ionicons name={builtIn ? 'lock-closed-outline' : 'person-outline'} size={iconSize.chip} color={colors.textMuted} accessible={false} />
       <Text maxFontSizeMultiplier={2} style={[styles.text, textFont(true)]}>{builtIn ? 'Bawaan' : 'Dari Pendamping'}</Text>
     </View>
   );
