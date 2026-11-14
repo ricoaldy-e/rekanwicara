@@ -187,6 +187,12 @@ diperiksa dan diuji lewat tes otomatis serta pengujian manual oleh tim. Aturan k
 [CLAUDE.md](CLAUDE.md) dan [AGENTS.md](AGENTS.md); riwayat keputusan ada di
 [PROGRESS.md](docs/PROGRESS.md).
 
+## Tim
+
+- Muhammad Helmi Abdulbaqi
+- Rico Aldy Kusuma
+- Steven Jonathan Sihombing
+
 ## Lisensi
 
 Kode milik tim dirilis di bawah [Lisensi MIT](LICENSE). Komponen pihak ketiga tetap memakai
