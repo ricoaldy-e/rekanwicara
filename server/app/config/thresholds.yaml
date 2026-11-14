@@ -160,4 +160,7 @@ tutorials:
 generation:
   timeout_s: 30
   max_tokens: 500
-  max_instruction_chars: 1600
+  max_instruction_chars: 1600   # raw answer before tidying
+  max_steps: 5                  # docs/AI_INSTRUCTION_BRIEF.md: one step per line, at most 5
+  max_step_chars: 120           # per step (same limit as the app form, FG-24)
+  max_total_chars: 500          # whole instruction after tidying

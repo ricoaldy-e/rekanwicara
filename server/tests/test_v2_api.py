@@ -750,3 +750,22 @@ def test_catalog_has_no_held_or_hum_items(v2_client: TestClient, upstream: dict)
     result = v2_client.get("/v2/catalog", headers=HEADERS)
     ids = {item["id"] for item in result.json()["level_1"]}
     assert ids == VOWEL_IDS and not ids & {"l0_hold_a", "l0_soft_loud", "l1_m"}
+
+
+def test_generated_instruction_is_tidied_into_steps() -> None:
+    from app.api.v2.instructions import tidy_steps
+
+    numbered = "1. Rapatkan bibir.\n- Buka mulut sedikit.\n\n• Ucapkan TO."
+    assert tidy_steps(numbered, 5, 120, 500) == "Rapatkan bibir.\nBuka mulut sedikit.\nUcapkan TO."
+    paragraph = "Rapatkan bibir dengan nyaman. " * 3 + "Buka mulut lebar dan ucapkan MA perlahan."
+    assert tidy_steps(paragraph, 5, 120, 500).count("\n") == 3
+    many = "\n".join(f"Langkah nomor {n}." for n in range(1, 8))
+    assert (
+        tidy_steps(many, 5, 120, 500).splitlines()[-1]
+        == "Langkah nomor 5. Langkah nomor 6. Langkah nomor 7."
+    )
+    assert all(
+        len(line) <= 20 for line in tidy_steps("x" * 50 + "\nyy yy", 5, 20, 500).splitlines()
+    )
+    assert len(tidy_steps("\n".join(["a" * 100] * 5), 5, 120, 250)) <= 250
+    assert tidy_steps(" \n- \n", 5, 120, 500) == ""

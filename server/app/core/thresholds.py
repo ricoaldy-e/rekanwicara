@@ -214,6 +214,9 @@ class GenerationConfig(_Strict):
     timeout_s: int = Field(gt=0)
     max_tokens: int = Field(gt=0)
     max_instruction_chars: int = Field(gt=0)
+    max_steps: int = Field(gt=0)
+    max_step_chars: int = Field(gt=0)
+    max_total_chars: int = Field(gt=0)
 
 
 class Thresholds(_Strict):
