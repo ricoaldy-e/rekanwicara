@@ -944,3 +944,5 @@ Skill yang dimuat: `figma-design-to-code` (membaca konteks), `figma-use` dan `fi
 - FG-20b: Level 1 hanya vokal a, i, u, e, o. "A panjang" dan "Pelan ke keras" tidak lagi tampil (katalog tiruan, teks bantu, dan `catalogToL1` menyaring `l1_[aiueo]`, jadi server yang masih mengirim item l0_* tidak memunculkannya). Hitungan Level 1 menjadi 5 materi. Logika lama l0_* (progresi, dataset, hasil) tidak diubah.
 
 - FG-21: Figma Kata baru (50:506) dan Ubah kata (61:716) kini menggambar tombol "Buat dengan AI" dan catatan pengiriman di tiap kartu suku kata (di bawah kolom instruksi, di atas Naik/Turun/Hapus). Kode sudah memilikinya sejak formulir dibuat (`AiInstruction` di `SyllableRow`, konteks kata induk dikirim sesuai kontrak §7, tes `aiInstruction.test`); tidak ada perubahan kode.
+
+- FG-21b: Figma Kata baru dan Ubah kata kini menggambar tombol video (Ganti video, Hapus) di tiap kartu suku kata, di bawah ringkasan video; kode sudah punya `VideoField` per suku kata. Tidak ada perubahan kode.
