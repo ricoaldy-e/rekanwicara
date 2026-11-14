@@ -85,6 +85,17 @@ it('analyzes the recording for the catalog item, stores the attempt and shows th
   expect(mockDelete).toHaveBeenCalledWith('file:///clip.mp4');
 });
 
+it('scores Level 1 opened with v2=1 through /v2/analyze and keeps the design flow', async () => {
+  mockParams = { itemId: 'l1_a', v2: '1' };
+  mockAnalyze.mockResolvedValue(result({ engine: 'mediapipe_parselmouth_wav2vec2' }));
+  await render(<Practice />);
+  expect(screen.getByText('Langkah 1 dari 4')).toBeTruthy();
+  await recordAndSend();
+  expect(mockAnalyze.mock.calls[0][1]).toMatchObject({ source: 'v2' });
+  expect(await screen.findByTestId('result-ok')).toBeTruthy();
+  expect(mockAddAttempt).toHaveBeenCalledWith(expect.objectContaining({ itemId: 'l1_a', scorer: 'mediapipe_parselmouth_wav2vec2' }));
+});
+
 it('does not store a retry and offers to record again', async () => {
   mockAnalyze.mockResolvedValue(result({ status: 'retry', result: null, lip_result: null, voice_result: null, feedback: { code: 'retry_no_face', message: 'Wajah belum terlihat.' } }));
   await render(<Practice />);

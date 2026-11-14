@@ -1,5 +1,6 @@
 import type { AnalyzeResponse, Status } from '../src/api/types';
-import { catalogToL1, clampStatus, fromStored, fromV1, toStored, wordToPath } from '../src/data/mappers';
+import { catalogToL1, clampStatus, cleanV2, fromStored, fromV1, toStored, wordToPath } from '../src/data/mappers';
+import type { AnalyzeResult } from '../src/data/types';
 import { MOCK_CATALOG, MOCK_WORDS } from '../src/mock';
 
 const visuals = { vowel_point: { f1: 700, f2: 1300 }, vowel_anchors: null, lip_contour: null, loudness: null };
@@ -124,5 +125,28 @@ describe('stored status', () => {
     for (const s of ['sesuai', 'mendekati', 'belum_sesuai'] as const) expect(fromStored(toStored(s))).toBe(s);
     for (const s of ['hijau', 'kuning', 'merah'] as const) expect(toStored(fromStored(s))).toBe(s);
     expect(toStored('mendekati')).toBe('kuning');
+  });
+});
+
+describe('cleanV2 with the server /v2/analyze shape (one feedback, no per-indicator lines)', () => {
+  const server = {
+    status: 'evaluated' as const, item_id: 'l1_e', level: 1 as const, result: 'mendekati' as const,
+    lip_result: 'sesuai' as const, voice_result: 'mendekati' as const,
+    feedback: { code: 'PRONUNCIATION_NOT_MATCHED', message: 'Coba lagi sesuai contoh E.' },
+    quality_flags: [], visuals: null, engine: 'mediapipe_parselmouth_wav2vec2', processing_ms: 9, sample: false,
+  } as unknown as AnalyzeResult;
+
+  it('puts the message on the indicator that is off', () => {
+    expect(cleanV2(server)).toMatchObject({ lip_feedback: null, voice_feedback: 'Coba lagi sesuai contoh E.' });
+    expect(cleanV2({ ...server, lip_result: 'belum_sesuai' })).toMatchObject({ lip_feedback: 'Coba lagi sesuai contoh E.', voice_feedback: null });
+  });
+
+  it('shows no hint when both fit, and keeps per-indicator lines when the server sends them', () => {
+    expect(cleanV2({ ...server, result: 'sesuai', voice_result: 'sesuai' })).toMatchObject({ lip_feedback: null, voice_feedback: null });
+    expect(cleanV2({ ...server, lip_feedback: null, voice_feedback: 'Dari server.' })).toMatchObject({ voice_feedback: 'Dari server.' });
+  });
+
+  it('clamps mendekati outside Level 1', () => {
+    expect(cleanV2({ ...server, level: 2 }).voice_result).toBe('belum_sesuai');
   });
 });

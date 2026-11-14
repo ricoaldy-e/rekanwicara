@@ -9,6 +9,7 @@ import { ApiError } from '../../src/api/apiError';
 import { errorMessage } from '../../src/api/errors';
 import { ActionBar, AnalyzingView, BackButton, BigButton, InfoNote, LoadingView, Screen, SessionHeader } from '../../src/components';
 import { UploadStatus } from '../../src/components/UploadStatus';
+import { ANALYZE_API, type AnalyzeApi } from '../../src/config';
 import { analyze, canAnalyze } from '../../src/data/analyze';
 import type { AnalyzeResult } from '../../src/data/types';
 import { usePracticeItem } from '../../src/data/useCatalog';
@@ -22,8 +23,6 @@ import { useSettings } from '../../src/state/settings';
 import { SESSION_ID, useUser } from '../../src/state/user';
 import { colors, layout, spacing } from '../../src/theme';
 import { attemptFromResult } from '../../src/user/pure';
-import { LevelOnePractice } from '../../src/practice/LevelOnePractice';
-import { CompanionLogin } from '../../src/auth/CompanionLogin';
 
 /** SPEC §2 cycle: Lihat → Tiru → Menganalisis → Hasil (design.md §6.4: "Langkah n dari 4"). "Ulangi" loops back to Tiru. */
 type Stage = 'look' | 'record' | 'send' | 'result';
@@ -39,18 +38,11 @@ function describeAnalyzeError(err: unknown): string | null {
 }
 
 export default function Practice() {
-  const { itemId, v2 } = useLocalSearchParams<{ itemId: string; v2?: string }>();
-  const { session } = useUser();
-  if (v2 === '1') return session
-    ? <LevelOnePractice key={`${session.user.id}:${itemId}`} itemId={itemId} ownerId={session.user.id} />
-    : <CompanionLogin />;
-  return <LegacyPractice />;
-}
-
-function LegacyPractice() {
   const router = useRouter();
   const navigation = useNavigation();
-  const params = useLocalSearchParams<{ itemId: string; wordId?: string; position?: string }>();
+  const params = useLocalSearchParams<{ itemId: string; wordId?: string; position?: string; v2?: string }>();
+  // Level 1 (opened with v2=1) is scored by /v2/analyze (lips, voice, Wav2Vec2) with the signed-in account's token.
+  const source: AnalyzeApi = params.v2 === '1' && ANALYZE_API !== 'mock' ? 'v2' : ANALYZE_API;
   const position = params.position !== undefined ? Number(params.position) : undefined;
   const { api, apiUrl } = useSettings();
   const { profile, addAttempt } = useUser();
@@ -93,7 +85,7 @@ function LegacyPractice() {
       const id = ++sendId.current;
       setStage('send');
       const res = await run((opts) =>
-        analyze({ file: videoUpload(file, 'clip.mp4'), item, sessionId: SESSION_ID, userId: profile.userId }, { ...opts, api }),
+        analyze({ file: videoUpload(file, 'clip.mp4'), item, sessionId: SESSION_ID, userId: profile.userId }, { ...opts, api, source }),
       );
       if (!res || id !== sendId.current) return; // network error: UploadStatus offers "Coba kirim lagi", the file stays; or cancelled
       deleteLocalFile(file);
@@ -105,7 +97,7 @@ function LegacyPractice() {
       setResult(res);
       setStage('result');
     },
-    [api, item, profile.userId, run, reset, addAttempt],
+    [api, source, item, profile.userId, run, reset, addAttempt],
   );
 
   const exit = () => router.back();
@@ -134,7 +126,7 @@ function LegacyPractice() {
     );
   }
 
-  const scorable = canAnalyze(item);
+  const scorable = canAnalyze(item, source);
   const footer =
     stage === 'look' && scorable ? (
       <View style={styles.footer}>

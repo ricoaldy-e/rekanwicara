@@ -18,13 +18,24 @@ export function clampStatus(level: Level, s: ResultStatus | null): ResultStatus 
   return 'belum_sesuai';
 }
 
-/** Applies the per-level rules to a v2 response from the server. */
+/**
+ * Applies the per-level rules to a v2 response from the server. The server's /v2/analyze sends one `feedback`
+ * and no `lip_feedback`/`voice_feedback`: the message then goes to the indicator that is off, as in fromV1.
+ */
 export function cleanV2(res: AnalyzeResult): AnalyzeResult {
+  const lip = clampStatus(res.level, res.lip_result);
+  const voice = clampStatus(res.level, res.voice_result);
+  const perIndicator = res.lip_feedback !== undefined || res.voice_feedback !== undefined;
+  const message = res.status === 'evaluated' ? res.feedback.message || null : null;
+  const lipOff = lip !== null && lip !== 'sesuai';
+  const voiceOff = voice !== null && voice !== 'sesuai';
   return {
     ...res,
     result: clampStatus(res.level, res.result),
-    lip_result: clampStatus(res.level, res.lip_result),
-    voice_result: clampStatus(res.level, res.voice_result),
+    lip_result: lip,
+    voice_result: voice,
+    lip_feedback: perIndicator ? res.lip_feedback ?? null : lipOff ? message : null,
+    voice_feedback: perIndicator ? res.voice_feedback ?? null : !lipOff && voiceOff ? message : null,
     visuals: res.level === 1 ? res.visuals : null,
   };
 }

@@ -1104,3 +1104,13 @@ Skill yang dimuat: `figma-design-to-code` (membaca konteks), `figma-use` dan `fi
 - `__tests__/allosaurusUpload.test.ts` dihapus lagi (sudah dihapus di FG-23, muncul kembali lewat be).
 - Hasil: `npm run typecheck` bersih, `npm test` 841/841, `pytest` server 752 lulus.
 - Belum: layar v2 be (`LevelOneList`, `LevelOnePractice`, `TutorialVideo`, `V2ResultView`, `CompanionLogin`) belum disesuaikan dengan Figma/design.md; belum diuji di perangkat.
+
+## MERGE-2 (14 Nov 2026): Level 1 memakai penilaian be di tampilan fe
+
+- Keputusan Rico: penilaian ikut be (`/v2/analyze`: bibir, suara, Wav2Vec2), materi ikut fe (vokal a, i, u, e, o), tampilan ikut fe (Figma). **Tanpa perubahan backend atau schema.**
+- `app/practice/[itemId].tsx`: satu layar latihan fe untuk semua level. Bila dibuka dengan `v2=1` (tombol Level 1 di Beranda dan daftar Level 1), analisis memakai sumber `v2` (klien `src/api/v2.ts` + token akun yang sudah login), kecuali mode mock. Level 2–3 tetap mengikuti `EXPO_PUBLIC_ANALYZE_API`.
+- Login: app sudah mewajibkan masuk akun (layar Masuk), jadi tidak ada layar login tambahan di latihan; `CompanionLogin` tidak lagi dipakai di sini (masih dipakai `tutorial-videos`).
+- `cleanV2`: server v2 hanya mengirim satu `feedback` tanpa `lip_feedback`/`voice_feedback`; pesannya ditaruh di indikator yang belum sesuai (sama dengan `fromV1`), jadi kartu petunjuk Hasil terisi.
+- Dihapus (tidak terpakai lagi): `LevelOnePractice.tsx`, `V2ResultView.tsx`, `levelOnePractice.test.tsx`. `TutorialVideo.tsx` (video Storage bertanda tangan) dan `LevelOneList.tsx` dibiarkan untuk dipakai nanti.
+- Tes baru: kasus `v2=1` di `practice.test`, `cleanV2` di `mappers.test`. `npm test` 841/841, typecheck bersih.
+- Belum: video contoh Level 1 masih dari `/v1/model-video` (server lokal); video dari Supabase Storage (FL-8) belum disambungkan ke `ModelVideo`. Kalibrasi dikirim lewat `/v1/calibrate` dengan `user_id`, sedangkan v2 membaca kalibrasi per `account.uid`; bila keduanya beda, hasil v2 bertanda `uncalibrated`. Belum diuji di perangkat.
