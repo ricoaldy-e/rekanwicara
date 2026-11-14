@@ -5,7 +5,7 @@ import type { UploadFile } from './types';
 import { UPLOAD_TIMEOUT_MS, type UploadCallOptions } from './upload';
 
 /** Native foreground uploads for speech experiments; never retries or copies the recording. */
-export async function uploadNative(url: string, file: UploadFile, opts: UploadCallOptions = {}, parameters?: Record<string, string>): Promise<unknown> {
+export async function uploadNative(url: string, file: UploadFile, opts: UploadCallOptions = {}, parameters?: Record<string, string>, headers?: Record<string, string>): Promise<unknown> {
   if (opts.signal?.aborted) throw new ApiError('cancelled', 'Upload cancelled');
   let recording: File;
   try {
@@ -21,7 +21,7 @@ export async function uploadNative(url: string, file: UploadFile, opts: UploadCa
     mimeType: file.type,
     parameters,
     sessionType: 'foreground',
-    headers: { Accept: 'application/json' },
+    headers: { Accept: 'application/json', ...headers },
     signal: opts.signal,
     onProgress: ({ bytesSent, totalBytes }) => {
       // iOS can deliver Int64 counters as BigInt despite the SDK's number types.

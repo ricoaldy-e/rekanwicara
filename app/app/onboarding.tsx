@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { BigButton, Body, Card, CheckRow, InfoNote, Screen, StepHeader } from '../src/components';
+import { CompanionLogin } from '../src/auth/CompanionLogin';
 import { useUser } from '../src/state/user';
 import { isValidPin } from '../src/user/pure';
 import { colors, fontSize, radius, spacing, touchTarget } from '../src/theme';
@@ -17,7 +18,7 @@ const CYCLE = [
 
 export default function Onboarding() {
   const router = useRouter();
-  const { completeOnboarding } = useUser();
+  const { session, completeOnboarding } = useUser();
   const [step, setStep] = useState(1);
   const [consentUser, setConsentUser] = useState(false);
   const [consentCompanion, setConsentCompanion] = useState(false);
@@ -40,6 +41,8 @@ export default function Onboarding() {
       setSaving(false);
     }
   };
+
+  if (!session) return <CompanionLogin />;
 
   return (
     <Screen>

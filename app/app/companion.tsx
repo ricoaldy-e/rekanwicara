@@ -9,15 +9,23 @@ import { colors, fontSize, radius, spacing, touchTarget } from '../src/theme';
 import { SESSION_MINUTES, isValidPin, type SessionMinutes } from '../src/user/pure';
 import { CONSULT_ADVICE, reportText, weeklySummary } from '../src/user/report';
 import { verifyPin } from '../src/user/storage';
+import { CompanionLogin } from '../src/auth/CompanionLogin';
+import { CompanionPinGate } from '../src/auth/CompanionPinGate';
+import { ManualWords } from '../src/customWords/ManualWords';
 
-type Stage = 'pin' | 'home' | 'pick' | 'listen';
+type Stage = 'pin' | 'home' | 'pick' | 'listen' | 'custom';
 
 const MINUTE_OPTIONS = SESSION_MINUTES.map((m) => ({ value: String(m), label: `${m} menit` }));
 
 /** Mode Pendamping (SPEC §8.1): PIN, weekly summary, Uji Dengar, session length, text report. */
 export default function Companion() {
+  const { session } = useUser();
+  return session ? <CompanionAccount key={session.user.id} /> : <CompanionLogin />;
+}
+
+function CompanionAccount() {
   const { items } = useContent();
-  const { profile, progress, sync, demo, addListenCheck, updateSettings, syncNow } = useUser();
+  const { session, profile, progress, sync, demo, addListenCheck, updateSettings, syncNow } = useUser();
   const [stage, setStage] = useState<Stage>('pin');
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState<string | null>(null);
@@ -56,9 +64,11 @@ export default function Companion() {
     setStage('pin');
   };
 
+  if (!session) return <CompanionLogin />;
+
   if (stage === 'pin') {
     return (
-      <Screen>
+      <CompanionPinGate onCreated={() => setStage('home')}><Screen>
         <Title>Mode Pendamping</Title>
         <Body>Bagian ini untuk orang tua, keluarga, atau guru. Masukkan PIN 4 angka.</Body>
         <TextInput
@@ -78,7 +88,7 @@ export default function Companion() {
         />
         {pinError ? <InfoNote tone="warning" text={pinError} testID="companion-pin-error" /> : null}
         <BigButton label="Buka" icon="lock-open" disabled={pin.length !== 4} onPress={unlock} testID="companion-unlock" />
-      </Screen>
+      </Screen></CompanionPinGate>
     );
   }
 
@@ -110,6 +120,8 @@ export default function Companion() {
       </Screen>
     );
   }
+
+  if (stage === 'custom') return <ManualWords key={session.user.id} ownerId={session.user.id} onClose={() => setStage('home')} />;
 
   if (stage === 'listen' && checkId) {
     const item = items?.find((it) => it.item_id === checkId);
@@ -148,6 +160,8 @@ export default function Companion() {
   return (
     <Screen>
       <Title>Mode Pendamping</Title>
+
+      <BigButton label="Kelola Kata Manual" icon="create" disabled={demo} onPress={() => setStage('custom')} testID="open-custom-words" />
 
       <Card testID="weekly-summary">
         <Text style={styles.heading}>Ringkasan 7 hari terakhir</Text>

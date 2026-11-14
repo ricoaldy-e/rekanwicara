@@ -4,6 +4,7 @@ import { uploadNative } from '../src/api/nativeUpload';
 import { createApiClient } from '../src/api/client';
 import { errorMessage } from '../src/api/errors';
 import combinedExample from '../test-fixtures/contract/combined.json';
+import type { TutorialItem } from '../src/api/types';
 
 const mockRecording = { exists: true, size: 123 };
 const mockUpload = jest.fn();
@@ -21,6 +22,27 @@ jest.mock('expo-file-system', () => ({
 const file = { uri: 'synthetic-recording', name: 'clip.mp4', type: 'video/mp4' };
 const prediction = { status: 'success', model: 'uni2005', phonetic_prediction: 'm ɑ', inference_ms: 2.5 };
 const url = 'http://example.test/v1/experiments/allosaurus';
+
+const tutorial: TutorialItem = {
+  item_id: 'kp_tolong_to', word: 'TOLONG', target: 'TO', kind: 'syllable', level: 2, position: 1,
+  bucket: 'rekan-wicara-tutorials', storage_path: 'default/syllables/tolong/01-to.mp4', steps: [], present: false,
+};
+const verified = { status: 'verified', item_id: tutorial.item_id, bucket: tutorial.bucket,
+  storage_path: tutorial.storage_path, size_bytes: 123 };
+
+it('uploads tutorial with the current bearer and validates the canonical destination', async () => {
+  mockUpload.mockResolvedValueOnce(response(verified));
+  await expect(createApiClient('http://example.test').uploadTutorial(tutorial, 'fixture-token', file)).resolves.toEqual(verified);
+  expect(UploadTask).toHaveBeenCalledWith(mockRecording, 'http://example.test/v1/tutorials/kp_tolong_to/video', expect.objectContaining({
+    headers: { Accept: 'application/json', Authorization: 'Bearer fixture-token' },
+  }));
+});
+
+it.each([{ status: 'ok' }, { ...verified, item_id: 'kp_api_a' }, { ...verified, storage_path: 'wrong.mp4' },
+  { ...verified, bucket: 'other' }, { ...verified, size_bytes: 0 }])('does not mark an unverified tutorial response as saved: %j', async (body) => {
+  mockUpload.mockResolvedValueOnce(response(body));
+  await expect(createApiClient('http://example.test').uploadTutorial(tutorial, 'fixture-token', file)).rejects.toMatchObject({ kind: 'parse' });
+});
 
 function response(body: unknown = prediction, status = 200) {
   return { status, body: JSON.stringify(body), headers: {} };

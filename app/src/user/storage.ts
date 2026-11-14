@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 
 import { getClient } from '../data/supabase';
+import { writeResume } from '../home/resume';
 import { isValidPin, newProfile, parseProfile, type Profile } from './pure';
 
 export const PROFILE_KEY = 'cw.profile';
@@ -74,6 +75,13 @@ export async function verifyPin(pin: string): Promise<boolean> {
   return await pinAccount() === uid && saved === pin;
 }
 
+export async function hasPin(): Promise<boolean> {
+  const uid = await pinAccount();
+  const saved = await SecureStore.getItemAsync(accountKey(PIN_KEY, uid));
+  if (await pinAccount() !== uid) throw new Error('Akun berubah; pemeriksaan PIN dibatalkan.');
+  return saved !== null;
+}
+
 export async function changePin(currentPin: string, nextPin: string): Promise<void> {
   return writePin(currentPin, nextPin);
 }
@@ -82,4 +90,5 @@ export async function changePin(currentPin: string, nextPin: string): Promise<vo
 export async function removeAccountData(uid: string): Promise<void> {
   await SecureStore.deleteItemAsync(accountKey(PIN_KEY, uid));
   await AsyncStorage.removeItem(accountKey(PROFILE_KEY, uid));
+  await writeResume(uid, null);
 }

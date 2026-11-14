@@ -3,9 +3,10 @@
 The app mirrors these in ``app/src/api/types.ts``. Change only together with SPEC §5.
 """
 
-from typing import Literal
+from typing import Annotated, Literal
+from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
 # ---------- Shared enums ----------
 
@@ -48,6 +49,36 @@ ReasonCode = Literal[
 
 class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+class TutorialItem(_Strict):
+    item_id: str
+    word: str
+    target: str
+    kind: Literal["word", "syllable"]
+    level: Literal[2, 3]
+    position: int | None
+    bucket: str
+    storage_path: str
+    steps: list[str]
+
+
+class TutorialPresence(TutorialItem):
+    present: bool
+
+
+class TutorialsResponse(_Strict):
+    items: list[TutorialPresence]
+    max_duration_s: int
+    max_upload_mb: int
+
+
+class TutorialUploadResponse(_Strict):
+    status: Literal["verified"] = "verified"
+    item_id: str
+    bucket: str
+    storage_path: str
+    size_bytes: int
 
 
 class AccountDeletionResponse(_Strict):
@@ -138,6 +169,181 @@ class Visuals(_Strict):
     vowel_anchors: VowelAnchors | None = None
     lip_contour: LipContour | None = None
     loudness: Loudness | None = None
+
+
+# ---------- API v2: clarified contract and latest endpoint requirements ----------
+
+
+class VideoReference(_Strict):
+    bucket: str
+    path: str
+    position: int = Field(ge=1)
+    available: bool = True
+
+
+class V2Material(_Strict):
+    id: str
+    text: str
+    instruction: str
+    videos: list[VideoReference] = Field(max_length=1)
+
+
+class V2WordSummary(_Strict):
+    id: str
+    text: str
+    source: Literal["default", "custom"]
+    has_level_2: bool
+    automatic_evaluation: bool = True
+
+
+class V2Catalog(_Strict):
+    level_1: list[V2Material]
+    words: list[V2WordSummary]
+
+
+class V2Syllable(V2Material):
+    position: int = Field(ge=1)
+    videos: list[VideoReference] = Field(min_length=1, max_length=1)
+
+
+class V2WordStage(_Strict):
+    instruction: str
+    videos: list[VideoReference] = Field(min_length=1, max_length=1)
+
+
+class V2WordDetail(_Strict):
+    id: str
+    text: str
+    source: Literal["default", "custom"]
+    syllable_split: str | None = None
+    automatic_evaluation: bool = True
+    level_2: list[V2Syllable]
+    level_3: V2WordStage
+
+
+class V2ItemDetail(V2Material):
+    level: Literal[1, 2, 3]
+    automatic_evaluation: bool = True
+
+
+ManualText = Annotated[str, StringConstraints(min_length=1, max_length=30, pattern=r"^[A-Za-z]+$")]
+ManualInstruction = Annotated[
+    str, StringConstraints(strip_whitespace=True, min_length=1, max_length=8000)
+]
+
+
+class CustomSyllableWrite(_Strict):
+    id: UUID
+    text: ManualText
+    instruction: ManualInstruction
+    position: int = Field(ge=1, le=6)
+    video: bool = True
+    video_path: str | None = Field(default=None, min_length=1, max_length=600)
+
+
+class CustomWordWrite(_Strict):
+    id: UUID | None = None
+    word: ManualText
+    instruction: ManualInstruction
+    status: Literal["draft", "published"] = "published"
+    video: bool = True
+    video_path: str | None = Field(default=None, min_length=1, max_length=600)
+    syllables: list[CustomSyllableWrite] = Field(default_factory=list, max_length=6)
+    revision: int | None = Field(default=None, ge=1)
+
+    @model_validator(mode="after")
+    def validate_syllables(self) -> "CustomWordWrite":
+        if len({part.id for part in self.syllables}) != len(self.syllables) or sorted(
+            part.position for part in self.syllables
+        ) != list(range(1, len(self.syllables) + 1)):
+            raise ValueError("Syllable IDs and positions must be unique and consecutive")
+        return self
+
+
+class CustomSyllableDetail(_Strict):
+    id: UUID
+    text: str
+    instruction: str
+    position: int
+    video: VideoReference | None
+
+
+class CustomWordDetail(_Strict):
+    id: UUID
+    word: str
+    instruction: str
+    status: Literal["draft", "published", "deleting"]
+    revision: int = Field(ge=1)
+    video: VideoReference | None
+    syllables: list[CustomSyllableDetail]
+    cleanup_pending: bool
+
+
+class CustomWordSummary(_Strict):
+    id: UUID
+    word: str
+    status: Literal["draft", "published", "deleting"]
+    revision: int = Field(ge=1)
+    syllable_count: int = Field(ge=0)
+    cleanup_pending: bool
+
+
+class CustomWordList(_Strict):
+    words: list[CustomWordSummary]
+    max_upload_mb: int
+    max_duration_s: int
+
+
+class CustomWordDeletion(_Strict):
+    id: UUID
+    status: Literal["deleted", "cleanup_pending"]
+
+
+V2Result = Literal["sesuai", "mendekati", "belum_sesuai"]
+
+
+class V2Feedback(_Strict):
+    code: str
+    message: str
+
+
+class V2AnalyzeResponse(_Strict):
+    status: Literal["evaluated", "retry"]
+    item_id: str
+    level: Literal[1, 2, 3]
+    result: V2Result | None
+    lip_result: V2Result | None
+    voice_result: V2Result | None
+    feedback: V2Feedback
+    quality_flags: list[str]
+    visuals: Visuals | None
+    engine: Literal["mediapipe_parselmouth", "mediapipe_wav2vec2"]
+    processing_ms: int = Field(ge=0)
+
+    @model_validator(mode="after")
+    def consistent_result(self) -> "V2AnalyzeResponse":
+        if self.status == "retry" and any(
+            value is not None for value in (self.result, self.lip_result, self.voice_result)
+        ):
+            raise ValueError("Retry must not contain pronunciation results")
+        if self.status == "evaluated" and (self.result is None or self.voice_result is None):
+            raise ValueError("Evaluated response requires a real result")
+        if self.level > 1 and (
+            self.visuals is not None
+            or "mendekati" in (self.result, self.lip_result, self.voice_result)
+        ):
+            raise ValueError("Levels 2 and 3 use binary results without visuals")
+        return self
+
+
+class InstructionRequest(_Strict):
+    type: Literal["word", "syllable"]
+    text: str = Field(min_length=1, max_length=200)
+    parent_word: str | None = Field(default=None, min_length=1, max_length=200)
+
+
+class InstructionResponse(_Strict):
+    instruction: str = Field(min_length=1)
 
 
 class AnalyzeResponse(_Strict):

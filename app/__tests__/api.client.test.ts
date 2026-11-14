@@ -43,6 +43,13 @@ const items: Item[] = [
 ];
 
 describe('createApiClient', () => {
+  it('checks tutorial presence with the supplied bearer', async () => {
+    const body = { items: [], max_duration_s: 120, max_upload_mb: 50 };
+    const fetchFn = jest.fn().mockResolvedValue(jsonResponse(body));
+    await expect(createApiClient(BASE, { fetchFn }).getTutorials('fixture-token')).resolves.toEqual(body);
+    expect(fetchFn.mock.calls[0][0]).toBe(`${BASE}/v1/tutorials`);
+    expect(fetchFn.mock.calls[0][1].headers.Authorization).toBe('Bearer fixture-token');
+  });
   it('deletes only the bearer owner without sending a target user id', async () => {
     const fetchFn = jest.fn().mockResolvedValue(jsonResponse({ status: 'deleted' }));
     await expect(createApiClient(BASE, { fetchFn }).deleteAccount('fixture-token')).resolves.toEqual({ status: 'deleted' });

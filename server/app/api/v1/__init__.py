@@ -10,6 +10,7 @@ from app.api.v1 import (
     health,
     items,
     model_video,
+    tutorials,
     wav2vec2,
 )
 
@@ -21,6 +22,7 @@ def build_v1_router(dataset_mode: bool, debug_mode: bool = False) -> APIRouter:
     router.include_router(items.router)
     router.include_router(analysis.router)
     router.include_router(model_video.router)
+    router.include_router(tutorials.router)
     if dataset_mode:
         # Not registered at all otherwise: the endpoint simply does not exist (404).
         router.include_router(dataset.router)

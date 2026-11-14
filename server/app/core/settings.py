@@ -3,6 +3,7 @@
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
+from uuid import UUID
 
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -36,7 +37,12 @@ class Settings(BaseSettings):
     tmp_dir: Path | None = None
 
     supabase_url: str = ""
+    supabase_anon_key: SecretStr = SecretStr("")
     supabase_service_role_key: SecretStr = SecretStr("")
+    tutorial_uploader_ids: set[UUID] = Field(default_factory=set)
+    llm_api_url: str = ""
+    llm_api_key: SecretStr = SecretStr("")
+    llm_model: str = ""
 
     @field_validator("data_dir", "face_model_path")
     @classmethod

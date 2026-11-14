@@ -1,0 +1,147 @@
+{
+  "l0_hold_a": {
+    "bucket": "default-videos",
+    "path": "level-1/hold_a.mp4",
+    "position": 1
+  },
+  "l0_soft_loud": {
+    "bucket": "default-videos",
+    "path": "level-1/soft_loud.mp4",
+    "position": 1
+  },
+  "l1_a": {
+    "bucket": "default-videos",
+    "path": "level-1/a.mp4",
+    "position": 1
+  },
+  "l1_i": {
+    "bucket": "default-videos",
+    "path": "level-1/i.mp4",
+    "position": 1
+  },
+  "l1_u": {
+    "bucket": "default-videos",
+    "path": "level-1/u.mp4",
+    "position": 1
+  },
+  "l1_m": {
+    "bucket": "default-videos",
+    "path": "level-1/mmm.mp4",
+    "position": 1
+  },
+  "l1_e": {
+    "bucket": "default-videos",
+    "path": "level-1/e.mp4",
+    "position": 1
+  },
+  "l1_o": {
+    "bucket": "default-videos",
+    "path": "level-1/o.mp4",
+    "position": 1
+  },
+  "l2_ma": {
+    "bucket": "default-videos",
+    "path": "level-2/ma.mp4",
+    "position": 1
+  },
+  "l2_mi": {
+    "bucket": "default-videos",
+    "path": "level-2/mi.mp4",
+    "position": 1
+  },
+  "l2_mu": {
+    "bucket": "default-videos",
+    "path": "level-2/mu.mp4",
+    "position": 1
+  },
+  "l2_pa": {
+    "bucket": "default-videos",
+    "path": "level-2/pa.mp4",
+    "position": 1
+  },
+  "l2_pi": {
+    "bucket": "default-videos",
+    "path": "level-2/pi.mp4",
+    "position": 1
+  },
+  "l2_pu": {
+    "bucket": "default-videos",
+    "path": "level-2/pu.mp4",
+    "position": 1
+  },
+  "l2_ba": {
+    "bucket": "default-videos",
+    "path": "level-2/ba.mp4",
+    "position": 1
+  },
+  "l2_bi": {
+    "bucket": "default-videos",
+    "path": "level-2/bi.mp4",
+    "position": 1
+  },
+  "l2_bu": {
+    "bucket": "default-videos",
+    "path": "level-2/bu.mp4",
+    "position": 1
+  },
+  "l3_mama": {
+    "bucket": "default-videos",
+    "path": "level-3/mama.mp4",
+    "position": 1
+  },
+  "l3_papa": {
+    "bucket": "default-videos",
+    "path": "level-3/papa.mp4",
+    "position": 1
+  },
+  "l3_bibi": {
+    "bucket": "default-videos",
+    "path": "level-3/bibi.mp4",
+    "position": 1
+  },
+  "l3_pipi": {
+    "bucket": "default-videos",
+    "path": "level-3/pipi.mp4",
+    "position": 1
+  },
+  "l3_apa": {
+    "bucket": "default-videos",
+    "path": "level-3/apa.mp4",
+    "position": 1
+  },
+  "l3_abu": {
+    "bucket": "default-videos",
+    "path": "level-3/abu.mp4",
+    "position": 1
+  },
+  "l3_ibu": {
+    "bucket": "default-videos",
+    "path": "level-3/ibu.mp4",
+    "position": 1
+  },
+  "l3_ubi": {
+    "bucket": "default-videos",
+    "path": "level-3/ubi.mp4",
+    "position": 1
+  },
+  "l3_bumi": {
+    "bucket": "default-videos",
+    "path": "level-3/bumi.mp4",
+    "position": 1
+  },
+  "l3_mau": {
+    "bucket": "default-videos",
+    "path": "level-3/mau.mp4",
+    "position": 1
+  },
+  "l3_bau": {
+    "bucket": "default-videos",
+    "path": "level-3/bau.mp4",
+    "position": 1
+  },
+  "l3_boba": {
+    "bucket": "default-videos",
+    "path": "level-3/boba.mp4",
+    "position": 1
+  }
+}

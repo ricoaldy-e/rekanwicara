@@ -22,6 +22,20 @@ class _AuthUser(BaseModel):
     is_anonymous: bool
 
 
+def verify_companion(client: httpx.Client, base: str, key: str, token: str) -> _AuthUser:
+    verification = client.get(
+        f"{base}/auth/v1/user", headers={"apikey": key, "Authorization": f"Bearer {token}"}
+    )
+    if verification.status_code in (401, 403):
+        raise ApiError(401, "auth_invalid", "Sesi tidak valid. Silakan login kembali.")
+    if verification.status_code != 200:
+        raise ApiError(503, "auth_unavailable", "Sesi belum dapat diverifikasi. Coba lagi.")
+    user = _AuthUser.model_validate(verification.json())
+    if user.is_anonymous or not user.email:
+        raise ApiError(403, "companion_required", "Gunakan akun pendamping dengan email.")
+    return user
+
+
 @router.delete(
     "/auth/account",
     response_model=AccountDeletionResponse,
@@ -42,17 +56,7 @@ def delete_account(
     try:
         # Bounded, no redirects or ambient proxies: credentials stay at the configured Auth origin.
         with httpx.Client(timeout=10, follow_redirects=False, trust_env=False) as client:
-            verification = client.get(
-                f"{base}/auth/v1/user",
-                headers={"apikey": key, "Authorization": f"Bearer {parts[1]}"},
-            )
-            if verification.status_code in (401, 403):
-                raise ApiError(401, "auth_invalid", "Sesi tidak valid. Silakan login kembali.")
-            if verification.status_code != 200:
-                raise ApiError(503, "auth_unavailable", "Sesi belum dapat diverifikasi. Coba lagi.")
-            user = _AuthUser.model_validate(verification.json())
-            if user.is_anonymous or not user.email:
-                raise ApiError(403, "companion_required", "Gunakan akun pendamping dengan email.")
+            user = verify_companion(client, base, key, parts[1])
             # The owner id comes exclusively from Auth, never from a caller-supplied id or profile.
             deletion = client.request(
                 "DELETE",

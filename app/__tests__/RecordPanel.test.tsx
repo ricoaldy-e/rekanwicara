@@ -118,3 +118,18 @@ it('still deletes a late recording when stopping the camera throws', async () =>
   expect(mockDone).not.toHaveBeenCalled();
   expect(jest.getTimerCount()).toBe(0);
 });
+
+it('allows manual tutorial stop without the short practice timer', async () => {
+  await render(<RecordPanel durationMs={120_000} manualStop videoQuality="1080p" onRecorded={mockOnRecorded} />);
+  await fireEvent(screen.getByTestId('synthetic-camera'), 'cameraReady');
+  await fireEvent.press(screen.getByTestId('record-button'));
+  for (let tick = 0; tick < 3; tick++) await act(async () => { jest.advanceTimersByTime(1000); });
+  await act(async () => { jest.advanceTimersByTime(6000); });
+  expect(mockStop).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Selesai rekam' }));
+  expect(mockStop).toHaveBeenCalledTimes(1);
+  expect(mockOnRecorded).not.toHaveBeenCalled();
+  await act(async () => finish({ uri: clipUri }));
+  expect(mockOnRecorded).toHaveBeenCalledWith(clipUri);
+  expect(jest.getTimerCount()).toBe(0);
+});

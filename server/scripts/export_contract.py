@@ -7,10 +7,168 @@ import json
 from pathlib import Path
 
 from app.api.mock import build_analyze_mock, build_calibrate_mock
-from app.api.schemas import ErrorDetail, ErrorResponse, HealthResponse
+from app.api.schemas import (
+    CustomWordDetail,
+    CustomWordWrite,
+    ErrorDetail,
+    ErrorResponse,
+    HealthResponse,
+    InstructionResponse,
+    V2AnalyzeResponse,
+    V2Catalog,
+    V2WordDetail,
+)
+from app.api.v1.tutorials import catalogue as tutorial_catalogue
 from app.content.loader import load_content
 
 FIXTURE = Path(__file__).resolve().parents[2] / "app/test-fixtures/api-contract.ts"
+V2_FIXTURE = FIXTURE.with_name("api-v2-contract.ts")
+
+
+def render_v2_contract() -> str:
+    guides = tutorial_catalogue()
+    whole = next(item for item in guides if item.item_id == "kp_tolong")
+    parts = [item for item in guides if item.word == whole.word and item.kind == "syllable"]
+    word = V2WordDetail(
+        id=whole.item_id,
+        text=whole.target,
+        source="default",
+        automatic_evaluation=False,
+        syllable_split="to-long",
+        level_2=[
+            {
+                "id": item.item_id,
+                "text": item.target,
+                "position": item.position,
+                "instruction": "\n".join(item.steps),
+                "videos": [{"bucket": item.bucket, "path": item.storage_path, "position": 1}],
+            }
+            for item in parts
+        ],
+        level_3={
+            "instruction": "\n".join(whole.steps),
+            "videos": [{"bucket": whole.bucket, "path": whole.storage_path, "position": 1}],
+        },
+    )
+    catalog = V2Catalog(
+        level_1=[{"id": "l1_a", "text": "A", "instruction": "Ucapkan A.", "videos": []}],
+        words=[
+            {
+                "id": item.item_id,
+                "text": item.target,
+                "source": "default",
+                "has_level_2": item.word != "HAUS",
+                "automatic_evaluation": False,
+            }
+            for item in guides
+            if item.kind == "word"
+        ],
+    )
+    evaluated = V2AnalyzeResponse(
+        status="evaluated",
+        item_id="l3_papa",
+        level=3,
+        result="sesuai",
+        lip_result=None,
+        voice_result="sesuai",
+        feedback={"code": "MATCHED", "message": "Ucapan sesuai target."},
+        quality_flags=[],
+        visuals=None,
+        engine="mediapipe_wav2vec2",
+        processing_ms=12,
+    )
+    retry_data = evaluated.model_dump()
+    retry_data.update(
+        {
+            "status": "retry",
+            "result": None,
+            "voice_result": None,
+            "quality_flags": ["no_face"],
+            "feedback": {"code": "RECORD_AGAIN", "message": "Coba rekam lagi."},
+        }
+    )
+    # Revalidate updates so even fixtures cannot bypass the response invariants.
+    retry = V2AnalyzeResponse.model_validate(retry_data)
+    payload = {
+        "catalog": catalog,
+        "word": word,
+        "analysis": evaluated,
+        "retry": retry,
+        "instruction": InstructionResponse(instruction="Ucapkan PA perlahan."),
+    }
+    owner = "11111111-1111-4111-8111-111111111111"
+    word_id = "33333333-3333-4333-8333-333333333333"
+    parts = [
+        ("44444444-4444-4444-8444-444444444444", "KER"),
+        ("55555555-5555-4555-8555-555555555555", "TAS"),
+    ]
+    payload["manualWord"] = CustomWordDetail(
+        id=word_id,
+        word="KERTAS",
+        instruction="Ucapkan KERTAS.",
+        status="draft",
+        revision=2,
+        cleanup_pending=False,
+        video={
+            "bucket": "rekan-wicara-tutorials",
+            "path": f"{owner}/words/{word_id}/word.mp4",
+            "position": 1,
+            "available": False,
+        },
+        syllables=[
+            {
+                "id": part_id,
+                "text": label,
+                "instruction": f"Ucapkan {label}.",
+                "position": index,
+                "video": {
+                    "bucket": "rekan-wicara-tutorials",
+                    "path": f"{owner}/words/{word_id}/syllables/{part_id}.mp4",
+                    "position": 1,
+                    "available": False,
+                },
+            }
+            for index, (part_id, label) in enumerate(parts, 1)
+        ],
+    )
+    payload["manualWrite"] = CustomWordWrite(
+        id=word_id,
+        word="KERTAS",
+        instruction="Ucapkan KERTAS.",
+        video=True,
+        revision=2,
+        status="draft",  # Historical FE typing fixture; this staging flow is no longer accepted.
+        syllables=[
+            {
+                "id": part_id,
+                "text": label,
+                "instruction": f"Ucapkan {label}.",
+                "position": index,
+                "video": True,
+            }
+            for index, (part_id, label) in enumerate(parts, 1)
+        ],
+    )
+    lines = [
+        "// Synthetic v2 examples generated by server/scripts/export_contract.py; no recordings.",
+        "import type { V2Catalog, V2WordDetail, V2AnalyzeResponse, InstructionResponse, "
+        "CustomWordDetail, CustomWordWrite } "
+        "from '../src/api/types';",
+        "export const contractV2 = {",
+    ]
+    for name, value in payload.items():
+        body = value.model_dump(mode="json", exclude_none=name == "manualWrite")
+        lines.append(f"  {name}: {json.dumps(body, ensure_ascii=False)},")
+    lines.extend(
+        [
+            "} satisfies { catalog: V2Catalog; word: V2WordDetail; "
+            "analysis: V2AnalyzeResponse; retry: V2AnalyzeResponse; "
+            "instruction: InstructionResponse; manualWord: CustomWordDetail; "
+            "manualWrite: CustomWordWrite };",
+            "",
+        ]
+    )
+    return "\n".join(lines)
 
 
 def render_contract() -> str:
@@ -67,4 +225,5 @@ def render_contract() -> str:
 if __name__ == "__main__":
     FIXTURE.parent.mkdir(parents=True, exist_ok=True)
     FIXTURE.write_text(render_contract(), encoding="utf-8")
+    V2_FIXTURE.write_text(render_v2_contract(), encoding="utf-8")
     print("Exported synthetic API contract fixture.")

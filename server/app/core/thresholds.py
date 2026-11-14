@@ -204,6 +204,18 @@ class ExperimentsConfig(_Strict):
     motion_steps_min: int = Field(ge=1)
 
 
+class TutorialsConfig(_Strict):
+    max_duration_s: int = Field(gt=0)
+    max_upload_mb: int = Field(gt=0)
+    processing_timeout_s: int = Field(gt=0)
+
+
+class GenerationConfig(_Strict):
+    timeout_s: int = Field(gt=0)
+    max_tokens: int = Field(gt=0)
+    max_instruction_chars: int = Field(gt=0)
+
+
 class Thresholds(_Strict):
     media: MediaConfig
     quality: QualityConfig
@@ -214,6 +226,8 @@ class Thresholds(_Strict):
     calibration: CalibrationConfig
     defaults: DefaultsConfig
     experiments: ExperimentsConfig
+    tutorials: TutorialsConfig
+    generation: GenerationConfig
 
 
 def load_thresholds(path: Path = THRESHOLDS_PATH) -> Thresholds:

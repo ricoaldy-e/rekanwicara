@@ -1,0 +1,403 @@
+[
+  {
+    "item_id": "kp_tolong_to",
+    "word": "TOLONG",
+    "target": "TO",
+    "kind": "syllable",
+    "level": 2,
+    "position": 1,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/tolong/01-to.mp4",
+    "steps": [
+      "Tempelkan ujung lidah di belakang gigi seri atas, siap untuk “t”.",
+      "Taruh satu tangan di depan mulut dan satu tangan di leher.",
+      "Lepas lidah dengan hembusan kecil; leher belum bergetar.",
+      "Segera bulatkan bibir dengan bukaan sedang dan bersuara “o”; rasakan getar di leher.",
+      "Gabungkan “t” dan “o” tanpa jeda, sebagai satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_tolong_long",
+    "word": "TOLONG",
+    "target": "LONG",
+    "kind": "syllable",
+    "level": 2,
+    "position": 2,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/tolong/02-long.mp4",
+    "steps": [
+      "Naikkan ujung lidah ke gusi di belakang gigi atas, siap untuk “l”.",
+      "Mulai bersuara saat lidah masih menempel; rasakan getar di leher.",
+      "Turunkan lidah dan bulatkan bibir ke “o”. Di suku kata tertutup ini bentuknya sedikit lebih santai dan terbuka daripada “o” sendirian.",
+      "Naikkan bagian belakang lidah ke langit-langit belakang dan alirkan suara lewat hidung: ini bunyi “ng”. Rasakan getar di sisi hidung.",
+      "Tahan “ng” sebentar lalu berhenti; jangan menambahkan “g”.",
+      "Hitung semuanya sebagai satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_tolong",
+    "word": "TOLONG",
+    "target": "TOLONG",
+    "kind": "word",
+    "level": 3,
+    "position": null,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/words/tolong.mp4",
+    "steps": [
+      "Pecah kata menjadi dua bagian: to-long. Satu tepukan telapak tangan untuk tiap bagian.",
+      "Ucapkan “to”, lalu langsung “long” tanpa jeda panjang.",
+      "Jaga dua tepukan sama kuat; jangan melebih-lebihkan bentuk mulut.",
+      "Cek dengan tangan: hembusan kecil terasa hanya di awal (“t”); getar di leher terasa pada “o”, “l”, “o”, dan “ng”.",
+      "Ulangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa."
+    ]
+  },
+  {
+    "item_id": "kp_polisi_po",
+    "word": "POLISI",
+    "target": "PO",
+    "kind": "syllable",
+    "level": 2,
+    "position": 1,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/polisi/01-po.mp4",
+    "steps": [
+      "Rapatkan kedua bibir, siap untuk “p”.",
+      "Taruh satu tangan di depan bibir dan satu tangan di leher.",
+      "Lepas bibir dengan hembusan kecil; leher belum bergetar.",
+      "Segera bulatkan bibir dengan bukaan sedang dan bersuara “o”; rasakan getar di leher.",
+      "Satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_polisi_li",
+    "word": "POLISI",
+    "target": "LI",
+    "kind": "syllable",
+    "level": 2,
+    "position": 2,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/polisi/02-li.mp4",
+    "steps": [
+      "Naikkan ujung lidah ke gusi di belakang gigi atas, siap untuk “l”.",
+      "Mulai bersuara saat lidah menempel; rasakan getar di leher.",
+      "Turunkan lidah sambil melebarkan bibir ke samping seperti tersenyum: “i”.",
+      "Satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_polisi_si",
+    "word": "POLISI",
+    "target": "SI",
+    "kind": "syllable",
+    "level": 2,
+    "position": 3,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/polisi/03-si.mp4",
+    "steps": [
+      "Lebarkan bibir seperti tersenyum; gigi hampir rapat.",
+      "Dekatkan ujung lidah ke gusi belakang gigi atas dengan celah sempit.",
+      "Embuskan udara hingga terasa dingin di tangan depan mulut; leher belum bergetar.",
+      "Tanpa berhenti, mulai bersuara “i”; getar di leher mulai terasa.",
+      "Satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_polisi",
+    "word": "POLISI",
+    "target": "POLISI",
+    "kind": "word",
+    "level": 3,
+    "position": null,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/words/polisi.mp4",
+    "steps": [
+      "Pecah kata menjadi tiga bagian: po-li-si. Satu tepukan telapak tangan untuk tiap bagian.",
+      "Ucapkan “po”, “li”, “si” berurutan tanpa jeda panjang.",
+      "Bentuk mulut berganti: bibir rapat lalu bulat, lidah naik ke gusi lalu senyum, desis lalu senyum.",
+      "Cek dengan tangan: hembusan kecil di awal (“p”); getar di leher pada “o”, “l”, “i”; dingin di tangan pada “s” sebelum “i” terakhir.",
+      "Ulangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa."
+    ]
+  },
+  {
+    "item_id": "kp_api_a",
+    "word": "API",
+    "target": "A",
+    "kind": "syllable",
+    "level": 2,
+    "position": 1,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/api/01-a.mp4",
+    "steps": [
+      "Buka mulut lebar, rahang turun.",
+      "Taruh telapak tangan di leher.",
+      "Bersuara “a” singkat dan rasakan getar di leher.",
+      "Satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_api_pi",
+    "word": "API",
+    "target": "PI",
+    "kind": "syllable",
+    "level": 2,
+    "position": 2,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/api/02-pi.mp4",
+    "steps": [
+      "Rapatkan kedua bibir.",
+      "Taruh satu tangan di depan bibir dan satu tangan di leher.",
+      "Lepas bibir dengan hembusan kecil dan pada saat yang sama lebarkan bibir ke samping seperti tersenyum untuk “i”.",
+      "Rasakan getar di leher mulai setelah bibir lepas.",
+      "Satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_api",
+    "word": "API",
+    "target": "API",
+    "kind": "word",
+    "level": 3,
+    "position": null,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/words/api.mp4",
+    "steps": [
+      "Pecah kata menjadi dua bagian: a-pi. Satu tepukan telapak tangan untuk tiap bagian.",
+      "Bentuk mulut berganti tiga kali: lebar (a) → rapat (p) → melebar seperti senyum (i).",
+      "Jangan menahan bibir rapat terlalu lama; langsung lepas ke “i”.",
+      "Cek dengan tangan: getar di leher pada “a”, berhenti sesaat saat bibir rapat, lalu mulai lagi pada “i”; hembusan kecil terasa saat bibir lepas.",
+      "Ulangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa."
+    ]
+  },
+  {
+    "item_id": "kp_sakit_sa",
+    "word": "SAKIT",
+    "target": "SA",
+    "kind": "syllable",
+    "level": 2,
+    "position": 1,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/sakit/01-sa.mp4",
+    "steps": [
+      "Dekatkan ujung lidah ke gusi belakang gigi atas dengan celah sempit; gigi hampir rapat.",
+      "Embuskan udara hingga terasa dingin di tangan depan mulut; leher belum bergetar.",
+      "Tanpa berhenti, buka mulut lebar dan bersuara “a”; getar di leher mulai terasa.",
+      "Satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_sakit_kit",
+    "word": "SAKIT",
+    "target": "KIT",
+    "kind": "syllable",
+    "level": 2,
+    "position": 2,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/sakit/02-kit.mp4",
+    "steps": [
+      "Naikkan bagian belakang lidah ke langit-langit belakang, siap untuk “k”.",
+      "Taruh satu tangan di depan mulut dan satu tangan di leher.",
+      "Lepas dengan hembusan kecil sambil melebarkan bibir ke samping untuk “i”. Di suku kata tertutup ini bentuknya sedikit lebih santai daripada “i” sendirian.",
+      "Akhiri dengan menempelkan ujung lidah di belakang gigi seri atas (“t”), lalu berhenti tanpa melepaskan hembusan.",
+      "Leher berhenti bergetar saat “t”. Satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_sakit",
+    "word": "SAKIT",
+    "target": "SAKIT",
+    "kind": "word",
+    "level": 3,
+    "position": null,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/words/sakit.mp4",
+    "steps": [
+      "Pecah kata menjadi dua bagian: sa-kit. Satu tepukan telapak tangan untuk tiap bagian.",
+      "Ucapkan “sa”, lalu langsung “kit” tanpa jeda panjang.",
+      "Cek dengan tangan: dingin di tangan pada “s”; hembusan kecil pada “k”; tidak ada hembusan di akhir (“t” berhenti).",
+      "Ulangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa."
+    ]
+  },
+  {
+    "item_id": "kp_obat_o",
+    "word": "OBAT",
+    "target": "O",
+    "kind": "syllable",
+    "level": 2,
+    "position": 1,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/obat/01-o.mp4",
+    "steps": [
+      "Bulatkan bibir dengan bukaan sedang, rahang turun sedikit.",
+      "Taruh telapak tangan di leher.",
+      "Bersuara “o” singkat dan rasakan getar di leher.",
+      "Satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_obat_bat",
+    "word": "OBAT",
+    "target": "BAT",
+    "kind": "syllable",
+    "level": 2,
+    "position": 2,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/obat/02-bat.mp4",
+    "steps": [
+      "Rapatkan kedua bibir dan taruh satu tangan di leher.",
+      "Mulai bersuara saat bibir masih rapat: getar di leher terasa.",
+      "Lepas bibir dengan lembut dan buka mulut lebar untuk “a”.",
+      "Akhiri dengan menempelkan ujung lidah di belakang gigi seri atas (“t”), lalu berhenti tanpa hembusan.",
+      "Satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_obat",
+    "word": "OBAT",
+    "target": "OBAT",
+    "kind": "word",
+    "level": 3,
+    "position": null,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/words/obat.mp4",
+    "steps": [
+      "Pecah kata menjadi dua bagian: o-bat. Satu tepukan telapak tangan untuk tiap bagian.",
+      "Bentuk mulut berganti: bulat (o) → rapat (b) → lebar (a) → lidah menempel di gigi dan berhenti (t).",
+      "Cek dengan tangan: getar di leher terus terasa dari “o” sampai “a”, termasuk saat bibir rapat (“b”); tidak ada hembusan di akhir.",
+      "Ulangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa."
+    ]
+  },
+  {
+    "item_id": "kp_alamat_a",
+    "word": "ALAMAT",
+    "target": "A",
+    "kind": "syllable",
+    "level": 2,
+    "position": 1,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/alamat/01-a.mp4",
+    "steps": [
+      "Buka mulut lebar, rahang turun.",
+      "Taruh telapak tangan di leher.",
+      "Bersuara “a” singkat dan rasakan getar di leher.",
+      "Satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_alamat_la",
+    "word": "ALAMAT",
+    "target": "LA",
+    "kind": "syllable",
+    "level": 2,
+    "position": 2,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/alamat/02-la.mp4",
+    "steps": [
+      "Naikkan ujung lidah ke gusi belakang gigi atas, siap untuk “l”.",
+      "Mulai bersuara saat lidah menempel; rasakan getar di leher.",
+      "Turunkan lidah dan buka mulut lebar untuk “a”.",
+      "Satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_alamat_mat",
+    "word": "ALAMAT",
+    "target": "MAT",
+    "kind": "syllable",
+    "level": 2,
+    "position": 3,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/alamat/03-mat.mp4",
+    "steps": [
+      "Rapatkan kedua bibir; taruh satu jari di sisi hidung dan satu tangan di leher.",
+      "Bersuara “m” dengan bibir rapat: udara keluar lewat hidung; rasakan getar di sisi hidung.",
+      "Buka mulut lebar untuk “a”; udara kini keluar lewat mulut.",
+      "Akhiri dengan menempelkan ujung lidah di belakang gigi seri atas (“t”), lalu berhenti tanpa hembusan.",
+      "Satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_alamat",
+    "word": "ALAMAT",
+    "target": "ALAMAT",
+    "kind": "word",
+    "level": 3,
+    "position": null,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/words/alamat.mp4",
+    "steps": [
+      "Pecah kata menjadi tiga bagian: a-la-mat. Satu tepukan telapak tangan untuk tiap bagian.",
+      "Mulut terbuka lebar pada setiap “a”; di antaranya lidah naik ke gusi (“l”) dan bibir merapat (“m”).",
+      "Cek dengan tangan: getar di leher hampir terus-menerus; getar di sisi hidung terasa pada “m”; tidak ada hembusan di akhir.",
+      "Ulangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa."
+    ]
+  },
+  {
+    "item_id": "kp_makan_ma",
+    "word": "MAKAN",
+    "target": "MA",
+    "kind": "syllable",
+    "level": 2,
+    "position": 1,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/makan/01-ma.mp4",
+    "steps": [
+      "Rapatkan kedua bibir; taruh satu jari di sisi hidung dan satu tangan di leher.",
+      "Bersuara “m” dengan bibir rapat: udara keluar lewat hidung; getar terasa di sisi hidung.",
+      "Buka mulut lebar untuk “a”; udara keluar lewat mulut.",
+      "Satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_makan_kan",
+    "word": "MAKAN",
+    "target": "KAN",
+    "kind": "syllable",
+    "level": 2,
+    "position": 2,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/syllables/makan/02-kan.mp4",
+    "steps": [
+      "Naikkan bagian belakang lidah ke langit-langit belakang, siap untuk “k”.",
+      "Taruh satu tangan di depan mulut.",
+      "Lepas dengan hembusan kecil dan segera buka mulut lebar untuk “a”.",
+      "Akhiri dengan menempelkan ujung lidah di belakang gigi seri atas dan alirkan suara lewat hidung (“n”); rasakan getar di sisi hidung.",
+      "Satu ketukan."
+    ]
+  },
+  {
+    "item_id": "kp_makan",
+    "word": "MAKAN",
+    "target": "MAKAN",
+    "kind": "word",
+    "level": 3,
+    "position": null,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/words/makan.mp4",
+    "steps": [
+      "Pecah kata menjadi dua bagian: ma-kan. Satu tepukan telapak tangan untuk tiap bagian.",
+      "Ucapkan “ma”, lalu langsung “kan” tanpa jeda panjang.",
+      "Bentuk mulut berganti: bibir rapat → lebar (a) → lidah belakang naik (k) → lebar (a) → lidah menempel di gigi (n).",
+      "Cek dengan tangan: getar di sisi hidung terasa pada “m” dan pada “n” di akhir; hembusan kecil terasa pada “k”.",
+      "Ulangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa."
+    ]
+  },
+  {
+    "item_id": "kp_haus",
+    "word": "HAUS",
+    "target": "HAUS",
+    "kind": "word",
+    "level": 3,
+    "position": null,
+    "bucket": "rekan-wicara-tutorials",
+    "storage_path": "default/words/haus.mp4",
+    "steps": [
+      "Taruh satu tangan di depan mulut dan satu tangan di leher.",
+      "Buka mulut lebar dan embuskan napas hangat dari tenggorokan (“h”); rasakan hangat di tangan, leher belum bergetar.",
+      "Tanpa berhenti, mulai bersuara “a”; getar di leher mulai terasa.",
+      "Sambil terus bersuara, bulatkan dan dekatkan bibir menuju “u”: “au” adalah satu gerakan mulus, bukan dua bunyi terpisah.",
+      "Lanjutkan tanpa jeda ke “s”: dekatkan ujung lidah ke gusi dengan celah sempit; getar berhenti dan udara dingin terasa di tangan.",
+      "Hitung semuanya sebagai satu ketukan (satu suku kata menurut ejaan; diftong “au” tidak dipenggal).",
+      "Ulangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa."
+    ]
+  }
+]

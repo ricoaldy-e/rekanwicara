@@ -1,0 +1,412 @@
+{
+  "tested_on": "2026-11-14",
+  "environment": "Real Supabase Cloud and local FastAPI; no mocked operations",
+  "credentials": "Public API key and two real authenticated companion JWTs; no service role",
+  "media": "Four distinct synthetic valid H264/AAC MP4 files: three initial files plus one replacement; no camera recording or private dataset accessed",
+  "limits": [
+    "Runtime RPC execution verified; SECURITY DEFINER flag not independently introspected through SQL",
+    "Native camera and Frontend not tested or modified",
+    "Legacy v1 regression scope was GET /v1/items; AI endpoints not exercised"
+  ],
+  "cases": {
+    "configuration_public_key_only": {
+      "passed": true
+    },
+    "media_KER": {
+      "bytes": 21390,
+      "synthetic": true,
+      "passed": true
+    },
+    "media_TAS": {
+      "bytes": 21342,
+      "synthetic": true,
+      "passed": true
+    },
+    "media_KERTAS": {
+      "bytes": 21371,
+      "synthetic": true,
+      "passed": true
+    },
+    "media_KERTAS_NEW": {
+      "bytes": 21402,
+      "synthetic": true,
+      "passed": true
+    },
+    "media_are_distinct": {
+      "passed": true
+    },
+    "login_A": {
+      "status": 200,
+      "passed": true
+    },
+    "verified_companion_A": {
+      "status": 200,
+      "passed": true
+    },
+    "login_B": {
+      "status": 200,
+      "passed": true
+    },
+    "verified_companion_B": {
+      "status": 200,
+      "passed": true
+    },
+    "two_distinct_real_accounts": {
+      "passed": true
+    },
+    "new_run_uuid_word": {
+      "status": 200,
+      "passed": true
+    },
+    "new_run_uuid_probe": {
+      "status": 200,
+      "passed": true
+    },
+    "rpc_authenticated_execute": {
+      "status": 422,
+      "code": "PT422",
+      "passed": true
+    },
+    "rpc_anon_denied": {
+      "status": 401,
+      "code": "42501",
+      "passed": true
+    },
+    "schema_columns_readable": {
+      "status": 200,
+      "passed": true
+    },
+    "direct_insert_denied": {
+      "status": 403,
+      "code": "42501",
+      "passed": true
+    },
+    "direct_update_denied": {
+      "status": 403,
+      "code": "42501",
+      "passed": true
+    },
+    "direct_delete_denied": {
+      "status": 403,
+      "code": "42501",
+      "passed": true
+    },
+    "manual_without_jwt": {
+      "status": 401,
+      "code": "UNAUTHENTICATED",
+      "passed": true
+    },
+    "manual_invalid_jwt": {
+      "status": 401,
+      "code": "UNAUTHENTICATED",
+      "passed": true
+    },
+    "incomplete_published_api": {
+      "status": 422,
+      "code": "INCOMPLETE_MATERIAL",
+      "passed": true
+    },
+    "incomplete_published_rpc": {
+      "status": 422,
+      "code": "PT422",
+      "passed": true
+    },
+    "incomplete_rpc_rollback": {
+      "status": 200,
+      "passed": true
+    },
+    "v1_items_before": {
+      "status": 200,
+      "passed": true
+    },
+    "default_catalog_before": {
+      "status": 200,
+      "passed": true
+    },
+    "default_videos_before": {
+      "expected_videos": 24,
+      "readable": 24,
+      "signed_access": null,
+      "passed": true
+    },
+    "unique_path_KER": {
+      "status": 400,
+      "code": "NoSuchKey",
+      "passed": true
+    },
+    "upload_KER": {
+      "status": 200,
+      "passed": true
+    },
+    "metadata_KER": {
+      "status": 200,
+      "passed": true
+    },
+    "signed_KER": {
+      "status": 200,
+      "passed": true
+    },
+    "download_KER": {
+      "status": 200,
+      "checksum_matches": true,
+      "passed": true
+    },
+    "unique_path_TAS": {
+      "status": 400,
+      "code": "NoSuchKey",
+      "passed": true
+    },
+    "upload_TAS": {
+      "status": 200,
+      "passed": true
+    },
+    "metadata_TAS": {
+      "status": 200,
+      "passed": true
+    },
+    "signed_TAS": {
+      "status": 200,
+      "passed": true
+    },
+    "download_TAS": {
+      "status": 200,
+      "checksum_matches": true,
+      "passed": true
+    },
+    "unique_path_KERTAS": {
+      "status": 400,
+      "code": "NoSuchKey",
+      "passed": true
+    },
+    "upload_KERTAS": {
+      "status": 200,
+      "passed": true
+    },
+    "metadata_KERTAS": {
+      "status": 200,
+      "passed": true
+    },
+    "signed_KERTAS": {
+      "status": 200,
+      "passed": true
+    },
+    "download_KERTAS": {
+      "status": 200,
+      "checksum_matches": true,
+      "passed": true
+    },
+    "POST_custom_word": {
+      "status": 201,
+      "passed": true
+    },
+    "created_published": {
+      "passed": true
+    },
+    "GET_custom_list": {
+      "status": 200,
+      "passed": true
+    },
+    "GET_custom_detail": {
+      "status": 200,
+      "passed": true
+    },
+    "GET_catalog_with_custom": {
+      "status": 200,
+      "passed": true
+    },
+    "GET_learning_detail_KER_TAS_KERTAS": {
+      "status": 200,
+      "passed": true
+    },
+    "database_real_tree": {
+      "word_rows": 1,
+      "syllable_rows": 2,
+      "video_rows": 3,
+      "passed": true
+    },
+    "account_B_get_A_word": {
+      "status": 404,
+      "code": "ITEM_NOT_FOUND",
+      "passed": true
+    },
+    "account_B_patch_A_word": {
+      "status": 404,
+      "code": "ITEM_NOT_FOUND",
+      "passed": true
+    },
+    "account_B_delete_A_word": {
+      "status": 404,
+      "code": "ITEM_NOT_FOUND",
+      "passed": true
+    },
+    "account_B_list": {
+      "status": 200,
+      "passed": true
+    },
+    "account_B_catalog": {
+      "status": 200,
+      "passed": true
+    },
+    "account_B_rls_custom_words": {
+      "status": 200,
+      "passed": true
+    },
+    "account_B_rls_custom_syllables": {
+      "status": 200,
+      "passed": true
+    },
+    "account_B_rls_custom_videos": {
+      "status": 200,
+      "passed": true
+    },
+    "account_B_rls_custom_videos_parts": {
+      "status": 200,
+      "passed": true
+    },
+    "account_B_direct_rpc_A_word": {
+      "status": 404,
+      "code": "PT404",
+      "passed": true
+    },
+    "account_B_info_A_video": {
+      "status": 400,
+      "code": "NoSuchKey",
+      "passed": true
+    },
+    "account_B_sign_A_video": {
+      "status": 400,
+      "code": "NoSuchKey",
+      "passed": true
+    },
+    "account_B_delete_A_video": {
+      "status": 200,
+      "owner_file_preserved": true,
+      "passed": true
+    },
+    "PATCH_revision_conflict": {
+      "status": 409,
+      "code": "REVISION_CONFLICT",
+      "passed": true
+    },
+    "revision_conflict_no_mutation": {
+      "passed": true
+    },
+    "PATCH_missing_replacement": {
+      "status": 422,
+      "code": "INCOMPLETE_MATERIAL",
+      "passed": true
+    },
+    "missing_replacement_preserves_metadata": {
+      "passed": true
+    },
+    "old_video_still_present_before_commit": {
+      "status": 200,
+      "passed": true
+    },
+    "unique_path_KERTAS_NEW": {
+      "status": 400,
+      "code": "NoSuchKey",
+      "passed": true
+    },
+    "upload_KERTAS_NEW": {
+      "status": 200,
+      "passed": true
+    },
+    "metadata_KERTAS_NEW": {
+      "status": 200,
+      "passed": true
+    },
+    "signed_KERTAS_NEW": {
+      "status": 200,
+      "passed": true
+    },
+    "download_KERTAS_NEW": {
+      "status": 200,
+      "checksum_matches": true,
+      "passed": true
+    },
+    "PATCH_instruction_and_video": {
+      "status": 200,
+      "passed": true
+    },
+    "replacement_correct_binding": {
+      "cleanup_pending": false,
+      "passed": true
+    },
+    "old_video_removed_after_commit": {
+      "status": 400,
+      "code": "NoSuchKey",
+      "passed": true
+    },
+    "signed_KERTAS_NEW_after_commit": {
+      "status": 200,
+      "passed": true
+    },
+    "download_KERTAS_NEW_after_commit": {
+      "status": 200,
+      "checksum_matches": true,
+      "passed": true
+    },
+    "DELETE_stale_revision": {
+      "status": 409,
+      "code": "REVISION_CONFLICT",
+      "passed": true
+    },
+    "DELETE_custom_word": {
+      "status": 200,
+      "passed": true
+    },
+    "GET_deleted_word": {
+      "status": 404,
+      "code": "ITEM_NOT_FOUND",
+      "passed": true
+    },
+    "catalog_after_cleanup": {
+      "status": 200,
+      "passed": true
+    },
+    "default_videos_after": {
+      "expected_videos": 24,
+      "readable": 24,
+      "signed_access": 24,
+      "passed": true
+    },
+    "default_objects_unchanged": {
+      "passed": true
+    },
+    "default_public_url_denied": {
+      "status": 400,
+      "code": null,
+      "passed": true
+    },
+    "v1_items_after": {
+      "status": 200,
+      "passed": true
+    },
+    "logout_local_A": {
+      "status": 204,
+      "passed": true
+    },
+    "logout_local_B": {
+      "status": 204,
+      "passed": true
+    }
+  },
+  "blocked": [],
+  "cleanup": {
+    "remaining_word_rows": 0,
+    "remaining_syllable_rows": 0,
+    "remaining_video_rows": 0,
+    "remaining_objects": 0,
+    "attempted_objects": 4,
+    "all_clean": true,
+    "issues": []
+  },
+  "errors": [],
+  "summary": {
+    "passed": 87,
+    "failed": [],
+    "blocked": [],
+    "errors": []
+  }
+}

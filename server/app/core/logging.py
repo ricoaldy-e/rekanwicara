@@ -29,6 +29,9 @@ def configure_logging(debug: bool) -> None:
     access_logger.propagate = True
     # Uvicorn's own access log includes the client address and the raw path with query string.
     logging.getLogger("uvicorn.access").disabled = True
+    # Outbound Storage URLs and request headers must not reach debug/access logs.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
 
 
 def _route_template(scope: Scope) -> str:

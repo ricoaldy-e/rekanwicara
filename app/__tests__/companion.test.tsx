@@ -15,12 +15,14 @@ const mockAddListenCheck = jest.fn();
 const mockUpdateSettings = jest.fn();
 let mockProfile: Profile;
 let mockDemo = false;
+let mockOwnerId = 'fixture-account';
 let mockSync: { configured: boolean; running: boolean; pending: number; lastError: string | null; lastSyncedAt: string | null };
 
-jest.mock('../src/user/storage', () => ({ verifyPin: (pin: string) => mockVerifyPin(pin) }));
+jest.mock('../src/user/storage', () => ({ verifyPin: (pin: string) => mockVerifyPin(pin), hasPin: async () => true }));
 jest.mock('../src/state/content', () => ({ useContent: () => ({ items: mockItems }) }));
 jest.mock('../src/state/user', () => ({
   useUser: () => ({
+    session: { user: { id: mockOwnerId } },
     profile: mockProfile,
     demo: mockDemo,
     // The real progression rules, so the screen shows what the app would show.
@@ -48,6 +50,7 @@ beforeEach(() => {
   mockUpdateSettings.mockReset();
   mockProfile = newProfile();
   mockDemo = false;
+  mockOwnerId = 'fixture-account';
   mockSync = { configured: false, running: false, pending: 0, lastError: null, lastSyncedAt: null };
 });
 
@@ -59,6 +62,17 @@ async function unlock(pin = '4821', correct = true) {
 }
 
 describe('Mode Pendamping', () => {
+  it('requires the new account PIN instead of carrying over the previous unlock', async () => {
+    mockVerifyPin.mockResolvedValue(true);
+    const view = await render(<Companion />);
+    await fireEvent.changeText(screen.getByTestId('companion-pin'), '4821');
+    await fireEvent.press(screen.getByTestId('companion-unlock'));
+    await waitFor(() => expect(screen.getByTestId('open-custom-words')).toBeTruthy());
+    mockOwnerId = 'other-fixture-account';
+    await view.rerender(<Companion />);
+    await waitFor(() => expect(screen.getByTestId('companion-pin')).toBeTruthy());
+    expect(screen.queryByTestId('open-custom-words')).toBeNull();
+  });
   it('shows nothing but the PIN screen until the PIN is right', async () => {
     await unlock('1111', false);
     await waitFor(() => expect(screen.getByTestId('companion-pin-error')).toBeTruthy());
@@ -146,6 +160,7 @@ describe('Mode Pendamping', () => {
     const share = jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction', activityType: undefined });
     await unlock();
     expect(screen.getByTestId('sync-demo')).toBeTruthy();
+    expect(screen.getByTestId('open-custom-words')).toBeDisabled();
     expect(screen.queryByRole('button', { name: 'Sinkronkan sekarang' })).toBeNull();
     await fireEvent.press(screen.getByTestId('share-report'));
     expect(share.mock.calls[0][0].message).toMatch(/^MODE DEMO/);

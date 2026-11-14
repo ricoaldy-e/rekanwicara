@@ -4,11 +4,13 @@ import Onboarding from '../app/onboarding';
 
 const mockReplace = jest.fn();
 const mockComplete = jest.fn();
+let mockSession: object | null = { user: { id: 'fixture-account' } };
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ replace: mockReplace }) }));
-jest.mock('../src/state/user', () => ({ useUser: () => ({ completeOnboarding: mockComplete }) }));
+jest.mock('../src/state/user', () => ({ useUser: () => ({ session: mockSession, completeOnboarding: mockComplete }) }));
 
 beforeEach(() => {
+  mockSession = { user: { id: 'fixture-account' } };
   mockReplace.mockClear();
   mockComplete.mockReset().mockResolvedValue(undefined);
 });
@@ -19,6 +21,13 @@ async function toConsent() {
 }
 
 describe('Onboarding', () => {
+  it('requires account login before offering PIN onboarding', async () => {
+    mockSession = null;
+    await render(<Onboarding />);
+    expect(screen.getByText('Login pendamping')).toBeTruthy();
+    expect(screen.queryByTestId('pin-input')).toBeNull();
+    expect(mockComplete).not.toHaveBeenCalled();
+  });
   it('explains that it is a practice aid, not a replacement for a teacher or therapist', async () => {
     await render(<Onboarding />);
     expect(screen.getByLabelText(/Bukan pengganti guru atau terapis, dan bukan penilaian klinis/)).toBeTruthy();

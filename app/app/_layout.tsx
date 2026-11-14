@@ -34,6 +34,7 @@ export default function RootLayout() {
             <Stack.Screen name="onboarding" options={{ title: 'Selamat datang' }} />
             <Stack.Screen name="calibration" options={{ title: 'Kalibrasi' }} />
             <Stack.Screen name="home" options={{ title: 'Cermin Wicara', headerBackVisible: false }} />
+            <Stack.Screen name="tutorial-videos" options={{ title: 'Rekam Tutorial', headerBackButtonMenuEnabled: false }} />
             <Stack.Screen name="practice/[itemId]" options={{ title: 'Latihan' }} />
             <Stack.Screen name="companion" options={{ title: 'Mode Pendamping' }} />
             <Stack.Screen name="dataset/index" options={{ title: 'Mode Dataset' }} />

@@ -13,6 +13,10 @@ from app.api import labeler
 from app.api.errors import register_error_handlers
 from app.api.uploads import MULTIPART_OVERHEAD_BYTES, UploadSizeLimitMiddleware
 from app.api.v1 import build_v1_router
+from app.api.v2 import analysis as analysis_v2
+from app.api.v2 import catalog as catalog_v2
+from app.api.v2 import custom_words as custom_words_v2
+from app.api.v2 import instructions as instructions_v2
 from app.content.loader import load_content
 from app.core.logging import AccessLogMiddleware, configure_logging
 from app.core.settings import Settings, get_settings
@@ -57,12 +61,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     register_error_handlers(app)
     app.include_router(build_v1_router(settings.dataset_mode, settings.debug))
+    app.include_router(catalog_v2.router)
+    app.include_router(custom_words_v2.router)
+    app.include_router(analysis_v2.router)
+    app.include_router(instructions_v2.router)
     if settings.dataset_mode:
         app.include_router(labeler.router)  # not registered otherwise: /labeler is a plain 404
 
     # Middleware added last runs first: AccessLog -> CORS -> size limit -> app.
     app.add_middleware(
-        UploadSizeLimitMiddleware, max_bytes=settings.max_upload_bytes + MULTIPART_OVERHEAD_BYTES
+        UploadSizeLimitMiddleware,
+        max_bytes=settings.max_upload_bytes + MULTIPART_OVERHEAD_BYTES,
+        tutorial_max_bytes=thresholds.tutorials.max_upload_mb * 1024 * 1024
+        + MULTIPART_OVERHEAD_BYTES,
     )
     # Open CORS: demo runs on a LAN; the native app does not need it, browsers/tools do.
     app.add_middleware(

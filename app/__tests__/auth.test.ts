@@ -8,8 +8,9 @@ import {
   updateCompanionProfile, verifyPasswordRecovery,
 } from '../src/auth/companion';
 import { newProfile } from '../src/user/pure';
+import { readResume, writeResume } from '../src/home/resume';
 import {
-  changePin, loadProfile, PIN_KEY, PROFILE_KEY, savePin, saveProfile, verifyPin,
+  changePin, hasPin, loadProfile, PIN_KEY, PROFILE_KEY, savePin, saveProfile, verifyPin,
 } from '../src/user/storage';
 
 const UID = '11111111-1111-4111-8111-111111111111';
@@ -180,8 +181,10 @@ it('isolates local profiles and preserves the legacy profile and PIN', async () 
 });
 
 it('creates, verifies and changes four-digit PINs per account and refuses overwrites', async () => {
+  expect(await hasPin()).toBe(false);
   await expect(savePin('123')).rejects.toThrow(/4 angka/);
   await savePin('1234');
+  expect(await hasPin()).toBe(true);
   await expect(savePin('9999')).rejects.toThrow(/sudah dibuat/);
   expect(await verifyPin('1234')).toBe(true);
   await expect(changePin('0000', '5678')).rejects.toThrow(/salah/);
@@ -189,6 +192,7 @@ it('creates, verifies and changes four-digit PINs per account and refuses overwr
   expect(await verifyPin('1234')).toBe(false);
   expect(await verifyPin('5678')).toBe(true);
   mockSession!.user.id = OTHER;
+  expect(await hasPin()).toBe(false);
   expect(await verifyPin('5678')).toBe(false);
   await savePin('4321');
   expect(mockSecure.get(`${PIN_KEY}.${UID}`)).toBe('5678');
@@ -199,6 +203,9 @@ it('creates, verifies and changes four-digit PINs per account and refuses overwr
 });
 
 it('deletes through Auth, then clears only the explicitly deleted account locally', async () => {
+  const cursor = { kind: 'word' as const, id: 'fixture-word', position: 1, phase: 'tutorial' as const };
+  await writeResume(UID, cursor);
+  await writeResume(OTHER, cursor);
   await saveProfile(newProfile(UID));
   await saveProfile(newProfile(OTHER));
   mockSecure.set(`${PIN_KEY}.${UID}`, '1234');
@@ -209,6 +216,8 @@ it('deletes through Auth, then clears only the explicitly deleted account locall
   expect(await AsyncStorage.getItem(`${PROFILE_KEY}.${OTHER}`)).not.toBeNull();
   expect(mockSecure.has(`${PIN_KEY}.${UID}`)).toBe(false);
   expect(mockSecure.has(`${PIN_KEY}.${OTHER}`)).toBe(true);
+  expect(await readResume(UID)).toBeNull();
+  expect(await readResume(OTHER)).toEqual(cursor);
 });
 
 it('keeps all local data and the session when remote deletion fails', async () => {

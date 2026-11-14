@@ -48,6 +48,7 @@ export default function Home() {
       >
         <Text style={styles.title}>Misi hari ini</Text>
       </Pressable>
+      {__DEV__ ? <BigButton label="Rekam Tutorial (24 video)" icon="videocam" onPress={() => router.push('/tutorial-videos')} /> : null}
       {demo ? <InfoNote text="Mode demo: progres contoh. Hasil latihan di mode ini tidak disimpan online." /> : null}
 
       {!profile.calibrated ? (

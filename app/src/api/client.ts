@@ -1,5 +1,12 @@
 import type {
+  CustomWordDetail,
+  CustomWordWrite,
+  CustomWordList,
+  CustomWordDeletion,
   AccountDeletionResponse,
+  TutorialsResponse,
+  TutorialItem,
+  TutorialUploadResponse,
   AllosaurusResponse,
   Wav2Vec2Response,
   CombinedResponse,
@@ -42,7 +49,15 @@ export interface ApiClient {
   readonly baseUrl: string;
   getHealth(): Promise<HealthResponse>;
   getItems(): Promise<ItemsResponse>;
+  listCustomWords(accessToken: string): Promise<CustomWordList>;
+  getCustomWord(id: string, accessToken: string): Promise<CustomWordDetail>;
+  createCustomWord(body: CustomWordWrite, accessToken: string): Promise<CustomWordDetail>;
+  updateCustomWord(id: string, body: CustomWordWrite, accessToken: string): Promise<CustomWordDetail>;
+  deleteCustomWord(id: string, revision: number, accessToken: string): Promise<CustomWordDeletion>;
+  cleanupCustomWord(id: string, accessToken: string): Promise<CustomWordDetail>;
   deleteAccount(accessToken: string): Promise<AccountDeletionResponse>;
+  getTutorials(accessToken: string): Promise<TutorialsResponse>;
+  uploadTutorial(item: TutorialItem, accessToken: string, file: UploadFile, options?: UploadCallOptions): Promise<TutorialUploadResponse>;
   analyze(req: AnalyzeRequest, options?: AnalysisCallOptions): Promise<AnalyzeResponse>;
   calibrate(req: CalibrateRequest, options?: AnalysisCallOptions): Promise<CalibrateResponse>;
   datasetUpload(req: DatasetUploadRequest, options?: UploadCallOptions): Promise<DatasetUploadResponse>;
@@ -110,9 +125,37 @@ export function createApiClient(baseUrl: string, options: ApiClientOptions = {})
 
   const mockQuery = (mock?: MockVariant) => (mock ? `?mock=${encodeURIComponent(mock)}` : '');
 
+  function custom<T>(path: string, accessToken: string, method = 'GET', body?: CustomWordWrite) {
+    return request<T>(`/v2/custom-words${path}`, {
+      method,
+      headers: { Authorization: `Bearer ${accessToken}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+      ...(body ? { body: JSON.stringify(body) } : {}),
+    });
+  }
+
   return {
     baseUrl: base,
+    listCustomWords: (token) => custom<CustomWordList>('', token),
+    getCustomWord: (id, token) => custom<CustomWordDetail>(`/${encodeURIComponent(id)}`, token),
+    createCustomWord: (body, token) => custom<CustomWordDetail>('', token, 'POST', body),
+    updateCustomWord: (id, body, token) => custom<CustomWordDetail>(`/${encodeURIComponent(id)}`, token, 'PATCH', body),
+    deleteCustomWord: (id, revision, token) => custom<CustomWordDeletion>(`/${encodeURIComponent(id)}?revision=${revision}`, token, 'DELETE'),
+    cleanupCustomWord: (id, token) => custom<CustomWordDetail>(`/${encodeURIComponent(id)}/cleanup`, token, 'POST'),
     getHealth: () => request<HealthResponse>('/v1/health'),
+    getTutorials: (accessToken) => request<TutorialsResponse>('/v1/tutorials', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }),
+    uploadTutorial: async (item, accessToken, file, opts = {}) => {
+      const body = await uploadNative(`${base}/v1/tutorials/${encodeURIComponent(item.item_id)}/video`, file,
+        { timeoutMs: 300_000, ...opts }, undefined, { Authorization: `Bearer ${accessToken}` });
+      const result = body as Partial<TutorialUploadResponse> | null;
+      if (!result || result.status !== 'verified' || result.item_id !== item.item_id
+        || result.bucket !== item.bucket || result.storage_path !== item.storage_path
+        || typeof result.size_bytes !== 'number' || !Number.isSafeInteger(result.size_bytes) || result.size_bytes <= 0) {
+        throw new ApiError('parse', 'Tutorial upload was not verified');
+      }
+      return result as TutorialUploadResponse;
+    },
     getItems: () => request<ItemsResponse>('/v1/items'),
     async deleteAccount(accessToken) {
       const body = await request<AccountDeletionResponse>('/v1/auth/account', {

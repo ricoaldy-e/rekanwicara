@@ -26,6 +26,8 @@ export interface RecordPanelProps {
   /** Text under the camera; defaults to the face-position hint. */
   hint?: string;
   permissionPurpose?: string;
+  manualStop?: boolean;
+  videoQuality?: '480p' | '1080p';
 }
 
 const REC_RED = '#C62828';
@@ -54,6 +56,8 @@ function RecorderCamera({
   disabled = false,
   recordLabel = 'Rekam',
   hint = 'Letakkan wajah di dalam oval, lalu tekan Rekam.',
+  manualStop = false,
+  videoQuality = '480p',
 }: RecordPanelProps) {
   const camera = useRef<CameraView>(null);
   const [ready, setReady] = useState(false);
@@ -157,7 +161,7 @@ function RecorderCamera({
           style={StyleSheet.absoluteFill}
           facing="front"
           mode="video"
-          videoQuality="480p"
+          videoQuality={videoQuality}
           onCameraReady={() => setReady(true)}
           onMountError={() => setMountError('Kamera tidak dapat dibuka. Tutup aplikasi lain yang memakai kamera.')}
         />
@@ -187,10 +191,21 @@ function RecorderCamera({
 
       <Text style={styles.hint}>{mountError ?? state.error ?? hint}</Text>
 
-      {!disabled ? (
+      {manualStop && state.phase === 'recording' ? (
+        <BigButton
+          label="Selesai rekam"
+          icon="stop-circle"
+          onPress={() => {
+            dispatch({ type: 'stop' });
+            try { camera.current?.stopRecording(); } catch {
+              dispatch({ type: 'failed', message: 'Belum dapat menghentikan kamera. Coba lagi.' });
+            }
+          }}
+        />
+      ) : !disabled ? (
         <BigButton
           testID="record-button"
-          label={busy ? 'Merekam…' : !ready ? 'Menyiapkan kamera…' : `${recordLabel} (${seconds} detik)`}
+          label={busy ? 'Merekam…' : !ready ? 'Menyiapkan kamera…' : manualStop ? recordLabel : `${recordLabel} (${seconds} detik)`}
           icon="radio-button-on"
           disabled={busy || !ready || mountError !== null}
           onPress={() => dispatch({ type: 'start' })}

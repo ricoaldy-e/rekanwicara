@@ -9,6 +9,156 @@ export interface AccountDeletionResponse {
   status: 'deleted';
 }
 
+/** API v2 models: clarified draft plus the latest endpoint requirements; v1 stays below. */
+export interface VideoReference {
+  bucket: string;
+  path: string;
+  position: number;
+  available: boolean;
+}
+
+export interface V2Material {
+  id: string;
+  text: string;
+  instruction: string;
+  videos: VideoReference[];
+}
+
+export interface V2WordSummary {
+  id: string;
+  text: string;
+  source: 'default' | 'custom';
+  has_level_2: boolean;
+  automatic_evaluation: boolean;
+}
+
+export interface V2Catalog {
+  level_1: V2Material[];
+  words: V2WordSummary[];
+}
+
+export interface V2WordDetail {
+  id: string;
+  text: string;
+  source: 'default' | 'custom';
+  syllable_split: string | null;
+  automatic_evaluation: boolean;
+  level_2: (V2Material & { position: number })[];
+  level_3: { instruction: string; videos: VideoReference[] };
+}
+
+export interface V2ItemDetail extends V2Material {
+  level: 1 | 2 | 3;
+  automatic_evaluation: boolean;
+}
+
+export interface CustomSyllableWrite {
+  id: string;
+  text: string;
+  instruction: string;
+  position: number;
+  video: boolean;
+}
+
+export interface CustomWordWrite {
+  id?: string;
+  word: string;
+  instruction: string;
+  status: 'draft' | 'published';
+  video: boolean;
+  syllables: CustomSyllableWrite[];
+  revision?: number;
+}
+
+export interface CustomSyllableDetail {
+  id: string;
+  text: string;
+  instruction: string;
+  position: number;
+  video: VideoReference | null;
+}
+
+export interface CustomWordDetail {
+  id: string;
+  word: string;
+  instruction: string;
+  status: 'draft' | 'published' | 'deleting';
+  revision: number;
+  video: VideoReference | null;
+  syllables: CustomSyllableDetail[];
+  cleanup_pending: boolean;
+}
+
+export interface CustomWordList {
+  words: CustomWordSummary[];
+  max_upload_mb: number;
+  max_duration_s: number;
+}
+
+export interface CustomWordSummary {
+  id: string;
+  word: string;
+  status: 'draft' | 'published' | 'deleting';
+  revision: number;
+  syllable_count: number;
+  cleanup_pending: boolean;
+}
+
+export interface CustomWordDeletion {
+  id: string;
+  status: 'deleted' | 'cleanup_pending';
+}
+
+export type V2Result = 'sesuai' | 'mendekati' | 'belum_sesuai';
+export interface V2AnalyzeResponse {
+  status: 'evaluated' | 'retry';
+  item_id: string;
+  level: 1 | 2 | 3;
+  result: V2Result | null;
+  lip_result: V2Result | null;
+  voice_result: V2Result | null;
+  feedback: { code: string; message: string };
+  quality_flags: string[];
+  visuals: AnalyzeResponse['visuals'] | null;
+  engine: 'mediapipe_parselmouth' | 'mediapipe_wav2vec2';
+  processing_ms: number;
+}
+
+export interface InstructionRequest {
+  type: 'word' | 'syllable';
+  text: string;
+  parent_word?: string | null;
+}
+
+export interface InstructionResponse { instruction: string }
+
+export interface TutorialItem {
+  item_id: string;
+  word: string;
+  target: string;
+  kind: 'word' | 'syllable';
+  level: 2 | 3;
+  position: number | null;
+  bucket: string;
+  storage_path: string;
+  steps: string[];
+  present: boolean;
+}
+
+export interface TutorialsResponse {
+  items: TutorialItem[];
+  max_duration_s: number;
+  max_upload_mb: number;
+}
+
+export interface TutorialUploadResponse {
+  status: 'verified';
+  item_id: string;
+  bucket: string;
+  storage_path: string;
+  size_bytes: number;
+}
+
 export type Status = 'hijau' | 'kuning' | 'merah';
 export type ResponseStatus = 'ok' | 'retry';
 /** SPEC §4/§7: the MVP always scores with rules. */

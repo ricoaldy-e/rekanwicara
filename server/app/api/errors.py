@@ -44,9 +44,13 @@ def register_error_handlers(app: FastAPI) -> None:
         return JSONResponse(error_body(exc.code, exc.message), status_code=exc.status_code)
 
     @app.exception_handler(RequestValidationError)
-    async def _validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
+    async def _validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
         return JSONResponse(
-            error_body("invalid_request", _format_validation_errors(exc)), status_code=422
+            error_body(
+                "INVALID_INPUT" if request.url.path.startswith("/v2/") else "invalid_request",
+                _format_validation_errors(exc),
+            ),
+            status_code=422,
         )
 
     @app.exception_handler(StarletteHTTPException)

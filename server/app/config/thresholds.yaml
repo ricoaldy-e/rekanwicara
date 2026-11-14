@@ -152,3 +152,12 @@ defaults:
     a: {f1: 819.0, f2: 1410.0}
     i: {f1: 310.0, f2: 2521.0}
     u: {f1: 416.0, f2: 931.0}
+tutorials:
+  max_duration_s: 120
+  max_upload_mb: 50
+  processing_timeout_s: 180
+
+generation:
+  timeout_s: 30
+  max_tokens: 500
+  max_instruction_chars: 1600

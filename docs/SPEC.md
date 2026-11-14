@@ -86,9 +86,266 @@ app simpan ringkasan → Supabase
 Environment server (`server/.env`): `HOST`, `PORT`, `MOCK_MODE` (true/false), `DATASET_MODE`,
 `DEBUG`, `DATA_DIR` (default `../data`), `SCORER_MODE` (MVP: selalu `rules`), `ENGINE_VERSION`.
 
-## §5 Kontrak API v1 (sumber kebenaran)
+## §5 Kontrak API v1 dan v2 (sumber kebenaran)
 
 Semua endpoint di bawah prefix `/v1`. Upload memakai `multipart/form-data`.
+
+### API v2 — implementasi 14 November 2026
+
+Acuan dibaca dari `REKAN_WICARA_BE_FE_CONTRACT_V2_FINAL_DRAFT.md`, sesuai klarifikasi
+pengguna. File bernama v2.1 belum tersedia. Instruksi terbaru pengguna mengesampingkan
+bagian draft yang bertentangan: satu video per kata/suku kata, katalog tanpa menu suku
+kata, delapan Kata Penting berupa panduan tanpa penilaian otomatis, Level 1 memiliki tiga hasil, serta
+`lip_result`/`voice_result` berupa string hasil atau null. Ini bukan klaim draft lama identik v2.1.
+
+Semua request v2 membutuhkan `Authorization: Bearer <Supabase access token>`.
+Server memverifikasi akun email non-anonim melalui Auth `/user`. Database dan Storage
+diakses memakai `SUPABASE_ANON_KEY` + JWT pemanggil, sehingga RLS tetap berlaku;
+UID filter selalu berasal dari hasil verifikasi, bukan form/query. Tidak memakai service
+role untuk akses data v2. Semua rute berikut terdaftar juga saat `DEBUG=false`.
+
+| Method/path | Request | Response 200 |
+|---|---|---|
+| GET `/v2/catalog` | tanpa body | `{level_1: [{id,text,instruction,videos}], words: [{id,text,source,has_level_2,automatic_evaluation}]}` |
+| GET `/v2/words/{word_id}` | ID default atau `custom_word:<uuid>` | `{id,text,source,syllable_split,automatic_evaluation,level_2:[{id,text,position,instruction,videos}],level_3:{instruction,videos}}` |
+| GET `/v2/items/{item_id}` | detail langsung L1/L2/L3 | `{id,level,text,instruction,videos,automatic_evaluation}` |
+| POST `/v2/analyze` | multipart `file`, `item_id`, `session_id` | format evaluasi di bawah |
+| POST `/v2/instructions/generate` | JSON `{type:"word"|"syllable",text,parent_word?}` | `{instruction:string}` |
+
+`videos` berisi referensi `{bucket,path,position,available}`; tidak berisi URL publik atau
+kredensial. FE meminta signed URL melalui Supabase SDK saat video dibuka, bukan saat
+login. Materi Level 1 dan detail kata lama memakai registry eksplisit `server/app/content/default_videos.json`
+berdasarkan ID materi; file diverifikasi dengan metadata Storage. Registry bukan bukti
+file sudah diunggah. Custom terikat `custom_videos.word_id XOR syllable_id` dan wajib
+berada di folder pemilik. Satu materi custom harus memiliki instruksi nonkosong dan
+tepat satu video yang tersedia; semua suku kata harus lengkap, posisi positif/unik,
+dan diurutkan sesuai `position`. Dua PA tetap dua langkah walaupun ID sama.
+Tidak mengubah status publikasi/schema atau menyimpan hasil generator.
+
+Video L1 default boleh `[]` saat belum tersedia. Detail kata/suku kata lama dan custom membutuhkan
+video: bila tidak ada, `404 VIDEO_NOT_FOUND`. Kata dengan suku kata yang belum memiliki
+ID Level 2 yang tersedia (misalnya bagian A pada APA) menghasilkan `422 INVALID_MATERIAL`,
+tidak diam-diam memakai ID Level 1 dengan evaluator berbeda. Item nonaktif seperti O
+belum diaktifkan untuk penilaian; tidak membuat skor pengganti. Custom terpisah
+tetap mengikuti kepemilikan dan validasi kelengkapan.
+
+#### Katalog Kata Penting dan video — pembaruan 14 November 2026
+
+Perubahan DTO berikut diselaraskan di Pydantic, tipe TypeScript, dan fixture kontrak;
+merupakan tambahan sesuai permintaan pengguna, bukan kutipan file v2.1 yang belum tersedia.
+Tidak mengubah API v1, schema, policy Storage, atau evaluator.
+
+Katalog v2 mempertahankan enam materi Level 1 aktif (`l1_a`, `l1_i`, `l1_u`, `l1_m`,
+`l0_hold_a`, `l0_soft_loud`) dan mengganti sembilan ringkasan kata default lama dengan:
+
+| ID | Kata | `syllable_split` | Tahapan Level 2 |
+|---|---|---|---|
+| `kp_tolong` | TOLONG | `to-long` | TO, LONG |
+| `kp_polisi` | POLISI | `po-li-si` | PO, LI, SI |
+| `kp_api` | API | `a-pi` | A, PI |
+| `kp_sakit` | SAKIT | `sa-kit` | SA, KIT |
+| `kp_obat` | OBAT | `o-bat` | O, BAT |
+| `kp_alamat` | ALAMAT | `a-la-mat` | A, LA, MAT |
+| `kp_makan` | MAKAN | `ma-kan` | MA, KAN |
+| `kp_haus` | HAUS | `haus` | `[]` (langsung kata utuh) |
+
+Ketidaksesuaian yang masih terbuka: draft lama menyebut O sebagai materi dasar produk,
+tetapi O masih nonaktif pada konten/evaluator yang tersedia dan MMM aktif. Pembaruan ini
+mempertahankan enam materi aktif existing; tidak mengaktifkan penilaian O atau mengganti
+materi Level 1 di luar scope. Daftar final perlu dicocokkan ketika file v2.1 tersedia.
+
+Seluruh Kata Penting memiliki `source: "default"` dan `automatic_evaluation: false`.
+Instruksi merupakan langkah UI dari dokumen sumber, disalin melalui manifest yang sudah
+ada `server/app/content/tutorials.json`; tidak menyertakan landasan riset. Instruksi kata
+utuh dan videonya berada pada `level_3`; setiap suku kata memiliki ID terpisah
+`kp_<kata>_<suku>`, `position` mulai 1, instruksi, dan tepat satu referensi video.
+Contoh urutan TOLONG: `kp_tolong_to`, `kp_tolong_long`, lalu `kp_tolong`.
+Bagian A dalam API dan ALAMAT memiliki ID dan video berbeda.
+
+Bucket privat yang digunakan adalah `rekan-wicara-tutorials`. Delapan video kata utuh
+berada di `default/words/<kata>.mp4`; 16 video suku kata berada di
+`default/syllables/<kata>/<posisi-dua-digit>-<suku>.mp4`.
+`VideoReference.position` adalah urutan video dalam satu materi (selalu 1), sedangkan
+`level_2[].position` adalah urutan suku kata dalam kata. Katalog tidak mengunduh atau
+menandatangani video Kata Penting; pemeriksaan metadata dilakukan saat detail dibuka.
+
+Jika suatu video panduan tidak ditemukan/tidak terlihat oleh RLS/kosong, detail tetap HTTP 200 dengan instruksi,
+path yang diharapkan, dan `available: false`. FE harus menampilkan kondisi video belum
+tersedia dan tidak meminta signed URL untuk referensi tersebut. Jika pemeriksaan akses
+Storage ditolak secara eksplisit (403) atau layanan gagal, server mengembalikan
+`503 STORAGE_UNAVAILABLE`, bukan menganggap file ada. Respons Storage `NoSuchKey`
+juga dapat menyembunyikan object yang tidak boleh dibaca; `available: false` bukan
+bukti file fisik hilang. Server tidak melewati RLS untuk membedakannya.
+Untuk `available: true`, FE memakai `supabase.storage.from(bucket).createSignedUrl(path, expiresIn)`
+dengan sesi akun login saat video dibuka; URL tidak disimpan sebagai metadata permanen.
+
+FE harus menggunakan `automatic_evaluation: false` untuk alur panduan tanpa mengirim
+rekaman ke `/v2/analyze`; server juga menolak seluruh ID Kata Penting sebagai target
+evaluasi. Nilai default flag pada materi lama/custom adalah true; `syllable_split`
+pada detail lama/custom adalah null. Penyesuaian UI/alur latihan tidak termasuk tahap ini.
+Ringkasan custom tetap terisolasi per pemilik dan hanya muncul setelah instruksi dan
+seluruh video lengkap. Schema yang tersedia belum memiliki status publikasi tersendiri;
+kelengkapan tetap menjadi kriteria yang sudah digunakan, tanpa menebak kolom baru.
+
+#### Kata Manual - audit Backend, satu Simpan Kata (14 November 2026)
+
+Fase ini Backend only: tidak mengubah app/, Expo, TypeScript, atau UI. Response DTO
+existing tetap. Kontrak request dan siklus simpan berikut menggantikan staging lama.
+UI tetap satu Simpan Kata, tanpa publikasi manual atau galeri. Tim FE menangani kamera
+serta upload SDK; Backend menerima referensi rekaman dan mengelola metadata/JWT.
+
+| Method/path | Input | Response |
+|---|---|---|
+| POST `/v2/custom-words` | snapshot lengkap, UUID stabil dan path rekaman yang sudah diunggah | 201 `CustomWordDetail` |
+| GET `/v2/custom-words` | tanpa body | `{words:CustomWordSummary[],max_upload_mb,max_duration_s}` |
+| GET `/v2/custom-words/{uuid}` | UUID pemilik | `CustomWordDetail` |
+| PATCH `/v2/custom-words/{uuid}` | snapshot lengkap, wajib revisi terakhir | `CustomWordDetail` |
+| DELETE `/v2/custom-words/{uuid}?revision=N` | revisi terakhir, termasuk retry deleting | `{id,status:"deleted"|"cleanup_pending"}` |
+| POST `/v2/custom-words/{uuid}/cleanup` | retry endpoint existing | `CustomWordDetail` |
+
+Detail tetap `{id,word,instruction,status,revision,video,syllables,cleanup_pending}`;
+video null atau `{bucket,path,position:1,available}`. Ringkasan tetap
+`{id,word,status,revision,syllable_count,cleanup_pending}`. Error tetap
+`{detail:{code,message}}`. JWT email non-anonim diverifikasi; UID berasal dari Auth,
+bukan body atau PIN. Default kp_* bukan UUID custom yang dapat diedit.
+
+Batas kata dan teks suku kata: 1-30 huruf A-Z/a-z, tanpa angka/spasi/tanda baca.
+Instruksi wajib nonkosong setelah trim, maksimal 8.000 karakter, termasuk pada INSERT
+internal pertama. Maksimal 6 suku kata; Level 2 boleh kosong. ID unik dan posisi 1..N
+harus unik/berurutan. Setiap material aktif membutuhkan tepat satu video tersendiri.
+PATCH mengganti snapshot pohon; bagian yang tidak disertakan berarti dihapus.
+
+Tambahan request: `video_path` pada kata dan setiap suku kata. Path rekaman baru:
+
+- `<auth.uid()>/words/<word_uuid>/word/<recording_uuid>.mp4`
+- `<auth.uid()>/words/<word_uuid>/syllables/<syllable_uuid>/<recording_uuid>.mp4`
+
+Buat UUID versi baru pada setiap penggantian, upload dengan SDK `upsert:false`, bucket
+privat rekan-wicara-tutorials dan MIME video/mp4. Setelah semua upload berhasil, kirim
+satu POST/PATCH lengkap. POST membutuhkan UUID kata dari client untuk path dan retry
+stabil. PATCH boleh menghilangkan video_path untuk mempertahankan binding material
+existing; binding legacy tidak ditimpa/dipindahkan otomatis. Boolean video lama tetap
+diterima (default true), tetapi false ditolak pada snapshot aktif. Status default
+published; request staging status:draft ditolak 422. Published ditetapkan server setelah
+validasi, bukan dipercaya dari client. Tidak ada endpoint publikasi manual.
+
+Contoh request, UUID sintetis, <uid> diganti akun login:
+
+```json
+{
+  "id": "33333333-3333-4333-8333-333333333333",
+  "word": "KERTAS",
+  "instruction": "Ucapkan KERTAS.",
+  "video_path": "<uid>/words/33333333-3333-4333-8333-333333333333/word/77777777-7777-4777-8777-777777777777.mp4",
+  "syllables": [
+    {"id":"44444444-4444-4444-8444-444444444444","text":"KER","position":1,"instruction":"Ucapkan KER.","video_path":"<uid>/words/33333333-3333-4333-8333-333333333333/syllables/44444444-4444-4444-8444-444444444444/88888888-8888-4888-8888-888888888888.mp4"},
+    {"id":"55555555-5555-4555-8555-555555555555","text":"TAS","position":2,"instruction":"Ucapkan TAS.","video_path":"<uid>/words/33333333-3333-4333-8333-333333333333/syllables/55555555-5555-4555-8555-555555555555/99999999-9999-4999-8999-999999999999.mp4"}
+  ]
+}
+```
+
+FastAPI memeriksa keterbacaan object dengan JWT akun sebelum write. RPC mengunci parent,
+memeriksa revisi, kepemilikan, batas materi, instruksi, path/UUID, ukuran positif dan
+MIME Storage. Seluruh metadata tiga tabel disimpan dalam satu transaksi. Draft baru
+hanya sementara di dalam transaksi; instruksi sudah sah pada INSERT pertama. Kegagalan
+termasuk sesudah sebagian SQL berjalan me-rollback semua metadata. File/referensi aktif
+lama tidak ditimpa; file lama baru masuk pending_video_paths setelah commit berhasil.
+File legacy yang masih dirujuk kata lain milik akun yang sama tidak dimasukkan ke
+antrean hapus, termasuk saat menghapus kata; tidak mengorbankan materi lain.
+
+Reorder mempertahankan UNIQUE(word_id,position): child rows diganti secara atomik dengan
+UUID/created_at yang dipertahankan, tanpa posisi sementara di luar batas. Proposal
+berhenti bila ada FK dependent tambahan yang belum diaudit. Tidak membuat ulang tabel,
+FK, partial unique index atau ownership policy existing.
+
+Cleanup memakai Storage API JWT pemilik, memverifikasi object sudah tidak ada, lalu
+mengakui antrean. RPC mengecek metadata Storage lagi sebelum ack. Cleanup gagal
+menghasilkan cleanup_pending dan dapat dicoba ulang. Path pending tidak boleh diaktifkan
+kembali sehingga cleanup tidak menghapus referensi aktif. DELETE menandai deleting,
+menyelesaikan cleanup, baru menghapus metadata. Revisi stale selalu 409.
+
+Perubahan database yang diusulkan: tiga kolom custom_words.status, revision,
+pending_video_paths; constraint enum status baru; RPC manage_custom_word; pencabutan
+INSERT/UPDATE/DELETE/TRUNCATE client pada tiga tabel. SELECT dan RLS ownership tetap.
+Migrasi berhenti bila inherited write grants masih memberi akses. RPC SECURITY DEFINER
+milik postgres diperlukan setelah revoke, dengan search_path kosong dan EXECUTE hanya
+untuk authenticated. Semua cabang memeriksa JWT/UID parent eksplisit: RLS tidak otomatis
+memfilter operasi dalam fungsi definer. Tidak memakai service role key, role baru,
+policy baru atau guard custom GUC yang dapat dipalsukan.
+
+Dampak FE: response DTO kompatibel, tetapi prepare-draft -> upload ke path aktif ->
+publish tidak kompatibel dan sengaja ditolak. Tim FE perlu mengirim video_path,
+membatasi 30 huruf/6 suku kata, mengisi semua instruksi, mengunggah versi baru dahulu,
+lalu satu save. SDK tidak boleh menulis tabel metadata langsung. Tidak ada file FE
+diubah pada fase ini; fixture serializer FE existing merupakan contoh historis,
+bukan bukti staging lama masih dapat dipakai.
+
+Risiko sebelum penerapan:
+
+- PostgreSQL dan Storage bukan distributed transaction. Client harus melacak upload
+  versi baru yang belum berhasil direferensikan untuk retry/cleanup. Pada timeout
+  ambigu, GET UUID yang sama dan cocokkan referensi sebelum menghapus file; jangan
+  menghapus upload yang ternyata telah di-commit.
+- Policy Storage existing harus mengizinkan prefix versi baru milik akun sebelum row
+  kata dibuat. Jika policy INSERT mensyaratkan parent sudah ada, alur ini memerlukan
+  penyesuaian yang harus ditinjau tersendiri. Proposal
+  tidak mengubah policy atau 24 video default. Policy UPDATE yang masih mengizinkan
+  overwrite tidak menjadi immutable oleh RPC; client wajib memakai UUID versi baru
+  dan upsert:false. Enforcement immutable di Storage memerlukan review policy terpisah.
+- Backend memvalidasi metadata/MIME/keterikatan object, bukan membuktikan sumber kamera
+  secara kriptografis. UI kamera-only tetap tanggung jawab FE; tidak ada endpoint galeri.
+- Penerapan mengambil lock (timeout 5 detik). Jadwalkan backup/review sebelum penerapan.
+  Data legacy tidak dihapus; yang tidak lengkap/di luar batas tetap menjadi draft.
+
+Tes SQL menjalankan proposal exact di cluster PostgreSQL lokal sementara dengan fixture
+CHECK instruksi wajib, FK, RLS dua principal sintetis, immediate unique position, dan
+partial unique indexes. Jalankan pytest -q tests/test_manual_words_sql.py dari server/.
+Binary dicari melalui REKAN_POSTGRES_BIN, PATH, atau PostgreSQL 18 Windows. Jika tidak
+ada binary, tes di-skip, tidak pernah dialihkan ke Cloud. Hasil lokal tidak menggantikan
+uji Supabase Auth/Storage nyata setelah persetujuan. SQL final untuk ditinjau:
+docs/supabase/custom_words_manual.proposed.sql. Migrasi Cloud belum dijalankan.
+
+Contoh hasil Level 3 (ilustrasi struktur, bukan hasil uji ucapan manusia):
+
+```json
+{"status":"evaluated","item_id":"l3_papa","level":3,"result":"sesuai","lip_result":null,"voice_result":"sesuai","feedback":{"code":"MATCHED","message":"Ucapan sesuai target."},"quality_flags":[],"visuals":null,"engine":"mediapipe_wav2vec2","processing_ms":12}
+```
+
+Level 1 memakai pipeline MediaPipe/Parselmouth dan aturan yang sudah ada, menghasilkan
+`sesuai|mendekati|belum_sesuai` beserta visual yang relevan. Level 0 lama dipetakan ke
+Level 1 produk, tanpa mengubah ID/v1. Pada latihan suara saja `lip_result` dapat null.
+Level 2/3 memakai gerak/visibilitas wajah MediaPipe sebagai gerbang kualitas, lalu
+Wav2Vec2 bebas dan perbandingan teks target otoritatif yang dinormalisasi. Hanya kecocokan
+tepat menghasilkan `sesuai`; selain itu `belum_sesuai`. Transkripsi mentah tidak dikirim.
+Gerbang gerak bukan penilai ketepatan bibir per bunyi, sehingga `lip_result` L2/3 null;
+tidak membuat nilai bibir palsu. Keterbatasan ini perlu dipahami FE. `visuals` L2/3 selalu
+null. Saat kualitas tidak cukup/teks ASR kosong: `status:"retry"`, ketiga hasil null.
+`MOCK_MODE` tidak menghasilkan skor contoh pada v2. Hasil tidak disimpan otomatis;
+semua media sementara dibersihkan pada sukses/error.
+
+Generator memakai endpoint HTTPS Chat Completions-compatible yang dikonfigurasi melalui
+`LLM_API_URL`, `LLM_API_KEY`, `LLM_MODEL` di backend. Tanpa konfigurasi, respons
+`503 AI_UNAVAILABLE`, bukan teks dummy. Batas waktu/token/panjang output di thresholds.yaml.
+Hasil harus JSON dengan string instruction, selesai sepenuhnya, dan lolos pemeriksaan
+teks dasar; pendamping tetap perlu meninjau kelayakannya. Tidak membaca video atau
+menyimpan/menerbitkan materi. `429 GENERATION_RATE_LIMITED`, `504 INFERENCE_TIMEOUT`
+dan kegagalan penyedia dipetakan tanpa meneruskan pesan/kredensial penyedia.
+
+Contoh request (isi token hanya di terminal lokal; jangan menyimpannya ke repo/log):
+
+```powershell
+$headers = @{ Authorization = "Bearer $env:SUPABASE_ACCESS_TOKEN" }
+Invoke-RestMethod http://localhost:8000/v2/catalog -Headers $headers
+Invoke-RestMethod http://localhost:8000/v2/words/kp_tolong -Headers $headers
+curl.exe -H "Authorization: Bearer $env:SUPABASE_ACCESS_TOKEN" -F "file=@clip.mp4" -F "item_id=l3_papa" -F "session_id=session-1" http://localhost:8000/v2/analyze
+$body = @{ type = 'syllable'; text = 'PA'; parent_word = 'PAPA' } | ConvertTo-Json
+Invoke-RestMethod http://localhost:8000/v2/instructions/generate -Method Post -Headers $headers -ContentType 'application/json' -Body $body
+```
+
+Error tetap `{detail:{code,message}}`: 401 `UNAUTHENTICATED`, 403 `FORBIDDEN`, 404
+`ITEM_NOT_FOUND|VIDEO_NOT_FOUND`, 422 `INVALID_INPUT|INVALID_MATERIAL|INVALID_MEDIA`,
+413/415 validasi media, 429 batas generator, 503 layanan/model belum tersedia, 504 timeout.
+Semua endpoint dan perilaku v1 di bawah tetap berlaku selama migrasi.
 
 ### GET /v1/health
 `{"status":"ok","engine_version":"0.1.0","scorer_mode":"rules","mock_mode":false}`
@@ -200,6 +457,33 @@ memiliki audio (`audio_missing`), durasi/format WAV tidak sesuai, atau konversi 
 (`media_timeout`); 503 alat media, venv/model belum siap (`allosaurus_unavailable`), hasil CLI
 tidak valid (`allosaurus_invalid_result`), atau berkas sementara gagal (`media_unavailable`);
 504 inferensi timeout (`allosaurus_timeout`). Tidak meneruskan path, stderr, atau traceback CLI.
+
+### Produksi tutorial default (13 Nov, terpisah dari latihan)
+
+`GET /v1/tutorials` dan `POST /v1/tutorials/{item_id}/video` memerlukan bearer Supabase
+Auth akun email dan UID pada `TUTORIAL_UPLOADER_IDS` server (JSON array; kosong = ditolak).
+Tidak mengubah daftar materi, skor, progres, dataset, schema, bucket atau policy Storage.
+Service role hanya di server. `item_id` wajib salah satu 24 target dalam
+`server/app/content/tutorials.json`, manifest produksi yang memuat langkah UI dari sumber.
+
+GET mengembalikan `{items, max_duration_s, max_upload_mb}`; setiap item memiliki
+`item_id, word, target, kind` (`word`/`syllable`), `level` (3/2), `position` (null/1-based),
+`bucket, storage_path, steps, present`. `present` hanya hasil pemeriksaan Storage, bukan
+persetujuan mutu rekaman. Tidak mengembalikan kredensial atau URL publik.
+
+POST menerima multipart `file`, MP4/MOV dengan gambar dan audio. Batas terpisah di
+`thresholds.yaml`: 50 MiB, 120 detik, konversi maksimal 180 detik. Seluruh demonstrasi
+dikonversi ke H.264/AAC MP4 tanpa pemotongan; berkas sementara dibersihkan saat sukses/error.
+Bucket yang sudah ada: `rekan-wicara-tutorials`; path tetap
+`default/words/{word}.mp4` atau `default/syllables/{word}/{position:02}-{syllable}.mp4`.
+Tidak menerima path dari klien dan tidak menimpa objek yang ada (409 `tutorial_exists`).
+Respons sukses hanya setelah info Storage memverifikasi ukuran:
+`{status:"verified", item_id, bucket, storage_path, size_bytes}`.
+Error mengikuti §5: 401 sesi tidak valid, 403 akun di luar daftar perekam, 404 target
+tidak dikenal, 413 ukuran, 415 format, 422 media/durasi, 502 upload/verifikasi,
+503 konfigurasi/Auth/Storage/alat media. Setelah respons terputus, periksa daftar
+sebelum mencoba ulang. Akses baca langsung dan policy RLS Storage masih perlu audit terpisah;
+endpoint produksi ini bukan bukti policy Storage telah diperketat.
 
 ### POST /v1/experiments/wav2vec2 (eksperimen, hanya `DEBUG=true`)
 

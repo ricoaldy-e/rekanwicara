@@ -52,24 +52,30 @@ def check_video_upload(file: UploadFile, max_bytes: int) -> None:
 class UploadSizeLimitMiddleware:
     """Reject oversized requests by Content-Length before the multipart body is spooled to disk."""
 
-    def __init__(self, app: ASGIApp, max_bytes: int) -> None:
+    def __init__(self, app: ASGIApp, max_bytes: int, tutorial_max_bytes: int | None = None) -> None:
         self.app = app
         self.max_bytes = max_bytes
+        self.tutorial_max_bytes = tutorial_max_bytes
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] == "http":
+            max_bytes = self.max_bytes
+            if scope.get("path", "").startswith("/v1/tutorials/") and self.tutorial_max_bytes:
+                max_bytes = self.tutorial_max_bytes
             for name, value in scope.get("headers", []):
                 if name == b"content-length":
                     try:
                         length = int(value)
                     except ValueError:
                         length = 0
-                    if length > self.max_bytes:
-                        limit_mb = (self.max_bytes - MULTIPART_OVERHEAD_BYTES) // (1024 * 1024)
+                    if length > max_bytes:
+                        limit_mb = (max_bytes - MULTIPART_OVERHEAD_BYTES) // (1024 * 1024)
                         body = json.dumps(
                             {
                                 "detail": {
-                                    "code": "file_too_large",
+                                    "code": "FILE_TOO_LARGE"
+                                    if scope.get("path", "").startswith("/v2/")
+                                    else "file_too_large",
                                     "message": f"The upload exceeds {limit_mb} MB.",
                                 }
                             }
