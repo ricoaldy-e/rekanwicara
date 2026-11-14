@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useNavigation, usePreventRemove } from 'expo-router'; // not from @react-navigation/native (separate context)
 import { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
@@ -40,6 +41,8 @@ export interface WordFormProps {
   onSubmit: (data: WordFormData, onProgress: SaveProgress, signal: AbortSignal) => Promise<void>;
   /** Leave the form (after saving, or when the user cancels). */
   onClose: () => void;
+  /** Extra action under Simpan and Batal, e.g. "Hapus kata" on the edit screen (design.md §6.6). */
+  footer?: ReactNode;
 }
 
 const toValues = (d: WordFormData): Values => ({
@@ -61,7 +64,7 @@ export function syllableProblems(rows: readonly SyllableValue[]): SyllableProble
 const rowErrorCount = (p: SyllableProblems[]) => p.reduce((n, r) => n + [r.text, r.instruction, r.video].filter(Boolean).length, 0);
 
 /** The form of a word with 0–6 syllables (flow §7.7.3). The instruction is typed by hand here. */
-export function WordForm({ initial, otherWords, onSubmit, onClose }: WordFormProps) {
+export function WordForm({ initial, otherWords, onSubmit, onClose, footer }: WordFormProps) {
   const navigation = useNavigation();
   const start = useRef(toValues(initial)).current;
   const rules: Rules<Values> = {
@@ -231,6 +234,7 @@ export function WordForm({ initial, otherWords, onSubmit, onClose }: WordFormPro
 
         <BigButton label={busy ? 'Menyimpan…' : UI.save} icon="save-outline" disabled={busy} onPress={submit} testID="word-save" />
         <BigButton label={UI.cancel} variant="secondary" disabled={busy} onPress={() => navigation.goBack()} testID="word-cancel" />
+        {footer && !busy ? footer : null}
 
         <ConfirmDialog
           visible={discarding !== null}

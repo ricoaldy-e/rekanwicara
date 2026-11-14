@@ -32,9 +32,10 @@ beforeEach(async () => {
   mockStore = createMockWordStore();
 });
 
-it('lists the companion words with labelled edit and delete buttons', async () => {
+it('lists the companion words; a row opens Ubah and the list has no delete button', async () => {
   await render(<Companion />);
-  await waitFor(() => expect(screen.getByText('TOLONG')).toBeTruthy());
+  await waitFor(() => expect(screen.getByText('tolong')).toBeTruthy());
+  expect(screen.queryByRole('button', { name: 'Hapus TOLONG' })).toBeNull();
   expect(screen.getByText('2 suku kata')).toBeTruthy();
   expect(screen.getByText('Tanpa suku kata')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Ubah TOLONG' }));
@@ -58,34 +59,13 @@ it('shows built-in words read-only: no edit or delete path', async () => {
   expect(screen.queryByTestId('mine-l3_mama')).toBeNull();
 });
 
-it('deletes only after the confirmation, naming the word and its syllable count', async () => {
-  await render(<Companion />);
-  await waitFor(() => expect(screen.getByText('TOLONG')).toBeTruthy());
-  await fireEvent.press(screen.getByRole('button', { name: 'Hapus TOLONG' }));
-  expect(screen.getByText('Hapus “tolong” dan 2 suku katanya? Ini tidak bisa dibatalkan.')).toBeTruthy();
-  await fireEvent.press(screen.getByTestId('confirm-cancel'));
-  expect(screen.getByText('TOLONG')).toBeTruthy();
-
-  await fireEvent.press(screen.getByRole('button', { name: 'Hapus TOLONG' }));
-  await fireEvent.press(screen.getByTestId('confirm-ok'));
-  await waitFor(() => expect(screen.queryByText('TOLONG')).toBeNull());
-  expect(screen.getByTestId('snackbar')).toHaveAccessibleName('Kata “tolong” dihapus.');
-  expect(mockReload).toHaveBeenCalled();
-});
-
-it('names a word without syllables plainly in the delete question', async () => {
-  await render(<Companion />);
-  await waitFor(() => expect(screen.getByText('MINUM')).toBeTruthy());
-  await fireEvent.press(screen.getByRole('button', { name: 'Hapus MINUM' }));
-  expect(screen.getByText('Hapus “minum”? Ini tidak bisa dibatalkan.')).toBeTruthy();
-});
-
 it('marks an incomplete word', async () => {
   const rows = await mockStore!.list();
   rows[1].videos = [];
   await AsyncStorage.setItem('rw.mock.customWords', JSON.stringify(rows));
   await render(<Companion />);
-  await waitFor(() => expect(screen.getByLabelText('MINUM: Belum lengkap')).toBeTruthy());
+  await waitFor(() => expect(screen.getByLabelText(/MINUM: Belum lengkap/)).toBeTruthy());
+  expect(screen.getByText('Tanpa suku kata · Belum lengkap')).toBeTruthy();
 });
 
 it('says plainly when companion words are not available', async () => {

@@ -89,3 +89,31 @@ it('edits a companion word and keeps its stored videos', async () => {
   expect(dto.level_3.instruction).toBe('Rapatkan bibir lalu ucapkan minum.');
   expect(dto.level_3.videos).toHaveLength(1);
 });
+
+describe('Ubah kata: Hapus kata', () => {
+  it('deletes only after the confirmation, naming the word and its syllable count, then leaves', async () => {
+    mockWordId = 'custom_word:11111111-1111-1111-1111-111111111111';
+    await render(<EditWord />);
+    await waitFor(() => expect(screen.getByTestId('word-delete')).toBeTruthy());
+    expect(screen.getByTestId('word-delete')).toHaveAccessibleName('Hapus TOLONG');
+
+    await fireEvent.press(screen.getByTestId('word-delete'));
+    expect(screen.getByText('Hapus “tolong” dan 2 suku katanya? Ini tidak bisa dibatalkan.')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('confirm-cancel'));
+    expect(mockBack).not.toHaveBeenCalled();
+    expect((await mockStore.list()).some((r) => r.word.id === mockWordId)).toBe(true);
+
+    await fireEvent.press(screen.getByTestId('word-delete'));
+    await fireEvent.press(screen.getByTestId('confirm-ok'));
+    await waitFor(() => expect(mockBack).toHaveBeenCalled());
+    expect((await mockStore.list()).some((r) => r.word.id === mockWordId)).toBe(false);
+  });
+
+  it('names a word without syllables plainly', async () => {
+    mockWordId = 'custom_word:22222222-2222-2222-2222-222222222222';
+    await render(<EditWord />);
+    await waitFor(() => expect(screen.getByTestId('word-delete')).toBeTruthy());
+    await fireEvent.press(screen.getByTestId('word-delete'));
+    expect(screen.getByText('Hapus “minum”? Ini tidak bisa dibatalkan.')).toBeTruthy();
+  });
+});

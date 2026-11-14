@@ -11,6 +11,7 @@ let mockSession: { uid: string } | null = { uid: 'u1' };
 let mockVibration = true;
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush, replace: mockReplace }) }));
+jest.mock('expo-constants', () => ({ __esModule: true, default: { expoConfig: { version: '0.1.0' } } }));
 jest.mock('../src/auth/AuthProvider', () => ({ useAuth: () => ({ session: mockSession }) }));
 jest.mock('../src/auth/session', () => ({ auth: { signOut: (...a: unknown[]) => mockSignOut(...a) } }));
 jest.mock('../src/pin/PinSession', () => ({ usePinSession: () => ({ lock: mockLock }) }));
@@ -35,7 +36,7 @@ beforeEach(() => {
 it('lists vibration, motion note, PIN, About and sign-out before the operator options', async () => {
   await render(<Settings />);
   const text = JSON.stringify(screen.toJSON());
-  const order = ['Getar', 'Gerak mengikuti pengaturan HP.', 'Ganti PIN', 'Tentang aplikasi', 'Keluar', 'Untuk operator demo'].map((t) => text.indexOf(t));
+  const order = ['Getar', 'Ukuran teks dan gerak mengikuti pengaturan HP.', 'Ganti PIN', 'Tentang Rekan Wicara', 'Keluar', 'Untuk operator demo'].map((t) => text.indexOf(t));
   expect(order.every((i) => i >= 0)).toBe(true);
   expect([...order].sort((a, b) => a - b)).toEqual(order);
   expect(screen.getByTestId('settings-url').props.value).toBe('http://192.168.1.10:8000');
@@ -63,32 +64,20 @@ it('opens Ganti PIN and Tentang', async () => {
   expect(mockPush).toHaveBeenLastCalledWith('/about');
 });
 
-it('signs out only after the confirmation, then goes to Masuk and locks the PIN session', async () => {
+it('Keluar opens the PIN-gated sign-out screen instead of signing out here', async () => {
   await render(<Settings />);
   await fireEvent.press(screen.getByTestId('sign-out'));
+  expect(mockPush).toHaveBeenLastCalledWith('/settings/sign-out');
   expect(mockSignOut).not.toHaveBeenCalled();
-  expect(screen.getByText('Keluar dari akun?')).toBeTruthy();
-  await fireEvent.press(screen.getByTestId('confirm-ok'));
-  await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/auth/sign-in'));
-  expect(mockSignOut).toHaveBeenCalledTimes(1);
-  expect(mockLock).toHaveBeenCalled();
-});
-
-it('cancel does nothing', async () => {
-  await render(<Settings />);
-  await fireEvent.press(screen.getByTestId('sign-out'));
-  await fireEvent.press(screen.getByTestId('confirm-cancel'));
-  expect(mockSignOut).not.toHaveBeenCalled();
-  expect(mockReplace).not.toHaveBeenCalled();
   expect(screen.queryByText('Keluar dari akun?')).toBeNull();
 });
 
-it('still leaves when the server cannot be reached', async () => {
-  mockSignOut.mockRejectedValue(new Error('Network request failed'));
+it('says which settings ask for the PIN, and shows the account', async () => {
+  mockSession = { uid: 'u1', displayName: 'dina.putri', email: 'dina@email.com' } as never;
   await render(<Settings />);
-  await fireEvent.press(screen.getByTestId('sign-out'));
-  await fireEvent.press(screen.getByTestId('confirm-ok'));
-  await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/auth/sign-in'));
+  expect(screen.getByText('Meminta PIN Pendamping')).toBeTruthy();
+  expect(screen.getByText(/Ganti PIN dan Keluar meminta PIN Pendamping/)).toBeTruthy();
+  expect(screen.getByTestId('account-card')).toHaveAccessibleName('dina.putri, dina@email.com');
 });
 
 it('has no sign-out button without an account session', async () => {

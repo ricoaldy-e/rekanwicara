@@ -1,21 +1,17 @@
 import { Stack } from 'expo-router';
-import { View } from 'react-native';
 
 import { darkStackOptions } from '../../../src/navigation/stackOptions';
-import { PinGate } from '../../../src/pin/PinGate';
-import { usePinSession } from '../../../src/pin/PinSession';
 
-/** Open only after the companion PIN; every touch restarts the 5-minute idle timer. */
+/**
+ * Pengaturan is open to everyone (design.md §6.7, D2): Getar is the Tuli user's own preference.
+ * Ganti PIN asks the old PIN itself; Keluar goes through the PIN-gated `sign-out` screen.
+ */
 export default function Layout() {
-  const { touch } = usePinSession();
   return (
-    <PinGate>
-      <View style={{ flex: 1 }} onTouchStart={touch}>
-        <Stack screenOptions={darkStackOptions}>
-          <Stack.Screen name="index" options={{ title: 'Pengaturan' }} />
-          <Stack.Screen name="change-pin" options={{ title: 'Ganti PIN' }} />
-        </Stack>
-      </View>
-    </PinGate>
+    <Stack screenOptions={darkStackOptions}>
+      <Stack.Screen name="index" options={{ title: 'Pengaturan' }} />
+      <Stack.Screen name="change-pin" options={{ title: 'Ganti PIN' }} />
+      <Stack.Screen name="sign-out" options={{ title: 'Keluar' }} />
+    </Stack>
   );
 }
