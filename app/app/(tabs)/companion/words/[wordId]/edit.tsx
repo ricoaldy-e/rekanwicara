@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: companion.deleteGap,
-    borderRadius: radius.tile,
+    borderRadius: radius.pill,
     borderWidth: stroke.hairline,
     borderColor: colors.hairline,
     backgroundColor: colors.surface,
