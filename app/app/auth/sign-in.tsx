@@ -11,7 +11,7 @@ import type { TextFieldRef } from '../../src/components/form/TextField';
 import { MESSAGES, messageOf } from '../../src/forms/messages';
 import { useFormState, type Rules } from '../../src/forms/useFormState';
 import * as validate from '../../src/forms/validators/auth';
-import { colors, fontSize, lineHeight, spacing, textFont } from '../../src/theme';
+import { colors, entry, fontSize, lineHeight, spacing, textFont } from '../../src/theme';
 
 type Values = { email: string; password: string };
 const INITIAL: Values = { email: '', password: '' };
@@ -56,7 +56,11 @@ export default function SignIn() {
   };
 
   return (
-    <AuthFrame headerless top={<BrandRow />}>
+    <AuthFrame
+      headerless
+      top={<BrandRow />}
+      footer={<Text maxFontSizeMultiplier={2} style={[styles.note, textFont()]}>Rekan Wicara adalah alat bantu latihan, bukan pengganti terapis wicara.</Text>}
+    >
       <AuthTitle title="Masuk" body="Masuk dengan akun Pendamping. Pendamping hanya perlu masuk sekali di HP ini." />
       {failure === 'banner' && failureLine ? <FormBanner text={failureLine} onRetry={submit} testID="sign-in-banner" /> : null}
       {failure === 'wrong' ? <InfoNote tone="warning" text={MESSAGES.signInFailed} testID="sign-in-failed" /> : null}
@@ -92,11 +96,10 @@ export default function SignIn() {
       />
       <BigButton label={busy ? 'Memeriksa…' : 'Masuk'} icon="log-in-outline" disabled={busy} onPress={submit} testID="sign-in-submit" />
       <AuthLinkRow question="Belum punya akun?" link="Daftar" onPress={() => router.push('/auth/sign-up')} testID="to-sign-up" />
-      <Text maxFontSizeMultiplier={2} style={[styles.note, textFont()]}>Rekan Wicara adalah alat bantu latihan, bukan pengganti terapis wicara.</Text>
     </AuthFrame>
   );
 }
 
 const styles = StyleSheet.create({
-  note: { marginTop: spacing.lg, fontSize: fontSize.small, lineHeight: lineHeight.small, color: colors.textMuted, textAlign: 'center' },
+  note: { paddingHorizontal: entry.gutter, paddingBottom: spacing.lg, paddingTop: spacing.sm, fontSize: fontSize.small, lineHeight: lineHeight.small, color: colors.textMuted, textAlign: 'center' },
 });

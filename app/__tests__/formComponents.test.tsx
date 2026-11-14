@@ -140,11 +140,11 @@ describe('PasswordField', () => {
     expect(screen.getByTestId('pw').props.secureTextEntry).toBe(true);
     const toggle = screen.getByTestId('pw-toggle');
     expect(toggle.props.accessibilityState).toMatchObject({ checked: false });
-    expect(screen.getByText('Tampilkan sandi')).toBeTruthy();
+    expect(screen.getByText('Tampilkan')).toBeTruthy();
     await fireEvent.press(toggle);
     expect(screen.getByTestId('pw').props.secureTextEntry).toBe(false);
     expect(screen.getByTestId('pw-toggle').props.accessibilityState).toMatchObject({ checked: true });
-    expect(screen.getByText('Sembunyikan sandi')).toBeTruthy();
+    expect(screen.getByText('Sembunyikan')).toBeTruthy();
   });
 });
 

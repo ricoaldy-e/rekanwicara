@@ -12,10 +12,10 @@ import type { AuthCode } from './errors';
  * The screen frame of the account forms: the keyboard must not cover the button.
  * `headerless` screens (Masuk, Daftar) hide the stack header, so the frame adds the top inset and the 24 dp gutter (Figma 27:38).
  */
-export function AuthFrame({ children, top, headerless = false }: { children: ReactNode; top?: ReactNode; headerless?: boolean }) {
+export function AuthFrame({ children, top, footer, headerless = false }: { children: ReactNode; top?: ReactNode; footer?: ReactNode; headerless?: boolean }) {
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Screen edges={headerless ? ['top', 'bottom', 'left', 'right'] : undefined} contentStyle={headerless ? styles.headerless : undefined}>
+      <Screen edges={headerless ? ['top', 'bottom', 'left', 'right'] : undefined} contentStyle={headerless ? styles.headerless : undefined} footer={footer}>
         {top}
         {children}
       </Screen>

@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react-native';
 import About from '../app/about';
 
 let mockHealth: { engine_version: string; mock_mode: boolean } | null = null;
+jest.mock('expo-router', () => ({ Stack: { Screen: () => null }, useLocalSearchParams: () => ({}) }));
 jest.mock('../src/state/content', () => ({ useContent: () => ({ health: mockHealth }) }));
 jest.mock('expo-constants', () => ({ __esModule: true, default: { expoConfig: { version: '0.1.0' } } }));
 
@@ -17,7 +18,7 @@ it('shows the connected engine and identifies mock results', async () => {
   mockHealth = { engine_version: '0.2.0', mock_mode: true };
   await render(<About />);
   expect(screen.getByLabelText('Mesin: 0.2.0')).toBeTruthy();
-  expect(screen.getByLabelText(/Server memakai mode contoh/)).toBeTruthy();
+  expect(screen.getByLabelText(/Server sedang memakai data contoh/)).toBeTruthy();
 });
 
 it('has a section per topic, each a heading (Figma 51:558)', async () => {

@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusRing } from '../../../../src/a11y/useFocusRing';
 import type { Source } from '../../../../src/api/types';
 import { errorMessage } from '../../../../src/api/errors';
+import { useRowPadding } from '../../../../src/components/ListGroup';
 import { LoadingView, BigButton, Body, InfoNote, LetterTile, ListGroup, Screen, SegmentedControl, SourceChip, StatusBadge, UntriedBadge } from '../../../../src/components';
 import { bestStatus, summary } from '../../../../src/data/progress';
 import type { WordSummary } from '../../../../src/data/types';
@@ -67,6 +68,7 @@ export default function Words() {
 /** One word: letter tile, word + best status, syllables and source (Figma 37:408). The Level 2 count (read aloud only) needs the word's syllables, loaded for this row. */
 function WordRow({ word: w, apiUrl, attempts, onPress }: { word: WordSummary; apiUrl: string; attempts: readonly Attempt[]; onPress: () => void }) {
   const { focusProps, focusStyle } = useFocusRing();
+  const padding = useRowPadding(listGroup.rowPaddingVertical);
   const path = useWordPath(w.id, { baseUrl: apiUrl });
   const best = bestStatus(attempts, w.id);
   const l3 = best === 'sesuai' ? 'sesuai' : 'belum';
@@ -82,7 +84,7 @@ function WordRow({ word: w, apiUrl, attempts, onPress }: { word: WordSummary; ap
       accessibilityRole="button"
       accessibilityLabel={`${w.text}, ${w.source === 'default' ? 'bawaan' : 'dari Pendamping'}, ${text}`}
       {...focusProps}
-      style={({ pressed }) => [styles.row, pressed && styles.pressed, focusStyle]}
+      style={({ pressed }) => [styles.row, padding, pressed && styles.pressed, focusStyle]}
     >
       <LetterTile letter={w.text.charAt(0).toUpperCase()} large />
       <View style={styles.rowText}>
@@ -105,7 +107,7 @@ const styles = StyleSheet.create({
   titleBlock: { gap: spacing.sm },
   title: { fontSize: fontSize.titleLarge, lineHeight: lineHeight.titleLarge, color: colors.text },
   intro: { fontSize: fontSize.body, lineHeight: lineHeight.body, color: colors.textMuted },
-  row: { flexDirection: 'row', alignItems: 'center', gap: listGroup.rowGap, paddingVertical: listGroup.rowPaddingVertical },
+  row: { flexDirection: 'row', alignItems: 'center', gap: listGroup.rowGap },
   pressed: { backgroundColor: colors.surfaceRaised },
   rowText: { flex: 1, minWidth: 1, gap: wordList.textGap },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: wordList.titleRowGap },

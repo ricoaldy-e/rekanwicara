@@ -122,7 +122,7 @@ export default function Home() {
         <Text accessible={false} maxFontSizeMultiplier={2} style={[styles.wordmark, displayFont()]}>Rekan Wicara</Text>
       </View>
 
-      {demo ? <InfoNote text="Mode demo: progres contoh. Hasil latihan di mode ini tidak disimpan online." /> : null}
+      {demo ? <InfoNote text="Profil contoh aktif. Hasil latihan tidak disimpan online." /> : null}
 
       {!profile.calibrated ? (
         <View style={styles.gap}>
@@ -131,7 +131,7 @@ export default function Home() {
         </View>
       ) : null}
 
-      {health?.mock_mode ? <InfoNote text="Server dalam mode contoh (mock). Hasil bukan analisis sebenarnya." /> : null}
+      {health?.mock_mode ? <InfoNote text="Server sedang memakai data contoh. Hasil bukan analisis rekaman." /> : null}
       {healthError ? <InfoNote tone="warning" text={errorMessage(healthError)} /> : null}
 
       {loading && !data ? <LoadingView label="Memuat materi" text="Memuat materi…" /> : null}
@@ -273,7 +273,7 @@ export default function Home() {
         </ListGroup>
       ) : null}
 
-      <Card onPress={() => router.push('/about')} accessibilityLabel="Tentang aplikasi">
+      <Card onPress={() => router.push({ pathname: '/about', params: { from: 'Latihan' } })} accessibilityLabel="Tentang aplikasi">
         <Text maxFontSizeMultiplier={2} style={[styles.link, textFont(true)]}>Tentang aplikasi</Text>
       </Card>
 

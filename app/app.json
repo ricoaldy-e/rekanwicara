@@ -7,13 +7,13 @@
     "icon": "./assets/images/icon.png",
     "scheme": "cerminwicara",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#08110B",
+    "backgroundColor": "#141414",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#08110B",
+        "backgroundColor": "#395848",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"

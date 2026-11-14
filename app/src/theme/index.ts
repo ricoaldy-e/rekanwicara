@@ -124,6 +124,9 @@ export const buttonHeight = 52;
 /** Height of a text field (design.md §5.5). */
 export const fieldHeight = 56;
 
+/** Room kept at the right of a field for an accessory such as "Tampilkan" (eye 20 + gap 6 + "Sembunyikan" 15 Bold). */
+export const fieldAccessory = 148;
+
 /** PIN pad and dots metrics from Figma "PIN pad" (50:186) and "PIN dots" (50:179), design.md §5.6. */
 export const pin = { key: 76, rowGap: 14, columnGap: 28, digit: 30, dot: 22, dotGap: 20, dotRing: 2.5, dotPaddingVertical: 8 } as const;
 

@@ -1,9 +1,9 @@
-import { forwardRef, useState, type ComponentRef } from 'react';
+import { forwardRef, useState, type ComponentRef, type ReactNode } from 'react';
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 
 import { COUNTER_FROM } from '../../forms/limits';
 import { fill, UI } from '../../forms/messages';
-import { colors, fieldHeight, fontSize, radius, spacing, stroke, textFont, touchTarget } from '../../theme';
+import { colors, fieldAccessory, fieldHeight, fontSize, radius, spacing, stroke, textFont, touchTarget } from '../../theme';
 import { FieldError } from './FieldError';
 
 export interface TextFieldProps extends Omit<TextInputProps, 'style' | 'accessibilityLabel' | 'accessibilityHint'> {
@@ -14,6 +14,8 @@ export interface TextFieldProps extends Omit<TextInputProps, 'style' | 'accessib
   /** Already-formatted error text. */
   error?: string | null;
   optional?: boolean;
+  /** Sits inside the box at the right edge, e.g. "Tampilkan" of a password field. */
+  accessory?: ReactNode;
   testID?: string;
 }
 
@@ -21,7 +23,7 @@ export interface TextFieldProps extends Omit<TextInputProps, 'style' | 'accessib
 export type TextFieldRef = ComponentRef<typeof TextInput>;
 
 export const TextField = forwardRef<TextFieldRef, TextFieldProps>(function TextField(
-  { label, hint, error, optional, testID, onFocus, onBlur, value, maxLength, multiline, ...input },
+  { label, hint, error, optional, accessory, testID, onFocus, onBlur, value, maxLength, multiline, ...input },
   ref,
 ) {
   const [focused, setFocused] = useState(false);
@@ -36,31 +38,35 @@ export const TextField = forwardRef<TextFieldRef, TextFieldProps>(function TextF
         {label}
         {optional ? ` ${UI.optional}` : ''}
       </Text>
-      <TextInput
-        ref={ref}
-        testID={testID}
-        value={value}
-        maxLength={maxLength}
-        multiline={multiline}
-        accessibilityLabel={optional ? `${label} ${UI.optional}` : label}
-        accessibilityHint={error ? undefined : hint}
-        placeholderTextColor={colors.textMuted}
-        onFocus={(e) => {
-          setFocused(true);
-          onFocus?.(e);
-        }}
-        onBlur={(e) => {
-          setFocused(false);
-          onBlur?.(e);
-        }}
-        style={[
-          styles.input,
-          textFont(),
-          multiline && styles.multiline,
-          { borderWidth: stroke.hairline, borderColor, padding: spacing.md },
-        ]}
-        {...input}
-      />
+      <View>
+        <TextInput
+          ref={ref}
+          testID={testID}
+          value={value}
+          maxLength={maxLength}
+          multiline={multiline}
+          accessibilityLabel={optional ? `${label} ${UI.optional}` : label}
+          accessibilityHint={error ? undefined : hint}
+          placeholderTextColor={colors.textMuted}
+          onFocus={(e) => {
+            setFocused(true);
+            onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setFocused(false);
+            onBlur?.(e);
+          }}
+          style={[
+            styles.input,
+            textFont(),
+            multiline && styles.multiline,
+            { borderWidth: stroke.hairline, borderColor, padding: spacing.md },
+            accessory ? styles.withAccessory : null,
+          ]}
+          {...input}
+        />
+        {accessory ? <View style={styles.accessory}>{accessory}</View> : null}
+      </View>
       {error ? <FieldError text={error} testID={testID ? `${testID}-error` : undefined} /> : hint ? <Text style={styles.hint}>{hint}</Text> : null}
       {showCounter ? (
         <Text style={styles.counter} accessibilityLabel={fill(UI.counter, { n: length, max: maxLength })}>
@@ -72,6 +78,8 @@ export const TextField = forwardRef<TextFieldRef, TextFieldProps>(function TextF
 });
 
 const styles = StyleSheet.create({
+  withAccessory: { paddingRight: fieldAccessory },
+  accessory: { position: 'absolute', top: 0, bottom: 0, right: spacing.md, justifyContent: 'center' },
   wrap: { gap: spacing.xs + spacing.xs / 2 },
   label: { fontSize: fontSize.small, color: colors.text },
   input: {

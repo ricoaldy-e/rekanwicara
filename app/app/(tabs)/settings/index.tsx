@@ -36,7 +36,7 @@ export default function Settings() {
     setResult(null);
     try {
       const h = await createApiClient(draft, { timeoutMs: 5000 }).getHealth();
-      setResult({ ok: true, text: `Terhubung. Versi mesin ${h.engine_version}${h.mock_mode ? ', mode contoh (mock)' : ''}.` });
+      setResult({ ok: true, text: `Terhubung. Versi mesin ${h.engine_version}${h.mock_mode ? ', data contoh' : ''}.` });
     } catch (e) {
       setResult({ ok: false, text: errorMessage(e) });
     } finally {
@@ -129,7 +129,7 @@ export default function Settings() {
           title="Tentang Rekan Wicara"
           paddingVertical={companion.rowPadding}
           accessibilityLabel="Tentang aplikasi"
-          onPress={() => router.push('/about')}
+          onPress={() => router.push({ pathname: '/about', params: { from: 'Pengaturan' } })}
         />
       </ListGroup>
 
@@ -144,7 +144,7 @@ export default function Settings() {
       </Text>
 
       <Text accessibilityRole="header" style={styles.section}>
-        Untuk operator demo
+        Lanjutan
       </Text>
       <Title>Alamat server</Title>
       <Body muted>Contoh: http://192.168.1.10:8000</Body>
@@ -182,12 +182,12 @@ export default function Settings() {
           <BigButton label="Uji Allosaurus" icon="flask" variant="secondary" onPress={() => router.push('/allosaurus')} />
         </>
       ) : null}
-      <Title>Mode demo</Title>
-      <Body>Contoh progres: a dan ma sudah lulus. Latihan tetap dianalisis server. Progres demo tidak dikirim online dan hilang saat keluar dari mode demo atau app dimulai ulang.</Body>
+      <Title>Profil contoh</Title>
+      <Body>Profil contoh berisi riwayat latihan sebagai gambaran. Latihan tetap dianalisis server. Hasilnya tidak dikirim online dan hilang saat profil contoh ditutup atau app dimulai ulang.</Body>
       {ready && !sync.running ? (
-        <CheckRow checked={demo} onToggle={() => setDemo(!demo)} text="Gunakan profil demo" testID="demo-toggle" />
+        <CheckRow checked={demo} onToggle={() => setDemo(!demo)} text="Gunakan profil contoh" testID="demo-toggle" />
       ) : <Body>Tunggu penyimpanan selesai sebelum mengganti profil.</Body>}
-      <InfoNote text={demo ? 'Mode demo aktif. Data latihan asli tetap tersimpan.' : 'Profil latihan pribadi aktif.'} />
+      <InfoNote text={demo ? 'Profil contoh aktif. Data latihan asli tetap tersimpan.' : 'Profil latihan pribadi aktif.'} />
     </Screen>
   );
 }

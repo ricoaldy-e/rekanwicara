@@ -37,7 +37,7 @@ function Item({ item: it }: { item: BottomBarItem }) {
       accessibilityLabel={it.accessibilityLabel ?? it.label}
       accessibilityState={{ selected: !!it.active }}
       {...focusProps}
-      style={[styles.item, focusStyle]}
+      style={({ pressed }) => [styles.item, pressed && styles.pressed, focusStyle]}
     >
       <View testID="bar-circle" style={[styles.circle, it.active && styles.circleActive]}>
         <Ionicons name={it.icon} size={bottomBar.icon} color={it.active ? colors.onAccent : colors.textMuted} accessible={false} />
@@ -60,7 +60,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     backgroundColor: colors.surface,
   },
-  item: { flex: 1, minWidth: 1, alignItems: 'center', justifyContent: 'center', gap: bottomBar.gap, height: '100%' },
+  pressed: { backgroundColor: colors.surfaceRaised },
+  item: { borderRadius: radius.pill, flex: 1, minWidth: 1, alignItems: 'center', justifyContent: 'center', gap: bottomBar.gap, height: '100%' },
   circle: { width: bottomBar.circle, height: bottomBar.circle, borderRadius: bottomBar.circle / 2, alignItems: 'center', justifyContent: 'center' },
   circleActive: { backgroundColor: colors.accent },
   label: { fontSize: fontSize.small, lineHeight: 22, color: colors.textMuted },

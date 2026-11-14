@@ -36,7 +36,7 @@ beforeEach(() => {
 it('lists vibration, motion note, PIN, About and sign-out before the operator options', async () => {
   await render(<Settings />);
   const text = JSON.stringify(screen.toJSON());
-  const order = ['Getar', 'Ukuran teks dan gerak mengikuti pengaturan HP.', 'Ganti PIN', 'Tentang Rekan Wicara', 'Keluar', 'Untuk operator demo'].map((t) => text.indexOf(t));
+  const order = ['Getar', 'Ukuran teks dan gerak mengikuti pengaturan HP.', 'Ganti PIN', 'Tentang Rekan Wicara', 'Keluar', 'Lanjutan'].map((t) => text.indexOf(t));
   expect(order.every((i) => i >= 0)).toBe(true);
   expect([...order].sort((a, b) => a - b)).toEqual(order);
   expect(screen.getByTestId('settings-url').props.value).toBe('http://192.168.1.10:8000');
@@ -61,7 +61,7 @@ it('opens Ganti PIN and Tentang', async () => {
   await fireEvent.press(screen.getByTestId('change-pin-link'));
   expect(mockPush).toHaveBeenLastCalledWith('/settings/change-pin');
   await fireEvent.press(screen.getByTestId('about-link'));
-  expect(mockPush).toHaveBeenLastCalledWith('/about');
+  expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/about', params: { from: 'Pengaturan' } });
 });
 
 it('Keluar opens the PIN-gated sign-out screen instead of signing out here', async () => {

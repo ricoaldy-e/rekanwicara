@@ -18,7 +18,7 @@ describe('ListGroup', () => {
     expect(dividers).toHaveLength(2);
     expect(StyleSheet.flatten(dividers[0].props.style)).toMatchObject({
       height: stroke.hairline,
-      marginLeft: listGroup.inset,
+      marginLeft: listGroup.paddingLeft + listGroup.inset,
       backgroundColor: colors.hairline,
     });
   });
@@ -37,4 +37,17 @@ describe('ListGroup', () => {
     await fireEvent.press(screen.getByTestId('open'));
     expect(onPress).toHaveBeenCalledTimes(1);
   });
+});
+
+it('a pressed row owns the card padding, so its fill reaches the card edges', async () => {
+  await render(
+    <ListGroup paddingVertical={4} paddingRight={16}>
+      <ListRow title="a" testID="first" onPress={jest.fn()} />
+      <ListRow title="b" testID="last" onPress={jest.fn()} />
+    </ListGroup>,
+  );
+  const first = StyleSheet.flatten(screen.getByTestId('first').props.style);
+  const last = StyleSheet.flatten(screen.getByTestId('last').props.style);
+  expect(first).toMatchObject({ paddingLeft: listGroup.paddingLeft, paddingRight: 16, paddingTop: listGroup.rowPaddingVertical + 4 });
+  expect(last).toMatchObject({ paddingBottom: listGroup.rowPaddingVertical + 4 });
 });

@@ -11,7 +11,7 @@ export function SignedOutRedirect() {
   const { ready, required, session } = useAuth();
   const router = useRouter();
   const first = (useSegments() as string[])[0];
-  const handledElsewhere = first === undefined || first === 'index' || first === 'auth' || first === 'welcome';
+  const handledElsewhere = first === undefined || first === 'index' || first === 'auth' || first === 'welcome' || first === 'about';
   useEffect(() => {
     if (ready && required && !session && !handledElsewhere) router.replace('/welcome');
   }, [ready, required, session, handledElsewhere, router]);

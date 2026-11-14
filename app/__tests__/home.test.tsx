@@ -54,7 +54,7 @@ it('opens Level 1, Pilih kata and About', async () => {
   await fireEvent.press(screen.getByTestId('card-words'));
   expect(mockPush).toHaveBeenLastCalledWith('/home/words');
   await fireEvent.press(screen.getByRole('button', { name: 'Tentang aplikasi' }));
-  expect(mockPush).toHaveBeenLastCalledWith('/about');
+  expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/about', params: { from: 'Latihan' } });
 });
 
 it('shows the calibration note only before calibration', async () => {

@@ -1,9 +1,18 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Children, type ReactNode } from 'react';
+import { Children, createContext, useContext, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useFocusRing } from '../a11y/useFocusRing';
 import { colors, fontSize, listGroup, radius, stroke, textFont } from '../theme';
+
+/** Padding a row takes from its group, so a pressed row is filled edge to edge instead of inside the card padding. */
+const RowSpace = createContext({ left: 0, right: 0, top: 0, bottom: 0 });
+
+/** Row padding for a custom pressable row inside a ListGroup. */
+export function useRowPadding(paddingVertical: number) {
+  const { left, right, top, bottom } = useContext(RowSpace);
+  return { paddingLeft: left, paddingRight: right, paddingTop: paddingVertical + top, paddingBottom: paddingVertical + bottom };
+}
 
 export interface ListGroupProps {
   /** Section heading above the card (label 16 Bold). */
@@ -31,11 +40,15 @@ export function ListGroup({ title, titleTrailing, inset = listGroup.inset, paddi
           {titleTrailing ? <Text style={[styles.trailingText, textFont()]}>{titleTrailing}</Text> : null}
         </View>
       ) : null}
-      <View style={[styles.card, { paddingVertical, paddingRight }]}>
+      <View style={styles.card}>
         {rows.map((row, i) => (
           <View key={i}>
-            {i > 0 ? <View testID="list-separator" style={[styles.separator, { marginLeft: inset }]} /> : null}
-            {row}
+            {i > 0 ? <View testID="list-separator" style={[styles.separator, { marginLeft: listGroup.paddingLeft + inset, marginRight: paddingRight }]} /> : null}
+            <RowSpace.Provider
+              value={{ left: listGroup.paddingLeft, right: paddingRight, top: i === 0 ? paddingVertical : 0, bottom: i === rows.length - 1 ? paddingVertical : 0 }}
+            >
+              {row}
+            </RowSpace.Provider>
           </View>
         ))}
       </View>
@@ -64,6 +77,7 @@ export interface ListRowProps {
 
 export function ListRow({ title, subtitle, leading, trailing, onPress, chevron = true, paddingVertical = listGroup.rowPaddingVertical, muted = false, accessibilityLabel, testID }: ListRowProps) {
   const { focusProps, focusStyle } = useFocusRing();
+  const padding = useRowPadding(paddingVertical);
   const content = (
     <>
       {leading}
@@ -77,7 +91,7 @@ export function ListRow({ title, subtitle, leading, trailing, onPress, chevron =
   );
   if (!onPress) {
     return (
-      <View testID={testID} accessible accessibilityLabel={accessibilityLabel ?? (subtitle ? `${title}. ${subtitle}` : title)} style={[styles.row, { paddingVertical }]}>
+      <View testID={testID} accessible accessibilityLabel={accessibilityLabel ?? (subtitle ? `${title}. ${subtitle}` : title)} style={[styles.row, padding]}>
         {content}
       </View>
     );
@@ -89,7 +103,7 @@ export function ListRow({ title, subtitle, leading, trailing, onPress, chevron =
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? (subtitle ? `${title}. ${subtitle}` : title)}
       {...focusProps}
-      style={({ pressed }) => [styles.row, { paddingVertical }, pressed && styles.pressed, focusStyle]}
+      style={({ pressed }) => [styles.row, padding, pressed && styles.pressed, focusStyle]}
     >
       {content}
     </Pressable>
@@ -102,7 +116,6 @@ const styles = StyleSheet.create({
   heading: { fontSize: fontSize.label, lineHeight: 22, color: colors.text },
   trailingText: { fontSize: fontSize.small, lineHeight: 22, color: colors.textMuted },
   card: {
-    paddingLeft: listGroup.paddingLeft,
     borderRadius: radius.card,
     borderWidth: stroke.hairline,
     borderColor: colors.hairline,
