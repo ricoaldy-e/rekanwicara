@@ -41,8 +41,8 @@ export const overlay = {
 
 export const chart = { userFill: 'rgba(247,247,244,0.18)' } as const;
 
-/** hairline = card edge and field line (design.md §3.3); focus = focused field line. */
-export const stroke = { hairline: 1, thin: 1.5, thick: 2, focus: 2 } as const;
+/** hairline = card edge and field line in every state (Figma). */
+export const stroke = { hairline: 1, thin: 1.5, thick: 2 } as const;
 
 const SERIF = Platform.select({ ios: 'Georgia', android: 'serif' });
 const PLAYFAIR = 'PlayfairDisplay_700Bold';

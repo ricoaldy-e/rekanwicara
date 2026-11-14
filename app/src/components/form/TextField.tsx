@@ -27,8 +27,7 @@ export const TextField = forwardRef<TextFieldRef, TextFieldProps>(function TextF
   const [focused, setFocused] = useState(false);
   const length = [...(value ?? '')].length;
   const showCounter = maxLength !== undefined && length >= maxLength * COUNTER_FROM;
-  // The line is 1 dp (2 dp when focused); the padding compensates so the field does not jump.
-  const width = focused ? stroke.focus : stroke.hairline;
+  // Figma draws a 1 dp line in every state (default, focus, error); only its color changes.
   const borderColor = focused ? colors.focus : error ? colors.danger : colors.border;
 
   return (
@@ -58,7 +57,7 @@ export const TextField = forwardRef<TextFieldRef, TextFieldProps>(function TextF
           styles.input,
           textFont(),
           multiline && styles.multiline,
-          { borderWidth: width, borderColor, padding: spacing.md - (width - stroke.hairline) },
+          { borderWidth: stroke.hairline, borderColor, padding: spacing.md },
         ]}
         {...input}
       />
@@ -73,7 +72,7 @@ export const TextField = forwardRef<TextFieldRef, TextFieldProps>(function TextF
 });
 
 const styles = StyleSheet.create({
-  wrap: { gap: spacing.xs },
+  wrap: { gap: spacing.xs + spacing.xs / 2 },
   label: { fontSize: fontSize.small, color: colors.text },
   input: {
     minHeight: fieldHeight,

@@ -725,11 +725,11 @@ dievaluasi. Detail di docs/COMBINED_POC.md.
 - FG-2 (14 Nov 2026): komponen dasar, mengikuti Figma ("Button", "Field", "Back" di "Komponen · Interaksi", node 55:500, 55:515, 55:538, 65:621).
   - `BigButton`: tipe `danger` baru; ditekan mengubah isi (primaryPressed, dangerPressed, surfaceRaised); nonaktif = isi `surfaceRaised`, tanpa garis, tanpa opacity;
     secondary tinggi 48 dengan garis 2 dp, primary dan danger 52 tanpa garis. Ikon 24 dp dan jarak ikon-label 10 mengikuti Figma (design.md §5.1 menulis 20).
-  - `Card`: garis `hairline` 1 dp. `TextField`/`PasswordField`: garis 1 dp, fokus 2 dp (`stroke.focus` 3 → 2, hanya TextField memakainya), tinggi 56 (`fieldHeight`), label 15 Bold,
-    area teks panjang 104. Figma menggambar garis fokus 1 dp; yang dipakai 2 dp sesuai design.md §5.5.
+  - `Card`: garis `hairline` 1 dp. `TextField`/`PasswordField`: garis 1 dp, fokus 2 dp (`stroke.focus` dihapus; hanya TextField memakainya), jarak label-kolom-pesan 6, tinggi 56 (`fieldHeight`), label 15 Bold,
+    area teks panjang 104. Figma menggambar garis 1 dp di semua state; yang dipakai 1 dp (diperbaiki setelah FG-2: sebelumnya 2 dp mengikuti design.md, itu keliru karena Figma sumber utama).
   - `BackButton` baru (kapsul 48, chevron + keterangan tujuan). Dipasang sebagai `headerLeft` bawaan di `darkStackOptions` (`label` = judul layar sebelumnya, cadangan "Kembali";
     tidak tampil di layar pertama stack) dan sebagai tombol "Keluar latihan" di layar latihan (label dan aksi sama). `headerBackTitle` dihapus. `sign-in`, `check-email`, `create-pin`
     diberi `headerLeft: () => null` agar tetap tanpa tombol kembali. Teks kapsul memakai `textFont()` (Inter bila termuat).
-  - Tes: `BackButton.test.tsx` baru; `BigButton.test.tsx` menambah kasus danger. Skill `figma-design-to-code` tidak ada di daftar Skill tool, jadi tidak dimuat.
+  - Tes: `BackButton.test.tsx` baru; `BigButton.test.tsx` menambah kasus danger. Skill `figma-design-to-code` dimuat dari MCP resource `skill://figma/figma-design-to-code/SKILL.md` (tidak ada di Skill tool); `get_design_context` dipanggil dengan `skillNames: resource:figma-design-to-code`.
   - Saran skill `interfaces:better-ui` yang ditolak: skala tekan 0,96 (design.md §5.1: 0,98), pengganti garis dengan bayangan (design.md: tanpa bayangan), transisi kustom (efek tekan hanya perubahan isi).
   - Belum diverifikasi di perangkat: bentuk kapsul `headerLeft` di iOS dan Android (tinggi header), keterangan tujuan yang panjang di skala teks 200%.
