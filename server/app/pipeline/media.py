@@ -21,7 +21,7 @@ from typing import BinaryIO
 
 from app.core.thresholds import MediaConfig
 
-logger = logging.getLogger("cermin_wicara.media")
+logger = logging.getLogger("rekan_wicara.media")
 
 FFMPEG_TIMEOUT_S = 60
 FFPROBE_TIMEOUT_S = 20

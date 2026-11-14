@@ -1,4 +1,4 @@
-# Model card — penilai Cermin Wicara (scorer `rules`, engine 0.1.0)
+# Model card — penilai Rekan Wicara (scorer `rules`, engine 0.1.0)
 
 ## Tujuan
 
@@ -21,7 +21,7 @@ Tidak ada model yang dilatih oleh tim. Penilaian = model pralatih + pengukuran a
 | MediaPipe Face Landmarker (Python Tasks API, mode VIDEO) | mediapipe 1.2.2, `face_landmarker.task` float16 (SHA-256 `64184e229b263107…`) | 478 titik wajah + 52 blendshape per frame (15 fps) |
 | Parselmouth (Praat) | praat-parselmouth 0.4.7 | intensitas, nada dan status bersuara, formant F1/F2 (langkah 10 ms) |
 | FFmpeg / ffprobe | 9.0.2 | audio WAV mono 16 kHz, frame 480 px, selisih waktu audio-video |
-| Aturan Cermin Wicara | `server/app/pipeline/` | segmentasi suku kata, aturan SPEC §6.7, skor §6.8, petunjuk §6.9 |
+| Aturan Rekan Wicara | `server/app/pipeline/` | segmentasi suku kata, aturan SPEC §6.7, skor §6.8, petunjuk §6.9 |
 | Ambang | `server/app/config/thresholds.yaml` | nilai awal SPEC, disetel A2/A3 dan A6 (LOSO) |
 
 Lingkungan: Python 3.11, numpy 2.4.6, scipy 1.17.1, FastAPI 0.162.2. Lisensi komponen ada di
@@ -34,10 +34,10 @@ evaluasi di atas berasal dari A6; pemeriksaan laptop penerus ada di checklist su
 - 81 klip video (2,5–4 detik, wajah + suara) dari **3 anggota tim** (P1, P2, P3), 27 klip per orang
   menurut skrip SPEC §10.2, termasuk kesalahan sengaja dan klip buruk. Ditambah 16 video model dari satu
   orang (contoh di app, tidak dipakai untuk penyetelan).
-- Perekaman: iPhone (iOS 26.5, 26.6.2, 27.0) di app Cermin Wicara (Expo Go), satu ruang tenang,
+- Perekaman: iPhone (iOS 26.5, 26.6.2, 27.0) di app Rekan Wicara (Expo Go), satu ruang tenang,
   10 November 2026. Rekaman pertama di kafe dibuang karena bising latar merusak pengukuran suara.
 - **Persetujuan**: ketiga perekam adalah anggota tim dan menyepakati pemakaian rekaman mereka untuk
-  pengembangan dan evaluasi Cermin Wicara selama lomba (kesepakatan tim, SPEC §10.1). Rekaman tidak
+  pengembangan dan evaluasi Rekan Wicara selama lomba (kesepakatan tim, SPEC §10.1). Rekaman tidak
   dipakai untuk melatih model dan tidak dibagikan.
 - Label: label otomatis dari skrip (§10.3) + cek label oleh 2 anggota yang bukan perekamnya untuk setiap
   klip. Kesepakatan "sesuai materi" 90%, kappa 0.65.

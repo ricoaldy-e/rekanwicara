@@ -1,4 +1,4 @@
-# Laporan evaluasi — Cermin Wicara MVP (fase A6)
+# Laporan evaluasi — Rekan Wicara MVP (fase A6)
 
 **Bukti awal, bukan klaim akurasi.** Semua angka berasal dari 81 klip yang direkam oleh 3 anggota tim
 (dewasa, bukan penutur Tuli, semuanya iPhone, satu ruang tenang). Satu klip bernilai 2–5% dari satu

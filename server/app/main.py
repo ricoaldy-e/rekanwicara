@@ -1,4 +1,4 @@
-"""Cermin Wicara API entry point.
+"""Rekan Wicara API entry point.
 
 Run: ``uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`` from ``server/``.
 """
@@ -22,7 +22,7 @@ from app.dataset.labels import LabelStore
 from app.pipeline.calibration import CalibrationStore
 
 SUPPORTED_PYTHON = ((3, 10), (3, 11))
-_startup_logger = logging.getLogger("cermin_wicara.startup")
+_startup_logger = logging.getLogger("rekan_wicara.startup")
 
 
 def python_version_warning(version: tuple[int, int] | None = None) -> str | None:
@@ -47,7 +47,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     thresholds = load_thresholds()  # raises on an invalid thresholds.yaml: fail fast at startup
 
     # debug=False always: FastAPI's debug mode would put tracebacks in responses.
-    app = FastAPI(title="Cermin Wicara API", version=settings.engine_version, debug=False)
+    app = FastAPI(title="Rekan Wicara API", version=settings.engine_version, debug=False)
     app.state.settings = settings
     app.state.content = content
     app.state.thresholds = thresholds

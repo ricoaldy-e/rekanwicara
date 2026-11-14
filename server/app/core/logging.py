@@ -12,7 +12,7 @@ from typing import Any
 
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-ACCESS_LOGGER_NAME = "cermin_wicara.access"
+ACCESS_LOGGER_NAME = "rekan_wicara.access"
 access_logger = logging.getLogger(ACCESS_LOGGER_NAME)
 
 _INTERNAL_ERROR_BODY = json.dumps(

@@ -1,4 +1,4 @@
-# SPEC — Cermin Wicara MVP (v1)
+# SPEC — Rekan Wicara MVP (v1)
 
 Dokumen ini adalah acuan teknis untuk Claude Code dan tim. Semua angka ambang di sini adalah
 **nilai awal** yang disetel ulang dari data (fase A6) dan disimpan di `server/app/config/thresholds.yaml`.

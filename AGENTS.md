@@ -1,6 +1,6 @@
 # AGENTS.md — aturan untuk agen AI di repo ini (Codex, Claude Code, dll.)
 
-Proyek: **Cermin Wicara** (aplikasi latihan pelafalan untuk penyandang Tuli/tunarungu, lomba LOGICODIX 2026).
+Proyek: **Rekan Wicara** (aplikasi latihan pelafalan untuk penyandang Tuli/tunarungu, lomba LOGICODIX 2026).
 Kunci fitur **Jumat 13 Nov 2026 malam**, submission **Sabtu 14 Nov 2026**.
 
 ## Baca dulu, berurutan

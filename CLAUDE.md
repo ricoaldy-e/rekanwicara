@@ -35,7 +35,7 @@ aplikasi menampilkan dua indikator (Bibir, Suara) dan satu petunjuk.
 
 ## Struktur repo
 ```
-cermin-wicara/
+rekanwicara/
 ├── CLAUDE.md
 ├── docs/            SPEC.md, PROGRESS.md, EVAL_REPORT.md, MODEL_CARD.md, supabase/
 ├── app/             Expo app

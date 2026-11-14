@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "Rekan Wicara",
-    "slug": "cermin-wicara",
+    "slug": "rekanwicara",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "cerminwicara",
+    "scheme": "rekanwicara",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#141414",
     "ios": {

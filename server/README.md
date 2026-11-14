@@ -1,4 +1,4 @@
-# Cermin Wicara — server
+# Rekan Wicara — server
 
 FastAPI server untuk analisis rekaman latihan. Kontrak API: [docs/SPEC.md §5](../docs/SPEC.md).
 Analisis `/analyze` dan kalibrasi `/calibrate` sudah memakai pipeline sungguhan bila

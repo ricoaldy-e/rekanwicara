@@ -1,4 +1,4 @@
-# CONTEXT — Cermin Wicara (serah terima ke agen AI lain / laptop lain)
+# CONTEXT — Rekan Wicara (serah terima ke agen AI lain / laptop lain)
 
 Status: **Kamis 12 November 2026, setelah F-fix4**. Dokumen ini ditulis untuk agen AI (mis. Codex) yang melanjutkan
 pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks penting ada di berkas repo:
@@ -14,7 +14,7 @@ pekerjaan di laptop lain **tanpa riwayat percakapan sebelumnya**. Semua konteks 
 
 ## 1. Ringkasan proyek
 
-- **Cermin Wicara**: aplikasi latihan pelafalan untuk penyandang Tuli/tunarungu yang **memilih** berlatih bicara.
+- **Rekan Wicara**: aplikasi latihan pelafalan untuk penyandang Tuli/tunarungu yang **memilih** berlatih bicara.
   Pengguna merekam 2–3 detik video wajah + suara; server menilai **bentuk bibir** (MediaPipe Face Landmarker)
   dan **suara** (Parselmouth/Praat) dengan **aturan berambang**; app menampilkan dua indikator (Bibir, Suara)
   dan satu petunjuk.
