@@ -283,3 +283,11 @@ export type AnalyzeResponseV2 = {
   engine: string;
   processing_ms: number;
 };
+
+/** `POST /v2/instructions/generate` (kontrak §7). */
+export type InstructionRequest =
+  | { type: 'word'; text: string }
+  | { type: 'syllable'; text: string; parent_word: string };
+export interface InstructionResponse {
+  instruction: string;
+}

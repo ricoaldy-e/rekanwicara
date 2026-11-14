@@ -20,6 +20,7 @@ jest.mock('expo-router', () => ({
   },
 }));
 jest.mock('../src/data/pickVideo', () => ({ pickFromGallery: () => mockGallery(), recordWithCamera: () => mockCamera() }));
+jest.mock('../src/state/settings', () => ({ useSettings: () => ({ apiUrl: 'http://x' }) }));
 jest.mock('expo-video', () => {
   const { View } = require('react-native');
   return { useVideoPlayer: () => ({ muted: false, loop: false }), VideoView: () => <View testID="preview-video" /> };

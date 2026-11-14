@@ -53,6 +53,9 @@ export const MESSAGES = {
   instructionShort: `Tulis minimal ${LIMITS.instruction.min} karakter agar jelas.`,
   instructionLong: `Maksimal ${LIMITS.instruction.max} karakter.`,
   instructionHint: 'Jelaskan posisi bibir, lidah, dan rahang saat mengucapkannya.',
+  // Instruksi dengan AI (flow §7.5.2)
+  aiNeedWord: 'Isi kata dulu untuk membuat instruksi.',
+  aiNeedSyllable: 'Isi suku kata dulu untuk membuat instruksi.',
   consentToSave: 'Centang persetujuan untuk menyimpan.',
   deleteWord: 'Hapus “{word}” dan {n} suku katanya? Ini tidak bisa dibatalkan.',
   deleteWordNoSyllables: 'Hapus “{word}”? Ini tidak bisa dibatalkan.',
@@ -83,6 +86,25 @@ export const MESSAGES = {
 } as const;
 
 /** Texts of the shared form components. */
+/** Texts of "Buat dengan AI" (flow §7.5.2). */
+export const AI = {
+  button: 'Buat dengan AI',
+  again: 'Buat ulang',
+  loading: 'Membuat instruksi…',
+  cancel: 'Batal',
+  working: 'Sedang membuat instruksi',
+  disclosure: 'Kata yang kamu tulis dikirim ke layanan AI untuk membuat instruksi. Video tidak dikirim.',
+  filled: 'Instruksi terisi. Periksa sebelum menyimpan.',
+  label: 'Dibuat dengan AI. Periksa dan ubah bila perlu.',
+  undo: 'Kembalikan teks sebelumnya',
+  replaceTitle: 'Ganti instruksi yang sudah ditulis?',
+  replace: 'Ganti',
+  failed: 'Instruksi belum bisa dibuat. Tulis sendiri atau coba lagi.',
+  offline: 'Tidak ada koneksi. Tulis sendiri atau coba lagi nanti.',
+  rateLimited: 'Terlalu banyak permintaan. Coba lagi sebentar lagi.',
+  warning: 'Instruksi dari AI bisa keliru dan bukan saran klinis. Periksa sebelum menyimpan.',
+} as const;
+
 export const UI = {
   optional: '(opsional)',
   showPassword: 'Tampilkan sandi',

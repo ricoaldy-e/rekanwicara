@@ -5,13 +5,14 @@ import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 
 import { showFlash } from '../../forms/flash';
 import { LIMITS, MAX_SYLLABLES } from '../../forms/limits';
-import { fill, MESSAGES, messageOf, UI, type Problem } from '../../forms/messages';
+import { fill, MESSAGES, messageOf, UI, type Problem, AI } from '../../forms/messages';
 import { useFormState, type Rules } from '../../forms/useFormState';
 import * as word from '../../forms/validators/word';
 import { newKey } from '../../forms/keys';
 import type { SaveProgress, VideoInput, WordFormData } from '../../data/words';
 import { spacing } from '../../theme';
 import { BigButton } from '../BigButton';
+import { AiInstruction } from './AiInstruction';
 import { Body } from '../Typography';
 import { Screen } from '../Screen';
 import { ProgressBar } from '../ProgressBar';
@@ -87,6 +88,7 @@ export function WordForm({ initial, otherWords, onSubmit, onClose, footer }: Wor
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [aiBusy, setAiBusy] = useState(false);
   const [discarding, setDiscarding] = useState<null | (() => void)>(null);
   const abort = useRef<AbortController | null>(null);
 
@@ -98,6 +100,8 @@ export function WordForm({ initial, otherWords, onSubmit, onClose, footer }: Wor
 
   const rowProblems = showRows ? syllableProblems(values.syllables) : [];
   const err = (k: keyof Values) => (form.errors[k] ? messageOf(form.errors[k]!) : null);
+  const textProblem = word.wordText(values.text, otherWords);
+  const aiRequest = textProblem ? null : ({ type: 'word', text: word.normalizeWord(values.text) } as const);
   const matchWarning = word.syllablesMatch(values.text, values.syllables.map((s) => s.text));
 
   const setSyllables = (next: SyllableValue[]) => form.setValue('syllables', next);
@@ -184,14 +188,29 @@ export function WordForm({ initial, otherWords, onSubmit, onClose, footer }: Wor
           error={err('instruction')}
           maxLength={LIMITS.instruction.max}
           multiline
-          editable={!busy}
+          editable={!busy && !aiBusy}
         />
+        <AiInstruction
+          testID="word-ai"
+          name="kata"
+          request={aiRequest}
+          instruction={values.instruction}
+          onFill={(t) => form.setValue('instruction', t)}
+          onNeedText={() => {
+            form.setError('text', values.text.trim() === '' ? 'aiNeedWord' : textProblem);
+            textRef.current?.focus();
+          }}
+          onBusyChange={setAiBusy}
+          onFilled={() => instructionRef.current?.focus()}
+        />
+        <Body muted>{AI.warning}</Body>
 
         <Body>{UI.sectionSyllables}</Body>
         {values.syllables.map((s, i) => (
           <SyllableRow
             key={s.key}
             index={i}
+            parentWord={word.normalizeWord(values.text)}
             total={values.syllables.length}
             value={s}
             problems={rowProblems[i]}

@@ -4,7 +4,7 @@
  */
 import { ApiError, httpError } from './apiError';
 import { DEFAULT_TIMEOUT_MS, normalizeBaseUrl } from './client';
-import type { AnalyzeResponseV2, CatalogDTO, UploadFile, WordDTO } from './types';
+import type { AnalyzeResponseV2, CatalogDTO, InstructionRequest, InstructionResponse, UploadFile, WordDTO } from './types';
 import { uploadMultipart, type UploadCallOptions, type XhrFactory } from './upload';
 
 /** Access token for `Authorization: Bearer`; passed in so this module never imports auth (no cycle). */
@@ -21,6 +21,8 @@ export interface V2Options {
   fetchFn?: typeof fetch;
   xhrFactory?: XhrFactory;
 }
+
+const INSTRUCTION_TIMEOUT_MS = 20_000;
 
 /** §9: code used when an error body carries none. */
 const CODE_BY_STATUS: Record<number, string> = {
@@ -53,24 +55,35 @@ export function createV2Client(opts: V2Options) {
   const fetchFn = opts.fetchFn ?? ((...args: Parameters<typeof fetch>) => fetch(...args));
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
-  async function get<T>(path: string): Promise<T> {
+  async function request<T>(path: string, init: { body?: unknown; signal?: AbortSignal; timeoutMs?: number } = {}): Promise<T> {
+    const limit = init.timeoutMs ?? timeoutMs;
     const controller = new AbortController();
     let timedOut = false;
     const timer = setTimeout(() => {
       timedOut = true;
       controller.abort();
-    }, timeoutMs);
+    }, limit);
+    const onAbort = () => controller.abort();
+    init.signal?.addEventListener('abort', onAbort);
     let res: Response;
     try {
       res = await fetchFn(`${base}${path}`, {
-        headers: { Accept: 'application/json', ...(await authHeader(opts.getToken)) },
+        method: init.body === undefined ? 'GET' : 'POST',
+        headers: {
+          Accept: 'application/json',
+          ...(init.body === undefined ? {} : { 'Content-Type': 'application/json' }),
+          ...(await authHeader(opts.getToken)),
+        },
+        ...(init.body === undefined ? {} : { body: JSON.stringify(init.body) }),
         signal: controller.signal,
       });
     } catch {
-      if (timedOut) throw new ApiError('timeout', `No response within ${timeoutMs} ms`);
+      if (timedOut) throw new ApiError('timeout', `No response within ${limit} ms`);
+      if (init.signal?.aborted) throw new ApiError('cancelled', 'Request cancelled');
       throw new ApiError('network', 'Network request failed');
     } finally {
       clearTimeout(timer);
+      init.signal?.removeEventListener('abort', onAbort);
     }
     let body: unknown;
     try {
@@ -82,6 +95,8 @@ export function createV2Client(opts: V2Options) {
     if (!res.ok) throw withV2Code(httpError(res.status, body));
     return body as T;
   }
+
+  const get = <T,>(path: string) => request<T>(path);
 
   /** 401 UNAUTHENTICATED: refresh the session and try once more; if that fails, tell the app the session is lost. */
   async function authed<T>(call: () => Promise<T>): Promise<T> {
@@ -104,6 +119,9 @@ export function createV2Client(opts: V2Options) {
   return {
     getCatalog: () => authed(() => get<CatalogDTO>('/v2/catalog')),
     getWord: (id: string) => authed(() => get<WordDTO>(`/v2/words/${encodeURIComponent(id)}`)),
+    /** kontrak §7: only the text goes out, never a video. Times out after 20 s. */
+    generateInstruction: (req: InstructionRequest, signal?: AbortSignal) =>
+      authed(() => request<InstructionResponse>('/v2/instructions/generate', { body: req, signal, timeoutMs: INSTRUCTION_TIMEOUT_MS })),
     async analyze(
       req: { file: UploadFile; item_id: string; session_id: string },
       callOpts?: UploadCallOptions,
