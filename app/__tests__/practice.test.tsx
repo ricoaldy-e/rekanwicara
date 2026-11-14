@@ -9,6 +9,7 @@ const mockAddAttempt = jest.fn();
 const mockDelete = jest.fn();
 const mockBuzz = jest.fn();
 const mockPreventRemove = jest.fn();
+const mockDispatch = jest.fn();
 let mockItem: PracticeItem | null = null;
 let mockParams: Record<string, string> = {};
 
@@ -17,7 +18,7 @@ jest.mock('expo-router', () => {
   return {
     Stack: { Screen: () => <View /> },
     useLocalSearchParams: () => mockParams,
-    useNavigation: () => ({ dispatch: jest.fn() }),
+    useNavigation: () => ({ dispatch: mockDispatch }),
     usePreventRemove: (...args: unknown[]) => mockPreventRemove(...args),
     useRouter: () => ({ back: jest.fn() }),
   };
@@ -120,6 +121,22 @@ it('guards leaving only while recording or sending', async () => {
   await fireEvent.press(screen.getByRole('button', { name: 'Mulai rekam' }));
   expect(mockPreventRemove).toHaveBeenLastCalledWith(true, expect.any(Function));
   expect(screen.getByRole('button', { name: 'Keluar latihan' })).toBeTruthy(); // the back capsule lives in the content (FG-7)
+});
+
+it('"Keluar" turns the guard off before leaving, so the question is not asked again', async () => {
+  const { Alert } = jest.requireActual<typeof import('react-native')>('react-native');
+  const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+  await render(<Practice />);
+  await fireEvent.press(screen.getByRole('button', { name: 'Mulai rekam' }));
+  const action = { type: 'GO_BACK' };
+  const [, onPrevent] = mockPreventRemove.mock.lastCall as [boolean, (e: { data: { action: unknown } }) => void];
+  await act(async () => onPrevent({ data: { action } }));
+  const buttons = alert.mock.lastCall![2] as { text: string; onPress?: () => void }[];
+  await act(async () => buttons.find((x) => x.text === 'Keluar')!.onPress!());
+  expect(mockDispatch).toHaveBeenCalledWith(action);
+  expect(mockDispatch).toHaveBeenCalledTimes(1);
+  expect(mockPreventRemove).toHaveBeenLastCalledWith(false, expect.any(Function));
+  alert.mockRestore();
 });
 
 it('hides recording for a material the server cannot score', async () => {

@@ -86,7 +86,8 @@ export function useFormState<V extends Record<string, unknown>>(initial: V, rule
     [start],
   );
 
-  const dirty = (Object.keys(values) as (keyof V)[]).some((k) => values[k] !== start[k]);
+  // Compare content, not identity: a list emptied again or an equal object is not an unsaved change.
+  const dirty = (Object.keys(values) as (keyof V)[]).some((k) => values[k] !== start[k] && JSON.stringify(values[k]) !== JSON.stringify(start[k]));
 
   return { values, errors, touched, dirty, setValue, blur, submit, setError, reset };
 }

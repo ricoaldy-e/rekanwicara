@@ -63,12 +63,17 @@ export default function Practice() {
   useEffect(() => () => deleteLocalFile(uriRef.current), []);
 
   // NAV-6: leaving while recording or sending asks first; header button and Android back both land here.
-  usePreventRemove(stage === 'record' || stage === 'send', ({ data }) => {
+  // "Keluar" switches the guard off first, then runs the blocked action (otherwise it is blocked again).
+  const [leaving, setLeaving] = useState<null | { action: Parameters<typeof navigation.dispatch>[0] }>(null);
+  usePreventRemove((stage === 'record' || stage === 'send') && !leaving, ({ data }) => {
     Alert.alert('Keluar dari latihan?', 'Rekaman ini tidak disimpan.', [
       { text: 'Lanjut', style: 'cancel' },
-      { text: 'Keluar', style: 'destructive', onPress: () => navigation.dispatch(data.action) },
+      { text: 'Keluar', style: 'destructive', onPress: () => setLeaving({ action: data.action }) },
     ]);
   });
+  useEffect(() => {
+    if (leaving) navigation.dispatch(leaving.action);
+  }, [leaving, navigation]);
 
   const discard = useCallback(() => {
     deleteLocalFile(uri);

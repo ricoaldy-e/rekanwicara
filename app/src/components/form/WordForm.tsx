@@ -100,7 +100,10 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
   const [aiBusy, setAiBusy] = useState(false);
   /** The one syllable card that is open; the others show a summary line. */
   const [openKey, setOpenKey] = useState<string | null>(null);
-  const [discarding, setDiscarding] = useState<null | (() => void)>(null);
+  /** The blocked navigation action while "Buang perubahan?" is open. */
+  const [discarding, setDiscarding] = useState<null | { action: Parameters<typeof navigation.dispatch>[0] }>(null);
+  /** Set by "Buang": the guard is switched off first, then the blocked action runs (otherwise it is blocked again). */
+  const [discarded, setDiscarded] = useState<null | { action: Parameters<typeof navigation.dispatch>[0] }>(null);
   const abort = useRef<AbortController | null>(null);
   const recordings = useRef(new Set<string>());
   useEffect(() => {
@@ -114,7 +117,10 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
   }, []);
 
   // Leaving with unsaved changes asks first (header, Android back, and the Batal button all land here).
-  usePreventRemove(form.dirty && !saved, ({ data }) => setDiscarding(() => () => navigation.dispatch(data.action)));
+  usePreventRemove(form.dirty && !saved && !discarded, ({ data }) => setDiscarding({ action: data.action }));
+  useEffect(() => {
+    if (discarded) navigation.dispatch(discarded.action);
+  }, [discarded, navigation]);
   useEffect(() => {
     if (saved) onClose();
   }, [saved, onClose]);
@@ -292,9 +298,8 @@ export function WordForm({ title = 'Kata baru', initial, otherWords, onSubmit, o
           danger
           onCancel={() => setDiscarding(null)}
           onConfirm={() => {
-            const leave = discarding;
+            setDiscarded(discarding);
             setDiscarding(null);
-            leave?.();
           }}
         />
       </WordFormScreen>

@@ -209,7 +209,10 @@ describe('leaving the form', () => {
     mockPrevent.cb({ data: { action } });
     await waitFor(() => expect(screen.getByTestId('confirm-ok')).toBeTruthy());
     await fireEvent.press(screen.getByTestId('confirm-ok'));
-    expect(mockDispatch).toHaveBeenCalledWith(action);
+    // "Buang" turns the guard off before leaving, so the dialog does not come back (it used to loop).
+    await waitFor(() => expect(mockDispatch).toHaveBeenCalledWith(action));
+    expect(mockDispatch).toHaveBeenCalledTimes(1);
+    expect(mockPrevent.prevent).toBe(false);
   });
 
   it('an edit keeps the stored videos and is not dirty until something changes', async () => {
