@@ -8,7 +8,7 @@ import type { VideoInput } from '../../data/words';
 import { MESSAGES, messageOf, UI } from '../../forms/messages';
 import { videoFile } from '../../forms/validators/video';
 import { describeVideo } from '../../forms/videoMeta';
-import { colors, fontSize, iconSize, lineHeight, radius, spacing, stroke, textFont, wordForm } from '../../theme';
+import { colors, fontSize, lineHeight, radius, spacing, stroke, textFont, wordForm } from '../../theme';
 import { BigButton } from '../BigButton';
 import { FieldError } from './FieldError';
 import { InfoNote } from '../InfoNote';
@@ -19,8 +19,6 @@ export interface VideoFieldProps {
   onChange: (value: VideoInput | null) => void;
   /** Already-formatted error from the form (e.g. "Pilih atau rekam video contoh."). */
   error?: string | null;
-  /** A syllable's video: a one-line summary instead of the card and the preview (Figma 50:574). */
-  compact?: boolean;
   testID?: string;
 }
 
@@ -28,7 +26,7 @@ export interface VideoFieldProps {
  * One video: pick from the gallery or record, preview without sound, replace or delete. A picked file is checked
  * (format, size, length) before it is accepted; a wrong one is refused with the reason and the old value stays.
  */
-export function VideoField({ label, value, onChange, error, compact = false, testID }: VideoFieldProps) {
+export function VideoField({ label, value, onChange, error, testID }: VideoFieldProps) {
   const [pickError, setPickError] = useState<string | null>(null);
   const [denied, setDenied] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -55,8 +53,8 @@ export function VideoField({ label, value, onChange, error, compact = false, tes
   return (
     <View style={styles.wrap} testID={testID}>
       <Text style={[styles.label, textFont(true)]}>{label}</Text>
-      {value ? <FileCard value={value} compact={compact} /> : null}
-      {value?.kind === 'new' && !compact ? <Preview uri={value.file.uri} label={label} /> : null}
+      {value ? <FileCard value={value} /> : null}
+      {value?.kind === 'new' ? <Preview uri={value.file.uri} label={label} /> : null}
       <View style={styles.row}>
         <View style={styles.cell}>
           <BigButton
@@ -117,17 +115,9 @@ export function VideoField({ label, value, onChange, error, compact = false, tes
   );
 }
 
-/** The chosen video: thumbnail, name and facts (Figma 50:534), or one line for a syllable (Figma 50:574). */
-function FileCard({ value, compact }: { value: VideoInput; compact: boolean }) {
+/** The chosen video: thumbnail, name and facts (Figma 50:534); the same for a word and for each syllable. */
+function FileCard({ value }: { value: VideoInput }) {
   const { name, length, size } = describeVideo(value);
-  if (compact) {
-    return (
-      <View style={styles.compact} testID="video-summary">
-        <Ionicons name="videocam-outline" size={iconSize.base} color={colors.text} accessible={false} />
-        <Text numberOfLines={1} maxFontSizeMultiplier={2} style={[styles.compactText, textFont()]}>{length ? `${name} · ${length}` : MESSAGES.videoKept}</Text>
-      </View>
-    );
-  }
   return (
     <View style={styles.card} testID="video-card">
       <View style={styles.thumb}>
@@ -164,8 +154,6 @@ const styles = StyleSheet.create({
   cardText: { flex: 1, minWidth: 1, gap: spacing.xs / 2 },
   name: { fontSize: fontSize.body, lineHeight: lineHeight.label, color: colors.text },
   facts: { fontSize: fontSize.small, lineHeight: lineHeight.small, color: colors.textMuted },
-  compact: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm + spacing.xs, padding: spacing.sm + spacing.xs, borderRadius: radius.tile, backgroundColor: colors.surfaceRaised },
-  compactText: { flex: 1, minWidth: 1, fontSize: fontSize.body, lineHeight: lineHeight.body, color: colors.text },
   frame: { width: '100%', aspectRatio: 3 / 4, maxHeight: 280, borderRadius: radius.card, overflow: 'hidden', backgroundColor: colors.surface },
   video: { width: '100%', height: '100%' },
 });

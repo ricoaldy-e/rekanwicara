@@ -75,7 +75,6 @@ export function SyllableRow({ index, parentWord = '', total, value, problems, on
       <VideoField
         testID={`syllable-${index + 1}-video`}
         label={`${title}: video`}
-        compact
         value={value.video}
         onChange={(video) => onChange({ ...value, video })}
         error={err(problems?.video)}

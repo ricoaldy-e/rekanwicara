@@ -946,3 +946,5 @@ Skill yang dimuat: `figma-design-to-code` (membaca konteks), `figma-use` dan `fi
 - FG-21: Figma Kata baru (50:506) dan Ubah kata (61:716) kini menggambar tombol "Buat dengan AI" dan catatan pengiriman di tiap kartu suku kata (di bawah kolom instruksi, di atas Naik/Turun/Hapus). Kode sudah memilikinya sejak formulir dibuat (`AiInstruction` di `SyllableRow`, konteks kata induk dikirim sesuai kontrak §7, tes `aiInstruction.test`); tidak ada perubahan kode.
 
 - FG-21b: Figma Kata baru dan Ubah kata kini menggambar tombol video (Ganti video, Hapus) di tiap kartu suku kata, di bawah ringkasan video; kode sudah punya `VideoField` per suku kata. Tidak ada perubahan kode.
+
+- FG-21c: video suku kata memakai kartu video yang sama dengan video kata (ubin 64, nama berkas, "0:02 · 1,2 MB", pratinjau muted); varian `compact` di `VideoField` dihapus. Figma Kata baru dan Ubah kata disamakan. Kontrol video (Ganti, Hapus, Rekam) tetap di bawah kartu.
