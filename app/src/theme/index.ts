@@ -218,6 +218,24 @@ export const entry = {
   stepBarGap: 8,
 } as const;
 
+/** Opening animation (FG-13), in ms and dp. The logo starts where the native splash draws it, then glides to its place. */
+export const splashMotion = {
+  hold: 150,
+  glide: 700,
+  nameDelay: 500,
+  nameFade: 500,
+  nameRise: 10,
+  taglineDelay: 800,
+  taglineFade: 450,
+  taglineRise: 6,
+  footDelay: 1100,
+  footFade: 400,
+  rest: 600,
+  exit: 300,
+  reducedRest: 600,
+  ease: [0.22, 1, 0.36, 1],
+} as const;
+
 /** Icon sizes in dp. Outline Ionicons are drawn in these boxes; labels carry the meaning (design.md §2). */
 export const iconSize = { chip: 18, field: 20, base: 22, button: 24, option: 26, note: 28, add: 32, status: 34, gate: 48 } as const;
 

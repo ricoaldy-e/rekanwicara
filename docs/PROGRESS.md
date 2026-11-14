@@ -902,3 +902,16 @@ Pengaturan tidak dikunci PIN dan Keluar meminta PIN (rute baru `/settings/sign-o
 - "Buat dengan AI" untuk kata dan tiap suku kata (kontrak §7, flow §7.5.2): `generateInstruction` di klien v2 (POST, 20 detik, batal), `src/data/instructions.ts` (tiruan bila `USE_MOCK`), komponen `AiInstruction` (konfirmasi ganti, memuat + Batal, Buat ulang, undo satu tingkat, label, pesan galat/offline/429 dengan jeda 30 detik, teks pengungkapan, peringatan). `instruction_source` belum disimpan ke penyimpanan (hanya label di formulir). Backend nyata belum diuji; `/v2` belum ada di server lokal.
 - Tentang disamakan dengan Figma 51:558 (judul, catatan, bagian berpemisah garis tipis, kartu versi Aplikasi/Mesin). Tombol "Pengaturan" di Tentang dihapus (tidak ada di Figma).
 - Putaran perbaikan berikutnya: efek tekan baris daftar kini penuh sampai tepi kartu (baris memegang padding kartu lewat konteks `ListGroup`; juga item bar bawah), kolom sandi "Tampilkan" di dalam kotak (aksesori `TextField`, Figma 27:70), "Rekan Wicara adalah alat bantu…" menempel di bawah layar Masuk, Tentang tetap terbuka saat belum masuk (tautan privasi dari Daftar sebelumnya dialihkan ke Selamat datang) dan kapsul kembalinya bernama asal layar lewat parameter `from` (nama rute "(tabs)" tidak pernah tampil), ikon aplikasi dan favicon dari logo Figma (iOS penuh, Android adaptif + monokrom), teks produk: tanpa LOGICODIX, tim, "mode demo" atau "mock" ("Profil contoh", "data contoh", "Lanjutan").
+
+## FG-13 (14 Nov 2026): animasi pembuka
+
+- `SplashIntro` (`app/src/components/SplashIntro.tsx`) menggantikan layar Memuat yang diam di `app/index.tsx`. `Animated` bawaan React Native, tanpa dependensi baru. Token di `splashMotion` (`src/theme`).
+- Urutan: logo muncul di posisi logo splash native (tengah layar), naik ke posisi Figma 106:627 (700 ms), nama, tagline, lalu catatan batas produk fade in; jeda 600 ms; fade out 300 ms; pindah ke tujuan gerbang. Logo tidak diberi skala agar sambungan dari splash native mulus.
+- Gerbang tidak berubah (urutan masuk, PIN, onboarding sama). Yang baru: pindah layar menunggu animasi selesai **dan** gerbang siap. Bila gerbang lebih lambat, layar tetap di keadaan akhir. Animasi hanya sekali per peluncuran (kembali ke gerbang setelah keluar/daftar tanpa animasi).
+- Reduce Motion: semua tampil sekaligus, jeda 600 ms, tanpa fade.
+- Layar tujuan (`welcome`, `auth/create-pin`, `onboarding`, `(tabs)`) memakai `animation: 'fade'` di `_layout.tsx`.
+- Bilah di Memuat tetap diam dan dekoratif (Figma menggambar bilah terisi sebagian; animasi pengisian akan mengklaim kemajuan yang tidak ada).
+- Figma hanya punya satu bingkai statis untuk splash (tanpa prototype); urutan gerak ini keputusan implementasi. design.md §8 dan §6.8 diperbarui.
+- Saran skill yang ditolak: tidak ada yang dipakai (tidak ada skill UI dimuat di langkah ini selain figma-design-to-code).
+- Tes: `SplashIntro.test` (baru); `auth.test` memakai tiruan `SplashIntro` agar tes gerbang tidak menunggu animasi.
+- **Belum diuji di perangkat:** kelancaran 60 fps, kesesuaian posisi logo dengan splash native di Android/iOS (ada kemungkinan lompatan kecil), dan fade ke layar tujuan.

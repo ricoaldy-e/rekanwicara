@@ -259,7 +259,7 @@ Tanpa bar bawah. **Tombol aksi menempel di bawah layar** (Ulangi primer; Lihat c
 
 ### 6.8 Tentang, autentikasi, onboarding, kalibrasi
 Mengikuti `flow-srs-ui.md` kecuali yang tertulis di sini. Tentang: deskripsi, catatan batas, privasi, versi (grup daftar).
-- **Splash:** native (logo 120 di atas `background`) lalu "Memuat" (logo, "Rekan Wicara" serif 34, "Latihan bicara dengan bantuan visual", batang diam 96 × 3 yang dekoratif, catatan batas produk).
+- **Splash:** native (logo 120 di atas `background`) lalu animasi pembuka `SplashIntro` (FG-13, sekali per peluncuran, ±2,5 detik): logo muncul di posisi logo native, naik ke tempatnya, lalu nama, tagline, dan catatan batas produk fade in; seluruh layar fade out setelah gerbang siap. Reduce Motion: semua tampil sekaligus, jeda ±0,6 detik. Token di `splashMotion`. Tampilan akhirnya "Memuat" (logo, "Rekan Wicara" serif 34, "Latihan bicara dengan bantuan visual", batang diam 96 × 3 yang dekoratif, catatan batas produk).
 - **Selamat datang (rute baru `/welcome`, **[BEDA DARI FLOW]**, D11):** layar pertama untuk yang belum masuk: logo 176, "Berlatih bicara dengan melihat.", kalimat pendukung, "Masuk" (krem) dan "Buat akun" (sekunder) menempel di bawah, catatan batas produk.
 - **Masuk:** tanpa header Stack; logo 56 + wordmark, judul + penjelasan, kolom isian 5.5, tombol, "Belum punya akun? Daftar", catatan batas produk. **Daftar:** kapsul "Kembali" di isi, judul "Buat akun Pendamping", kolom, daftar syarat sandi (ikon `success` bila terpenuhi + teks), persetujuan privasi, "Sudah punya akun? Masuk". Pesan "Username tersedia." (Figma) tidak ada: username tidak unik dan tidak dicek.
 - **Onboarding:** dua batang langkah + "Langkah n dari 2" di atas; langkah 1: empat kartu siklus + catatan batas, "Lanjut" menempel di bawah; langkah 2: kartu privasi `hero` (teks yang menyebut hasil angka disimpan online tanpa nama, lebih lengkap dari versi Figma), dua persetujuan dalam kartu, "Centang kedua persetujuan untuk lanjut." selama belum lengkap, "Lanjut ke kalibrasi" dan "Kembali".
@@ -283,7 +283,7 @@ Mengikuti `flow-srs-ui.md` kecuali yang tertulis di sini. Tentang: deskripsi, ca
 | Mendekati / Belum sesuai | impact ringan | badge |
 
 - Tanpa getar tipe error pada hasil latihan. Semua panggilan getar tidak boleh melempar error dan mengikuti sakelar Getar.
-- Gerak hanya efek tekan, pengisian cincin, dan transisi bawaan. Hormati Reduce Motion lewat `AccessibilityInfo.isReduceMotionEnabled`.
+- Gerak hanya efek tekan, pengisian cincin, transisi bawaan, dan animasi pembuka (6.8). Layar tujuan gerbang (Selamat datang, Buat PIN, Onboarding, Beranda) masuk dengan fade. Hormati Reduce Motion lewat `AccessibilityInfo.isReduceMotionEnabled`.
 
 ## 9. Lapisan kamera
 

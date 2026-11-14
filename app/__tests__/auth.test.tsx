@@ -32,6 +32,11 @@ jest.mock('../src/auth/session', () => ({
     signUp: (...a: unknown[]) => mockSignUp(...a),
   },
 }));
+// The opening animation has its own tests (SplashIntro.test); here it hands over as soon as the gate is ready.
+jest.mock('../src/components/SplashIntro', () => {
+  const { useEffect } = require('react');
+  return { SplashIntro: ({ ready, onDone }: { ready: boolean; onDone: () => void }) => { useEffect(() => { if (ready) onDone(); }, [ready, onDone]); return null; } };
+});
 jest.mock('../src/auth/AuthProvider', () => ({ useAuth: () => mockAuthState }));
 jest.mock('../src/state/user', () => ({ useUser: () => ({ ready: true, profile: { onboarded: mockOnboarded } }) }));
 jest.mock('../src/pin/pinStore', () => ({ hasPin: async () => mockHasPin }));
