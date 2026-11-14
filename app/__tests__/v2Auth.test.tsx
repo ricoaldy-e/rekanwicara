@@ -71,9 +71,9 @@ describe('account defaults for the v2 client', () => {
 });
 
 describe('SignedOutRedirect', () => {
-  it('goes to Masuk when the session disappears inside the app', async () => {
+  it('goes to Selamat datang when the session disappears inside the app', async () => {
     await render(<SignedOutRedirect />);
-    expect(mockReplace).toHaveBeenCalledWith('/auth/sign-in');
+    expect(mockReplace).toHaveBeenCalledWith('/welcome');
   });
 
   it.each([
@@ -81,6 +81,7 @@ describe('SignedOutRedirect', () => {
     ['no accounts in this build', { ready: true, required: false, session: null }, ['(tabs)', 'home']],
     ['the session is still loading', { ready: false, required: true, session: null }, ['(tabs)', 'home']],
     ['already on an auth screen', { ready: true, required: true, session: null }, ['auth', 'sign-in']],
+    ['already on Selamat datang', { ready: true, required: true, session: null }, ['welcome']],
     ['on the start gate', { ready: true, required: true, session: null }, []],
   ])('does nothing when %s', async (_name, state, segments) => {
     mockAuthState = state;

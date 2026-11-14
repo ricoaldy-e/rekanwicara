@@ -229,7 +229,7 @@ describe('start gate', () => {
     return waitFor(() => screen.getByTestId('redirect')).then((el) => el.props.children);
   };
 
-  it('signed out → Masuk', async () => expect(await target()).toBe('/auth/sign-in'));
+  it('signed out → Selamat datang', async () => expect(await target()).toBe('/welcome'));
 
   it('signed in without a PIN → Buat PIN', async () => {
     mockAuthState = { ...mockAuthState, session: { uid: 'u1' }, uid: 'u1' };
@@ -295,5 +295,23 @@ describe('v2 client: 401', () => {
     const v2 = createV2Client({ baseUrl: 'http://x', fetchFn: fetchFn as never, refreshSession });
     await expect(v2.getWord('x')).rejects.toMatchObject({ code: 'ITEM_NOT_FOUND' });
     expect(refreshSession).not.toHaveBeenCalled();
+  });
+});
+
+describe('Masuk and Daftar layout (Figma 27:38, 27:146)', () => {
+  it('Masuk shows the brand, its intro, the product boundary and a link to Daftar', async () => {
+    await render(<SignIn />);
+    expect(screen.getByLabelText('Rekan Wicara')).toBeTruthy();
+    expect(screen.getByRole('header', { name: 'Masuk' })).toBeTruthy();
+    expect(screen.getByText(/Pendamping hanya perlu masuk sekali di HP ini/)).toBeTruthy();
+    expect(screen.getByText('Rekan Wicara adalah alat bantu latihan, bukan pengganti terapis wicara.')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Belum punya akun? Daftar' })).toBeTruthy();
+  });
+
+  it('Daftar has its own "Kembali" capsule and a link back to Masuk', async () => {
+    await render(<SignUp />);
+    expect(screen.getByRole('header', { name: 'Buat akun Pendamping' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Kembali' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Sudah punya akun? Masuk' })).toBeTruthy();
   });
 });

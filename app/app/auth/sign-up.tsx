@@ -1,18 +1,18 @@
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AuthFailure } from '../../src/auth/errors';
-import { AuthFrame, errorCountText, failureText, PasswordChecklist } from '../../src/auth/authForm';
+import { AuthFrame, AuthLinkRow, AuthTitle, errorCountText, failureText, PasswordChecklist } from '../../src/auth/authForm';
 import { auth } from '../../src/auth/session';
-import { BigButton, Body, Checkbox, FormBanner, PasswordField, TextField, Title } from '../../src/components';
+import { BackButton, BigButton, Checkbox, FormBanner, PasswordField, TextField } from '../../src/components';
 import { announce } from '../../src/components/form/announce';
 import type { TextFieldRef } from '../../src/components/form/TextField';
 import { LIMITS } from '../../src/forms/limits';
 import { messageOf } from '../../src/forms/messages';
 import { useFormState, type Rules } from '../../src/forms/useFormState';
+import { colors, fontSize, spacing, textFont, touchTarget } from '../../src/theme';
 import * as validate from '../../src/forms/validators/auth';
-import { colors, fontSize, spacing, touchTarget } from '../../src/theme';
 
 type Values = { username: string; email: string; password: string; repeat: string; consent: boolean };
 const INITIAL: Values = { username: '', email: '', password: '', repeat: '', consent: false };
@@ -70,9 +70,15 @@ export default function SignUp() {
   };
 
   return (
-    <AuthFrame>
-      <Title>Daftar</Title>
-      <Body>Semua isian wajib diisi.</Body>
+    <AuthFrame
+      headerless
+      top={
+        <View style={styles.back}>
+          <BackButton label="Kembali" onPress={() => (router.canGoBack() ? router.back() : router.replace('/welcome'))} testID="sign-up-back" />
+        </View>
+      }
+    >
+      <AuthTitle title="Buat akun Pendamping" body="Akun ini dipakai Pendamping untuk menambah kata dan mengatur app." />
       {banner ? <FormBanner text={banner} onRetry={submit} testID="sign-up-banner" /> : null}
       <TextField
         ref={refs.username}
@@ -145,17 +151,16 @@ export default function SignUp() {
         error={err('consent')}
       />
       <Pressable onPress={() => router.push('/about')} accessibilityRole="link" accessibilityLabel="Baca kebijakan privasi" style={styles.link}>
-        <Text style={styles.linkText}>Baca kebijakan privasi</Text>
+        <Text maxFontSizeMultiplier={2} style={[styles.linkText, textFont(true)]}>Baca kebijakan privasi</Text>
       </Pressable>
       <BigButton label={busy ? 'Mendaftar…' : 'Daftar'} icon="person-add-outline" disabled={busy} onPress={submit} testID="sign-up-submit" />
-      <Pressable onPress={() => router.back()} accessibilityRole="link" accessibilityLabel="Sudah punya akun? Masuk" style={styles.link}>
-        <Text style={styles.linkText}>Sudah punya akun? Masuk</Text>
-      </Pressable>
+      <AuthLinkRow question="Sudah punya akun?" link="Masuk" onPress={() => router.replace('/auth/sign-in')} testID="to-sign-in" />
     </AuthFrame>
   );
 }
 
 const styles = StyleSheet.create({
+  back: { alignItems: 'flex-start' },
   link: { minHeight: touchTarget, justifyContent: 'center', paddingVertical: spacing.sm },
-  linkText: { fontSize: fontSize.label, fontWeight: '700', color: colors.text, textDecorationLine: 'underline' },
+  linkText: { fontSize: fontSize.label, color: colors.text, textDecorationLine: 'underline' },
 });

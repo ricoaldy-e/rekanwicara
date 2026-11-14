@@ -198,4 +198,17 @@ export const pathCard = { padding: 14, paddingNext: 12, tileHeight: 56, tileMinW
 /** Pendamping (50:402) and Pengaturan (51:268): account avatar, settings rows, the "Hapus kata" button (61:833). */
 export const companion = { avatar: 48, rowPadding: 14, groupPadding: 4, deleteHeight: 52, deleteIcon: 20, deleteGap: 8, wordTileFont: 20 } as const;
 
+/** Entry screens from Figma "Splash · Memuat" (106:627), "Selamat datang" (106:646), "Masuk" (27:38), onboarding (29:182). */
+export const entry = {
+  gutter: 24,
+  brandLogo: 56,
+  welcomeGutter: 20,
+  welcomeLogo: 176,
+  welcomeLogoArea: 330,
+  splashLogo: 120,
+  splashBar: { width: 96, height: 3, fill: 38 },
+  check: { box: 28, radius: 8, icon: 20, gap: 12 },
+  stepBarGap: 8,
+} as const;
+
 export const theme = { colors, fontSize, spacing, radius, touchTarget, buttonHeight, statusStyles, overlay, chart, stroke, fontFamily } as const;

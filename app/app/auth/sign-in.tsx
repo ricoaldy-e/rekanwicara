@@ -1,17 +1,17 @@
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 
 import { AuthFailure } from '../../src/auth/errors';
-import { AuthFrame, errorCountText, failureText } from '../../src/auth/authForm';
+import { AuthFrame, AuthLinkRow, AuthTitle, BrandRow, errorCountText, failureText } from '../../src/auth/authForm';
 import { auth } from '../../src/auth/session';
-import { BigButton, FormBanner, InfoNote, PasswordField, TextField, Title } from '../../src/components';
+import { BigButton, FormBanner, InfoNote, PasswordField, TextField } from '../../src/components';
 import { announce } from '../../src/components/form/announce';
 import type { TextFieldRef } from '../../src/components/form/TextField';
 import { MESSAGES, messageOf } from '../../src/forms/messages';
 import { useFormState, type Rules } from '../../src/forms/useFormState';
 import * as validate from '../../src/forms/validators/auth';
-import { colors, fontSize, spacing, touchTarget } from '../../src/theme';
+import { colors, fontSize, lineHeight, spacing, textFont } from '../../src/theme';
 
 type Values = { email: string; password: string };
 const INITIAL: Values = { email: '', password: '' };
@@ -56,8 +56,8 @@ export default function SignIn() {
   };
 
   return (
-    <AuthFrame>
-      <Title>Masuk</Title>
+    <AuthFrame headerless top={<BrandRow />}>
+      <AuthTitle title="Masuk" body="Masuk dengan akun Pendamping. Pendamping hanya perlu masuk sekali di HP ini." />
       {failure === 'banner' && failureLine ? <FormBanner text={failureLine} onRetry={submit} testID="sign-in-banner" /> : null}
       {failure === 'wrong' ? <InfoNote tone="warning" text={MESSAGES.signInFailed} testID="sign-in-failed" /> : null}
       <TextField
@@ -91,14 +91,12 @@ export default function SignIn() {
         onSubmitEditing={submit}
       />
       <BigButton label={busy ? 'Memeriksa…' : 'Masuk'} icon="log-in-outline" disabled={busy} onPress={submit} testID="sign-in-submit" />
-      <Pressable onPress={() => router.push('/auth/sign-up')} accessibilityRole="link" accessibilityLabel="Belum punya akun? Daftar" style={styles.link}>
-        <Text style={styles.linkText}>Belum punya akun? Daftar</Text>
-      </Pressable>
+      <AuthLinkRow question="Belum punya akun?" link="Daftar" onPress={() => router.push('/auth/sign-up')} testID="to-sign-up" />
+      <Text maxFontSizeMultiplier={2} style={[styles.note, textFont()]}>Rekan Wicara adalah alat bantu latihan, bukan pengganti terapis wicara.</Text>
     </AuthFrame>
   );
 }
 
 const styles = StyleSheet.create({
-  link: { minHeight: touchTarget, justifyContent: 'center', paddingVertical: spacing.sm },
-  linkText: { fontSize: fontSize.label, fontWeight: '700', color: colors.text, textDecorationLine: 'underline' },
+  note: { marginTop: spacing.lg, fontSize: fontSize.small, lineHeight: lineHeight.small, color: colors.textMuted, textAlign: 'center' },
 });

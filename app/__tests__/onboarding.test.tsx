@@ -45,3 +45,29 @@ describe('Onboarding', () => {
     expect(mockComplete).toHaveBeenCalledWith();
   });
 });
+
+describe('Onboarding layout (Figma 29:182, 29:235)', () => {
+  it('step 1 shows the cycle and the sticky "Lanjut" button', async () => {
+    await render(<Onboarding />);
+    expect(screen.getByLabelText(/^Langkah 1 dari 2/)).toBeTruthy();
+    for (const t of ['Lihat contoh bentuk bibir.', 'Tiru dan rekam wajah dan suaramu.', 'Bandingkan hasilnya.', 'Ulangi sampai terasa pas.']) {
+      expect(screen.getByText(t)).toBeTruthy();
+    }
+    expect(screen.getByRole('button', { name: 'Lanjut' })).toBeTruthy();
+  });
+
+  it('step 2 says why "Lanjut ke kalibrasi" is off, until both consents are ticked', async () => {
+    await toConsent();
+    expect(screen.getByText('Centang kedua persetujuan untuk lanjut.')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('checkbox', { name: /Saya mengerti/ }));
+    await fireEvent.press(screen.getByRole('checkbox', { name: /Pendamping/ }));
+    expect(screen.queryByText('Centang kedua persetujuan untuk lanjut.')).toBeNull();
+    expect(screen.getByRole('checkbox', { name: /Saya mengerti/ })).toBeChecked();
+  });
+
+  it('"Kembali" returns to step 1', async () => {
+    await toConsent();
+    await fireEvent.press(screen.getByRole('button', { name: 'Kembali' }));
+    expect(screen.getByLabelText(/^Langkah 1 dari 2/)).toBeTruthy();
+  });
+});

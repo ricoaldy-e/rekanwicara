@@ -1,7 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSize, radius, spacing, touchTarget } from '../theme';
+import { useFocusRing } from '../a11y/useFocusRing';
+import { colors, entry, fontSize, lineHeight, stroke, textFont, touchTarget } from '../theme';
 
 export interface CheckRowProps {
   checked: boolean;
@@ -10,8 +11,9 @@ export interface CheckRowProps {
   testID?: string;
 }
 
-/** A large checkbox row: state shown by icon + fill + the accessibility state, not colour alone. */
+/** A checkbox row (Figma 27:224): 28 dp box, filled cream with a check when selected, outlined when not. State is also in the accessibility state. */
 export function CheckRow({ checked, onToggle, text, testID }: CheckRowProps) {
+  const { focusProps, focusStyle } = useFocusRing();
   return (
     <Pressable
       testID={testID}
@@ -19,25 +21,21 @@ export function CheckRow({ checked, onToggle, text, testID }: CheckRowProps) {
       accessibilityRole="checkbox"
       accessibilityState={{ checked }}
       accessibilityLabel={text}
-      style={[styles.row, checked && styles.on]}
+      {...focusProps}
+      style={[styles.row, focusStyle]}
     >
-      <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={34} color={colors.text} />
-      <Text style={styles.text}>{text}</Text>
+      <View style={[styles.box, checked ? styles.boxOn : styles.boxOff]}>
+        {checked ? <Ionicons name="checkmark" size={entry.check.icon} color={colors.onPrimary} accessible={false} /> : null}
+      </View>
+      <Text maxFontSizeMultiplier={2} style={[styles.text, textFont()]}>{text}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    minHeight: touchTarget,
-    padding: spacing.md,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: radius.card,
-  },
-  on: { backgroundColor: colors.infoBg, borderColor: colors.text },
-  text: { flex: 1, fontSize: fontSize.body, color: colors.text },
+  row: { flexDirection: 'row', alignItems: 'center', gap: entry.check.gap, minHeight: touchTarget },
+  box: { width: entry.check.box, height: entry.check.box, borderRadius: entry.check.radius, alignItems: 'center', justifyContent: 'center' },
+  boxOn: { backgroundColor: colors.primary },
+  boxOff: { borderWidth: stroke.thick, borderColor: colors.border },
+  text: { flex: 1, minWidth: 1, fontSize: fontSize.body, lineHeight: lineHeight.body, color: colors.text },
 });
