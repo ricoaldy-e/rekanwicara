@@ -51,4 +51,4 @@ export function TutorialVideo({ video, ownerId }: { video: VideoReference | unde
   </View>;
 }
 
-const styles = StyleSheet.create({ video: { width: '100%', aspectRatio: 3 / 4, borderRadius: radius.lg } });
+const styles = StyleSheet.create({ video: { width: '100%', aspectRatio: 3 / 4, borderRadius: radius.card } });

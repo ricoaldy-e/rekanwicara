@@ -1093,3 +1093,14 @@ Skill yang dimuat: `figma-design-to-code` (membaca konteks), `figma-use` dan `fi
 - **Perlu backend:** prompt `/v2/instructions/generate` mengikuti brief. App sudah menjaga hasil yang meleset (pangkas, buang nomor), tetapi jawaban satu paragraf panjang hanya dipecah per kalimat.
 - **Keputusan terbuka:** instruksi bawaan tim (Level 1, mis. "Buka mulut lebar dan ucapkan A.") tetap satu langkah; pecah bila tim ingin.
 - **Belum diuji di perangkat:** gulir geser di carousel, tinggi kartu pada layar 360 dp dan skala teks 200%, dan perilaku fokus saat kartu suku kata terbuka atau terlipat.
+
+## MERGE-1 (14 Nov 2026): fe/design + be/core-feature
+
+- `fe/design` di-fast-forward ke `be/core-feature` (`fa3e62e`). Commit be itu memuat **marker konflik yang ter-commit** di 5 berkas; diselesaikan dengan menggabungkan kedua sisi:
+  - `RecordPanel.tsx`: prop be (`manualStop`, `videoQuality`, tombol "Selesai rekam") + tampilan fe (`footer`, hint "Posisikan wajah di dalam oval", ikon `videocam-outline`; batang waktu dan hint lama dari be dibuang karena sudah ada di panel fe).
+  - `practice/[itemId].tsx`: impor tema/`attemptFromResult` fe + `LevelOnePractice`/`CompanionLogin` be.
+  - Tes `RecordPanel` (tes be dan fe dipertahankan), `demo.test` (mock `savePin`/`verifyPin` be + deklarasi `mockSavePin` yang hilang), README (bagian Arsitektur be + tabel env fe + catatan AUTH).
+- Kode be yang belum cocok dengan fe: `V2ResultView` dan `LevelOneList` mengirim status lama (`hijau`) ke `StatusBadge` (kini `sesuai`/…); `TutorialVideo` memakai `radius.lg` yang tidak ada (diganti `radius.card`).
+- `__tests__/allosaurusUpload.test.ts` dihapus lagi (sudah dihapus di FG-23, muncul kembali lewat be).
+- Hasil: `npm run typecheck` bersih, `npm test` 841/841, `pytest` server 752 lulus.
+- Belum: layar v2 be (`LevelOneList`, `LevelOnePractice`, `TutorialVideo`, `V2ResultView`, `CompanionLogin`) belum disesuaikan dengan Figma/design.md; belum diuji di perangkat.

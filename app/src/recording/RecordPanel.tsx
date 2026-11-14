@@ -29,13 +29,10 @@ export interface RecordPanelProps {
   /** Text under the camera; defaults to the face-position hint. */
   hint?: string;
   permissionPurpose?: string;
-<<<<<<< HEAD
   manualStop?: boolean;
   videoQuality?: '480p' | '1080p';
-=======
   /** Shown under the record button only while idle, e.g. "Lihat contoh lagi". */
   footer?: ReactNode;
->>>>>>> fe/design
 }
 
 const PROGRESS_INTERVAL_MS = 100;
@@ -54,14 +51,10 @@ function RecorderCamera({
   onRecorded,
   disabled = false,
   recordLabel = 'Rekam',
-<<<<<<< HEAD
-  hint = 'Letakkan wajah di dalam oval, lalu tekan Rekam.',
+  hint = 'Posisikan wajah di dalam oval',
   manualStop = false,
   videoQuality = '480p',
-=======
-  hint = 'Posisikan wajah di dalam oval',
   footer,
->>>>>>> fe/design
 }: RecordPanelProps) {
   const camera = useRef<CameraView>(null);
   const [ready, setReady] = useState(false);
@@ -215,13 +208,6 @@ function RecorderCamera({
         ) : null}
       </View>
 
-<<<<<<< HEAD
-      {state.phase === 'recording' || state.phase === 'finishing' ? (
-        <ProgressBar value={state.elapsedMs / durationMs} color={REC_RED} height={18} accessibilityLabel="Waktu rekam" />
-      ) : null}
-
-      <Text style={styles.hint}>{mountError ?? state.error ?? hint}</Text>
-
       {manualStop && state.phase === 'recording' ? (
         <BigButton
           label="Selesai rekam"
@@ -237,14 +223,7 @@ function RecorderCamera({
         <BigButton
           testID="record-button"
           label={busy ? 'Merekam…' : !ready ? 'Menyiapkan kamera…' : manualStop ? recordLabel : `${recordLabel} (${seconds} detik)`}
-          icon="radio-button-on"
-=======
-      {!disabled ? (
-        <BigButton
-          testID="record-button"
-          label={busy ? 'Merekam…' : !ready ? 'Menyiapkan kamera…' : `${recordLabel} (${seconds} detik)`}
           icon={busy ? undefined : 'videocam-outline'}
->>>>>>> fe/design
           disabled={busy || !ready || mountError !== null}
           onPress={() => dispatch({ type: 'start' })}
         />

@@ -3,7 +3,6 @@ import { StyleSheet, View } from 'react-native';
 import type { V2AnalyzeResponse } from '../api/types';
 import { Body, InfoNote, StatusBadge } from '../components';
 import { spacing } from '../theme';
-import { resultStatus } from '../user/pure';
 import { LipMirror, LoudnessChart, VowelMap } from './charts';
 import { targetShape } from './lipShapes';
 import { DISCLAIMER } from './ResultView';
@@ -16,9 +15,9 @@ export function V2ResultView({ result, target }: { result: V2AnalyzeResponse; ta
   const visual = result.visuals;
   const shape = targetShape([target]);
   return <View style={styles.wrap}>
-    {result.result ? <StatusBadge label="Hasil" status={resultStatus[result.result]} size="lg" /> : null}
-    {result.lip_result ? <StatusBadge label="Bibir" status={resultStatus[result.lip_result]} /> : null}
-    {result.voice_result ? <StatusBadge label="Suara" status={resultStatus[result.voice_result]} /> : null}
+    {result.result ? <StatusBadge label="Hasil" status={result.result} size="lg" /> : null}
+    {result.lip_result ? <StatusBadge label="Bibir" status={result.lip_result} /> : null}
+    {result.voice_result ? <StatusBadge label="Suara" status={result.voice_result} /> : null}
     <Body>{result.feedback.message}</Body>
     {result.quality_flags.includes('uncalibrated') ? <InfoNote text="Hasil lebih tepat setelah kalibrasi." /> : null}
     {visual?.vowel_point && visual.vowel_anchors ? <>

@@ -8,6 +8,7 @@ import { createDemoProfile } from '../src/user/demo';
 import { newProfile, parseProfile } from '../src/user/pure';
 
 const mockSave = jest.fn();
+const mockSavePin = jest.fn();
 const mockEnsureUser = jest.fn().mockResolvedValue('11111111-1111-4111-8111-111111111111');
 const mockUpsert = jest.fn().mockResolvedValue(undefined);
 const mockPersonal = { ...newProfile('11111111-1111-4111-8111-111111111111'), onboarded: true, calibrated: true };
@@ -27,11 +28,8 @@ jest.mock('../src/auth/companion', () => ({
 jest.mock('../src/user/storage', () => ({
   loadProfile: async () => mockLoadedProfile,
   saveProfile: (...args: unknown[]) => mockSave(...args),
-<<<<<<< HEAD
   savePin: (...args: unknown[]) => mockSavePin(...args),
   verifyPin: async () => false,
-=======
->>>>>>> fe/design
 }));
 jest.mock('../src/data/supabase', () => ({ createRemote: () => ({
   ensureUser: () => mockEnsureUser(), upsert: (...args: unknown[]) => mockUpsert(...args),

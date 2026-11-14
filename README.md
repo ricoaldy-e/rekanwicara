@@ -12,7 +12,8 @@ Proyek ini dibuat tim kami untuk LOGICODIX 2026, subtema Inclusive Health.
 > diagnosis, bukan terapi, dan tidak menggantikan terapis wicara atau guru. Hasilnya
 > adalah perkiraan sistem untuk latihan, bukan penilaian klinis.
 
-<<<<<<< HEAD
+## Arsitektur
+
 - `app/`: Expo Go, React Native, TypeScript strict dan expo-router. Kamera merekam video
   beserta audio; hasil/progres disimpan lokal. Profil demo terpisah di memori.
 - `server/`: FastAPI, Python 3.11. FFmpeg menyiapkan audio/frame, MediaPipe mengukur
@@ -22,9 +23,8 @@ Proyek ini dibuat tim kami untuk LOGICODIX 2026, subtema Inclusive Health.
   dan RLS berdasarkan `auth.uid()`. Video tidak dikirim ke Supabase.
 - `ml/`: alat dataset, label, penyetelan ambang dan evaluasi, memakai ulang pipeline server.
 - `docs/`: kontrak, evaluasi, model card, bukti uji dan panduan submission.
-=======
+
 ## Fitur
->>>>>>> fe/design
 
 - **Latihan bertahap.** Level 1 melatih bunyi vokal, Level 2 suku kata, dan Level 3 kata
   sederhana. Setiap latihan terdiri atas empat langkah: Lihat, Tiru, Menganalisis, Hasil.
@@ -130,16 +130,6 @@ if (!(Test-Path .env)) { Copy-Item .env.example .env }
 
 Isi `app/.env`:
 
-<<<<<<< HEAD
-- `EXPO_PUBLIC_API_URL=http://<IP-laptop>:8000`
-- `EXPO_PUBLIC_DATASET_MODE=false`
-- Opsional: `EXPO_PUBLIC_SUPABASE_URL` dan `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
-  Aktifkan provider **Email/password** dan gunakan [schema.sql](docs/supabase/schema.sql)
-  yang sudah ada. Jangan gunakan service-role key di app. Login anonim otomatis sudah
-  dihentikan. Logic autentikasi siap, UI login belum dibuat; onboarding PIN akun
-  memerlukan sesi pendamping terlebih dahulu. Data lama tidak dihapus/ditautkan otomatis.
-  Rincian setup dan batas integrasi: [AUTH.md](docs/supabase/AUTH.md).
-=======
 | Variabel | Keterangan |
 |---|---|
 | `EXPO_PUBLIC_API_URL` | `http://<IP-laptop>:8000` |
@@ -147,7 +137,8 @@ Isi `app/.env`:
 | `EXPO_PUBLIC_USE_MOCK` | `true` memakai katalog dan kata contoh bawaan aplikasi. Server lokal baru menyediakan `/v1`, jadi nilai ini diperlukan agar katalog tampil |
 | `EXPO_PUBLIC_ANALYZE_API` | `v1` (bawaan), `v2`, atau `mock` |
 | `EXPO_PUBLIC_DATASET_MODE` | `false` untuk build produk |
->>>>>>> fe/design
+
+Catatan Supabase: login anonim sudah dihentikan; onboarding PIN akun memerlukan sesi pendamping. Rincian: [AUTH.md](docs/supabase/AUTH.md).
 
 ```powershell
 npx.cmd expo login --no-browser

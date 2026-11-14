@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import type { V2Material } from '../api/types';
+import { fromStored } from '../data/mappers';
 import { getCompanionSession } from '../auth/companion';
 import { BigButton, Body, Card, InfoNote, StatusBadge } from '../components';
 import type { Attempt } from '../user/pure';
@@ -54,7 +55,7 @@ export function LevelOneList({ ownerId, attempts = [] }: { ownerId: string; atte
       onPress={() => router.push({ pathname: '/practice/[itemId]', params: { itemId: item.id, v2: '1' } })}>
       <Text style={styles.target}>{item.text}</Text>
       <Body>{item.videos.some((video) => video.available) ? 'Video contoh tersedia' : 'Panduan teks tersedia; video contoh belum tersedia.'}</Body>
-      {last ? <StatusBadge label="Terakhir" status={last.overall} /> : <Body muted>Belum dicoba</Body>}
+      {last ? <StatusBadge label="Terakhir" status={fromStored(last.overall)} /> : <Body muted>Belum dicoba</Body>}
     </Card>;
     })}
   </View>;

@@ -119,7 +119,6 @@ it('still deletes a late recording when stopping the camera throws', async () =>
   expect(jest.getTimerCount()).toBe(0);
 });
 
-<<<<<<< HEAD
 it('allows manual tutorial stop without the short practice timer', async () => {
   await render(<RecordPanel durationMs={120_000} manualStop videoQuality="1080p" onRecorded={mockOnRecorded} />);
   await fireEvent(screen.getByTestId('synthetic-camera'), 'cameraReady');
@@ -133,7 +132,8 @@ it('allows manual tutorial stop without the short practice timer', async () => {
   await act(async () => finish({ uri: clipUri }));
   expect(mockOnRecorded).toHaveBeenCalledWith(clipUri);
   expect(jest.getTimerCount()).toBe(0);
-=======
+});
+
 it('shows the countdown number in the oval, then MEREKAM with the remaining seconds, and a note under the button', async () => {
   await startCountdown();
   expect(screen.getByLabelText('Mulai dalam 3')).toBeTruthy();
@@ -154,5 +154,4 @@ it('shows the footer only while idle', async () => {
   await fireEvent(screen.getByTestId('synthetic-camera'), 'cameraReady');
   await fireEvent.press(screen.getByTestId('record-button'));
   expect(screen.queryByText('footer-slot')).toBeNull();
->>>>>>> fe/design
 });

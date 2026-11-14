@@ -20,15 +20,10 @@ import { useUpload } from '../../src/recording/useUpload';
 import { ResultView } from '../../src/results/ResultView';
 import { useSettings } from '../../src/state/settings';
 import { SESSION_ID, useUser } from '../../src/state/user';
-<<<<<<< HEAD
-import { colors } from '../../src/theme';
-import { attemptFromResponse } from '../../src/user/pure';
-import { LevelOnePractice } from '../../src/practice/LevelOnePractice';
-import { CompanionLogin } from '../../src/auth/CompanionLogin';
-=======
 import { colors, layout, spacing } from '../../src/theme';
 import { attemptFromResult } from '../../src/user/pure';
->>>>>>> fe/design
+import { LevelOnePractice } from '../../src/practice/LevelOnePractice';
+import { CompanionLogin } from '../../src/auth/CompanionLogin';
 
 /** SPEC §2 cycle: Lihat → Tiru → Menganalisis → Hasil (design.md §6.4: "Langkah n dari 4"). "Ulangi" loops back to Tiru. */
 type Stage = 'look' | 'record' | 'send' | 'result';
