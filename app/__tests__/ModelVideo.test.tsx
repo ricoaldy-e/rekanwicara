@@ -15,11 +15,14 @@ interface MockPlayer {
   addListener(name: string, listener: (event: StatusEvent) => void): { remove(): void };
 }
 
-const mockHasVideo = jest.fn();
-const mockApi = { baseUrl: 'http://example.test', hasModelVideo: mockHasVideo };
+const SIGNED = 'https://storage.test/signed/a.mp4';
+const mockSigned = jest.fn();
 const mockPlayers: MockPlayer[] = [];
 let mockInitialStatus: VideoPlayerStatus = 'loading';
-const item: PracticeItem = { key: 'l1_a', itemId: 'l1_a', level: 1, text: 'a', instruction: 'Buka mulut lebar dan ucapkan A.', source: 'default' };
+const item: PracticeItem = {
+  key: 'l1_a', itemId: 'l1_a', level: 1, text: 'a', instruction: 'Buka mulut lebar dan ucapkan A.', source: 'default',
+  video: { bucket: 'rekan-wicara-tutorials', path: 'default/level-1/a.mp4', position: 1 },
+};
 
 function mockCreatePlayer(): MockPlayer {
   const listeners = new Set<(event: StatusEvent) => void>();
@@ -34,7 +37,7 @@ function mockCreatePlayer(): MockPlayer {
   return player;
 }
 
-jest.mock('../src/state/settings', () => ({ useSettings: () => ({ api: mockApi }) }));
+jest.mock('../src/data/videoUrl', () => ({ signedVideoUrl: (...args: unknown[]) => mockSigned(...args) }));
 jest.mock('expo', () => jest.requireActual('expo/src/hooks/useEvent'));
 jest.mock('expo-video', () => {
   const { useEffect, useState } = require('react');
@@ -54,7 +57,7 @@ jest.mock('expo-video', () => {
 });
 
 beforeEach(() => {
-  mockHasVideo.mockReset().mockResolvedValue(true);
+  mockSigned.mockReset().mockResolvedValue(SIGNED);
   mockPlayers.length = 0;
   mockInitialStatus = 'loading';
 });
@@ -68,13 +71,13 @@ async function statusChange(status: VideoPlayerStatus) {
 }
 
 it('shows loading during the check and native buffering, then plays and cleans up on unmount', async () => {
-  let finish!: (exists: boolean) => void;
-  mockHasVideo.mockReturnValueOnce(new Promise<boolean>((resolve) => { finish = resolve; }));
+  let finish!: (url: string | null) => void;
+  mockSigned.mockReturnValueOnce(new Promise<string | null>((resolve) => { finish = resolve; }));
   const view = await render(<ModelVideo item={item} />);
   expect(screen.getByLabelText('Memuat video contoh')).toBeTruthy();
   expect(mockPlayers).toHaveLength(0);
 
-  await act(async () => finish(true));
+  await act(async () => finish(SIGNED));
   expect(screen.getByLabelText('Memuat video contoh')).toBeTruthy();
   await statusChange('readyToPlay');
   expect(screen.queryByLabelText('Memuat video contoh')).toBeNull();
@@ -100,7 +103,7 @@ it.each(['loading', 'readyToPlay'] as const)('falls back when playback fails fro
   expect(screen.queryByText('Synthetic decoder detail')).toBeNull();
   expect(mockPlayers[0].listeners.size).toBe(0);
   expect(mockPlayers[0].release).toHaveBeenCalledTimes(1);
-  expect(mockHasVideo).toHaveBeenCalledTimes(1);
+  expect(mockSigned).toHaveBeenCalledWith(item.video);
 });
 
 it('handles a player already in error before the listener is attached', async () => {
@@ -111,9 +114,8 @@ it('handles a player already in error before the listener is attached', async ()
   expect(mockPlayers[0].release).toHaveBeenCalledTimes(1);
 });
 
-it.each(['missing', 'network'] as const)('uses illustrations and offers retry when the check reports %s', async (condition) => {
-  if (condition === 'missing') mockHasVideo.mockResolvedValueOnce(false);
-  else mockHasVideo.mockRejectedValueOnce(new Error('Synthetic transport detail'));
+it('uses illustrations and offers retry when Storage cannot be reached', async () => {
+  mockSigned.mockRejectedValueOnce(new Error('Synthetic transport detail'));
   await render(<ModelVideo item={item} />);
   expect(screen.getByTestId('model-fallback')).toBeTruthy();
   expect(screen.getByRole('button', { name: 'Coba muat video lagi' })).toBeTruthy();
@@ -121,17 +123,25 @@ it.each(['missing', 'network'] as const)('uses illustrations and offers retry wh
   expect(mockPlayers).toHaveLength(0);
 });
 
+it('uses illustrations without retry when the video is not in Storage', async () => {
+  mockSigned.mockResolvedValueOnce(null);
+  await render(<ModelVideo item={item} />);
+  expect(screen.getByTestId('model-video-missing')).toBeTruthy();
+  expect(screen.getByTestId('model-fallback')).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Coba muat video lagi' })).toBeNull();
+});
+
 it('rechecks on retry and creates a fresh player after releasing the failed one', async () => {
   await render(<ModelVideo item={item} />);
   await statusChange('error');
-  let finish!: (exists: boolean) => void;
-  mockHasVideo.mockReturnValueOnce(new Promise<boolean>((resolve) => { finish = resolve; }));
+  let finish!: (url: string | null) => void;
+  mockSigned.mockReturnValueOnce(new Promise<string | null>((resolve) => { finish = resolve; }));
   await fireEvent.press(screen.getByRole('button', { name: 'Coba muat video lagi' }));
   expect(screen.getByLabelText('Memuat video contoh')).toBeTruthy();
-  expect(mockHasVideo).toHaveBeenCalledTimes(2);
+  expect(mockSigned).toHaveBeenCalledTimes(2);
   expect(mockPlayers).toHaveLength(1);
 
-  await act(async () => finish(true));
+  await act(async () => finish(SIGNED));
   expect(mockPlayers).toHaveLength(2);
   await statusChange('readyToPlay');
   expect(screen.getByTestId('synthetic-video')).toBeTruthy();
@@ -141,23 +151,23 @@ it('rechecks on retry and creates a fresh player after releasing the failed one'
 });
 
 it('ignores a completed availability check after unmount', async () => {
-  let finish!: (exists: boolean) => void;
-  mockHasVideo.mockReturnValueOnce(new Promise<boolean>((resolve) => { finish = resolve; }));
+  let finish!: (url: string | null) => void;
+  mockSigned.mockReturnValueOnce(new Promise<string | null>((resolve) => { finish = resolve; }));
   const view = await render(<ModelVideo item={item} />);
   await view.unmount();
-  await act(async () => finish(true));
+  await act(async () => finish(SIGNED));
   expect(mockPlayers).toHaveLength(0);
 });
 
-it('shows text only, without a video check, when not analysing with v1', async () => {
-  await render(<ModelVideo item={item} source="mock" />);
-  expect(mockHasVideo).not.toHaveBeenCalled();
+it('shows text only, without a Storage call, when the material has no video', async () => {
+  await render(<ModelVideo item={{ ...item, video: undefined }} />);
+  expect(mockSigned).not.toHaveBeenCalled();
   expect(screen.getByTestId('model-video-missing')).toBeTruthy();
   expect(screen.getByTestId('model-instruction')).toBeTruthy();
   expect(screen.queryByRole('button', { name: 'Coba muat video lagi' })).toBeNull();
 });
 
 it('labels an AI-written instruction', async () => {
-  await render(<ModelVideo item={{ ...item, instructionSource: 'ai' }} source="mock" />);
+  await render(<ModelVideo item={{ ...item, video: undefined, instructionSource: 'ai' }} />);
   expect(screen.getByText('Instruksi dibuat dengan bantuan AI')).toBeTruthy();
 });

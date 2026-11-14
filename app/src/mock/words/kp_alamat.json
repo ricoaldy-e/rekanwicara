@@ -1,0 +1,32 @@
+{
+  "id": "kp_alamat",
+  "text": "ALAMAT",
+  "source": "default",
+  "level_2": [
+    {
+      "id": "kp_alamat_a",
+      "text": "A",
+      "position": 1,
+      "instruction": "Buka mulut lebar, rahang turun.\nTaruh telapak tangan di leher.\nBersuara “a” singkat dan rasakan getar di leher.\nSatu ketukan.",
+      "videos": []
+    },
+    {
+      "id": "kp_alamat_la",
+      "text": "LA",
+      "position": 2,
+      "instruction": "Naikkan ujung lidah ke gusi belakang gigi atas, siap untuk “l”.\nMulai bersuara saat lidah menempel; rasakan getar di leher.\nTurunkan lidah dan buka mulut lebar untuk “a”.\nSatu ketukan.",
+      "videos": []
+    },
+    {
+      "id": "kp_alamat_mat",
+      "text": "MAT",
+      "position": 3,
+      "instruction": "Rapatkan kedua bibir; taruh satu jari di sisi hidung dan satu tangan di leher.\nBersuara “m” dengan bibir rapat: udara keluar lewat hidung; rasakan getar di sisi hidung.\nBuka mulut lebar untuk “a”; udara kini keluar lewat mulut.\nAkhiri dengan menempelkan ujung lidah di belakang gigi seri atas (“t”), lalu berhenti tanpa hembusan.\nSatu ketukan.",
+      "videos": []
+    }
+  ],
+  "level_3": {
+    "instruction": "Pecah kata menjadi tiga bagian: a-la-mat. Satu tepukan telapak tangan untuk tiap bagian.\nMulut terbuka lebar pada setiap “a”; di antaranya lidah naik ke gusi (“l”) dan bibir merapat (“m”).\nCek dengan tangan: getar di leher hampir terus-menerus; getar di sisi hidung terasa pada “m”; tidak ada hembusan di akhir.\nUlangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa.",
+    "videos": []
+  }
+}

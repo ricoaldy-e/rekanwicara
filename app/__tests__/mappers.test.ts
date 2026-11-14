@@ -150,3 +150,22 @@ describe('cleanV2 with the server /v2/analyze shape (one feedback, no per-indica
     expect(cleanV2({ ...server, level: 2 }).voice_result).toBe('belum_sesuai');
   });
 });
+
+describe('mock data mirrors the server catalog', () => {
+  it('has exactly the five vowels with step instructions, and every listed word resolves', () => {
+    expect(MOCK_CATALOG.level_1.map((m) => m.id)).toEqual(['l1_a', 'l1_i', 'l1_u', 'l1_e', 'l1_o']);
+    expect(MOCK_CATALOG.level_1.every((m) => m.instruction.includes('\n'))).toBe(true);
+    for (const w of MOCK_CATALOG.words) {
+      expect(MOCK_WORDS[w.id]).toBeDefined();
+      expect(MOCK_WORDS[w.id].level_2.length > 0).toBe(w.has_level_2);
+    }
+  });
+});
+
+describe('automatic_evaluation', () => {
+  it('marks every step of an unscorable word, and leaves scorable words unmarked', () => {
+    const path = wordToPath({ ...MOCK_WORDS.l3_papa, automatic_evaluation: false });
+    expect([...path.syllables, path.whole].every((s) => s.scorable === false)).toBe(true);
+    expect(wordToPath(MOCK_WORDS.l3_papa).whole.scorable).toBeUndefined();
+  });
+});

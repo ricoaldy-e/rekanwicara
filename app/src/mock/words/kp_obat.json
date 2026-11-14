@@ -1,0 +1,25 @@
+{
+  "id": "kp_obat",
+  "text": "OBAT",
+  "source": "default",
+  "level_2": [
+    {
+      "id": "kp_obat_o",
+      "text": "O",
+      "position": 1,
+      "instruction": "Bulatkan bibir dengan bukaan sedang, rahang turun sedikit.\nTaruh telapak tangan di leher.\nBersuara “o” singkat dan rasakan getar di leher.\nSatu ketukan.",
+      "videos": []
+    },
+    {
+      "id": "kp_obat_bat",
+      "text": "BAT",
+      "position": 2,
+      "instruction": "Rapatkan kedua bibir dan taruh satu tangan di leher.\nMulai bersuara saat bibir masih rapat: getar di leher terasa.\nLepas bibir dengan lembut dan buka mulut lebar untuk “a”.\nAkhiri dengan menempelkan ujung lidah di belakang gigi seri atas (“t”), lalu berhenti tanpa hembusan.\nSatu ketukan.",
+      "videos": []
+    }
+  ],
+  "level_3": {
+    "instruction": "Pecah kata menjadi dua bagian: o-bat. Satu tepukan telapak tangan untuk tiap bagian.\nBentuk mulut berganti: bulat (o) → rapat (b) → lebar (a) → lidah menempel di gigi dan berhenti (t).\nCek dengan tangan: getar di leher terus terasa dari “o” sampai “a”, termasuk saat bibir rapat (“b”); tidak ada hembusan di akhir.\nUlangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa.",
+    "videos": []
+  }
+}

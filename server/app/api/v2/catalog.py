@@ -36,6 +36,16 @@ GUIDE_ITEMS = {item.item_id: item for item in tutorial_catalogue()}
 GUIDE_WORDS = [item for item in GUIDE_ITEMS.values() if item.kind == "word"]
 OFFLINE_IDS = frozenset(GUIDE_ITEMS)
 OFFLINE_WORDS = frozenset(item.target.casefold() for item in GUIDE_WORDS)
+# Level 1 is the five vowels only (decided 14 Nov 2026). Step instructions per default material:
+# vowels from the Level 1 tutorial manifest, m/p/b items from default_instructions.json.
+INSTRUCTION_STEPS: dict[str, list[str]] = {
+    **json.loads(
+        (Path(__file__).resolve().parents[2] / "content/default_instructions.json").read_text(
+            "utf-8"
+        )
+    ),
+    **{item.item_id: item.steps for item in tutorial_catalogue("level_1")},
+}
 
 
 def text(value: object) -> str:
@@ -53,6 +63,8 @@ def missing_video() -> ApiError:
 
 
 def default_instruction(item_id: str, label: str) -> str:
+    if item_id in INSTRUCTION_STEPS:
+        return "\n".join(INSTRUCTION_STEPS[item_id])
     return {
         "l0_hold_a": "Ucapkan A dan tahan selama rekaman.",
         "l0_soft_loud": "Ucapkan A pelan, lalu lebih kuat.",
@@ -97,7 +109,6 @@ class Catalogue:
             id=whole.id,
             text=whole.text,
             source="default",
-            automatic_evaluation=False,
             syllable_split="-".join(item.target.lower() for item in parts)
             if parts
             else asset.target.lower(),
@@ -192,7 +203,6 @@ class Catalogue:
                 id=item.item_id,
                 text=item.target,
                 source="default",
-                automatic_evaluation=False,
                 has_level_2=any(
                     part.kind == "syllable" and part.word == item.word
                     for part in GUIDE_ITEMS.values()
@@ -200,14 +210,9 @@ class Catalogue:
             )
             for item in GUIDE_WORDS
         ]
+        project_words = []
         for item in self.content.items:
-            if (
-                (not item.active and item.item_id not in VOWEL_IDS)
-                or item.item_id in OFFLINE_IDS
-                or item.text.casefold() in OFFLINE_WORDS
-            ):
-                continue
-            if item.level in (0, 1):
+            if item.item_id in VOWEL_IDS:
                 basics.append(
                     V2Material(
                         id=item.item_id,
@@ -216,6 +221,28 @@ class Catalogue:
                         videos=self.default_video(item.item_id, False),
                     )
                 )
+            elif (
+                item.level == 3
+                and item.active
+                and item.item_id not in OFFLINE_IDS
+                and item.text.casefold() not in OFFLINE_WORDS
+            ):
+                # Listed only when it can be opened: a word without its tutorial videos is left out.
+                try:
+                    detail = self.word(item.item_id)
+                except ApiError as exc:
+                    if exc.code in ("INVALID_MATERIAL", "VIDEO_NOT_FOUND"):
+                        continue
+                    raise
+                project_words.append(
+                    V2WordSummary(
+                        id=detail.id,
+                        text=detail.text,
+                        source="default",
+                        has_level_2=bool(detail.level_2),
+                    )
+                )
+        words = project_words + words
         owned = self.account.rows(
             "custom_words",
             {
@@ -284,13 +311,15 @@ class Catalogue:
                 None,
             )
             if syllable is None:
-                raise ApiError(422, "INVALID_MATERIAL", "Tahapan materi ini belum tersedia.")
+                # A vowel unit (apa, ibu) has no Level 2 syllable: whole word only.
+                parts = []
+                break
             parts.append(
                 V2Syllable(
                     id=syllable.item_id,
                     text=unit.upper(),
                     position=position,
-                    instruction=f"Ucapkan {unit.upper()}.",
+                    instruction=default_instruction(syllable.item_id, unit.upper()),
                     videos=self.default_video(syllable.item_id, True),
                 )
             )
@@ -300,12 +329,15 @@ class Catalogue:
             source="default",
             level_2=parts,
             level_3=V2WordStage(
-                instruction=f"Ucapkan {item.text.upper()} secara lengkap.",
+                instruction=default_instruction(item.item_id, item.text.upper()),
                 videos=self.default_video(item.item_id, True),
             ),
         )
 
     def target(self, item_id: str) -> tuple[int, str]:
+        if item_id in GUIDE_ITEMS:
+            guide = GUIDE_ITEMS[item_id]
+            return guide.level, guide.target
         item = self.content.items_by_id.get(item_id)
         if (
             item
@@ -354,9 +386,7 @@ def item_detail(item_id: str, account: AccountDep, content: ContentDep) -> V2Ite
     catalogue = Catalogue(account, content)
     if item_id in GUIDE_ITEMS:
         material = catalogue.guide_material(item_id)
-        return V2ItemDetail(
-            **material.model_dump(), level=GUIDE_ITEMS[item_id].level, automatic_evaluation=False
-        )
+        return V2ItemDetail(**material.model_dump(), level=GUIDE_ITEMS[item_id].level)
     if item_id.startswith("custom_word:"):
         word = catalogue.word(item_id)
         return V2ItemDetail(

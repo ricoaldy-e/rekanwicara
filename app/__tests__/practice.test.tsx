@@ -122,8 +122,8 @@ it('guards leaving only while recording or sending', async () => {
   expect(screen.getByRole('button', { name: 'Keluar latihan' })).toBeTruthy(); // the back capsule lives in the content (FG-7)
 });
 
-it('hides recording for a custom word the v1 server cannot score', async () => {
-  mockItem = { ...A, itemId: 'custom_word:1', key: 'custom_word:1', level: 3, text: 'TOLONG', source: 'custom' };
+it('hides recording for a material the server cannot score', async () => {
+  mockItem = { ...A, itemId: 'custom_word:1', key: 'custom_word:1', level: 3, text: 'TOLONG', source: 'custom', scorable: false };
   await render(<Practice />);
   expect(screen.getByTestId('practice-not-supported')).toBeTruthy();
   expect(screen.queryByRole('button', { name: 'Mulai rekam' })).toBeNull();

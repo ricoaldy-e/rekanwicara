@@ -6,6 +6,9 @@ import { catalogToWords, wordToPath } from '../src/data/mappers';
 import { MOCK_CATALOG, MOCK_WORDS } from '../src/mock';
 import { newProfile, type Attempt } from '../src/user/pure';
 
+const DEFAULTS = MOCK_CATALOG.words.filter((w) => w.source === 'default').length;
+const CUSTOM = MOCK_CATALOG.words.length - DEFAULTS;
+
 const mockPush = jest.fn();
 let mockProfile = newProfile();
 let mockWordId = 'l3_papa';
@@ -37,11 +40,11 @@ beforeEach(() => {
 });
 
 describe('Pilih kata', () => {
-  it('lists the four words with the right source chip', async () => {
+  it('lists every catalog word with the right source chip', async () => {
     await render(<Words />);
-    expect(screen.getAllByTestId(/^word-/)).toHaveLength(4);
-    expect(screen.getAllByText('Bawaan')).toHaveLength(3); // two row chips + the filter segment
-    expect(screen.getAllByText('Dari Pendamping')).toHaveLength(2);
+    expect(screen.getAllByTestId(/^word-/)).toHaveLength(DEFAULTS + CUSTOM);
+    expect(screen.getAllByText('Bawaan')).toHaveLength(DEFAULTS + 1); // row chips + the filter segment
+    expect(screen.getAllByText('Dari Pendamping')).toHaveLength(CUSTOM);
     expect(screen.queryByText(/Terkunci/)).toBeNull();
   });
 
@@ -57,10 +60,10 @@ describe('Pilih kata: filter and rows', () => {
     await render(<Words />);
     expect(screen.getByRole('radio', { name: 'Semua kata' })).toBeSelected();
     await fireEvent.press(screen.getByRole('radio', { name: 'Pendamping' }));
-    expect(screen.getAllByTestId(/^word-/)).toHaveLength(2);
+    expect(screen.getAllByTestId(/^word-/)).toHaveLength(CUSTOM);
     expect(screen.queryByTestId('word-l3_mama')).toBeNull();
     await fireEvent.press(screen.getByRole('radio', { name: 'Bawaan' }));
-    expect(screen.getAllByTestId(/^word-/)).toHaveLength(2);
+    expect(screen.getAllByTestId(/^word-/)).toHaveLength(DEFAULTS);
     expect(screen.getByTestId('word-l3_mama')).toBeTruthy();
     expect(screen.queryByTestId('word-custom_word:11111111-1111-1111-1111-111111111111')).toBeNull();
   });

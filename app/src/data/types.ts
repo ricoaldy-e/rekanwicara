@@ -11,6 +11,8 @@ export type PracticeItem = {
   position?: number;
   source: Source;
   instructionSource?: 'ai' | 'ai_edited' | 'manual';
+  /** false when the server cannot score this material (v2 `automatic_evaluation: false`). */
+  scorable?: boolean;
 };
 
 export type WordSummary = { id: string; text: string; source: Source; hasLevel2: boolean };

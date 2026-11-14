@@ -1,0 +1,25 @@
+{
+  "id": "kp_tolong",
+  "text": "TOLONG",
+  "source": "default",
+  "level_2": [
+    {
+      "id": "kp_tolong_to",
+      "text": "TO",
+      "position": 1,
+      "instruction": "Tempelkan ujung lidah di belakang gigi seri atas, siap untuk “t”.\nTaruh satu tangan di depan mulut dan satu tangan di leher.\nLepas lidah dengan hembusan kecil; leher belum bergetar.\nSegera bulatkan bibir dengan bukaan sedang dan bersuara “o”; rasakan getar di leher.\nGabungkan “t” dan “o” tanpa jeda, sebagai satu ketukan.",
+      "videos": []
+    },
+    {
+      "id": "kp_tolong_long",
+      "text": "LONG",
+      "position": 2,
+      "instruction": "Naikkan ujung lidah ke gusi di belakang gigi atas, siap untuk “l”.\nMulai bersuara saat lidah masih menempel; rasakan getar di leher.\nTurunkan lidah dan bulatkan bibir ke “o”. Di suku kata tertutup ini bentuknya sedikit lebih santai dan terbuka daripada “o” sendirian.\nNaikkan bagian belakang lidah ke langit-langit belakang dan alirkan suara lewat hidung: ini bunyi “ng”. Rasakan getar di sisi hidung.\nTahan “ng” sebentar lalu berhenti; jangan menambahkan “g”.\nHitung semuanya sebagai satu ketukan.",
+      "videos": []
+    }
+  ],
+  "level_3": {
+    "instruction": "Pecah kata menjadi dua bagian: to-long. Satu tepukan telapak tangan untuk tiap bagian.\nUcapkan “to”, lalu langsung “long” tanpa jeda panjang.\nJaga dua tepukan sama kuat; jangan melebih-lebihkan bentuk mulut.\nCek dengan tangan: hembusan kecil terasa hanya di awal (“t”); getar di leher terasa pada “o”, “l”, “o”, dan “ng”.\nUlangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa.",
+    "videos": []
+  }
+}

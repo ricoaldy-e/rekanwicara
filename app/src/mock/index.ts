@@ -4,14 +4,29 @@ import { getHint } from '../content/hints';
 import catalog from './catalog.json';
 import custom1111 from './words/custom_1111.json';
 import custom2222 from './words/custom_2222.json';
+import kpAlamat from './words/kp_alamat.json';
+import kpApi from './words/kp_api.json';
+import kpHaus from './words/kp_haus.json';
+import kpMakan from './words/kp_makan.json';
+import kpObat from './words/kp_obat.json';
+import kpPolisi from './words/kp_polisi.json';
+import kpSakit from './words/kp_sakit.json';
+import kpTolong from './words/kp_tolong.json';
+import l3Abu from './words/l3_abu.json';
+import l3Apa from './words/l3_apa.json';
+import l3Bibi from './words/l3_bibi.json';
+import l3Bumi from './words/l3_bumi.json';
+import l3Ibu from './words/l3_ibu.json';
 import l3Mama from './words/l3_mama.json';
 import l3Papa from './words/l3_papa.json';
+import l3Pipi from './words/l3_pipi.json';
+import l3Ubi from './words/l3_ubi.json';
 
 export const MOCK_CATALOG = catalog as CatalogDTO;
 
 // File names avoid ':' (not allowed on Windows); the ids inside are the contract ids.
 export const MOCK_WORDS: Readonly<Record<string, WordDTO>> = Object.fromEntries(
-  ([l3Mama, l3Papa, custom1111, custom2222] as WordDTO[]).map((w) => [w.id, w]),
+  ([custom1111, custom2222, kpAlamat, kpApi, kpHaus, kpMakan, kpObat, kpPolisi, kpSakit, kpTolong, l3Abu, l3Apa, l3Bibi, l3Bumi, l3Ibu, l3Mama, l3Papa, l3Pipi, l3Ubi] as WordDTO[]).map((w) => [w.id, w]),
 );
 
 /** Mock analysis results in turn: sesuai, then not quite (mendekati at L1), then retry. */

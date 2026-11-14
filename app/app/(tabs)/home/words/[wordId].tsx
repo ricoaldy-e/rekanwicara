@@ -62,7 +62,7 @@ export default function WordPath() {
         </View>
         <Text maxFontSizeMultiplier={2} style={[styles.intro, textFont()]}>Latih suku kata dulu, lalu kata utuh. Urutan hanya saran.</Text>
       </View>
-      {!canAnalyze(path.whole) ? <InfoNote text="Penilaian belum tersedia di server demo." testID="word-not-supported" /> : null}
+      {!canAnalyze(path.whole) ? <InfoNote text="Penilaian otomatis untuk kata ini belum tersedia. Berlatihlah dengan melihat contoh." testID="word-not-supported" /> : null}
 
       {path.syllables.length > 0 ? (
         <>

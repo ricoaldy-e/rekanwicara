@@ -14,11 +14,12 @@ function fakeApi(): ApiClient & { analyze: jest.Mock } {
 
 describe('ANALYZE_API', () => {
   it.each([
-    [undefined, 'v1'],
-    ['', 'v1'],
-    ['v3', 'v1'],
-    ['V2', 'v1'],
+    [undefined, 'v2'],
+    ['', 'v2'],
+    ['v3', 'v2'],
+    ['V2', 'v2'],
     ['v2', 'v2'],
+    ['v1', 'v1'],
     ['mock', 'mock'],
   ])('%p → %p', (raw, expected) => {
     expect(parseAnalyzeApi(raw)).toBe(expected);
@@ -45,5 +46,13 @@ describe('analyze', () => {
     expect(results.map((r) => r.result)).not.toContain('mendekati');
     expect(results.every((r) => r.visuals === null)).toBe(true);
     expect(api.analyze).not.toHaveBeenCalled();
+  });
+});
+
+describe('canAnalyze', () => {
+  it('is false for a material the server cannot score', () => {
+    const { canAnalyze } = jest.requireActual('../src/data/analyze') as typeof import('../src/data/analyze');
+    expect(canAnalyze({ ...mama, scorable: false }, 'v2')).toBe(false);
+    expect(canAnalyze(mama, 'v2')).toBe(true);
   });
 });

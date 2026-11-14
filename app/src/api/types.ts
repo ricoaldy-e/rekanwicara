@@ -399,17 +399,20 @@ export type Level = 1 | 2 | 3;
 export type Source = 'default' | 'custom';
 /** `mendekati` only at Level 1. */
 export type ResultStatus = 'sesuai' | 'mendekati' | 'belum_sesuai';
-export type VideoRef = { bucket: string; path: string; position: number };
+/** `available: false` = the server knows the file is not in Storage yet. */
+export type VideoRef = { bucket: string; path: string; position: number; available?: boolean };
 
 export type CatalogDTO = {
   level_1: Array<{ id: string; text: string; instruction: string; videos: VideoRef[] }>;
-  words: Array<{ id: string; text: string; source: Source; has_level_2: boolean }>;
+  words: Array<{ id: string; text: string; source: Source; has_level_2: boolean; automatic_evaluation?: boolean }>;
 };
 
 export type WordDTO = {
   id: string;
   text: string;
   source: Source;
+  /** false: the server cannot score this word (yet); it is practised by watching the example. */
+  automatic_evaluation?: boolean;
   level_2: Array<{ id: string; text: string; position: number; instruction: string; videos: VideoRef[] }>;
   level_3: { instruction: string; videos: VideoRef[] };
 };

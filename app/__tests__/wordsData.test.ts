@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { getCatalog, getWord } from '../src/data/catalog';
 import { createWord, isComplete, listMine, removeWord, SaveFailed, updateWord, type VideoFile, type WordFormData } from '../src/data/words';
+import { MOCK_CATALOG } from '../src/mock';
 import { createMockWordStore } from '../src/mock/words';
 
 jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
@@ -132,7 +133,7 @@ describe('mock word store', () => {
     const id = await createWord(store, SUSU);
     const catalog = await run(getCatalog({ baseUrl: '', mock: true }));
     expect(catalog.words.find((w) => w.id === id)).toEqual({ id, text: 'susu', source: 'custom', has_level_2: true });
-    expect(catalog.words.filter((w) => w.source === 'default').map((w) => w.id)).toEqual(['l3_mama', 'l3_papa']);
+    expect(catalog.words.filter((w) => w.source === 'default')).toEqual(MOCK_CATALOG.words.filter((w) => w.source === 'default'));
     const word = await run(getWord(id, { baseUrl: '', mock: true }));
     expect(word.level_2.map((s) => [s.text, s.position, s.videos.length])).toEqual([['su', 1, 1], ['su', 2, 1]]);
     expect(word.level_3.videos).toHaveLength(1);

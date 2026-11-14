@@ -182,7 +182,7 @@ export default function Practice() {
           {!profile.calibrated ? (
             <InfoNote text="Hasil lebih tepat setelah kalibrasi. Kalibrasi bisa dilakukan dari beranda." />
           ) : null}
-          {!scorable ? <InfoNote text="Penilaian kata ini belum tersedia di server demo." testID="practice-not-supported" /> : null}
+          {!scorable ? <InfoNote text="Penilaian otomatis untuk materi ini belum tersedia. Berlatihlah dengan melihat contoh." testID="practice-not-supported" /> : null}
         </>
       ) : null}
 

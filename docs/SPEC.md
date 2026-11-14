@@ -19,8 +19,8 @@ Siklus satu percobaan: **Lihat** (video model + garis bibir target) → **Tiru**
 
 | Level | Isi | Status MVP |
 |---|---|---|
-| 0 | Suara: tahan "aaa", pelan lalu keras | Wajib |
-| 1 | Bunyi terisolasi: a, i, u, mmm (e, o bonus) | Wajib |
+| 0 | Suara: tahan "aaa", pelan lalu keras | Tidak tampil di app sejak 14 Nov 2026 (data tetap untuk dataset) |
+| 1 | Vokal: a, i, u, e, o (diputuskan 14 Nov 2026; mmm tidak tampil di app) | Wajib |
 | 2 | Suku kata: ma mi mu pa pi pu ba bi bu | Wajib |
 | 3 | Kata (lihat §3) | Wajib |
 | 4 | Pasangan minimal | Bonus |
@@ -38,9 +38,9 @@ Notasi unit: suku kata atau vokal. Setiap unit tersusun dari fon: `C:m`, `C:p`, 
 | l1_a | 1 | a | [a] | wajib |
 | l1_i | 1 | i | [i] | wajib |
 | l1_u | 1 | u | [u] | wajib |
-| l1_m | 1 | mmm | [m_hum] | wajib |
-| l1_e | 1 | e | [e] | bonus |
-| l1_o | 1 | o | [o] | bonus |
+| l1_m | 1 | mmm | [m_hum] | tidak tampil di app (14 Nov 2026) |
+| l1_e | 1 | e | [e] | wajib (14 Nov 2026) |
+| l1_o | 1 | o | [o] | wajib (14 Nov 2026) |
 | l2_ma … l2_bu | 2 | ma, mi, mu, pa, pi, pu, ba, bi, bu | [ma] … [bu] | wajib |
 | l3_mama | 3 | mama | [ma, ma] | wajib |
 | l3_papa | 3 | papa | [pa, pa] | wajib |
@@ -95,7 +95,7 @@ Semua endpoint di bawah prefix `/v1`. Upload memakai `multipart/form-data`.
 Acuan dibaca dari `REKAN_WICARA_BE_FE_CONTRACT_V2_FINAL_DRAFT.md`, sesuai klarifikasi
 pengguna. File bernama v2.1 belum tersedia. Instruksi terbaru pengguna mengesampingkan
 bagian draft yang bertentangan: satu video per kata/suku kata, katalog tanpa menu suku
-kata, delapan Kata Penting berupa panduan tanpa penilaian otomatis, Level 1 memiliki tiga hasil, serta
+kata, delapan Kata Penting (sejak 14 Nov 2026 dinilai otomatis: Wav2Vec2 terhadap teks target), Level 1 memiliki tiga hasil, serta
 `lip_result`/`voice_result` berupa string hasil atau null. Ini bukan klaim draft lama identik v2.1.
 
 Semua request v2 membutuhkan `Authorization: Bearer <Supabase access token>`.

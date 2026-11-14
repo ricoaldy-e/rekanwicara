@@ -27,6 +27,11 @@ HEADERS = {"Authorization": "Bearer fixture-user-token"}
 PUBLIC_KEY = "fixture-public-key"
 PRIVATE_KEY = "fixture-service-role-not-used-by-v2"
 CUSTOM_PATH = f"{UID}/words/{WORD}/video.mp4"
+# Active Level 3 m/p/b words; those with a vowel unit are whole-word only.
+PROJECT_WORD_IDS = [
+    "l3_mama", "l3_papa", "l3_bibi", "l3_pipi", "l3_apa", "l3_abu", "l3_ibu", "l3_ubi", "l3_bumi",
+]  # fmt: skip
+PROJECT_HAS_LEVEL_2 = [True, True, True, True, False, False, False, False, True]
 IMPORTANT_WORDS = {
     "tolong": ["to", "long"],
     "polisi": ["po", "li", "si"],
@@ -176,14 +181,16 @@ def test_catalog_default_and_only_complete_owned_custom(
     assert response.status_code == 200, response.text
     body = response.json()
     assert set(body) == {"level_1", "words"}
-    assert {item["id"] for item in body["level_1"]} >= {"l1_a", "l1_i", "l1_u"}
-    assert len(body["level_1"]) == 8
-    assert VOWEL_IDS <= {item["id"] for item in body["level_1"]}
+    # Level 1 is exactly the five vowels, in order, with step-by-step instructions.
+    assert [item["id"] for item in body["level_1"]] == ["l1_a", "l1_i", "l1_u", "l1_e", "l1_o"]
+    assert all("\n" in item["instruction"] for item in body["level_1"])
     defaults = [word for word in body["words"] if word["source"] == "default"]
-    assert [word["id"] for word in defaults] == [f"kp_{word}" for word in IMPORTANT_WORDS]
-    assert all(word["automatic_evaluation"] is False for word in defaults)
-    assert [word["has_level_2"] for word in defaults] == [True] * 7 + [False]
-    assert not any(word["id"].startswith("l3_") for word in body["words"])
+    # Project m/p/b words first (scorable), then the important words (also scorable).
+    assert [word["id"] for word in defaults] == PROJECT_WORD_IDS + [
+        f"kp_{word}" for word in IMPORTANT_WORDS
+    ]
+    assert all(word["automatic_evaluation"] is True for word in defaults)
+    assert [word["has_level_2"] for word in defaults] == PROJECT_HAS_LEVEL_2 + [True] * 7 + [False]
     assert [word["id"] for word in body["words"] if word["source"] == "custom"] == [
         f"custom_word:{WORD}"
     ]
@@ -245,7 +252,7 @@ def test_important_word_instructions_sequence_and_exact_video_bindings(
     assert response.status_code == 200, response.text
     body = response.json()
     assert body["id"] == f"kp_{word}" and body["source"] == "default"
-    assert body["text"] == word.upper() and body["automatic_evaluation"] is False
+    assert body["text"] == word.upper() and body["automatic_evaluation"] is True
     assert body["syllable_split"] == "-".join(syllables or [word])
     assert [part["text"] for part in body["level_2"]] == [s.upper() for s in syllables]
     assert [part["position"] for part in body["level_2"]] == list(range(1, len(syllables) + 1))
@@ -290,24 +297,13 @@ def test_guide_storage_denied_is_an_explicit_service_error(
 
 
 @pytest.mark.parametrize("item_id", GUIDE_ITEMS)
-def test_each_guide_item_is_readable_but_never_sent_to_evaluation(
-    v2_client: TestClient,
-    upstream: dict,
-    sample_video: bytes,
-    monkeypatch: pytest.MonkeyPatch,
-    item_id: str,
+def test_each_guide_item_is_readable_and_scorable(
+    v2_client: TestClient, upstream: dict, item_id: str
 ) -> None:
-    extract = Mock(side_effect=AssertionError("Guides must not be evaluated"))
-    recognize = Mock(side_effect=AssertionError("Guides must not run ASR"))
-    monkeypatch.setattr(analysis_v2, "extract_or_error", extract)
-    monkeypatch.setattr(analysis_v2, "_recognize", recognize)
     detail = v2_client.get(f"/v2/items/{item_id}", headers=HEADERS)
     assert detail.status_code == 200
-    assert detail.json()["automatic_evaluation"] is False
+    assert detail.json()["automatic_evaluation"] is True
     assert detail.json()["videos"][0]["path"] == GUIDE_ITEMS[item_id].storage_path
-    response = send_analysis(v2_client, sample_video, item_id)
-    assert response.status_code == 404 and response.json()["detail"]["code"] == "ITEM_NOT_FOUND"
-    assert not extract.called and not recognize.called
 
 
 def test_foreign_custom_word_is_not_found(v2_client: TestClient, upstream: dict) -> None:
@@ -517,6 +513,9 @@ def visible_face(monkeypatch: pytest.MonkeyPatch) -> Mock:
         ("l3_papa", "papi", "belum_sesuai", 3),
         ("l3_papa", "", None, 3),
         (f"custom_word:{WORD}", "kertas", "sesuai", 3),
+        ("kp_tolong", "tolong", "sesuai", 3),
+        ("kp_tolong", "tolang", "belum_sesuai", 3),
+        ("kp_tolong_to", "to", "sesuai", 2),
     ],
 )
 def test_level_two_three_use_authoritative_target_and_binary_voice(
@@ -612,7 +611,7 @@ def test_invalid_upload_and_unsupported_item(
     v2_client: TestClient, upstream: dict, sample_video: bytes
 ) -> None:
     assert send_analysis(v2_client, b"not-a-video", "l1_a").status_code == 415
-    assert send_analysis(v2_client, sample_video, "kp_tolong").status_code == 404
+    assert send_analysis(v2_client, sample_video, "kp_unknown").status_code == 404
     assert send_analysis(v2_client, sample_video, "l1_unknown").status_code == 404
     assert (
         v2_client.post(
@@ -735,7 +734,8 @@ def test_word_with_unmapped_level_two_vowel_is_not_given_a_level_one_item(
     v2_client: TestClient, upstream: dict
 ) -> None:
     result = v2_client.get("/v2/words/l3_apa", headers=HEADERS)
-    assert result.status_code == 422 and result.json()["detail"]["code"] == "INVALID_MATERIAL"
+    assert result.status_code == 200, result.text
+    assert result.json()["level_2"] == [] and result.json()["level_3"]["videos"]
 
 
 def test_oversized_v2_upload_preserves_v1_limit_with_v2_error_code(
@@ -753,10 +753,18 @@ def test_private_video_binding_rejects_two_parents(v2_client: TestClient, upstre
     )
 
 
-def test_legacy_l0_instruction_uses_the_sound_instead_of_the_exercise_title(
+def test_catalog_has_no_held_or_hum_items(v2_client: TestClient, upstream: dict) -> None:
+    result = v2_client.get("/v2/catalog", headers=HEADERS)
+    ids = {item["id"] for item in result.json()["level_1"]}
+    assert ids == VOWEL_IDS and not ids & {"l0_hold_a", "l0_soft_loud", "l1_m"}
+
+
+def test_default_word_and_syllables_carry_step_instructions(
     v2_client: TestClient, upstream: dict
 ) -> None:
-    result = v2_client.get("/v2/catalog", headers=HEADERS)
-    items = {item["id"]: item for item in result.json()["level_1"]}
-    assert items["l0_hold_a"]["instruction"] == "Ucapkan A dan tahan selama rekaman."
-    assert items["l0_soft_loud"]["instruction"] == "Ucapkan A pelan, lalu lebih kuat."
+    body = v2_client.get("/v2/words/l3_papa", headers=HEADERS).json()
+    assert (
+        body["level_3"]["instruction"].splitlines()[-1]
+        == "Gabungkan menjadi PAPA dengan irama sama."
+    )
+    assert all(len(part["instruction"].splitlines()) == 2 for part in body["level_2"])

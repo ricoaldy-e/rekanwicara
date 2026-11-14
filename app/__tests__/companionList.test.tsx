@@ -35,7 +35,7 @@ beforeEach(async () => {
 
 it('lists the companion words; a row opens Ubah and the list has no delete button', async () => {
   await render(<Companion />);
-  await waitFor(() => expect(screen.getByText('tolong')).toBeTruthy());
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Ubah TOLONG' })).toBeTruthy());
   expect(screen.queryByRole('button', { name: 'Hapus TOLONG' })).toBeNull();
   expect(screen.getByText('Suku kata: to · long')).toBeTruthy();
   expect(screen.getByText('Tanpa suku kata')).toBeTruthy();
@@ -55,7 +55,7 @@ it('shows built-in words read-only: no edit or delete path', async () => {
     expect(screen.queryByRole('button', { name: `Ubah ${name}` })).toBeNull();
     expect(screen.queryByRole('button', { name: `Hapus ${name}` })).toBeNull();
   }
-  expect(screen.getAllByText('Bawaan')).toHaveLength(2);
+  expect(screen.getAllByText('Bawaan')).toHaveLength(MOCK_CATALOG.words.filter((w) => w.source === 'default').length);
   // The companion list never contains a built-in word.
   expect(screen.queryByTestId('mine-l3_mama')).toBeNull();
 });

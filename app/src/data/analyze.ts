@@ -18,9 +18,9 @@ export class NotSupportedError extends Error {
   }
 }
 
-/** False when the chosen scorer cannot judge this material (custom words need /v2). */
+/** False when the material cannot be scored: the server says so, or v1 was chosen for a custom word. */
 export const canAnalyze = (item: PracticeItem, source: AnalyzeApi = ANALYZE_API) =>
-  !(source === 'v1' && item.source === 'custom');
+  item.scorable !== false && !(source === 'v1' && item.source === 'custom');
 
 export interface AnalyzeInput {
   file: UploadFile;

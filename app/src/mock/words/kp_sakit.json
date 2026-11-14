@@ -1,0 +1,25 @@
+{
+  "id": "kp_sakit",
+  "text": "SAKIT",
+  "source": "default",
+  "level_2": [
+    {
+      "id": "kp_sakit_sa",
+      "text": "SA",
+      "position": 1,
+      "instruction": "Dekatkan ujung lidah ke gusi belakang gigi atas dengan celah sempit; gigi hampir rapat.\nEmbuskan udara hingga terasa dingin di tangan depan mulut; leher belum bergetar.\nTanpa berhenti, buka mulut lebar dan bersuara “a”; getar di leher mulai terasa.\nSatu ketukan.",
+      "videos": []
+    },
+    {
+      "id": "kp_sakit_kit",
+      "text": "KIT",
+      "position": 2,
+      "instruction": "Naikkan bagian belakang lidah ke langit-langit belakang, siap untuk “k”.\nTaruh satu tangan di depan mulut dan satu tangan di leher.\nLepas dengan hembusan kecil sambil melebarkan bibir ke samping untuk “i”. Di suku kata tertutup ini bentuknya sedikit lebih santai daripada “i” sendirian.\nAkhiri dengan menempelkan ujung lidah di belakang gigi seri atas (“t”), lalu berhenti tanpa melepaskan hembusan.\nLeher berhenti bergetar saat “t”. Satu ketukan.",
+      "videos": []
+    }
+  ],
+  "level_3": {
+    "instruction": "Pecah kata menjadi dua bagian: sa-kit. Satu tepukan telapak tangan untuk tiap bagian.\nUcapkan “sa”, lalu langsung “kit” tanpa jeda panjang.\nCek dengan tangan: dingin di tangan pada “s”; hembusan kecil pada “k”; tidak ada hembusan di akhir (“t” berhenti).\nUlangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa.",
+    "videos": []
+  }
+}

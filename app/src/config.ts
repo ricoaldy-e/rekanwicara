@@ -11,8 +11,8 @@ export const SUPABASE_ANON_KEY: string = process.env.EXPO_PUBLIC_SUPABASE_ANON_K
 export const USE_MOCK: boolean = process.env.EXPO_PUBLIC_USE_MOCK === 'true';
 
 export type AnalyzeApi = 'v1' | 'v2' | 'mock';
-/** Unknown or empty values fall back to 'v1' (the only scorer the local server has). */
+/** v2 is the scorer (lips, voice, Wav2Vec2); v1 is no longer used and stays only as an explicit opt-in. */
 export function parseAnalyzeApi(value: string | undefined): AnalyzeApi {
-  return value === 'v2' || value === 'mock' ? value : 'v1';
+  return value === 'v1' || value === 'mock' ? value : 'v2';
 }
 export const ANALYZE_API: AnalyzeApi = parseAnalyzeApi(process.env.EXPO_PUBLIC_ANALYZE_API);

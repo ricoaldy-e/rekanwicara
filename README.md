@@ -134,8 +134,8 @@ Isi `app/.env`:
 |---|---|
 | `EXPO_PUBLIC_API_URL` | `http://<IP-laptop>:8000` |
 | `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Opsional. Aktifkan penyedia Email di Supabase, lalu jalankan [schema.sql](docs/supabase/schema.sql) di SQL Editor. Jangan menaruh service-role key di aplikasi |
-| `EXPO_PUBLIC_USE_MOCK` | `true` memakai katalog dan kata contoh bawaan aplikasi. Server lokal baru menyediakan `/v1`, jadi nilai ini diperlukan agar katalog tampil |
-| `EXPO_PUBLIC_ANALYZE_API` | `v1` (bawaan), `v2`, atau `mock` |
+| `EXPO_PUBLIC_USE_MOCK` | `true` memakai katalog dan kata contoh bawaan aplikasi (isi sama dengan katalog server). `false` mengambil katalog dari `/v2/catalog` (perlu login) |
+| `EXPO_PUBLIC_ANALYZE_API` | `v2` (bawaan) atau `mock`. `v1` tidak dipakai lagi |
 | `EXPO_PUBLIC_DATASET_MODE` | `false` untuk build produk |
 
 Catatan Supabase: login anonim sudah dihentikan; onboarding PIN akun memerlukan sesi pendamping. Rincian: [AUTH.md](docs/supabase/AUTH.md).

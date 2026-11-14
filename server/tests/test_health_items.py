@@ -44,7 +44,7 @@ def test_items_returns_only_active_items(client: TestClient) -> None:
 
     required = {
         "l0_hold_a", "l0_soft_loud",
-        "l1_a", "l1_i", "l1_u", "l1_m",
+        "l1_a", "l1_i", "l1_u", "l1_m", "l1_e", "l1_o",
         "l2_ma", "l2_mi", "l2_mu", "l2_pa", "l2_pi", "l2_pu", "l2_ba", "l2_bi", "l2_bu",
         "l3_mama", "l3_papa", "l3_bibi", "l3_pipi", "l3_apa", "l3_abu", "l3_ibu", "l3_ubi",
         "l3_bumi",

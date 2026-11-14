@@ -1,0 +1,25 @@
+{
+  "id": "kp_api",
+  "text": "API",
+  "source": "default",
+  "level_2": [
+    {
+      "id": "kp_api_a",
+      "text": "A",
+      "position": 1,
+      "instruction": "Buka mulut lebar, rahang turun.\nTaruh telapak tangan di leher.\nBersuara “a” singkat dan rasakan getar di leher.\nSatu ketukan.",
+      "videos": []
+    },
+    {
+      "id": "kp_api_pi",
+      "text": "PI",
+      "position": 2,
+      "instruction": "Rapatkan kedua bibir.\nTaruh satu tangan di depan bibir dan satu tangan di leher.\nLepas bibir dengan hembusan kecil dan pada saat yang sama lebarkan bibir ke samping seperti tersenyum untuk “i”.\nRasakan getar di leher mulai setelah bibir lepas.\nSatu ketukan.",
+      "videos": []
+    }
+  ],
+  "level_3": {
+    "instruction": "Pecah kata menjadi dua bagian: a-pi. Satu tepukan telapak tangan untuk tiap bagian.\nBentuk mulut berganti tiga kali: lebar (a) → rapat (p) → melebar seperti senyum (i).\nJangan menahan bibir rapat terlalu lama; langsung lepas ke “i”.\nCek dengan tangan: getar di leher pada “a”, berhenti sesaat saat bibir rapat, lalu mulai lagi pada “i”; hembusan kecil terasa saat bibir lepas.\nUlangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa.",
+    "videos": []
+  }
+}

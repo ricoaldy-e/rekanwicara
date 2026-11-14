@@ -1,0 +1,32 @@
+{
+  "id": "kp_polisi",
+  "text": "POLISI",
+  "source": "default",
+  "level_2": [
+    {
+      "id": "kp_polisi_po",
+      "text": "PO",
+      "position": 1,
+      "instruction": "Rapatkan kedua bibir, siap untuk “p”.\nTaruh satu tangan di depan bibir dan satu tangan di leher.\nLepas bibir dengan hembusan kecil; leher belum bergetar.\nSegera bulatkan bibir dengan bukaan sedang dan bersuara “o”; rasakan getar di leher.\nSatu ketukan.",
+      "videos": []
+    },
+    {
+      "id": "kp_polisi_li",
+      "text": "LI",
+      "position": 2,
+      "instruction": "Naikkan ujung lidah ke gusi di belakang gigi atas, siap untuk “l”.\nMulai bersuara saat lidah menempel; rasakan getar di leher.\nTurunkan lidah sambil melebarkan bibir ke samping seperti tersenyum: “i”.\nSatu ketukan.",
+      "videos": []
+    },
+    {
+      "id": "kp_polisi_si",
+      "text": "SI",
+      "position": 3,
+      "instruction": "Lebarkan bibir seperti tersenyum; gigi hampir rapat.\nDekatkan ujung lidah ke gusi belakang gigi atas dengan celah sempit.\nEmbuskan udara hingga terasa dingin di tangan depan mulut; leher belum bergetar.\nTanpa berhenti, mulai bersuara “i”; getar di leher mulai terasa.\nSatu ketukan.",
+      "videos": []
+    }
+  ],
+  "level_3": {
+    "instruction": "Pecah kata menjadi tiga bagian: po-li-si. Satu tepukan telapak tangan untuk tiap bagian.\nUcapkan “po”, “li”, “si” berurutan tanpa jeda panjang.\nBentuk mulut berganti: bibir rapat lalu bulat, lidah naik ke gusi lalu senyum, desis lalu senyum.\nCek dengan tangan: hembusan kecil di awal (“p”); getar di leher pada “o”, “l”, “i”; dingin di tangan pada “s” sebelum “i” terakhir.\nUlangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa.",
+    "videos": []
+  }
+}

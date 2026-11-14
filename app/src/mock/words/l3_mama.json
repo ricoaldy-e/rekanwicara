@@ -3,8 +3,23 @@
   "text": "MAMA",
   "source": "default",
   "level_2": [
-    { "id": "l2_ma", "text": "MA", "position": 1, "instruction": "Rapatkan bibir, lalu buka dan ucapkan MA.", "videos": [] },
-    { "id": "l2_ma", "text": "MA", "position": 2, "instruction": "Rapatkan bibir lagi, lalu ucapkan MA.", "videos": [] }
+    {
+      "id": "l2_ma",
+      "text": "MA",
+      "position": 1,
+      "instruction": "Rapatkan kedua bibir; rasakan getar di hidung.\nBuka bibir dan ucapkan MA dengan mulut terbuka lebar.",
+      "videos": []
+    },
+    {
+      "id": "l2_ma",
+      "text": "MA",
+      "position": 2,
+      "instruction": "Rapatkan kedua bibir; rasakan getar di hidung.\nBuka bibir dan ucapkan MA dengan mulut terbuka lebar.",
+      "videos": []
+    }
   ],
-  "level_3": { "instruction": "Rapatkan bibir untuk MA yang pertama.\nBuka mulut, lalu rapatkan lagi untuk MA yang kedua.\nUcapkan MAMA perlahan dengan irama sama.", "videos": [] }
+  "level_3": {
+    "instruction": "MA: rapatkan bibir, lalu buka mulut lebar.\nMA: rapatkan bibir, lalu buka mulut lebar.\nGabungkan menjadi MAMA dengan irama sama.",
+    "videos": []
+  }
 }

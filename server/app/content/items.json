@@ -6,8 +6,8 @@
   {"item_id": "l1_i", "level": 1, "text": "i", "units": ["i"], "priority": "required", "emoji": null, "active": true},
   {"item_id": "l1_u", "level": 1, "text": "u", "units": ["u"], "priority": "required", "emoji": null, "active": true},
   {"item_id": "l1_m", "level": 1, "text": "mmm", "units": ["m_hum"], "priority": "required", "emoji": null, "active": true},
-  {"item_id": "l1_e", "level": 1, "text": "e", "units": ["e"], "priority": "bonus", "emoji": null, "active": false},
-  {"item_id": "l1_o", "level": 1, "text": "o", "units": ["o"], "priority": "bonus", "emoji": null, "active": false},
+  {"item_id": "l1_e", "level": 1, "text": "e", "units": ["e"], "priority": "required", "emoji": null, "active": true},
+  {"item_id": "l1_o", "level": 1, "text": "o", "units": ["o"], "priority": "required", "emoji": null, "active": true},
 
   {"item_id": "l2_ma", "level": 2, "text": "ma", "units": ["ma"], "priority": "required", "emoji": null, "active": true},
   {"item_id": "l2_mi", "level": 2, "text": "mi", "units": ["mi"], "priority": "required", "emoji": null, "active": true},

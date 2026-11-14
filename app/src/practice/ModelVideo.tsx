@@ -4,42 +4,43 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { BigButton, Body, InfoNote, LipIllustration } from '../components';
-import { ANALYZE_API, type AnalyzeApi } from '../config';
 import type { PracticeItem } from '../data/types';
+import { signedVideoUrl } from '../data/videoUrl';
 import { soundShape } from '../results/lipShapes';
 import { InstructionCarousel } from './InstructionCarousel';
-import { useSettings } from '../state/settings';
 import { colors, displayFont, fontSize, lineHeight, radius, session, spacing, stroke, textFont } from '../theme';
 
 /**
  * "Lihat" (LAT-4, LAT-7): the model video with the instruction text always under it.
- * Video source: the team's /v1/model-video/{itemId} when analysing with v1. `item.video` (Supabase Storage,
- * signed URL) is not wired yet (FL-8), so without v1 the step shows text only.
+ * Video source: `item.video` from the v2 catalog, played from Supabase Storage through a signed URL.
  */
-export function ModelVideo({ item, source = ANALYZE_API }: { item: PracticeItem; source?: AnalyzeApi }) {
-  const { api } = useSettings();
-  const fromV1 = source === 'v1';
-  const [state, setState] = useState<'loading' | 'available' | 'missing' | 'error'>(fromV1 ? 'loading' : 'missing');
+export function ModelVideo({ item }: { item: PracticeItem }) {
+  const video = item.video;
+  const [state, setState] = useState<'loading' | 'available' | 'missing' | 'error'>(video ? 'loading' : 'missing');
+  const [url, setUrl] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    if (!fromV1) return;
+    if (!video) return;
     let cancelled = false;
-    api
-      .hasModelVideo(item.itemId)
-      .then((yes) => !cancelled && setState(yes ? 'available' : 'missing'))
+    signedVideoUrl(video)
+      .then((signed) => {
+        if (cancelled) return;
+        setUrl(signed);
+        setState(signed ? 'available' : 'missing');
+      })
       .catch(() => !cancelled && setState('error'));
     return () => {
       cancelled = true;
     };
-  }, [api, fromV1, item.itemId, attempt]);
+  }, [video, attempt]);
 
   const instruction = <Instruction item={item} />;
   if (state === 'loading') return <><Loading text={item.text} />{instruction}</>;
-  if (state === 'available') return (
+  if (state === 'available' && url) return (
     <>
       <VideoCard>
-        <Player url={`${api.baseUrl}/v1/model-video/${encodeURIComponent(item.itemId)}`} text={item.text} onError={() => setState('error')} />
+        <Player key={url} url={url} text={item.text} onError={() => setState('error')} />
       </VideoCard>
       {instruction}
     </>
@@ -55,7 +56,7 @@ export function ModelVideo({ item, source = ANALYZE_API }: { item: PracticeItem;
       />
       <TextFallback item={item} />
       {instruction}
-      {fromV1 ? (
+      {state === 'error' && video ? (
         <BigButton label="Coba muat video lagi" icon="refresh" variant="secondary" onPress={() => {
           setState('loading');
           setAttempt((n) => n + 1);

@@ -1,0 +1,25 @@
+{
+  "id": "kp_makan",
+  "text": "MAKAN",
+  "source": "default",
+  "level_2": [
+    {
+      "id": "kp_makan_ma",
+      "text": "MA",
+      "position": 1,
+      "instruction": "Rapatkan kedua bibir; taruh satu jari di sisi hidung dan satu tangan di leher.\nBersuara “m” dengan bibir rapat: udara keluar lewat hidung; getar terasa di sisi hidung.\nBuka mulut lebar untuk “a”; udara keluar lewat mulut.\nSatu ketukan.",
+      "videos": []
+    },
+    {
+      "id": "kp_makan_kan",
+      "text": "KAN",
+      "position": 2,
+      "instruction": "Naikkan bagian belakang lidah ke langit-langit belakang, siap untuk “k”.\nTaruh satu tangan di depan mulut.\nLepas dengan hembusan kecil dan segera buka mulut lebar untuk “a”.\nAkhiri dengan menempelkan ujung lidah di belakang gigi seri atas dan alirkan suara lewat hidung (“n”); rasakan getar di sisi hidung.\nSatu ketukan.",
+      "videos": []
+    }
+  ],
+  "level_3": {
+    "instruction": "Pecah kata menjadi dua bagian: ma-kan. Satu tepukan telapak tangan untuk tiap bagian.\nUcapkan “ma”, lalu langsung “kan” tanpa jeda panjang.\nBentuk mulut berganti: bibir rapat → lebar (a) → lidah belakang naik (k) → lebar (a) → lidah menempel di gigi (n).\nCek dengan tangan: getar di sisi hidung terasa pada “m” dan pada “n” di akhir; hembusan kecil terasa pada “k”.\nUlangi tiga kali pelan, lalu tiga kali dengan kecepatan bicara biasa.",
+    "videos": []
+  }
+}

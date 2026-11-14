@@ -1,0 +1,25 @@
+{
+  "id": "l3_pipi",
+  "text": "PIPI",
+  "source": "default",
+  "level_2": [
+    {
+      "id": "l2_pi",
+      "text": "PI",
+      "position": 1,
+      "instruction": "Rapatkan kedua bibir dan tahan udara sebentar.\nLepaskan bibir dengan hembusan kecil dan ucapkan PI dengan bibir melebar.",
+      "videos": []
+    },
+    {
+      "id": "l2_pi",
+      "text": "PI",
+      "position": 2,
+      "instruction": "Rapatkan kedua bibir dan tahan udara sebentar.\nLepaskan bibir dengan hembusan kecil dan ucapkan PI dengan bibir melebar.",
+      "videos": []
+    }
+  ],
+  "level_3": {
+    "instruction": "PI: rapatkan bibir, lepaskan dengan hembusan kecil, lalu lebarkan bibir.\nPI: rapatkan bibir, lepaskan dengan hembusan kecil, lalu lebarkan bibir.\nGabungkan menjadi PIPI dengan irama sama.",
+    "videos": []
+  }
+}

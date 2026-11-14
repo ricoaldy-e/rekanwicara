@@ -60,6 +60,7 @@ export function catalogToWords(dto: CatalogDTO): WordSummary[] {
 }
 
 export function wordToPath(dto: WordDTO): WordPath {
+  const scorable = dto.automatic_evaluation === false ? { scorable: false } : {};
   return {
     word: { id: dto.id, text: dto.text, source: dto.source, hasLevel2: dto.level_2.length > 0 },
     syllables: [...dto.level_2]
@@ -73,6 +74,7 @@ export function wordToPath(dto: WordDTO): WordPath {
         video: s.videos[0],
         position: s.position,
         source: dto.source,
+        ...scorable,
       })),
     whole: {
       key: dto.id,
@@ -82,6 +84,7 @@ export function wordToPath(dto: WordDTO): WordPath {
       instruction: dto.level_3.instruction,
       video: dto.level_3.videos[0],
       source: dto.source,
+      ...scorable,
     },
   };
 }
