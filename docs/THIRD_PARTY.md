@@ -71,9 +71,16 @@ URL unduhan `latest` bisa berubah; hasil pemeriksaan ini merujuk bundle dengan h
 | jest 30.5.2 | MIT | [Jest](https://github.com/jestjs/jest/blob/main/LICENSE) |
 | TypeScript 6.0.3 | Apache-2.0 | [TypeScript](https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt) |
 
-Supabase dipakai sebagai layanan, tidak dibundel. Aset cermin/bibir PNG dan generatornya
-milik tim dan termasuk lisensi repo; tidak memakai gambar pihak ketiga. Wav2Vec2,
-Transformers, PyTorch, torchaudio dan scikit-learn tidak dipasang/dipakai dalam MVP.
+Supabase (Auth, Postgres, Storage) dan Google Gemini API (saran instruksi, hanya teks) dipakai sebagai layanan, tidak dibundel. Logo, ikon,
+dan gambar bibir milik tim dan termasuk lisensi repo; tidak memakai gambar pihak ketiga.
+Wav2Vec2 (dengan PyTorch dan Transformers) dipakai di server lewat venv terpisah,
+lihat bagian berikut. torchaudio dan scikit-learn tidak dipasang.
+
+| Paket tambahan (versi diperiksa) | Lisensi | Sumber resmi |
+|---|---|---|
+| @expo-google-fonts/inter 0.4.2 (font Inter) | MIT untuk paket; SIL OFL 1.1 untuk font | [Inter](https://github.com/rsms/inter/blob/master/LICENSE.txt) |
+| @expo-google-fonts/playfair-display 0.4.2 (font Playfair Display) | MIT untuk paket; SIL OFL 1.1 untuk font | [Playfair Display](https://github.com/clauswilke/PlayfairDisplay/blob/master/OFL.txt) |
+| expo-image-picker 58.0.10 | MIT | [Expo](https://github.com/expo/expo/blob/main/LICENSE) |
 
 ## Distribusi dan batas pemeriksaan
 

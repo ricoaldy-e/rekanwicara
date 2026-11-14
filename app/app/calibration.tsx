@@ -75,7 +75,7 @@ export default function Calibration() {
       <Screen edges={TOP_EDGES} contentStyle={styles.content}>
         <StepHeader step={STEPS.length} total={STEPS.length} title="Kalibrasi selesai" />
         <Body>Terima kasih. Hasil latihan sekarang disesuaikan dengan bentuk bibir dan suaramu.</Body>
-        <BigButton label="Ke beranda" icon="home" onPress={() => router.replace('/home')} />
+        <BigButton label="Selesai" icon="checkmark" onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))} />
       </Screen>
     );
   }

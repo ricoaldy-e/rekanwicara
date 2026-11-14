@@ -122,7 +122,7 @@ Versi FFmpeg evaluasi A6 di laptop sebelumnya berbeda; evaluasi A6 tidak dijalan
 
 - [x] README root mencakup deskripsi, arsitektur, setup server/model/app, lingkungan,
   Supabase opsional, demo, tim serta evaluasi dan batas produk.
-- [x] Status fase dan serah terima diselaraskan di PROGRESS, CONTEXT dan NEXT_STEPS.
+- [x] Status fase dan keputusan diselaraskan di PROGRESS.
 - [x] THIRD_PARTY memuat dependency langsung Python/JS dan sumber lisensi. Tiga model
   card resmi komponen Face Landmarker menyatakan Apache-2.0. Bundle unduhan tidak dibundel.
 - [x] Daftar berkas Git saat ini dan nama berkas seluruh riwayat/ref diperiksa: tidak
@@ -151,9 +151,9 @@ Gunakan **berkas terlacak pada tag `v1.0-submission`**, termasuk:
   `.env.example`, README dan generator aset.
 - `server/`: source, tes, requirements, `.env.example`, skrip unduh model/kontrak dan README.
 - `ml/`: alat dataset, plot, penyetelan/evaluasi (bukan hasil/rekaman lokal).
-- `docs/`: SPEC, PROGRESS, NEXT_STEPS, EVAL_REPORT, MODEL_CARD, THIRD_PARTY,
-  I1_CHECKLIST, checklist ini, dan `supabase/schema.sql`.
-- README root, LICENSE, AGENTS, CLAUDE, CONTEXT serta konfigurasi Git yang terlacak.
+- `docs/`: SPEC, PROGRESS, EVAL_REPORT, MODEL_CARD, THIRD_PARTY,
+  checklist ini, dan `supabase/schema.sql`.
+- README root, LICENSE, AGENTS, CLAUDE serta konfigurasi Git yang terlacak.
 
 Tidak disertakan: `.env`, `data/`, model unduhan, venv, node_modules, cache, binary FFmpeg,
 atau panduan lokal pengguna yang belum terlacak. Tidak ada APK yang sudah dibangun dan
@@ -166,7 +166,7 @@ Supabase online dan antrean Uji Dengar offline→online berhasil. Antrean latiha
 diuji dengan koneksi Supabase disimulasikan gagal sementara LAN tetap aktif, lalu pulih
 otomatis setelah endpoint asli dipulihkan. WAN jaringan bersama tidak diputus.
 20 durasi manual: p50 2,385 s, p90 3,91 s, maksimum 14,5 s; tidak membuang sampel lambat.
-Lihat [I1_CHECKLIST.md](I1_CHECKLIST.md).
+Catatan uji lengkap ada di [PROGRESS.md](PROGRESS.md).
 
 B4: pengguna mengonfirmasi Tentang tampil baik, penanda demo/a/ma lulus benar dan angka
 percobaan pribadi kembali sama setelah demo dimatikan. Tidak mengulang semua uji HP di F,

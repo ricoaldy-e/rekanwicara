@@ -180,7 +180,7 @@ export default function Practice() {
         <>
           <ModelVideo item={item} />
           {!profile.calibrated ? (
-            <InfoNote text="Hasil lebih tepat setelah kalibrasi. Kalibrasi bisa dilakukan dari beranda." />
+            <InfoNote text="Hasil lebih tepat setelah kalibrasi. Kalibrasi bisa dilakukan dari Pengaturan." />
           ) : null}
           {!scorable ? <InfoNote text="Penilaian otomatis untuk materi ini belum tersedia. Berlatihlah dengan melihat contoh." testID="practice-not-supported" /> : null}
         </>

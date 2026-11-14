@@ -33,14 +33,21 @@ beforeEach(() => {
   mockSignOut.mockResolvedValue(undefined);
 });
 
-it('lists vibration, motion note, PIN, About and sign-out before the operator options', async () => {
+it('lists vibration, calibration, motion note, PIN, About and sign-out, with no operator or demo options', async () => {
   await render(<Settings />);
   const text = JSON.stringify(screen.toJSON());
-  const order = ['Getar', 'Ukuran teks dan gerak mengikuti pengaturan HP.', 'Ganti PIN', 'Tentang Rekan Wicara', 'Keluar', 'Lanjutan'].map((t) => text.indexOf(t));
+  const order = ['Getar', 'Kalibrasi', 'Ukuran teks dan gerak mengikuti pengaturan HP.', 'Ganti PIN', 'Tentang Rekan Wicara', 'Keluar'].map((t) => text.indexOf(t));
   expect(order.every((i) => i >= 0)).toBe(true);
   expect([...order].sort((a, b) => a - b)).toEqual(order);
-  expect(screen.getByTestId('settings-url').props.value).toBe('http://192.168.1.10:8000');
-  expect(screen.getByTestId('demo-toggle')).toBeTruthy();
+  expect(screen.queryByTestId('settings-url')).toBeNull();
+  expect(screen.queryByTestId('demo-toggle')).toBeNull();
+  expect(text).not.toContain('Lanjutan');
+});
+
+it('opens the optional calibration', async () => {
+  await render(<Settings />);
+  await fireEvent.press(screen.getByTestId('calibration-link'));
+  expect(mockPush).toHaveBeenLastCalledWith('/calibration');
 });
 
 it('the vibration switch changes the setting and its state is written out', async () => {

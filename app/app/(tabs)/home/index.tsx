@@ -6,7 +6,6 @@ import { StyleSheet, Text, View } from 'react-native';
 import { errorMessage } from '../../../src/api/errors';
 import { useAuth } from '../../../src/auth/AuthProvider';
 import { BigButton, Card, HeroCard, InfoNote, LetterTile, LevelTile, LipIllustration, ListGroup, ListRow, LoadingView, ProgressRing, Screen, StatTile, StatusBadge } from '../../../src/components';
-import { DATASET_MODE } from '../../../src/config';
 import { describeItem, nextItem, recentActivity, summary } from '../../../src/data/progress';
 import { useCatalog } from '../../../src/data/useCatalog';
 import { soundShape } from '../../../src/results/lipShapes';
@@ -55,12 +54,12 @@ export default function Home() {
   const router = useRouter();
   const { health, healthError } = useContent();
   const { apiUrl } = useSettings();
-  const { profile, demo } = useUser();
+  const { profile } = useUser();
   const { session } = useAuth();
   const { data, loading, error, reload } = useCatalog({ baseUrl: apiUrl });
 
   const name = session?.displayName?.trim() || FALLBACK_NAME;
-  const attempts = demo || session?.uid === profile.userId ? profile.attempts : [];
+  const attempts = session?.uid === profile.userId ? profile.attempts : [];
   const l1 = data ? summary(attempts, data.level1.map((i) => i.itemId)) : null;
   // shortcut: counts whole words (Level 3) only; Level 2 syllables need every word's detail, add with FL-5.
   const words = data ? summary(attempts, data.words.map((w) => w.id)) : null;
@@ -83,19 +82,13 @@ export default function Home() {
     return shape ? <LipIllustration shape={shape} size={homeList.heroIllustration} tone="hero" /> : undefined;
   };
 
+  // Calibration is optional (Pengaturan), so it is not a first step (decided 14 Nov 2026).
   const steps: { key: string; title: string; subtitle: string; state: StepState; onPress?: () => void }[] = [
-    {
-      key: 'calibration',
-      title: 'Kalibrasi wajah dan suara',
-      subtitle: profile.calibrated ? 'Selesai' : 'Berikutnya',
-      state: profile.calibrated ? 'done' : 'next',
-      onPress: profile.calibrated ? undefined : () => router.push('/calibration'),
-    },
     {
       key: 'first-sound',
       title: `Latih bunyi “${(firstItem?.text ?? 'a').toLowerCase()}”`,
-      subtitle: profile.calibrated ? 'Berikutnya' : 'Belum',
-      state: profile.calibrated ? 'next' : 'later',
+      subtitle: 'Berikutnya',
+      state: 'next',
       onPress: firstItem ? () => open(firstItem) : undefined,
     },
     {
@@ -123,19 +116,8 @@ export default function Home() {
         <Text accessible={false} maxFontSizeMultiplier={2} style={[styles.wordmark, displayFont()]}>Rekan Wicara</Text>
       </View>
 
-      {demo ? <InfoNote text="Profil contoh aktif. Hasil latihan tidak disimpan online." /> : null}
-
-      {!profile.calibrated ? (
-        <View style={styles.gap}>
-          <InfoNote text="Kalibrasi belum dilakukan. Dengan kalibrasi, hasil latihan lebih tepat untukmu." testID="calibration-banner" />
-          <BigButton label="Kalibrasi sekarang" icon="options" variant="secondary" onPress={() => router.push('/calibration')} />
-        </View>
-      ) : null}
-
       {health?.mock_mode ? <InfoNote text="Server sedang memakai data contoh. Hasil bukan analisis rekaman." /> : null}
       {healthError ? <InfoNote tone="warning" text={errorMessage(healthError)} /> : null}
-
-      {__DEV__ && session && !demo ? <BigButton label="Rekam Tutorial" icon="videocam" onPress={() => router.push('/tutorial-videos')} /> : null}
 
       {data && data.level1.length === 0 && data.words.length === 0 ? <InfoNote text="Materi latihan belum tersedia." testID="home-empty" /> : null}
 
@@ -281,10 +263,6 @@ export default function Home() {
       <Card onPress={() => router.push({ pathname: '/about', params: { from: 'Latihan' } })} accessibilityLabel="Tentang aplikasi">
         <Text maxFontSizeMultiplier={2} style={[styles.link, textFont(true)]}>Tentang aplikasi</Text>
       </Card>
-
-      {DATASET_MODE ? (
-        <BigButton label="Mode Dataset" icon="videocam" variant="secondary" onPress={() => router.push('/dataset')} />
-      ) : null}
     </Screen>
   );
 }

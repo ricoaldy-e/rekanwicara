@@ -51,11 +51,7 @@ export default function RootLayout() {
             <Stack.Screen name="onboarding" options={{ title: 'Selamat datang', headerShown: false, animation: 'fade' }} />
             <Stack.Screen name="calibration" options={{ title: 'Kalibrasi', headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: 'fade' }} />
-            <Stack.Screen name="tutorial-videos" options={{ title: 'Rekam Tutorial', headerBackButtonMenuEnabled: false }} />
             <Stack.Screen name="practice/[itemId]" options={{ title: 'Latihan' }} />
-            <Stack.Screen name="dataset/index" options={{ title: 'Mode Dataset' }} />
-            <Stack.Screen name="dataset/session" options={{ title: 'Sesi Dataset' }} />
-            <Stack.Screen name="dataset/model-videos" options={{ title: 'Rekam Video Model' }} />
             <Stack.Screen name="about" options={{ title: 'Tentang aplikasi' }} />
             <Stack.Screen name="privacy" options={{ title: 'Kebijakan privasi' }} />
           </Stack>

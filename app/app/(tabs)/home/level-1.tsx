@@ -25,9 +25,9 @@ const SOUND: Record<string, { hint: string; tile?: string; icon?: ComponentProps
 export default function LevelOne() {
   const router = useRouter();
   const { apiUrl } = useSettings();
-  const { profile, demo } = useUser();
+  const { profile } = useUser();
   const { uid } = useAuth();
-  const attempts = demo || profile.userId === uid ? profile.attempts : [];
+  const attempts = profile.userId === uid ? profile.attempts : [];
   const { data, loading, error, reload } = useCatalog({ baseUrl: apiUrl });
   const progress = data ? summary(attempts, data.level1.map((i) => i.itemId)) : null;
 

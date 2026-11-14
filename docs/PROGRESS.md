@@ -1131,3 +1131,10 @@ Skill yang dimuat: `figma-design-to-code` (membaca konteks), `figma-use` dan `fi
 - Server: katalog v2 tidak lagi mendaftar kata m/p/b; `default_instructions.json` dari DATA-1 dihapus dan `word()` untuk item lama kembali seperti semula (tes lama dipulihkan). `pytest` 755 lulus, ruff bersih.
 - App: mock = 5 vokal + 8 Kata Penting + 2 kata Pendamping contoh. MAMA/PAPA hanya tersisa sebagai fixture tes (`test-fixtures/sampleWords.ts`) untuk tes jalur kata (suku kata berulang). `npm test` 848/848, typecheck bersih.
 - Penghalang demo: `.env` lokal app `EXPO_PUBLIC_USE_MOCK=false` (mode mock memakai token palsu yang ditolak `/v2/analyze`). Storage: 29/29 video (24 Kata Penting + 5 vokal) ada; akses baca akun sudah diuji tim setelah RLS diperbarui (baris "Uji ulang RLS video v2").
+
+## CLEAN-1 (14 Nov 2026): hanya fitur produk untuk pengumpulan
+
+- Keputusan Rico: app dikumpulkan sebagai produk, tanpa fitur tim atau demo. Dihapus dari app: Rekam Tutorial (layar, `TutorialVideo`, `CompanionLogin`, `CompanionPinGate`), Mode Dataset (`app/dataset`, `src/dataset`, `EXPO_PUBLIC_DATASET_MODE`), layar Uji Wav2Vec2 dan Uji Gabungan (`src/experiments`), Profil contoh (state `demo`, label di header, `user/demo.ts`), bagian "Lanjutan" Pengaturan (alamat server, Tes koneksi; alamat kini hanya dari `app/.env`, nilai lama di HP dihapus sekali saat app dibuka), `LevelOneList` yang tidak terpakai, metode klien API untuk fitur itu dan `nativeUpload`/`experimentResponses`.
+- Kalibrasi tidak lagi di awal: onboarding berakhir ke Beranda ("Mulai latihan"), tanpa banner dan tanpa langkah kalibrasi di "Langkah awal" (kini 2 langkah). Kalibrasi tetap opsional di Pengaturan > Umum > Kalibrasi; layar selesai kembali ke asal.
+- Server, `ml/` dan endpoint dataset/tutorial di server tidak diubah (dipakai tim untuk menyetel ambang dan mengunggah video).
+- `npm test` 746/746, typecheck bersih, lint 0 error.

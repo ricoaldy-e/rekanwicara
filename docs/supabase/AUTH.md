@@ -121,7 +121,7 @@ Berkas fase ini (perubahan eksperimen Wav2Vec2 sebelumnya tetap dipertahankan):
   `server/app/api/v1/__init__.py`, `server/.env.example`.
 - Tes existing: `app/__tests__/api.client.test.ts`, `app/__tests__/demo.test.tsx`,
   `app/__tests__/sync.test.ts`.
-- Acuan/setup: `docs/SPEC.md`, `docs/PROGRESS.md`, `CONTEXT.md`, `README.md`, `app/README.md`.
+- Acuan/setup: `docs/SPEC.md`, `docs/PROGRESS.md`, `README.md`, `app/README.md`.
 
 Hasil lokal: **536 pytest** (15 tambahan), **318 Jest** (33 tambahan, 27 suite),
 TypeScript dan Ruff check/format 95 berkas lulus. Expo lint exit 0 dengan 0 error dan

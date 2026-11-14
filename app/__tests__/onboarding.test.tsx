@@ -36,7 +36,7 @@ describe('Onboarding', () => {
 
   it('needs both consents before continuing', async () => {
     await toConsent();
-    const next = () => screen.getByRole('button', { name: 'Lanjut ke kalibrasi' });
+    const next = () => screen.getByRole('button', { name: 'Mulai latihan' });
     expect(next()).toBeDisabled();
     await fireEvent.press(screen.getByRole('checkbox', { name: /Saya mengerti/ }));
     expect(next()).toBeDisabled();
@@ -50,8 +50,8 @@ describe('Onboarding', () => {
     await fireEvent.press(screen.getByRole('checkbox', { name: /Saya mengerti/ }));
     await fireEvent.press(screen.getByRole('checkbox', { name: /Pendamping/ }));
     expect(screen.queryByTestId('pin-input')).toBeNull();
-    await fireEvent.press(screen.getByRole('button', { name: 'Lanjut ke kalibrasi' }));
-    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/calibration'));
+    await fireEvent.press(screen.getByRole('button', { name: 'Mulai latihan' }));
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/home'));
     expect(mockComplete).toHaveBeenCalledWith();
   });
 });
@@ -66,7 +66,7 @@ describe('Onboarding layout (Figma 29:182, 29:235)', () => {
     expect(screen.getByRole('button', { name: 'Lanjut' })).toBeTruthy();
   });
 
-  it('step 2 says why "Lanjut ke kalibrasi" is off, until both consents are ticked', async () => {
+  it('step 2 says why "Mulai latihan" is off, until both consents are ticked', async () => {
     await toConsent();
     expect(screen.getByText('Centang kedua persetujuan untuk lanjut.')).toBeTruthy();
     await fireEvent.press(screen.getByRole('checkbox', { name: /Saya mengerti/ }));

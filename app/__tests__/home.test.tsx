@@ -55,14 +55,11 @@ it('opens Level 1, Pilih kata and About', async () => {
   expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/about', params: { from: 'Latihan' } });
 });
 
-it('shows the calibration note only before calibration', async () => {
-  await render(<Home />);
-  expect(screen.queryByTestId('calibration-banner')).toBeNull();
+it('never asks for calibration on Home: it is optional, in Pengaturan', async () => {
   mockProfile = { ...newProfile(UID), calibrated: false };
   await render(<Home />);
-  expect(screen.getByTestId('calibration-banner')).toBeTruthy();
-  await fireEvent.press(screen.getByRole('button', { name: 'Kalibrasi sekarang' }));
-  expect(mockPush).toHaveBeenLastCalledWith('/calibration');
+  expect(screen.queryByTestId('calibration-banner')).toBeNull();
+  expect(screen.queryByText(/Kalibrasi/)).toBeNull();
 });
 
 it('offers a retry when the catalog fails and hides the cards', async () => {
@@ -97,10 +94,10 @@ it('shows a waiting state for an empty catalog without inventing practice target
   expect(screen.queryByTestId('hero-action')).toBeNull();
 });
 
-it('keeps the existing tutorial recorder entry available in development', async () => {
+it('has no team-only entries (tutorial recording, dataset)', async () => {
   await render(<Home />);
-  await fireEvent.press(screen.getByRole('button', { name: 'Rekam Tutorial' }));
-  expect(mockPush).toHaveBeenLastCalledWith('/tutorial-videos');
+  expect(screen.queryByRole('button', { name: 'Rekam Tutorial' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Mode Dataset' })).toBeNull();
 });
 
 describe('new user (no attempts yet)', () => {
@@ -109,20 +106,21 @@ describe('new user (no attempts yet)', () => {
     expect(screen.getByText('Latihan pertamamu')).toBeTruthy();
     expect(screen.getByText('Vokal “a”')).toBeTruthy();
     expect(screen.getByText('Mulai latihan pertama')).toBeTruthy();
-    expect(screen.getByText('1 dari 3')).toBeTruthy();
+    expect(screen.getByText('0 dari 2')).toBeTruthy();
     expect(screen.getByTestId('progress-empty')).toBeTruthy();
     expect(screen.queryByTestId('stat-vowels')).toBeNull();
     expect(screen.queryByTestId('home-activity')).toBeNull();
     expect(screen.queryByTestId('home-hero')).toBeNull();
   });
 
-  it('starts the first sound from the hero and opens the word list from step 3', async () => {
+  it('starts the first sound from the hero and opens the word list from step 2', async () => {
     await render(<Home />);
     await fireEvent.press(screen.getByTestId('hero-action'));
     expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/practice/[itemId]', params: { itemId: 'l1_a', v2: '1' } });
     await fireEvent.press(screen.getByTestId('step-first-word'));
     expect(mockPush).toHaveBeenLastCalledWith('/home/words');
-    expect(screen.getByTestId('step-calibration').props.accessibilityLabel).toBe('Langkah 1: Kalibrasi wajah dan suara. Selesai');
+    expect(screen.getByTestId('step-first-sound').props.accessibilityLabel).toBe('Langkah 1: Latih bunyi “a”. Berikutnya');
+    expect(screen.queryByTestId('step-calibration')).toBeNull();
   });
 });
 

@@ -114,22 +114,17 @@ it('ignores stale action callbacks and sync completion belonging to a previous a
   expect(mockSave).not.toHaveBeenCalled();
 });
 
-it('preserves current state and demo on a token refresh for the same account', async () => {
+it('preserves current state on a token refresh for the same account', async () => {
   await render(<UserProvider><Capture /></UserProvider>);
   await waitFor(() => expect(latest.ready).toBe(true));
-  await act(async () => latest.setDemo(true));
-  const demoId = latest.profile.userId;
   const loads = mockLoad.mock.calls.length;
   await act(async () => mockListener(session(A)));
-  expect(latest.demo).toBe(true);
-  expect(latest.profile.userId).toBe(demoId);
   expect(mockLoad).toHaveBeenCalledTimes(loads);
   await act(async () => {
     mockUid = B;
     mockListener(session(B));
   });
   await waitFor(() => expect(latest.profile.userId).toBe(B));
-  expect(latest.demo).toBe(false);
 });
 
 it('drops a child PIN-unlocked state on account changes but keeps it during same-account refresh', async () => {

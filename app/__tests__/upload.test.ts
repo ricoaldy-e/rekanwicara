@@ -204,47 +204,4 @@ describe('client upload endpoints', () => {
     expect(formParts(xhr.body)).toContainEqual(['step', 'vowel_a']);
   });
 
-  it('datasetUpload posts every dataset field', async () => {
-    FakeXhr.script = [{ kind: 'ok', body: { status: 'ok', clip_id: 'x' } }];
-    await api.datasetUpload({
-      file: FILE,
-      purpose: 'dataset',
-      speaker_id: 'P2',
-      item_id: 'l1_a',
-      rep: 1,
-      intended_error: 'bad_noise',
-      condition: 'noisy',
-      session_id: 'P2_20261111_0930',
-      device: 'samsung SM-A525F',
-    });
-    const keys = formParts(FakeXhr.instances[0].body).map(([k]) => k).sort();
-    expect(keys).toEqual(
-      ['condition', 'device', 'file', 'intended_error', 'item_id', 'purpose', 'rep', 'session_id', 'speaker_id'].sort(),
-    );
-    expect(FakeXhr.instances[0].url).toBe('http://10.0.0.2:8000/v1/dataset/upload');
-  });
-});
-
-describe('hasModelVideo', () => {
-  const res = (status: number, body: unknown = null) =>
-    ({ ok: status < 300, status, json: async () => body }) as unknown as Response;
-
-  it('asks for one byte and maps 206/200 to true, 404 to false', async () => {
-    const fetchFn = jest.fn().mockResolvedValueOnce(res(206)).mockResolvedValueOnce(res(200)).mockResolvedValueOnce(res(404));
-    const api = createApiClient('http://h:8000', { fetchFn });
-    await expect(api.hasModelVideo('l1_a')).resolves.toBe(true);
-    await expect(api.hasModelVideo('l1_a')).resolves.toBe(true);
-    await expect(api.hasModelVideo('l1_i')).resolves.toBe(false);
-    const [url, init] = fetchFn.mock.calls[0];
-    expect(url).toBe('http://h:8000/v1/model-video/l1_a');
-    expect(init.headers).toMatchObject({ Range: 'bytes=0-0' });
-  });
-
-  it('throws on other statuses', async () => {
-    const fetchFn = jest.fn().mockResolvedValue(res(500, { detail: { code: 'internal_error', message: 'x' } }));
-    await expect(createApiClient('http://h:8000', { fetchFn }).hasModelVideo('l1_a')).rejects.toMatchObject({
-      kind: 'http',
-      code: 'internal_error',
-    });
-  });
 });

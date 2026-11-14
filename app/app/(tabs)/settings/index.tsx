@@ -1,72 +1,18 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Constants from 'expo-constants';
-import { useEffect, useState } from 'react';
-import { StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Switch, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { createApiClient, isValidBaseUrl } from '../../../src/api/client';
-import { errorMessage } from '../../../src/api/errors';
 import { useAuth } from '../../../src/auth/AuthProvider';
-import { BigButton, Body, Card, CheckRow, InfoNote, ListGroup, ListRow, Screen, Snackbar, Title } from '../../../src/components';
+import { BigButton, ListGroup, ListRow, Screen, Snackbar } from '../../../src/components';
 import { useFlash } from '../../../src/forms/flash';
 import { useUser } from '../../../src/state/user';
-import { DATASET_MODE } from '../../../src/config';
-import { useContent } from '../../../src/state/content';
-import { useSettings } from '../../../src/state/settings';
 import { colors, companion, displayFont, fontSize, layout, lineHeight, radius, spacing, stroke, textFont, touchTarget } from '../../../src/theme';
 
-type TestResult = { ok: true; text: string } | { ok: false; text: string } | null;
-
-/** Settings (Figma 51:268): account, Getar, Ganti PIN, Tentang, Keluar; then the demo operator's server URL and demo profile. Not PIN-locked (design.md §6.7). */
+/** Settings (Figma 51:268): account, Getar, Kalibrasi (optional), Ganti PIN, Tentang, Keluar. Not PIN-locked (design.md §6.7). */
 export default function Settings() {
   const router = useRouter();
-  const { apiUrl, envApiUrl, isOverridden, setApiUrl, resetApiUrl } = useSettings();
-  const { health } = useContent();
-  const { demo, setDemo, sync, ready, profile, updateSettings } = useUser();
-  const [draft, setDraft] = useState(apiUrl);
-  const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<TestResult>(null);
-
-  useEffect(() => setDraft(apiUrl), [apiUrl]);
-
-  const valid = isValidBaseUrl(draft);
-
-  async function testConnection() {
-    setBusy(true);
-    setResult(null);
-    try {
-      const h = await createApiClient(draft, { timeoutMs: 5000 }).getHealth();
-      setResult({ ok: true, text: `Terhubung. Versi mesin ${h.engine_version}${h.mock_mode ? ', data contoh' : ''}.` });
-    } catch (e) {
-      setResult({ ok: false, text: errorMessage(e) });
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function save() {
-    setBusy(true);
-    try {
-      await setApiUrl(draft);
-      setResult({ ok: true, text: 'Alamat server disimpan.' });
-    } catch {
-      setResult({ ok: false, text: 'Gagal menyimpan. Coba lagi.' });
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function reset() {
-    setBusy(true);
-    try {
-      await resetApiUrl();
-      setResult({ ok: true, text: 'Kembali ke alamat bawaan.' });
-    } catch {
-      setResult({ ok: false, text: 'Alamat bawaan belum bisa dipulihkan. Coba lagi.' });
-    } finally {
-      setBusy(false);
-    }
-  }
+  const { profile, updateSettings } = useUser();
 
   const [flash, clearFlash] = useFlash();
   const { session } = useAuth();
@@ -110,6 +56,14 @@ export default function Settings() {
               />
             </View>
           </View>
+          <ListRow
+            testID="calibration-link"
+            title="Kalibrasi"
+            subtitle={profile.calibrated ? 'Sudah dilakukan. Bisa diulang.' : 'Opsional. Membuat hasil lebih tepat untukmu.'}
+            paddingVertical={companion.rowPadding}
+            accessibilityLabel="Kalibrasi"
+            onPress={() => router.push('/calibration')}
+          />
         </ListGroup>
         <Text maxFontSizeMultiplier={2} style={[styles.muted, textFont()]}>Ukuran teks dan gerak mengikuti pengaturan HP.</Text>
       </View>
@@ -143,50 +97,6 @@ export default function Settings() {
         Rekan Wicara · versi {Constants.expoConfig?.version ?? '-'}
       </Text>
 
-      <Text accessibilityRole="header" style={styles.section}>
-        Lanjutan
-      </Text>
-      <Title>Alamat server</Title>
-      <Body muted>Contoh: http://192.168.1.10:8000</Body>
-      <TextInput
-        value={draft}
-        onChangeText={setDraft}
-        autoCapitalize="none"
-        autoCorrect={false}
-        keyboardType="url"
-        accessibilityLabel="Alamat server"
-        style={[styles.input, !valid && styles.inputInvalid]}
-        testID="settings-url"
-      />
-      {!valid ? <Text style={styles.invalid}>Alamat harus diawali http:// atau https://</Text> : null}
-
-      <BigButton label="Tes koneksi" icon="pulse" onPress={testConnection} disabled={busy || !valid} />
-      <BigButton label="Simpan" icon="save" onPress={save} disabled={busy || !valid || draft === apiUrl} />
-      {result ? <InfoNote tone={result.ok ? 'info' : 'warning'} text={result.text} /> : null}
-
-      <Card>
-        <Body>Dipakai sekarang: {apiUrl || '(kosong)'}</Body>
-        <Body muted>Bawaan (.env): {envApiUrl || '(kosong)'}</Body>
-        <Body muted>Server: {health ? `versi ${health.engine_version}${health.mock_mode ? ', mock' : ''}` : 'belum terhubung'}</Body>
-        <Body muted>Mode Dataset: {DATASET_MODE ? 'aktif' : 'tidak aktif'}</Body>
-      </Card>
-      {isOverridden ? (
-        <View>
-          <BigButton label="Kembalikan ke bawaan" variant="secondary" icon="arrow-undo" onPress={reset} disabled={busy} />
-        </View>
-      ) : null}
-      {__DEV__ ? (
-        <>
-          <BigButton label="Uji Wav2Vec2" icon="chatbox-ellipses" variant="secondary" onPress={() => router.push('/wav2vec2')} />
-          <BigButton label="Uji Gabungan" icon="layers" variant="secondary" onPress={() => router.push('/combined')} />
-        </>
-      ) : null}
-      <Title>Profil contoh</Title>
-      <Body>Profil contoh berisi riwayat latihan sebagai gambaran. Latihan tetap dianalisis server. Hasilnya tidak dikirim online dan hilang saat profil contoh ditutup atau app dimulai ulang.</Body>
-      {ready && !sync.running ? (
-        <CheckRow checked={demo} onToggle={() => setDemo(!demo)} text="Gunakan profil contoh" testID="demo-toggle" />
-      ) : <Body>Tunggu penyimpanan selesai sebelum mengganti profil.</Body>}
-      <InfoNote text={demo ? 'Profil contoh aktif. Data latihan asli tetap tersimpan.' : 'Profil latihan pribadi aktif.'} />
     </Screen>
   );
 }

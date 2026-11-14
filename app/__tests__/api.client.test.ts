@@ -1,4 +1,4 @@
-import { ApiError, createApiClient, isValidBaseUrl, normalizeBaseUrl } from '../src/api/client';
+import { ApiError, createApiClient, normalizeBaseUrl } from '../src/api/client';
 import { errorMessage } from '../src/api/errors';
 import type { HealthResponse, Item } from '../src/api/types';
 
@@ -43,20 +43,6 @@ const items: Item[] = [
 ];
 
 describe('createApiClient', () => {
-  it('requests the separate vowel production group with the current bearer', async () => {
-    const body = { items: [], max_duration_s: 120, max_upload_mb: 50 };
-    const fetchFn = jest.fn().mockResolvedValue(jsonResponse(body));
-    await expect(createApiClient(BASE, { fetchFn }).getTutorials('fixture-token', 'level_1')).resolves.toEqual(body);
-    expect(fetchFn.mock.calls[0][0]).toBe(`${BASE}/v1/tutorials?group=level_1`);
-    expect(fetchFn.mock.calls[0][1].headers.Authorization).toBe('Bearer fixture-token');
-  });
-  it('checks tutorial presence with the supplied bearer', async () => {
-    const body = { items: [], max_duration_s: 120, max_upload_mb: 50 };
-    const fetchFn = jest.fn().mockResolvedValue(jsonResponse(body));
-    await expect(createApiClient(BASE, { fetchFn }).getTutorials('fixture-token')).resolves.toEqual(body);
-    expect(fetchFn.mock.calls[0][0]).toBe(`${BASE}/v1/tutorials`);
-    expect(fetchFn.mock.calls[0][1].headers.Authorization).toBe('Bearer fixture-token');
-  });
   it('deletes only the bearer owner without sending a target user id', async () => {
     const fetchFn = jest.fn().mockResolvedValue(jsonResponse({ status: 'deleted' }));
     await expect(createApiClient(BASE, { fetchFn }).deleteAccount('fixture-token')).resolves.toEqual({ status: 'deleted' });
@@ -180,17 +166,6 @@ describe('URL helpers', () => {
     expect(normalizeBaseUrl(' http://10.0.0.2:8000/ ')).toBe('http://10.0.0.2:8000');
   });
 
-  it.each([
-    ['http://192.168.1.10:8000', true],
-    ['https://example.org', true],
-    ['http://localhost:8000/', true],
-    ['192.168.1.10:8000', false],
-    ['ftp://192.168.1.10', false],
-    ['http://', false],
-    ['', false],
-  ])('isValidBaseUrl(%p) = %p', (url, expected) => {
-    expect(isValidBaseUrl(url)).toBe(expected);
-  });
 });
 
 describe('errorMessage', () => {

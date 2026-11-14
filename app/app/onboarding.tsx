@@ -31,7 +31,7 @@ export default function Onboarding() {
   const bothConsents = consentUser && consentCompanion;
   const finish = () => {
     completeOnboarding();
-    router.replace('/calibration');
+    router.replace('/home');
   };
 
   if (!ready) return null;
@@ -51,7 +51,7 @@ export default function Onboarding() {
             {!bothConsents ? (
               <Text maxFontSizeMultiplier={2} style={[styles.hint, textFont()]}>Centang kedua persetujuan untuk lanjut.</Text>
             ) : null}
-            <BigButton label="Lanjut ke kalibrasi" icon="arrow-forward" disabled={!bothConsents} onPress={finish} />
+            <BigButton label="Mulai latihan" icon="arrow-forward" disabled={!bothConsents} onPress={finish} />
             <BigButton label="Kembali" variant="secondary" onPress={() => setStep(1)} />
           </View>
         )

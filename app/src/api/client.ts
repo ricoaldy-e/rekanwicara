@@ -1,32 +1,19 @@
 import type {
   CustomWordDetail,
-  V2Catalog,
-  V2ItemDetail,
-  V2AnalyzeResponse,
   CustomWordWrite,
   CustomWordList,
   CustomWordDeletion,
   AccountDeletionResponse,
-  TutorialsResponse,
-  TutorialItem,
-  TutorialUploadResponse,
-  Wav2Vec2Response,
-  CombinedResponse,
   AnalyzeRequest,
   AnalyzeResponse,
   CalibrateRequest,
   CalibrateResponse,
-  DatasetUploadRequest,
-  DatasetUploadResponse,
   HealthResponse,
   ItemsResponse,
   MockVariant,
   UploadFile,
 } from './types';
 import { ApiError, httpError } from './apiError';
-import { uploadNative } from './nativeUpload';
-import { isCombinedResponse, isWav2Vec2Response } from './experimentResponses';
-import { isV2AnalyzeResponse, isV2Catalog, isV2Item } from './v2Responses';
 import { uploadMultipart, type UploadCallOptions, type XhrFactory } from './upload';
 
 type MultipartFields = Record<string, string | number | undefined>;
@@ -52,9 +39,6 @@ export interface ApiClient {
   readonly baseUrl: string;
   getHealth(): Promise<HealthResponse>;
   getItems(): Promise<ItemsResponse>;
-  getV2Catalog(accessToken: string): Promise<V2Catalog>;
-  getV2Item(id: string, accessToken: string): Promise<V2ItemDetail>;
-  analyzeV2(itemId: string, sessionId: string, file: UploadFile, accessToken: string, options?: UploadCallOptions): Promise<V2AnalyzeResponse>;
   listCustomWords(accessToken: string): Promise<CustomWordList>;
   getCustomWord(id: string, accessToken: string): Promise<CustomWordDetail>;
   createCustomWord(body: CustomWordWrite, accessToken: string): Promise<CustomWordDetail>;
@@ -62,26 +46,13 @@ export interface ApiClient {
   deleteCustomWord(id: string, revision: number, accessToken: string): Promise<CustomWordDeletion>;
   cleanupCustomWord(id: string, accessToken: string): Promise<CustomWordDetail>;
   deleteAccount(accessToken: string): Promise<AccountDeletionResponse>;
-  getTutorials(accessToken: string, group?: 'important_words' | 'level_1'): Promise<TutorialsResponse>;
-  uploadTutorial(item: TutorialItem, accessToken: string, file: UploadFile, options?: UploadCallOptions): Promise<TutorialUploadResponse>;
   analyze(req: AnalyzeRequest, options?: AnalysisCallOptions): Promise<AnalyzeResponse>;
   calibrate(req: CalibrateRequest, options?: AnalysisCallOptions): Promise<CalibrateResponse>;
-  datasetUpload(req: DatasetUploadRequest, options?: UploadCallOptions): Promise<DatasetUploadResponse>;
-  wav2vec2(file: UploadFile, options?: UploadCallOptions): Promise<Wav2Vec2Response>;
-  combined(file: UploadFile, target: CombinedResponse['target'], options?: UploadCallOptions): Promise<CombinedResponse>;
-  /** True when GET /v1/model-video/{itemId} exists (asks for 1 byte only), false on 404. */
-  hasModelVideo(itemId: string): Promise<boolean>;
 }
 
 /** Trim whitespace and trailing slashes so `${base}/v1/...` never has `//`. */
 export function normalizeBaseUrl(url: string): string {
   return url.trim().replace(/\/+$/, '');
-}
-
-/** Accepts only http(s) URLs with a host. Used by the Settings screen before saving. */
-export function isValidBaseUrl(url: string): boolean {
-  const u = normalizeBaseUrl(url);
-  return /^https?:\/\/[^\s/:]+(:\d{1,5})?(\/[^\s]*)?$/i.test(u);
 }
 
 export function createApiClient(baseUrl: string, options: ApiClientOptions = {}): ApiClient {
@@ -140,22 +111,6 @@ export function createApiClient(baseUrl: string, options: ApiClientOptions = {})
 
   return {
     baseUrl: base,
-    getV2Catalog: async (token) => {
-      const body = await request<unknown>('/v2/catalog', { headers: { Authorization: `Bearer ${token}` } });
-      if (!isV2Catalog(body)) throw new ApiError('parse', 'Invalid v2 catalog');
-      return body;
-    },
-    getV2Item: async (id, token) => {
-      const body = await request<unknown>(`/v2/items/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${token}` } });
-      if (!isV2Item(body) || body.id !== id) throw new ApiError('parse', 'Invalid v2 material');
-      return body;
-    },
-    analyzeV2: async (itemId, sessionId, file, token, opts) => {
-      const body = await uploadNative(`${base}/v2/analyze`, file, opts,
-        { item_id: itemId, session_id: sessionId }, { Authorization: `Bearer ${token}` });
-      if (!isV2AnalyzeResponse(body) || body.item_id !== itemId) throw new ApiError('parse', 'Invalid v2 evaluation');
-      return body;
-    },
     listCustomWords: (token) => custom<CustomWordList>('', token),
     getCustomWord: (id, token) => custom<CustomWordDetail>(`/${encodeURIComponent(id)}`, token),
     createCustomWord: (body, token) => custom<CustomWordDetail>('', token, 'POST', body),
@@ -163,20 +118,6 @@ export function createApiClient(baseUrl: string, options: ApiClientOptions = {})
     deleteCustomWord: (id, revision, token) => custom<CustomWordDeletion>(`/${encodeURIComponent(id)}?revision=${revision}`, token, 'DELETE'),
     cleanupCustomWord: (id, token) => custom<CustomWordDetail>(`/${encodeURIComponent(id)}/cleanup`, token, 'POST'),
     getHealth: () => request<HealthResponse>('/v1/health'),
-    getTutorials: (accessToken, group) => request<TutorialsResponse>(`/v1/tutorials${group ? `?group=${group}` : ''}`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    }),
-    uploadTutorial: async (item, accessToken, file, opts = {}) => {
-      const body = await uploadNative(`${base}/v1/tutorials/${encodeURIComponent(item.item_id)}/video`, file,
-        { timeoutMs: 300_000, ...opts }, undefined, { Authorization: `Bearer ${accessToken}` });
-      const result = body as Partial<TutorialUploadResponse> | null;
-      if (!result || result.status !== 'verified' || result.item_id !== item.item_id
-        || result.bucket !== item.bucket || result.storage_path !== item.storage_path
-        || typeof result.size_bytes !== 'number' || !Number.isSafeInteger(result.size_bytes) || result.size_bytes <= 0) {
-        throw new ApiError('parse', 'Tutorial upload was not verified');
-      }
-      return result as TutorialUploadResponse;
-    },
     getItems: () => request<ItemsResponse>('/v1/items'),
     async deleteAccount(accessToken) {
       const body = await request<AccountDeletionResponse>('/v1/auth/account', {
@@ -192,37 +133,5 @@ export function createApiClient(baseUrl: string, options: ApiClientOptions = {})
     calibrate: ({ file, ...fields }, opts) =>
       upload<CalibrateResponse>(`/v1/calibrate${mockQuery(opts?.mock)}`, fields, file, opts),
 
-    datasetUpload: ({ file, ...fields }, opts) =>
-      upload<DatasetUploadResponse>('/v1/dataset/upload', fields, file, opts),
-
-    async wav2vec2(file, opts) {
-      const body = await uploadNative(`${base}/v1/experiments/wav2vec2`, file, opts);
-      if (!isWav2Vec2Response(body)) {
-        throw new ApiError('parse', 'Invalid Wav2Vec2 result');
-      }
-      return body;
-    },
-
-    async combined(file, target, opts) {
-      const body = await uploadNative(`${base}/v1/experiments/combined`, file, opts, { target });
-      if (!isCombinedResponse(body) || body.target !== target) throw new ApiError('parse', 'Invalid combined result');
-      return body;
-    },
-
-    async hasModelVideo(itemId: string) {
-      // Range: 1 byte is enough to learn whether the file exists (server answers 206/200 or 404).
-      const res = await send(`/v1/model-video/${encodeURIComponent(itemId)}`, {
-        headers: { Range: 'bytes=0-0', Accept: 'video/mp4' },
-      });
-      if (res.status === 200 || res.status === 206) return true;
-      if (res.status === 404) return false;
-      let body: unknown = null;
-      try {
-        body = await res.json();
-      } catch {
-        // not JSON: keep body null
-      }
-      throw httpError(res.status, body);
-    },
   };
 }

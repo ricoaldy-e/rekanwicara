@@ -21,7 +21,6 @@ import {
   type Settings,
 } from '../user/pure';
 import { loadProfile, saveProfile } from '../user/storage';
-import { createDemoProfile } from '../user/demo';
 import { useContent } from './content';
 import { buildProgress, type ItemProgress } from './progression';
 
@@ -41,8 +40,6 @@ export interface SyncStatus {
 
 interface UserValue {
   session: Session | null;
-  demo: boolean;
-  setDemo(enabled: boolean): void;
   /** False until the saved profile has been read. */
   ready: boolean;
   profile: Profile;
@@ -70,9 +67,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const owner = useRef<string | null | undefined>(undefined);
   const generation = useRef(0);
   const mounted = useRef(false);
-  const [demo, setDemoState] = useState(false);
-  const demoRef = useRef(false);
-  const personal = useRef<Profile | null>(null);
   const latest = useRef(profile);
   const remote = useMemo(() => createRemote(), []);
   const itemsRef = useRef(items);
@@ -97,11 +91,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       owner.current = uid;
       const version = ++generation.current;
       running.current = null;
-      demoRef.current = false;
-      personal.current = null;
       latest.current = newProfile(uid ?? undefined);
       setProfile(latest.current);
-      setDemoState(false);
       setReady(false);
       setAccount({ uid, version });
       setStatus({ running: false, lastError: null, lastSyncedAt: null });
@@ -126,11 +117,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const next = change(latest.current);
     latest.current = next;
     setProfile(next);
-    if (!demoRef.current) void saveProfile(next);
+    void saveProfile(next);
   }, [ready, account.version]);
 
   const syncNow = useCallback(async () => {
-    if (!mounted.current || demoRef.current || !ready || !remote || running.current === account.version || !itemsRef.current ||
+    if (!mounted.current || !ready || !remote || running.current === account.version || !itemsRef.current ||
         !account.uid || latest.current.userId !== account.uid || generation.current !== account.version) return;
     const version = account.version;
     running.current = version;
@@ -150,20 +141,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, [ready, remote, update, account]);
 
-  const setDemo = useCallback((enabled: boolean) => {
-    if (!mounted.current || !ready || generation.current !== account.version || running.current !== null || enabled === demoRef.current) return;
-    if (enabled) personal.current = latest.current;
-    const next = enabled ? createDemoProfile() : personal.current!;
-    demoRef.current = enabled;
-    latest.current = next;
-    setProfile(next);
-    setDemoState(enabled);
-    setStatus({ running: false, lastError: null, lastSyncedAt: null });
-  }, [ready, account.version]);
-
   // Sync when the profile is read, when the app comes back to the foreground, and every 30 s while open.
   useEffect(() => {
-    if (!ready || demo || !remote || !account.uid) return;
+    if (!ready || !remote || !account.uid) return;
     void syncNow();
     const sub = AppState.addEventListener('change', (s) => s === 'active' && void syncNow());
     const timer = setInterval(() => void syncNow(), SYNC_INTERVAL_MS);
@@ -171,11 +151,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
       sub.remove();
       clearInterval(timer);
     };
-  }, [ready, demo, remote, syncNow, items, account.uid]);
+  }, [ready, remote, syncNow, items, account.uid]);
 
   const completeOnboarding = useCallback(
     () => {
-      if (!mounted.current || demoRef.current || !ready || generation.current !== account.version) return;
+      if (!mounted.current || !ready || generation.current !== account.version) return;
       update((p) => ({ ...p, onboarded: true, consentUser: true, consentCompanion: true }));
     },
     [update, ready, account.version],
@@ -217,12 +197,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const value = useMemo<UserValue>(
     () => ({
       session,
-      demo,
-      setDemo,
       ready,
       profile,
       progress,
-      sync: { configured: !demo && remote !== null && session !== null, pending: demo ? 0 : pendingCount(profile), ...status },
+      sync: { configured: remote !== null && session !== null, pending: pendingCount(profile), ...status },
       completeOnboarding,
       markCalibrated,
       addAttempt,
@@ -230,7 +208,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       updateSettings,
       syncNow,
     }),
-    [session, demo, setDemo, ready, profile, progress, remote, status, completeOnboarding, markCalibrated, addAttempt, addCheck, updateSettings, syncNow],
+    [session, ready, profile, progress, remote, status, completeOnboarding, markCalibrated, addAttempt, addCheck, updateSettings, syncNow],
   );
   return <UserContext.Provider key={account.uid ?? 'guest'} value={value}>{children}</UserContext.Provider>;
 }
