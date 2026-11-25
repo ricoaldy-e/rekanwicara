@@ -1,6 +1,6 @@
 /**
  * Kebijakan Privasi (Figma "Kebijakan privasi"). Plain statements of what the app really does; keep it in step with
- * docs/supabase/schema.sql, the upload code and the product boundary in CLAUDE.md. Change `PRIVACY_UPDATED` with any edit.
+ * docs/supabase/schema.sql, the upload code and the product boundary. Change `PRIVACY_UPDATED` with any edit.
  */
 export const PRIVACY_UPDATED = '14 November 2026';
 

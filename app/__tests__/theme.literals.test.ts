@@ -14,7 +14,7 @@ function files(dir: string): string[] {
   });
 }
 
-// Everything except the theme itself: colors, icon sizes and font sizes come from src/theme (CLAUDE.md, design.md §0).
+// Everything except the theme itself: colors, icon sizes and font sizes come from src/theme (design.md §0).
 const sources = DIRS.flatMap((d) => files(join(ROOT, d))).filter((f) => !f.includes(join('src', 'theme')));
 
 describe('no literals outside src/theme', () => {

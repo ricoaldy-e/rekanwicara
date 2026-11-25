@@ -283,6 +283,5 @@ npx.cmd expo lint --no-cache
 ```
 
 Belum diuji: akurasi enam target dengan ucapan manusia, penutur Tuli, kebisingan, perangkat
-berbeda, penutur di luar data training, dan penggunaan serentak. Tidak ada commit, merge,
-push, deploy, atau perubahan tag submission. Penggantian Level 3 perlu keputusan terpisah
+berbeda, penutur di luar data training, dan penggunaan serentak. Penggantian Level 3 perlu keputusan terpisah
 setelah bukti uji, karena scorer aturan lama tidak mencakup bunyi/frasa baru ini.

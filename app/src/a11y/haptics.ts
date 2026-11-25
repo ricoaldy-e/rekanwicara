@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 
 import type { ResultStatus } from '../api/types';
 
-// Haptics are a visual-only UI's "beep" (CLAUDE.md: no sound cues). They follow the Getar switch
+// Haptics are a visual-only UI's "beep" (no sound cues). They follow the Getar switch
 // in Settings and never throw. UserProvider keeps the flag in sync with profile.settings.vibration.
 let enabled = true;
 

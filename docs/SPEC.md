@@ -1,6 +1,6 @@
 # SPEC — Rekan Wicara MVP (v1)
 
-Dokumen ini adalah acuan teknis untuk Claude Code dan tim. Semua angka ambang di sini adalah
+Dokumen ini adalah acuan teknis tim untuk Rekan Wicara. Semua angka ambang di sini adalah
 **nilai awal** yang disetel ulang dari data (fase A6) dan disimpan di `server/app/config/thresholds.yaml`.
 
 ---
@@ -90,13 +90,11 @@ Environment server (`server/.env`): `HOST`, `PORT`, `MOCK_MODE` (true/false), `D
 
 Semua endpoint di bawah prefix `/v1`. Upload memakai `multipart/form-data`.
 
-### API v2 — implementasi 14 November 2026
+### API v2
 
-Acuan dibaca dari `REKAN_WICARA_BE_FE_CONTRACT_V2_FINAL_DRAFT.md`, sesuai klarifikasi
-pengguna. File bernama v2.1 belum tersedia. Instruksi terbaru pengguna mengesampingkan
-bagian draft yang bertentangan: satu video per kata/suku kata, katalog tanpa menu suku
-kata, delapan Kata Penting (sejak 14 Nov 2026 dinilai otomatis: Wav2Vec2 terhadap teks target), Level 1 memiliki tiga hasil, serta
-`lip_result`/`voice_result` berupa string hasil atau null. Ini bukan klaim draft lama identik v2.1.
+API v2 mencakup satu video per kata/suku kata, katalog tanpa menu suku kata terpisah,
+delapan Kata Penting (dinilai otomatis dengan Wav2Vec2 terhadap teks target), Level 1
+dengan tiga hasil, serta `lip_result`/`voice_result` berupa string hasil atau null.
 
 Semua request v2 membutuhkan `Authorization: Bearer <Supabase access token>`.
 Server memverifikasi akun email non-anonim melalui Auth `/user`. Database dan Storage
@@ -861,7 +859,7 @@ Evaluasi memakai LOSO (§10.6). Data kecil: satu klip ≈ 3–4% pada setiap put
 
 ## §12 Privasi
 Rekaman produk dihapus setelah analisis. Tidak ada media di log. Dataset hanya di `data/` lokal dengan
-persetujuan tertulis; dihapus setelah lomba kecuali penutur setuju disimpan. Kalibrasi hanya angka.
+persetujuan tertulis; dihapus setelah pengembangan kecuali penutur setuju disimpan. Kalibrasi hanya angka.
 
 ## §13 Pustaka petunjuk (`hints.json`, draf, ditinjau ahli)
 | hint_id | kalimat |

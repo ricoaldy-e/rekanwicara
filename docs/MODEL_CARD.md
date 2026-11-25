@@ -26,8 +26,7 @@ Tidak ada model yang dilatih oleh tim. Penilaian = model pralatih + pengukuran a
 
 Lingkungan: Python 3.11, numpy 2.4.6, scipy 1.17.1, FastAPI 0.162.2. Lisensi komponen ada di
 `docs/THIRD_PARTY.md`. Tiga model card resmi komponen Face Landmarker menyatakan
-Apache-2.0; tautan dan SHA-256 bundle tercantum di dokumen tersebut. Lingkungan
-evaluasi di atas berasal dari A6; pemeriksaan laptop penerus ada di checklist submission.
+Apache-2.0; tautan dan SHA-256 bundle tercantum di dokumen tersebut.
 
 ## Data
 
@@ -37,7 +36,7 @@ evaluasi di atas berasal dari A6; pemeriksaan laptop penerus ada di checklist su
 - Perekaman: iPhone (iOS 26.5, 26.6.2, 27.0) di app Rekan Wicara (Expo Go), satu ruang tenang,
   10 November 2026. Rekaman pertama di kafe dibuang karena bising latar merusak pengukuran suara.
 - **Persetujuan**: ketiga perekam adalah anggota tim dan menyepakati pemakaian rekaman mereka untuk
-  pengembangan dan evaluasi Rekan Wicara selama lomba (kesepakatan tim, SPEC §10.1). Rekaman tidak
+  pengembangan dan evaluasi Rekan Wicara (kesepakatan tim, SPEC §10.1). Rekaman tidak
   dipakai untuk melatih model dan tidak dibagikan.
 - Label: label otomatis dari skrip (§10.3) + cek label oleh 2 anggota yang bukan perekamnya untuk setiap
   klip. Kesepakatan "sesuai materi" 90%, kappa 0.65.
@@ -77,7 +76,7 @@ Ini **bukti awal dari 3 penutur dewasa**, bukan akurasi sistem.
   setelah terkirim. Yang disimpan hanya angka (hasil dan kalibrasi). Log hanya berisi metode, rute,
   kode status, dan durasi.
 - Rekaman dataset hanya ada di laptop tim (`data/`, tidak di-commit, tidak diunggah ke layanan cloud) dan
-  dihapus setelah lomba kecuali perekam setuju disimpan.
+  dihapus setelah evaluasi kecuali perekam setuju disimpan.
 - Halaman cek label hanya terbuka dari laptop server; penilai tidak melihat hasil mesin.
 - UI tidak bergantung pada suara; status selalu warna + ikon + teks; tanpa istilah klinis.
 - Risiko: umpan balik yang salah dapat membuat pengguna berlatih bentuk yang keliru atau kehilangan

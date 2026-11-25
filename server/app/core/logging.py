@@ -1,6 +1,6 @@
 """Privacy-safe request logging.
 
-Rule (CLAUDE.md, SPEC §12): logs contain only numbers and status codes. We log the HTTP method,
+Rule (SPEC §12): logs contain only numbers and status codes. We log the HTTP method,
 the route *template* (e.g. ``/v1/model-video/{item_id}``), the status code and the duration in ms.
 Never the raw path, query string, client address, filenames, form fields or upload content.
 """

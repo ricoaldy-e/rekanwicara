@@ -143,7 +143,7 @@ cuplikan hanya ilustrasi hasil deteksi; keputusan gerak memakai rangkaian frame.
   kosong sesudah kedua kasus; konfigurasi layanan aktif tidak diganti oleh uji ini.
 - Bundle iOS HTTP **200**, **7.735.835 byte**. Backend aktif port **8000**, Metro **8081**.
 - requirements.txt, pyvenv.cfg dan pip freeze backend identik sebelum/sesudah. Tidak ada
-  pemasangan paket, commit/merge/push/deploy, atau perubahan tag submission.
+  pemasangan paket atau perubahan pada cabang utama.
 
 Perintah dari server/: pytest -q -p no:cacheprovider melalui python -B dengan DEBUG=false
 dan PYTHONDONTWRITEBYTECODE=1; Ruff check dan format --check untuk app/tests/../ml.

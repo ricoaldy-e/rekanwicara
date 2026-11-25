@@ -1,8 +1,8 @@
 # DESIGN.md — Rekan Wicara
 
-Versi 7.1 · 14 Nov 2026 (disesuaikan dengan Figma setelah implementasi FG-1 sampai FG-12; catatan per langkah di `docs/PROGRESS.md`) · Berlaku untuk `app/` (Expo, React Native, TypeScript strict, expo-router)
+Versi 7.1 · Berlaku untuk `app/` (Expo, React Native, TypeScript strict, expo-router)
 
-Dokumen ini mengatur **tampilan dan teks**. Perilaku produk mengikuti `docs/SPEC.md` (kontrak API di SPEC §5) dan alur layar mengikuti `docs/flow-srs-ui.md`. Bagian yang sengaja berbeda dari flow ditandai **[BEDA DARI FLOW]** dan butuh keputusan Rico (bagian 12).
+Dokumen ini mengatur **tampilan dan teks**. Perilaku produk mengikuti `docs/SPEC.md` (kontrak API di SPEC §5).
 
 ## Sumber kebenaran visual
 
@@ -14,18 +14,18 @@ Gelap, tenang, dan rapi, dengan rasa iPhone. Latar dan kartu **abu arang netral*
 
 Inspirasi: aplikasi kebugaran "VibeMove" (Dribbble). Diambil: struktur, suasana, hierarki. **Tidak** diambil: maskot dan ilustrasi karakter, foto, teks miring (mengubah cara kata terbaca), navigasi tanpa label, teks di bawah 15, chip streak. Tidak ada kode atau aset yang disalin.
 
-Versi 7 menggantikan versi 6 ("Hutan Malam" serba hijau). Dipertahankan: nama "Rekan Wicara", batas produk di `CLAUDE.md`, aturan tiga status, prinsip visual dulu.
+Versi 7 menggantikan versi 6 ("Hutan Malam" serba hijau). Dipertahankan: nama "Rekan Wicara", batas produk, aturan tiga status, prinsip visual dulu.
 
-## 0. Cara memakai (untuk agen)
+## 0. Pedoman implementasi
 
 - Baca seluruhnya sebelum mengubah UI, lalu buka Figma untuk layar yang disentuh.
 - **Tata letak dan gaya boleh dirombak; logika dan data tidak.** Jangan mengubah state data, alur data, panggilan API, aturan progresi, dan rute tanpa persetujuan.
-- **Pertahankan `testID` dan `accessibilityLabel`** yang ada. Tes yang memang harus berubah dicatat di `docs/PROGRESS.md`.
+- **Pertahankan `testID` dan `accessibilityLabel`** yang ada.
 - Semua warna, ukuran, jarak, radius, dan font berasal dari `app/src/theme/index.ts`. Tidak ada hex atau ukuran literal di layar/komponen. Nilai baru ditambahkan sebagai token.
 - Komponen bersama ada di `app/src/components/`. Pakai ulang sebelum membuat baru.
 - **Font Inter disetujui** (paket `@expo-google-fonts/inter`, pola pemuatan sama dengan Playfair; bila gagal, kembali ke font sistem). Selain itu **tanpa dependensi baru** tanpa bertanya.
 - Jangan membuat teks lebih kecil dari 15 dan target sentuh di bawah 48 dp.
-- Kasus tak tercakup: pilih yang lebih sederhana, lebih datar, lebih kontras. Catat di `docs/PROGRESS.md`.
+- Kasus tak tercakup: pilih yang lebih sederhana, lebih datar, lebih kontras.
 - Bagian **[BELUM DIVERIFIKASI]** belum diuji; jangan menyebutnya "teruji" di README, model card, atau video.
 
 ## 1. Produk dan nama
@@ -259,7 +259,7 @@ Tanpa bar bawah. **Tombol aksi menempel di bawah layar** (Ulangi primer; Lihat c
 **[BEDA DARI FLOW §SET-2]:** tab Pengaturan **tidak dikunci PIN**. Getar (sakelar) dan Tentang terbuka untuk semua; **Ganti PIN** (ikon kunci, "Meminta PIN Pendamping") dan **Keluar** meminta PIN. Alasan: Getar adalah preferensi pengguna Tuli dan satu-satunya umpan balik non-visual. Isi: judul serif, kartu akun (avatar 48, nama tampilan, email; hanya bila ada sesi), grup Umum (Getar + "Aktif"/"Mati" + sakelar), catatan ukuran teks dan gerak, grup Akun dan aplikasi (Ganti PIN "Meminta PIN Pendamping" + ikon kunci, Tentang Rekan Wicara), tombol sekunder "Keluar" (membuka layar `/settings/sign-out` yang meminta PIN, lalu konfirmasi), catatan siapa yang meminta PIN, versi dari `app.json`. Bagian operator demo (alamat server, mode demo) tetap di bawah.
 
 ### 6.8 Tentang, autentikasi, onboarding, kalibrasi
-Mengikuti `flow-srs-ui.md` kecuali yang tertulis di sini. Tentang: deskripsi, catatan batas, privasi, versi (grup daftar).
+Tentang: deskripsi, catatan batas, privasi, versi (grup daftar).
 - **Splash:** native (logo 120 di atas `background`) lalu animasi pembuka `SplashIntro` (FG-13, sekali per peluncuran, ±2,5 detik): logo muncul di posisi logo native, naik ke tempatnya, lalu nama, tagline, dan catatan batas produk fade in; seluruh layar fade out setelah gerbang siap. Reduce Motion: semua tampil sekaligus, jeda ±0,6 detik. Token di `splashMotion`. Tampilan akhirnya "Memuat" (logo, "Rekan Wicara" serif 34, "Latihan bicara dengan bantuan visual", batang 96 × 3 yang bergeser selama menunggu gerbang siap; indikator tak-tentu, tidak menunjukkan persentase, diam bila Reduce Motion, catatan batas produk).
 - **Selamat datang (rute baru `/welcome`, **[BEDA DARI FLOW]**, D11):** layar pertama untuk yang belum masuk: logo 176, "Berlatih bicara dengan melihat.", kalimat pendukung, "Masuk" (krem) dan "Buat akun" (sekunder) menempel di bawah, catatan batas produk.
 - **Masuk:** tanpa header Stack; logo 56 + wordmark, judul + penjelasan, kolom isian 5.5, tombol, "Belum punya akun? Daftar", catatan batas produk. **Daftar:** kapsul "Kembali" di isi, judul "Buat akun Pendamping", kolom, daftar syarat sandi (ikon `success` bila terpenuhi + teks), persetujuan privasi, "Sudah punya akun? Masuk". Kolom **Nama panggilan** (2–20 karakter, tidak unik, hanya tampil di Beranda); tidak ada pesan "tersedia" karena tidak dicek ke server. **Masuk hanya dengan email + kata sandi** (Figma diperbarui 14 Nov).
@@ -345,8 +345,6 @@ Garis target putus-putus `textMuted`, garis pengguna tebal `text`, dengan ketera
 - [ ] Layar diperiksa di cahaya terang: garis `hairline` dan teks redup tetap terbaca.
 - [ ] `npm test` dan `npm run typecheck` lulus.
 
-Daftar periksa rinci per layar untuk 360 dp dan skala teks 200%: `docs/CHECKLIST_360_200.md`.
-
 ## 14. Belum diverifikasi
 
 - Belum diuji dengan pengguna Tuli. Jangan menulis "teruji pengguna" atau "ramah Tuli" sebagai klaim terbukti.
@@ -358,8 +356,6 @@ Daftar periksa rinci per layar untuk 360 dp dan skala teks 200%: `docs/CHECKLIST
 - Ikon di Figma digambar sebagai SVG bergaya garis; di app memakai Ionicons, jadi bentuk bisa sedikit berbeda.
 - Kontras dihitung dengan rumus WCAG pada 14 Nov 2026; hitung ulang bila warna diubah.
 - Arah gaya terinspirasi VibeMove hanya pada struktur dan suasana; itu bukan bukti kecocokan untuk teman Tuli.
-
-Penggunaan AI untuk desain dan kode wajib dicatat di dokumentasi lomba.
 
 PRIORITAS URUTAN REFERENSI DESIGN
 1. FIGMA

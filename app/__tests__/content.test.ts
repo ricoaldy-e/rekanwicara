@@ -38,7 +38,7 @@ describe('groupByLevel', () => {
   });
 });
 
-/** CLAUDE.md product boundary: no clinical wording in user-facing app text. */
+/** Product boundary: no clinical wording in user-facing app text. */
 describe('UI wording', () => {
   function sourceFiles(dir: string): string[] {
     return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {

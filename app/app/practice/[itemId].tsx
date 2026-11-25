@@ -55,7 +55,7 @@ export default function Practice() {
   const [result, setResult] = useState<AnalyzeResult | null>(null);
   const { state: upload, run, reset } = useUpload();
 
-  // A recording that was never analysed is deleted when leaving the screen (CLAUDE.md: no leftovers).
+  // A recording that was never analysed is deleted when leaving the screen (no leftovers).
   const uriRef = useRef<string | null>(null);
   useEffect(() => {
     uriRef.current = uri;

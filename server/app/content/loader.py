@@ -40,7 +40,7 @@ REQUIRED_HINT_IDS = frozenset(
     }
 )
 
-# Product boundary (CLAUDE.md): these words must never reach the UI or API output.
+# Product boundary: these words must never reach the UI or API output.
 FORBIDDEN_WORDS = ("normal", "abnormal", "gangguan", "diagnosis")
 
 

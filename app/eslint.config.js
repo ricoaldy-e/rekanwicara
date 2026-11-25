@@ -9,7 +9,7 @@ module.exports = defineConfig([
   },
   {
     // shortcut: React Compiler hints added in eslint-config-expo 58; the compiler is off here and the
-    // flagged B1 code works on device. Refactor and restore "error" after submission.
+    // flagged B1 code works on device. Refactor and restore "error" later.
     rules: {
       'react-hooks/refs': 'warn',
       'react-hooks/set-state-in-effect': 'warn',

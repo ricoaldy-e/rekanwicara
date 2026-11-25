@@ -9,7 +9,6 @@ bersifat visual (warna, ikon, teks) dengan getar sebagai pelengkap. Tidak ada is
 |---|---|
 | **Kategori** | Mobile (React Native / Expo) dengan server analisis FastAPI |
 | **Nama aplikasi** | Rekan Wicara |
-| **Lomba** | LOGICODIX 2026, subtema Inclusive Health |
 | **Repositori** | https://github.com/ricoaldy-e/rekanwicara |
 
 > **Batas produk.** Rekan Wicara adalah alat bantu latihan. Aplikasi ini bukan alat diagnosis,
@@ -28,7 +27,7 @@ bersifat visual (warna, ikon, teks) dengan getar sebagai pelengkap. Tidak ada is
 8. [Akun demonstrasi](#8-akun-demonstrasi)
 9. [Pengujian](#9-pengujian)
 10. [Hasil dan keterbatasan](#10-hasil-dan-keterbatasan)
-11. [Dokumentasi penggunaan AI](#11-dokumentasi-penggunaan-ai)
+11. [Model dan layanan AI di dalam produk](#11-model-dan-layanan-ai-di-dalam-produk)
 12. [Atribusi pihak ketiga](#12-atribusi-pihak-ketiga)
 13. [Struktur repositori dan dokumen](#13-struktur-repositori-dan-dokumen)
 14. [Lisensi](#14-lisensi)
@@ -41,16 +40,8 @@ bersifat visual (warna, ikon, teks) dengan getar sebagai pelengkap. Tidak ada is
 | Steven Jonathan Sihombing | Backend dan data | API v2 (katalog, penilaian, instruksi); autentikasi dan penghapusan akun; persistensi Supabase beserta RLS; kata Pendamping (CRUD); video contoh di Storage; integrasi Wav2Vec2 dan pembuat instruksi berbasis LLM |
 | Muhammad Helmi Abdulbaqi | Fondasi aplikasi dan media | Kerangka awal aplikasi Expo; komponen rekam video+audio dan unggah; alat pengumpulan dataset tim; pipeline media awal (FFmpeg, pemeriksaan kualitas rekaman, ekstraksi fitur wajah) |
 
-Pembagian di atas mengikuti riwayat commit (`git shortlog`). Pekerjaan lintas peran, seperti pengambilan data rekaman dan
+Pembagian di atas mengikuti riwayat pengembangan tim. Pekerjaan lintas peran, seperti pengambilan data rekaman dan
 pelabelan silang, dilakukan bersama oleh ketiga anggota.
-
-Urutan pengerjaan:
-
-1. **10 November** — kerangka aplikasi, pipeline media, pemeriksaan kualitas, komponen rekam, alat dataset.
-2. **10–11 November** — pengambilan 81 klip dataset tim, pelabelan silang, penyetelan ambang, evaluasi (EVAL_REPORT).
-3. **11–12 November** — integrasi HP, sinkronisasi Supabase, inventaris pihak ketiga, pemeriksaan submission.
-4. **13 November** — autentikasi email/password, eksperimen Wav2Vec2, API v2, kata Pendamping.
-5. **14 November** — implementasi desain Figma, Level 1 vokal a/i/u/e/o dengan penilaian v2, katalog Kata Penting, penyatuan cabang frontend dan backend.
 
 ## 2. Latar belakang dan target pengguna
 
@@ -67,7 +58,7 @@ dibandingkan dengan bentuk target, dan ciri suara ditampilkan sebagai grafik dan
 - Teman Tuli dan tunarungu yang **memilih** berlatih bicara, berlatih mandiri di antara pertemuan dengan guru atau terapis.
 - Pendamping (keluarga, guru) yang menyiapkan kata latihan dan mengatur akun serta PIN.
 
-**Kontribusi terhadap Inclusive Health.** Aplikasi menyediakan latihan berulang, murah, dan bisa dilakukan di rumah. Aplikasi
+**Dampak sosial.** Aplikasi menyediakan latihan berulang, terjangkau, dan bisa dilakukan di rumah. Aplikasi
 tidak mengklaim menggantikan tenaga profesional dan tidak memberi diagnosis.
 
 ## 3. Solusi dan fitur utama
@@ -360,9 +351,7 @@ Angka ini adalah bukti awal pada penutur dewasa non-Tuli, **bukan akurasi pada p
 
 Rincian ada di [EVAL_REPORT.md](docs/EVAL_REPORT.md) dan [MODEL_CARD.md](docs/MODEL_CARD.md).
 
-## 11. Dokumentasi penggunaan AI
-
-### 11.1 Model dan layanan AI di dalam produk
+## 11. Model dan layanan AI di dalam produk
 
 | Model / layanan | Modul yang memakainya | Fungsi | Data masuk dan keluar | Catatan |
 |---|---|---|---|---|
@@ -373,16 +362,7 @@ Rincian ada di [EVAL_REPORT.md](docs/EVAL_REPORT.md) dan [MODEL_CARD.md](docs/MO
 | **Aturan berambang** | `server/app/pipeline/rules.py`, `hints.py`, `server/app/config/thresholds.yaml` | Menentukan status Sesuai / Mendekati / Belum sesuai dan petunjuk | Angka fitur → status | Buatan tim, bukan model AI. Ambang disetel dari data tim (3 perekam, maksimal 100 video) |
 
 Tim tidak melatih atau menyempurnakan model apa pun. Data rekaman tim hanya dipakai untuk menyetel ambang dan menguji.
-
-### 11.2 AI dalam proses pengembangan
-
-Proyek ini dikembangkan dengan bantuan alat AI: **Claude Code** (Anthropic) dan **Codex** (OpenAI) untuk menulis dan meninjau kode,
-tes, dan dokumentasi, serta **Claude** melalui integrasi Figma untuk menerjemahkan rancangan Figma ke komponen aplikasi.
-Arah produk, batas penggunaan, desain, pengambilan data, penyetelan ambang, dan keputusan akhir ada pada tim. Hasil kerja AI
-diperiksa lewat tes otomatis dan pengujian manual. Aturan kerja agen tertulis di [CLAUDE.md](CLAUDE.md) dan
-[AGENTS.md](AGENTS.md); keputusan per fase dicatat di [PROGRESS.md](docs/PROGRESS.md).
-
-Tidak ada gambar, ilustrasi, atau video yang dihasilkan AI. Logo, ikon, dan gambar bibir digambar tim di Figma.
+Logo, ikon, dan gambar bibir dibuat oleh tim di Figma. Video contoh Kata Penting dan vokal direkam langsung oleh tim.
 
 ## 12. Atribusi pihak ketiga
 
@@ -418,10 +398,8 @@ referensi; tidak ada kode atau aset yang disalin.
 | `data/` | Data pengembangan lokal. Tidak di-commit |
 | `media/` | Tempat video contoh lokal (berkas video tidak di-commit) |
 
-Dokumen utama: [SPEC.md](docs/SPEC.md) (kontrak API di §5) · [kontrak-fe-final.md](docs/kontrak-fe-final.md) ·
-[REKAN_WICARA_BE_FE_CONTRACT_V2_FINAL_DRAFT.md](REKAN_WICARA_BE_FE_CONTRACT_V2_FINAL_DRAFT.md) ·
-[design.md](docs/design.md) · [flow-srs-ui.md](docs/flow-srs-ui.md) · [EVAL_REPORT.md](docs/EVAL_REPORT.md) ·
-[MODEL_CARD.md](docs/MODEL_CARD.md) · [THIRD_PARTY.md](docs/THIRD_PARTY.md) · [PROGRESS.md](docs/PROGRESS.md) ·
+Dokumen utama: [SPEC.md](docs/SPEC.md) (kontrak API di §5) · [design.md](docs/design.md) · [EVAL_REPORT.md](docs/EVAL_REPORT.md) ·
+[MODEL_CARD.md](docs/MODEL_CARD.md) · [THIRD_PARTY.md](docs/THIRD_PARTY.md) ·
 [AUTH.md](docs/supabase/AUTH.md) · [server/README.md](server/README.md) · [app/README.md](app/README.md)
 
 ## 14. Lisensi

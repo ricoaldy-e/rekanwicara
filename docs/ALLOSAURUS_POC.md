@@ -2,7 +2,7 @@
 
 Status: **CLI dan endpoint eksperimen berfungsi pada CPU**. Pengguna sudah melaporkan hasil
 rekaman dari HP; tampilan huruf baru dan akurasi ucapan masih perlu diperiksa di perangkat.
-Branch `experiment/allosaurus-poc`; pipeline penilaian utama dan snapshot submission tetap utuh.
+Branch `experiment/allosaurus-poc`; pipeline penilaian utama tetap utuh.
 
 ## Bunyi Indonesia dan tampilan huruf
 
@@ -227,7 +227,7 @@ Sumber: [paket PyPI](https://pypi.org/project/allosaurus/1.0.2/),
 [model resmi uni2005](https://github.com/xinjli/allosaurus/releases/download/v1.0/uni2005.tar.gz),
 [indeks Torch CPU](https://download.pytorch.org/whl/cpu).
 Kode Allosaurus berlisensi [GPL-3.0](https://github.com/xinjli/allosaurus/blob/master/LICENSE).
-Ketentuan distribusi bobot belum diverifikasi tersendiri; jangan membundel model ke submission.
+Ketentuan distribusi bobot belum diverifikasi tersendiri; jangan membundel model ke repositori.
 
 ## Bukti pengujian aktual
 

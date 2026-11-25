@@ -40,5 +40,3 @@ sepenuhnya.
 
 - Pengujian di perangkat untuk skala teks 200%, layar 360 dp, VoiceOver/TalkBack, dan izin yang ditolak.
 - Build APK atau IPA. Target saat ini Expo Go.
-
-Catatan keputusan dan status tiap fase ada di [../docs/PROGRESS.md](../docs/PROGRESS.md).

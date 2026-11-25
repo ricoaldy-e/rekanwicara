@@ -27,7 +27,7 @@ describe('Kebijakan privasi', () => {
     expect(all).toMatch(/rekanwicara@gmail\.com/);
   });
 
-  it('uses no word the product forbids (CLAUDE.md)', () => {
+  it('uses no word the product forbids (product boundary)', () => {
     const all = [PRIVACY_INTRO, ...PRIVACY_SECTIONS.flatMap((s) => [s.title, ...s.paragraphs])].join(' ');
     expect(all).not.toMatch(/\b(normal|abnormal|gangguan|diagnosis|tunarungu|penderita)\b/i);
     expect(all).not.toMatch(/\bterapi\b/i); // "terapis wicara" is allowed

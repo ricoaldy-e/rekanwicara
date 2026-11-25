@@ -1,6 +1,6 @@
-﻿# Komponen pihak ketiga
+# Komponen pihak ketiga
 
-Inventaris fase F, 11 November 2026. Versi dan lisensi diperiksa dari metadata paket
+Inventaris versi dan lisensi diperiksa dari metadata paket
 terpasang (`importlib.metadata`, `node_modules/*/package.json`) dan sumber resmi di bawah.
 Kode milik tim berlisensi MIT; komponen lain mempertahankan ketentuannya.
 Ini daftar dependency langsung dan komponen native utama, bukan SBOM seluruh dependency transitif.
@@ -93,7 +93,7 @@ di [WAV2VEC2_POC.md](WAV2VEC2_POC.md). Model/venv tidak dibundel atau di-commit.
 - MIT repo hanya berlaku untuk kode milik tim. Parselmouth/Praat tetap GPL; distribusi
   gabungan yang menautkannya perlu memenuhi ketentuan kompatibilitas, lisensi dan sumber
   yang berlaku. Ketentuan tidak hanya bergantung pada apakah hasil distribusinya binary.
-  Submission tidak membundel venv, wheel, model atau FFmpeg. Jangan menganggap semua
+  Repositori ini tidak membundel venv, wheel, model atau FFmpeg. Jangan menganggap semua
   dependency berubah menjadi MIT karena berkas LICENSE root.
 - Bila menyiapkan kontainer, binary atau APK di luar lingkup ini, sertakan pemberitahuan
   dan sumber yang diwajibkan komponen yang benar-benar dibundel; cek konfigurasi FFmpeg

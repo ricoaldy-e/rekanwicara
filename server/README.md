@@ -27,7 +27,7 @@ Sumber resmi (Google AI Edge, halaman Face Landmarker, bagian "Models"; dicek 10
 
 Dokumentasi hanya menyediakan path `latest`, tanpa versi/checksum. Unduhan 10 Nov 2026:
 3,58 MB, SHA-256 `64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff`.
-Skrip mencetak SHA-256; bila berbeda, model di server berubah: catat di `docs/PROGRESS.md`.
+Skrip mencetak SHA-256; periksa kesesuaiannya dengan hash di atas bila model di server berubah.
 
 ## Setup venv
 
